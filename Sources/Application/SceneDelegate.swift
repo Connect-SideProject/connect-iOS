@@ -17,8 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let scene = (scene as? UIWindowScene) else { return }
     window = .init(windowScene: scene)
 
-    let controller = UIViewController()
-    controller.view.backgroundColor = .red
+    let controller = MainController()
     window?.rootViewController = controller
     window?.makeKeyAndVisible()
   }
