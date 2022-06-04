@@ -36,7 +36,7 @@ final class HomeCategoryCollectionViewCell: UICollectionViewCell {
     
     private func configure() {
         contentView.addSubview(titleLabel)
-        
+        contentView.backgroundColor = .white
     }
     
 }
