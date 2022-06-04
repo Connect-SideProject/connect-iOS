@@ -9,7 +9,7 @@
 import Foundation
 
 extension NSAttributedString {
-    func setColor(key: NSAttributedString.Key, value: Any, compare: String) -> NSAttributedString {
+    func setAttributed(key: NSAttributedString.Key, value: Any, compare: String) -> NSAttributedString {
         let attributedString = NSMutableAttributedString(attributedString: self)
         attributedString.addAttribute(key, value: value, range: (string as NSString).range(of: compare))
         
