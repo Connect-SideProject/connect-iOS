@@ -10,7 +10,7 @@ import UIKit
 
 
 /// 홈 카테고리 셀
-final class HomeCategoryCollectionViewCell: UICollectionViewCell {
+final class HomeCategoryCell: UICollectionViewCell {
     
     //MARK: Property
     

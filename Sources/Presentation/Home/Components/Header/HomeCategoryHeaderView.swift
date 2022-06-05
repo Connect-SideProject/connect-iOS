@@ -17,7 +17,7 @@ final class HomeCategoryHeaderView: UICollectionReusableView {
     
     private var titleLabel: UILabel = {
         $0.numberOfLines = 1
-        $0.text = "인기 관심 분야 Top 6"
+        $0.text = "인기 관심 분야 Top 3"
         $0.font = .boldSystemFont(ofSize: 20)
         $0.textColor = .black
         
@@ -38,9 +38,9 @@ final class HomeCategoryHeaderView: UICollectionReusableView {
         addSubview(titleLabel)
         
         titleLabel.attributedText = NSAttributedString(string: titleLabel.text!)
-            .setColor(key: .foregroundColor,
+            .setAttributed(key: .foregroundColor,
                       value: UIColor.systemPink,
-                      compare: "Top 6")
+                      compare: "Top 3")
             
         titleLabel.snp.makeConstraints {
             $0.left.right.top.equalToSuperview()
