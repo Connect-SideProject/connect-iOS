@@ -13,6 +13,8 @@ import SnapKit
 class HomeController: UIViewController {
     
     
+    
+    
     private lazy var collectionView: UICollectionView = {
         let compositionalLayout: UICollectionViewCompositionalLayout = UICollectionViewCompositionalLayout { [weak self] (section,env) ->  NSCollectionLayoutSection? in
             guard let `self` = self else { return nil }
@@ -20,8 +22,10 @@ class HomeController: UIViewController {
                 return self.setCategoryLayout()
             } else if section == 1 {
                 return self.setCountryProjectLayout()
-            } else {
+            } else if section == 2 {
                 return self.setUserPostLayout()
+            } else {
+                return self.setRecruitUserSection()
             }
         }
         
@@ -56,10 +60,13 @@ class HomeController: UIViewController {
         collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
         collectionView.register(HomeCountryCategoryCell.self, forCellWithReuseIdentifier: "HomeCountryCategoryCell")
         collectionView.register(HomeUserPostCell.self, forCellWithReuseIdentifier: "HomeUserPostCell")
+        collectionView.register(HomeRecruitUserCell.self, forCellWithReuseIdentifier: "HomeRecruitUserCell")
+        
         
         collectionView.register(HomeCategoryHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeCategoryHeaderView")
         collectionView.register(HomeCountryCategoryHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeCountryCategoryHeaderView")
         collectionView.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
+        collectionView.register(HomeRecruitHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeRecruitHeaderView")
     }
 }
 
@@ -167,6 +174,38 @@ extension HomeController {
         
         return section
     }
+    
+    
+    fileprivate func setRecruitUserSection() -> NSCollectionLayoutSection {
+        let itemSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
+            widthDimension: .absolute(100)
+            , heightDimension: .absolute(150)
+        )
+        
+        let item: NSCollectionLayoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 20, bottom: 5, trailing: 20)
+        
+        let headerSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .absolute(50)
+        )
+        
+        let header: NSCollectionLayoutBoundarySupplementaryItem = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        
+        
+        let groupSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
+            widthDimension: .estimated(view.frame.size.width),
+            heightDimension: .absolute(150)
+        )
+        
+        let group: NSCollectionLayoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+        
+        let section: NSCollectionLayoutSection = NSCollectionLayoutSection(group: group)
+        section.orthogonalScrollingBehavior = .continuous
+        section.boundarySupplementaryItems = [header]
+        
+        return section
+    }
 }
 
 
@@ -174,11 +213,11 @@ extension HomeController {
 extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 3
+        return 4
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 5
+        return 6
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -190,10 +229,14 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
             let countryCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCountryCategoryCell", for: indexPath) as? HomeCountryCategoryCell
             
             return countryCell!
-        } else {
+        } else if indexPath.section == 2 {
             let postCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeUserPostCell", for: indexPath) as? HomeUserPostCell
             
             return postCell!
+        } else {
+            let recruitCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeRecruitUserCell", for: indexPath) as? HomeRecruitUserCell
+            
+            return recruitCell!
         }
     }
     
@@ -207,10 +250,14 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
             let countryHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeCountryCategoryHeaderView", for: indexPath) as? HomeCountryCategoryHeaderView
             countryHeader?.country = "광진구"
             return countryHeader!
-        } else {
+        } else if indexPath.section == 2 {
             let postHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeUserPostHeaderView", for: indexPath) as? HomeUserPostHeaderView
             
             return postHeader!
+        } else {
+            let recruitHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeRecruitHeaderView", for: indexPath) as? HomeRecruitHeaderView
+            
+            return recruitHeader!
         }
     }
 }
