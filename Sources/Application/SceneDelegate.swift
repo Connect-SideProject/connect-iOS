@@ -16,9 +16,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     guard let scene = (scene as? UIWindowScene) else { return }
     window = .init(windowScene: scene)
-
-    let controller = MainController()
-    window?.rootViewController = controller
+    let flowDI = MainFlow()
+    window?.rootViewController = flowDI.makeMainController()
     window?.makeKeyAndVisible()
   }
 }
