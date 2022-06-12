@@ -31,7 +31,7 @@ class HomeController: UIViewController {
         
         let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: compositionalLayout)
         
-        collectionView.backgroundColor = .blue
+        collectionView.backgroundColor = .brown
         return collectionView
     }()
     
