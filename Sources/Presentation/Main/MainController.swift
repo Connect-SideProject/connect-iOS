@@ -8,64 +8,45 @@
 
 import UIKit
 
-
-protocol Coordinator: AnyObject {
+/// 코디네이터 인터페이스
+protocol BaseCoordinator: AnyObject {
     var presenter: UINavigationController {get set}
-    var childrenCoordinator: [Coordinator] {get set}
-    func start()
+    var childrenCoordinator: [BaseCoordinator] {get set}
 }
 
-/// 홈 코디네이터
-class HomeCoordinator: Coordinator {
-    var presenter: UINavigationController
-    
-    var childrenCoordinator: [Coordinator]
-    
-    init(presenter: UINavigationController) {
-        self.presenter = presenter
-        self.childrenCoordinator = []
-    }
-    
-    func start() {
-        let homeController = HomeController()
-        presenter.pushViewController(homeController, animated: false)
-    }
-    
-}
-
-
+/// ViewController Flow 인터페이스
 protocol ViewControllerFlow {
     func makeMainController() -> MainController
-    func makeMainFlow() -> MainFlow
     func makeHomeCoordinator() -> HomeCoordinator
-    func makeHomeNavigationRootView() -> UINavigationController
+    func makeHomeController() -> HomeController
+    
 }
 
+/// MainFlow DI
 class MainFlow: ViewControllerFlow {
     
     func makeMainController() -> MainController {
-        return MainController(ViewFlow: makeMainFlow())
+        return MainController(viewFlow: self)
     }
-    
-    func makeMainFlow() -> MainFlow {
-        return MainFlow()
-    }
-    
+        
     func makeHomeCoordinator() -> HomeCoordinator {
-        return HomeCoordinator(presenter: makeHomeNavigationRootView())
+        return HomeCoordinator(presenter: UINavigationController(rootViewController: makeHomeController()))
     }
     
-    func makeHomeNavigationRootView() -> UINavigationController {
-        return UINavigationController(rootViewController: HomeController())
+    func makeHomeController() -> HomeController {
+        return HomeController()
     }
+    
+
+    
 }
 
 /// 하단 탭바가 포함된 화면 컨트롤러.
 class MainController: UITabBarController {
-    weak var ViewFlow: MainFlow?
+    var viewFlow: ViewControllerFlow?
     
-    init(ViewFlow: MainFlow) {
-        self.ViewFlow = ViewFlow
+    init(viewFlow: ViewControllerFlow) {
+        self.viewFlow = viewFlow
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -84,14 +65,6 @@ class MainController: UITabBarController {
 extension MainController {
     /// 탭바 메뉴당 화면 설정(추후 아이콘 등 설정).
     private func setViewContaollers() {
-        
-        /// 홈 화면.
-        let homeController = HomeController()
-        homeController.tabBarItem = .init(
-            title: "main.tabItem.home".localized(),
-            image: nil,
-            selectedImage: nil
-        )
         
         /// 지도 화면.
         let mapController = MapController()
@@ -117,7 +90,7 @@ extension MainController {
             selectedImage: nil
         )
         
-        guard let coordinator = ViewFlow?.makeHomeCoordinator() else { return }
+        guard let coordinator = viewFlow?.makeHomeCoordinator() else { return }
         
         self.viewControllers = [
             coordinator.presenter,
@@ -125,6 +98,14 @@ extension MainController {
             messageController,
             profileController
         ]
+
+        /// 홈 화면.
+        coordinator.presenter
+            .tabBarItem = .init(
+                title: "main.tabItem.home".localized(),
+                image: nil,
+                selectedImage: nil
+            )
     }
     
     /// 탭바 커스텀 설정.
