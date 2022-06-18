@@ -18,6 +18,11 @@ let dependencies = Dependencies(
       url: "https://github.com/SnapKit/SnapKit.git",
       requirement: .upToNextMajor(from: "5.0.1")
     )
+//    .remote(
+//      url: "https://github.com/scenee/FloatingPanel.git", // 추가 하려는 원격 저장소 주소
+//      requirement: .upToNextMajor(from: "2.5.3")           // 해당 라이브러리의 버전.
+//    )
   ],
   platforms: [.iOS]
 )
+

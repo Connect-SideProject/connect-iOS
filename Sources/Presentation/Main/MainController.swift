@@ -32,7 +32,7 @@ extension MainController {
     )
     
     /// 지도 화면.
-    let mapController = MapController()
+    let mapController = UINavigationController(rootViewController: MapController())
     mapController.tabBarItem = .init(
       title: "main.tabItem.map".localized(),
       image: nil,

@@ -31,7 +31,8 @@ let infoPlist: [String: InfoPlist.Value] = [
         ]
       ]
     ]
-  ]
+  ],
+  "KAKAO_APP_KEY": "6fed6eb258e2dcf2e2b404a08022fcd5"
 ]
 
 let settings: Settings = .settings(
@@ -56,6 +57,7 @@ let targets = [
       /// Dependencies.swift에 정의된 외부 라이브러리 설정
       .external(name: "ReactorKit"),
       .external(name: "SnapKit")
+//      .external(name: "FloatingPanel")
     ],
     settings: settings
   ),
