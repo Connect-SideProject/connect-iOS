@@ -12,9 +12,6 @@ import SnapKit
 /// 홈 화면 컨트롤러.
 class HomeController: UIViewController {
     
-    
-    
-    
     private lazy var collectionView: UICollectionView = {
         let compositionalLayout: UICollectionViewCompositionalLayout = UICollectionViewCompositionalLayout { [weak self] (section,env) ->  NSCollectionLayoutSection? in
             guard let `self` = self else { return nil }
@@ -36,12 +33,17 @@ class HomeController: UIViewController {
     }()
     
     
-  override func viewDidLoad() {
-    super.viewDidLoad()
-      
-    configure()
-  }
-
+    deinit {
+        print(#function)
+    }
+    
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        configure()
+    }
+    
     private func configure() {
         collectionView.dataSource = self
         collectionView.delegate = self
@@ -110,13 +112,13 @@ extension HomeController {
     
     
     fileprivate func setCountryProjectLayout() -> NSCollectionLayoutSection {
-
-
+        
+        
         let itemSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(0.8),
             heightDimension: .absolute(300)
         )
-
+        
         let item: NSCollectionLayoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
         item.contentInsets = NSDirectionalEdgeInsets.init(top: 5, leading: 5, bottom: 5, trailing: 5)
         
@@ -128,12 +130,12 @@ extension HomeController {
         
         let header: NSCollectionLayoutBoundarySupplementaryItem = NSCollectionLayoutBoundarySupplementaryItem.init(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         
-
+        
         let groupSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
             heightDimension: .absolute(300)
         )
-
+        
         let group: NSCollectionLayoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 1)
         
         
@@ -215,7 +217,7 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 4
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 6
     }
@@ -244,7 +246,7 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
         
         if indexPath.section == 0 {
             let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeCategoryHeaderView", for: indexPath) as? HomeCategoryHeaderView
-
+            
             return header!
         } else if indexPath.section == 1 {
             let countryHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeCountryCategoryHeaderView", for: indexPath) as? HomeCountryCategoryHeaderView
@@ -259,5 +261,10 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
             
             return recruitHeader!
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let postVC = PostListController()
+        self.navigationController?.pushViewController(postVC, animated: true)
     }
 }
