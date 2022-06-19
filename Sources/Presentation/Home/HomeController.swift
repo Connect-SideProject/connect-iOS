@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import Network
 
 /// 홈 화면 컨트롤러.
 class HomeController: UIViewController {
@@ -264,7 +265,24 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let postVC = PostListController()
-        self.navigationController?.pushViewController(postVC, animated: true)
+        
     }
+}
+
+//MARK: Network
+final class ConnectNetwork {
+    static var shared: ConnectNetwork = ConnectNetwork()
+    private let queue: DispatchQueue
+    private let monitor: NWPathMonitor
+    
+    private init() {
+        queue = DispatchQueue.global()
+        monitor = NWPathMonitor()
+    }
+    
+    deinit {
+        print(#function)
+    }
+   
+    
 }
