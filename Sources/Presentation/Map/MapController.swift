@@ -28,7 +28,8 @@ class MapController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-        setFloatingPanel(floatingPanelVC)
+        let contentViewController = MapFloatingPanelViewController()
+        setFloatingPanel(contentViewController: contentViewController, floatingPanelVC)
     }
     
     override func viewDidLayoutSubviews() {
@@ -52,11 +53,12 @@ class MapController: UIViewController {
         view.addSubview(mapView)
     }
     
-    private func setFloatingPanel(_ floatingPanelVC: FloatingPanelController) {
+    private func setFloatingPanel(contentViewController: UIViewController, _ floatingPanelVC: FloatingPanelController) {
         let layout = MapFloatingPanelLayout()
         floatingPanelVC.layout = layout
         floatingPanelVC.delegate = self
         floatingPanelVC.addPanel(toParent: self)
+        floatingPanelVC.set(contentViewController: contentViewController)
         floatingPanelVC.show()
     }
 
