@@ -6,11 +6,14 @@
 //  Copyright © 2022 sideproj. All rights reserved.
 //
 
+import FloatingPanel
 import SnapKit
 import UIKit
 
 /// 지도 화면 컨트롤러.
 class MapController: UIViewController {
+    
+    private lazy var floatingPanelVC = FloatingPanelController()
     
     private let mapSearchView: MapSearchView = {
        let mapSearchView = MapSearchView()
@@ -25,7 +28,7 @@ class MapController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-        
+        setFloatingPanel(floatingPanelVC)
     }
     
     override func viewDidLayoutSubviews() {
@@ -47,6 +50,14 @@ class MapController: UIViewController {
     private func configureUI() {
         view.addSubview(mapSearchView)
         view.addSubview(mapView)
+    }
+    
+    private func setFloatingPanel(_ floatingPanelVC: FloatingPanelController) {
+        let layout = MapFloatingPanelLayout()
+        floatingPanelVC.layout = layout
+        floatingPanelVC.delegate = self
+        floatingPanelVC.addPanel(toParent: self)
+        floatingPanelVC.show()
     }
 
 }
@@ -97,5 +108,33 @@ extension MapController {
             self.addSubview(filterButton)
         }
     }
+}
+
+//MARK: -FloatingPanel Setting
+extension MapController: FloatingPanelControllerDelegate {
+    func floatingPanelDidChangeState(_ fpc: FloatingPanelController) {
+        if fpc.state == .tip {
+            floatingPanelVC.removePanelFromParent(animated: true)
+        }
+    }
+}
+
+class MapFloatingPanelLayout: FloatingPanelLayout {
+    var position: FloatingPanelPosition {
+        return .bottom
+    }
+    
+    var initialState: FloatingPanelState {
+        return .half
+    }
+    
+    var anchors: [FloatingPanelState : FloatingPanelLayoutAnchoring] {
+        return [
+                    .half: FloatingPanelLayoutAnchor(absoluteInset: 292, edge: .bottom, referenceGuide: .safeArea),
+                    .tip: FloatingPanelLayoutAnchor(absoluteInset: 20.0, edge: .bottom, referenceGuide: .safeArea) // tabbar에 가려져서 이에 맞춘 크기가 20이 적당하다생각
+                ]
+    }
+    
+    
 }
 
