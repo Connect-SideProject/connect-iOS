@@ -49,7 +49,11 @@ extension MainController {
     
     /// MY 화면.
     let profileController = ProfileController()
-    profileController.tabBarItem = .init(
+    
+    let profileNavigationController = UINavigationController(
+      rootViewController: profileController
+    )
+    profileNavigationController.tabBarItem = .init(
       title: "main.tabItem.profile".localized(),
       image: nil,
       selectedImage: nil
@@ -59,7 +63,7 @@ extension MainController {
       homeController,
       mapController,
       messageController,
-      profileController
+      profileNavigationController
     ]
   }
   
