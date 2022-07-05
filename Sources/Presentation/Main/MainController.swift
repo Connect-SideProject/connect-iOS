@@ -34,7 +34,7 @@ class MainFlow: ViewControllerFlow {
     }
     
     func makeHomeController() -> HomeController {
-        return HomeController()
+        return HomeController(reactor: HomeViewReactor())
     }
     
 

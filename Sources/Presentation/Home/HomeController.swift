@@ -9,9 +9,15 @@
 import UIKit
 import SnapKit
 import Network
+import ReactorKit
+import RxSwift
 
 /// 홈 화면 컨트롤러.
 class HomeController: UIViewController {
+    
+    //MARK: Property
+    var disposeBag: DisposeBag = DisposeBag()
+    typealias Reactor = HomeViewReactor
     
     private lazy var collectionView: UICollectionView = {
         let compositionalLayout: UICollectionViewCompositionalLayout = UICollectionViewCompositionalLayout { [weak self] (section,env) ->  NSCollectionLayoutSection? in
@@ -33,6 +39,14 @@ class HomeController: UIViewController {
         return collectionView
     }()
     
+    init(reactor: Reactor) {
+        super.init(nibName: nil, bundle: nil)
+        self.reactor = reactor
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
     
     deinit {
         print(#function)
@@ -44,6 +58,7 @@ class HomeController: UIViewController {
         
         configure()
     }
+
     
     private func configure() {
         collectionView.dataSource = self
@@ -269,9 +284,20 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
     }
 }
 
+
+
+extension HomeController: ReactorKit.View {
+    
+    func bind(reactor: Reactor) {
+        
+    }
+    
+    
+}
+
 //MARK: Network
 final class ConnectNetwork {
-    static var shared: ConnectNetwork = ConnectNetwork()
+    static let shared: ConnectNetwork = ConnectNetwork()
     private let queue: DispatchQueue
     private let monitor: NWPathMonitor
     
