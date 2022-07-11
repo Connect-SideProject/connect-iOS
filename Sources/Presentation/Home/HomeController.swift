@@ -17,7 +17,6 @@ class HomeController: UIViewController {
     
     //MARK: Property
     var disposeBag: DisposeBag = DisposeBag()
-    typealias Reactor = HomeViewReactor
     
     private lazy var collectionView: UICollectionView = {
         let compositionalLayout: UICollectionViewCompositionalLayout = UICollectionViewCompositionalLayout { [weak self] (section,env) ->  NSCollectionLayoutSection? in
@@ -67,7 +66,8 @@ class HomeController: UIViewController {
         view.addSubview(collectionView)
         
         collectionView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(30)
+            $0.bottom.left.right.equalToSuperview()
         }
         
         setCollectionViewRegister(collectionView)
@@ -287,6 +287,8 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
 
 
 extension HomeController: ReactorKit.View {
+    
+    typealias Reactor = HomeViewReactor
     
     func bind(reactor: Reactor) {
         

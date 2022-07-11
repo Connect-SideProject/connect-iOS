@@ -11,11 +11,11 @@ import UIKit
 
 /// 홈 코디네이터
 class HomeCoordinator: BaseCoordinator {
-    var presenter: UINavigationController
+    var presenter: BaseNavigationViewController
     
     var childrenCoordinator: [BaseCoordinator]
     
-    init(presenter: UINavigationController) {
+    init(presenter: BaseNavigationViewController) {
         self.presenter = presenter
         self.childrenCoordinator = []
     }
