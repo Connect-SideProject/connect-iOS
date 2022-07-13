@@ -9,6 +9,9 @@ import ProjectDescription
 
 /// 외부 dependencies 업데이트 및 반영을 위해서 'tuist fetch' 명령어 실행.
 let dependencies = Dependencies(
+  carthage: [
+    .github(path: "layoutBox/FlexLayout", requirement: .upToNext("1.3.24"))
+  ],
   swiftPackageManager: [
     .remote(
       url: "https://github.com/ReactorKit/ReactorKit.git",
@@ -17,6 +20,10 @@ let dependencies = Dependencies(
     .remote(
       url: "https://github.com/SnapKit/SnapKit.git",
       requirement: .upToNextMajor(from: "5.0.1")
+    ),
+    .remote(
+      url: "https://github.com/layoutBox/PinLayout.git",
+      requirement: .upToNextMajor(from: "1.10.3")
     )
   ],
   platforms: [.iOS]
