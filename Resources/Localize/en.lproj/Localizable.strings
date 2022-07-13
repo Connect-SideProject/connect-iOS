@@ -1,0 +1,21 @@
+/* 
+  Localizable.strings
+  connect
+
+  Created by sean on 2022/06/02.
+  Copyright © 2022 sideproj. All rights reserved.
+*/
+
+// MainController
+"main.tabItem.home" = "홈";
+"main.tabItem.map" = "지도";
+"main.tabItem.message" = "채팅";
+"main.tabItem.profile" = "MY";
+
+// HomeController
+
+// MapController
+
+// MessageController
+
+// ProfileController
