@@ -55,6 +55,7 @@ let targets = [
     dependencies: [
       /// Dependencies.swift에 정의된 외부 라이브러리 설정
       .external(name: "ReactorKit"),
+      .external(name: "RxCocoa"),
       .external(name: "SnapKit"),
       .external(name: "FlexLayout"),
       .external(name: "PinLayout")
