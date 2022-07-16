@@ -18,13 +18,21 @@ class HomeController: UIViewController {
     //MARK: Property
     var disposeBag: DisposeBag = DisposeBag()
     
+    private let floatingButton: UIButton = {
+        $0.backgroundColor = .black
+        $0.layer.masksToBounds = false
+        $0.clipsToBounds = true
+        
+        return $0
+    }(UIButton())
+    
     private lazy var collectionView: UICollectionView = {
         let compositionalLayout: UICollectionViewCompositionalLayout = UICollectionViewCompositionalLayout { [weak self] (section,env) ->  NSCollectionLayoutSection? in
             guard let `self` = self else { return nil }
             if section == 0 {
-                return self.setCategoryLayout()
-            } else if section == 1 {
                 return self.setCountryProjectLayout()
+            } else if section == 1 {
+                return self.setCategoryLayout()
             } else if section == 2 {
                 return self.setUserPostLayout()
             } else {
@@ -57,13 +65,26 @@ class HomeController: UIViewController {
         
         configure()
     }
+      
+      override func viewWillLayoutSubviews() {
+        floatingButton.layer.cornerRadius = floatingButton.frame.width / 2.0
+    }
 
     
     private func configure() {
         collectionView.dataSource = self
         collectionView.delegate = self
         
-        view.addSubview(collectionView)
+        [collectionView,floatingButton].forEach {
+            view.addSubview($0)
+        }
+    
+        floatingButton.snp.makeConstraints {
+            $0.right.equalToSuperview().offset(-15)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-15)
+            $0.width.height.equalTo(75)
+        }
+        
         
         collectionView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(30)
@@ -165,12 +186,12 @@ extension HomeController {
     
     fileprivate func setUserPostLayout() -> NSCollectionLayoutSection {
         let itemSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1),
-            heightDimension: .absolute(50)
+            widthDimension: .fractionalWidth(0.5),
+            heightDimension: .absolute(180)
         )
         
         let item: NSCollectionLayoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets.init(top: 5, leading: 10, bottom: 5, trailing: 10)
+        item.contentInsets = NSDirectionalEdgeInsets.init(top: 5, leading: 5, bottom: 5, trailing: 5)
         
         let headerSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
@@ -180,11 +201,11 @@ extension HomeController {
         let header: NSCollectionLayoutBoundarySupplementaryItem = NSCollectionLayoutBoundarySupplementaryItem.init(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
         
         let groupSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(0.9),
-            heightDimension: .absolute(300)
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .absolute(200)
         )
         
-        let group: NSCollectionLayoutGroup = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
+        let group: NSCollectionLayoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
         
         let section: NSCollectionLayoutSection = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .groupPaging
