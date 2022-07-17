@@ -8,6 +8,9 @@
 
 import UIKit
 
+import PinLayout
+import FlexLayout
+
 /// 프로필 원형 이미지 사이즈.
 enum ProfileImageSize {
   case large, medium, small
@@ -17,7 +20,7 @@ enum ProfileImageSize {
     case .large:
       return .init(width: 200, height: 200)
     case .medium:
-      return .init(width: 100, height: 100)
+      return .init(width: 80, height: 80)
     case .small:
       return .init(width: 50, height: 50)
     }
@@ -29,8 +32,17 @@ final class ProfileImageView: UIView {
   
   private let imageView = IndicatorImageView()
   
+  private let flexContainerView = UIView()
+  
   let imageLoader: ImageLoadable
   let imageSize: ProfileImageSize
+  
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    
+    flexContainerView.pin.layout()
+    flexContainerView.flex.layout()
+  }
   
   override func draw(_ rect: CGRect) {
     super.draw(rect)
@@ -61,18 +73,13 @@ final class ProfileImageView: UIView {
   }
   
   private func configureUI() {
-    imageView.translatesAutoresizingMaskIntoConstraints = false
+    addSubview(flexContainerView)
     
-    addSubview(imageView)
-    
-    NSLayoutConstraint.activate([
-      widthAnchor.constraint(equalToConstant: imageSize.value.width),
-      heightAnchor.constraint(equalToConstant: imageSize.value.height),
-      imageView.topAnchor.constraint(equalTo: topAnchor),
-      imageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-      imageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-      imageView.bottomAnchor.constraint(equalTo: bottomAnchor)
-    ])
+    flexContainerView
+      .flex
+      .define { flex in
+        flex.addItem(imageView)
+    }
   }
   
   /**
@@ -83,7 +90,7 @@ final class ProfileImageView: UIView {
    - Parameter url: 원격 이미지 주소.
    
    */
-  func set(url: URL) async {
+  func setImage(url: URL) async {
     do {
       let image = try await imageLoader.fetch(url: url)
       imageView.image = image
