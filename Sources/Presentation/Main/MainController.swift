@@ -10,7 +10,7 @@ import UIKit
 
 /// 코디네이터 인터페이스
 protocol BaseCoordinator: AnyObject {
-    var presenter: BaseNavigationViewController {get set}
+    var presenter: UINavigationController {get set}
     var childrenCoordinator: [BaseCoordinator] {get set}
 }
 
@@ -30,7 +30,7 @@ class MainFlow: ViewControllerFlow {
     }
         
     func makeHomeCoordinator() -> HomeCoordinator {
-        return HomeCoordinator(presenter: BaseNavigationViewController(rootViewController: makeHomeController()))
+        return HomeCoordinator(presenter: UINavigationController(rootViewController: makeHomeController()))
     }
     
     func makeHomeController() -> HomeController {

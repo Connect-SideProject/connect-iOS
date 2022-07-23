@@ -18,6 +18,23 @@ class HomeController: UIViewController {
     //MARK: Property
     var disposeBag: DisposeBag = DisposeBag()
     
+    private let mainTitleLabel: UILabel = {
+        $0.text = "어떤 프로젝트를 찾으시나요?"
+        $0.font = .systemFont(ofSize: 16, weight: .medium)
+        $0.textColor = .black
+        $0.textAlignment = .left
+        
+        return $0
+    }(UILabel())
+    
+    private let searchView: HomeSearchView = {
+        $0.layer.borderColor = .init(red: 187/255, green: 237/255, blue: 80/255, alpha: 1.0)
+        $0.layer.borderWidth = 2
+        
+        
+        return $0
+    }(HomeSearchView(frame: .zero))
+    
     private let floatingButton: UIButton = {
         $0.backgroundColor = .black
         $0.layer.masksToBounds = false
@@ -41,8 +58,6 @@ class HomeController: UIViewController {
         }
         
         let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: compositionalLayout)
-        
-        collectionView.backgroundColor = .brown
         return collectionView
     }()
     
@@ -62,7 +77,8 @@ class HomeController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+        self.navigationController?.setToolbarHidden(false, animated: true)
         configure()
     }
       
@@ -74,9 +90,23 @@ class HomeController: UIViewController {
     private func configure() {
         collectionView.dataSource = self
         collectionView.delegate = self
-        
-        [collectionView,floatingButton].forEach {
+        view.backgroundColor = .white
+        [mainTitleLabel,searchView,collectionView,floatingButton].forEach {
             view.addSubview($0)
+        }
+        
+        mainTitleLabel.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(30)
+            $0.left.equalToSuperview().offset(19)
+            $0.width.lessThanOrEqualTo(200)
+        }
+        
+        searchView.snp.makeConstraints {
+            $0.top.equalTo(mainTitleLabel.snp.bottom).offset(11)
+            $0.left.equalToSuperview().offset(20)
+            $0.right.equalToSuperview().offset(-20)
+            $0.height.equalTo(42)
+            
         }
     
         floatingButton.snp.makeConstraints {
@@ -87,7 +117,7 @@ class HomeController: UIViewController {
         
         
         collectionView.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(30)
+            $0.top.equalTo(searchView.snp.bottom).offset(30)
             $0.bottom.left.right.equalToSuperview()
         }
         
