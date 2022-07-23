@@ -45,7 +45,7 @@ final class HomeSearchHeaderView: UICollectionReusableView {
         _ = [mainTitleLabel,searchView].map { addSubview($0) }
         
         mainTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(30)
+            $0.top.equalToSuperview().offset(30)
             $0.left.equalToSuperview().offset(19)
             $0.width.lessThanOrEqualTo(200)
         }
