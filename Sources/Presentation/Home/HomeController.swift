@@ -11,6 +11,7 @@ import SnapKit
 import Network
 import ReactorKit
 import RxSwift
+import RxCocoa
 
 
 enum HomeSection: Int {
@@ -97,7 +98,7 @@ class HomeController: UIViewController {
         }
         
         collectionView.snp.makeConstraints {
-            $0.top.bottom.left.right.equalToSuperview()
+            $0.edges.equalToSuperview()
         }
         
         floatingButton.snp.makeConstraints {
@@ -364,6 +365,34 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print(#function)
     }
+    
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        reactor?.action
+            .map{ _ in Reactor.Action.didScroll}
+            .bind(to: reactor!.action)
+            .disposed(by: disposeBag)
+        
+        reactor?.state
+            .map { !$0.isScroll}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.floatingButton.rx.isHidden)
+            .disposed(by: disposeBag)
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        reactor?.action
+            .map { _ in Reactor.Action.didEndScroll}
+            .bind(to: reactor!.action)
+            .disposed(by: disposeBag)
+        
+        reactor?.state
+            .map { $0.isScroll}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.floatingButton.rx.isHidden)
+            .disposed(by: disposeBag)
+    }
+    
 }
 
 
