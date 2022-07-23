@@ -18,22 +18,6 @@ class HomeController: UIViewController {
     //MARK: Property
     var disposeBag: DisposeBag = DisposeBag()
     
-    private let mainTitleLabel: UILabel = {
-        $0.text = "어떤 프로젝트를 찾으시나요?"
-        $0.font = .systemFont(ofSize: 16, weight: .medium)
-        $0.textColor = .black
-        $0.textAlignment = .left
-        
-        return $0
-    }(UILabel())
-    
-    private let searchView: HomeSearchView = {
-        $0.layer.borderColor = .init(red: 187/255, green: 237/255, blue: 80/255, alpha: 1.0)
-        $0.layer.borderWidth = 2
-        
-        
-        return $0
-    }(HomeSearchView(frame: .zero))
     
     private let floatingButton: UIButton = {
         $0.backgroundColor = .black
@@ -71,7 +55,7 @@ class HomeController: UIViewController {
     }
     
     deinit {
-        print(#function)
+        debugPrint(#function)
     }
     
     
@@ -91,22 +75,12 @@ class HomeController: UIViewController {
         collectionView.dataSource = self
         collectionView.delegate = self
         view.backgroundColor = .white
-        [mainTitleLabel,searchView,collectionView,floatingButton].forEach {
+        [collectionView,floatingButton].forEach {
             view.addSubview($0)
         }
         
-        mainTitleLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(30)
-            $0.left.equalToSuperview().offset(19)
-            $0.width.lessThanOrEqualTo(200)
-        }
-        
-        searchView.snp.makeConstraints {
-            $0.top.equalTo(mainTitleLabel.snp.bottom).offset(11)
-            $0.left.equalToSuperview().offset(20)
-            $0.right.equalToSuperview().offset(-20)
-            $0.height.equalTo(42)
-            
+        collectionView.snp.makeConstraints {
+            $0.top.bottom.left.right.equalToSuperview()
         }
     
         floatingButton.snp.makeConstraints {
@@ -115,11 +89,6 @@ class HomeController: UIViewController {
             $0.width.height.equalTo(75)
         }
         
-        
-        collectionView.snp.makeConstraints {
-            $0.top.equalTo(searchView.snp.bottom).offset(30)
-            $0.bottom.left.right.equalToSuperview()
-        }
         
         setCollectionViewRegister(collectionView)
     }
@@ -131,7 +100,7 @@ class HomeController: UIViewController {
         collectionView.register(HomeUserPostCell.self, forCellWithReuseIdentifier: "HomeUserPostCell")
         collectionView.register(HomeRecruitUserCell.self, forCellWithReuseIdentifier: "HomeRecruitUserCell")
         
-        
+        collectionView.register(HomeSearchHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchHeaderView")
         collectionView.register(HomeCategoryHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeCategoryHeaderView")
         collectionView.register(HomeCountryCategoryHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeCountryCategoryHeaderView")
         collectionView.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
@@ -143,6 +112,38 @@ class HomeController: UIViewController {
 
 
 extension HomeController {
+    
+    fileprivate func setFilterLayout() -> NSCollectionLayoutSection {
+        
+        let itemSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .absolute(200)
+        )
+        
+        let item: NSCollectionLayoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets.init(top: 0, leading: 10, bottom: 0, trailing: 10)
+        
+        let headerSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .absolute(100)
+        )
+        
+        let header: NSCollectionLayoutBoundarySupplementaryItem = NSCollectionLayoutBoundarySupplementaryItem.init(layoutSize: headerSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+        
+        let groupSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1),
+            heightDimension: .absolute(200)
+        )
+        
+        let group: NSCollectionLayoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: item, count: 3)
+        
+        let section: NSCollectionLayoutSection = NSCollectionLayoutSection(group: group)
+        section.orthogonalScrollingBehavior = .none
+        section.boundarySupplementaryItems = [header]
+        
+        
+        return section
+    }
     
     fileprivate func setCategoryLayout() -> NSCollectionLayoutSection {
         
@@ -331,7 +332,7 @@ extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
+        print(#function)
     }
 }
 
