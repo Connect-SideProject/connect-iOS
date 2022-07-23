@@ -71,12 +71,12 @@ extension EndPoint {
     return components.url
   }
   
-  var parameter: [String: Any] {
+  var parameter: [String: Any]? {
     switch path {
     case let .updateProfile(profile):
       return profile.asDictionary()!
     default:
-      return [:]
+      return nil
     }
   }
   
