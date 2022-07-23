@@ -15,47 +15,42 @@ final class HomeViewReactor: Reactor {
     let initialState: State
     
     enum Action {
-        case selectSection
-        case setProcessProject
+        case didScroll
+        case didEndScroll
     }
     
     enum Mutation {
-        case setTransformSetion(Void)
-        case setTransformProject(Void)
+        case setDidScrollView(Bool)
     }
     
     struct State {
-        var isSelectSection: Void?
-        var isSelectProject: Void?
+        var isScroll: Bool
     }
     
     init() {
         defer { _ = self.state }
-        self.initialState = State(isSelectSection: nil, isSelectProject: nil)
+        self.initialState = State(isScroll: false)
     }
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .selectSection:
-            return .just(.setTransformSetion(()))
-                .throttle(.seconds(3), scheduler: MainScheduler.instance)
-        case .setProcessProject:
-            return .just(.setTransformSetion(()))
-                .throttle(.seconds(3), scheduler: MainScheduler.instance)
+        case .didScroll:
+            let didScroll = Observable<Mutation>.just(.setDidScrollView(true))
+            return didScroll
+        case .didEndScroll:
+            let didendScroll = Observable<Mutation>.just(.setDidScrollView(false))
+            return didendScroll
         }
     }
     
     func reduce(state: State, mutation: Mutation) -> State {
         switch mutation {
-        case let .setTransformSetion(action):
+        case let .setDidScrollView(isState):
             var newState = state
-            newState.isSelectSection = action
-            return newState
-        case let .setTransformProject(action):
-            var newState = state
-            newState.isSelectProject = action
+            newState.isScroll = isState
             return newState
         }
+        
     }
     
     
