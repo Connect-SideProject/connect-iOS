@@ -12,6 +12,16 @@ import Network
 import ReactorKit
 import RxSwift
 
+
+enum HomeSection: Int {
+    case filter
+    case location
+    case field
+    case realTime
+    case user
+    
+}
+
 /// 홈 화면 컨트롤러.
 class HomeController: UIViewController {
     
@@ -27,18 +37,25 @@ class HomeController: UIViewController {
         return $0
     }(UIButton())
     
+    private let dataSoruce: [HomeSection] = [.filter,.location,.field,.realTime,.user]
+    
     private lazy var collectionView: UICollectionView = {
         let compositionalLayout: UICollectionViewCompositionalLayout = UICollectionViewCompositionalLayout { [weak self] (section,env) ->  NSCollectionLayoutSection? in
             guard let `self` = self else { return nil }
-            if section == 0 {
+            
+            switch self.dataSoruce[section] {
+            case .filter:
+                return self.setFilterLayout()
+            case .location:
                 return self.setCountryProjectLayout()
-            } else if section == 1 {
+            case .field:
                 return self.setCategoryLayout()
-            } else if section == 2 {
+            case .realTime:
                 return self.setUserPostLayout()
-            } else {
+            case .user:
                 return self.setRecruitUserSection()
             }
+            
         }
         
         let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: compositionalLayout)
@@ -65,11 +82,11 @@ class HomeController: UIViewController {
         self.navigationController?.setToolbarHidden(false, animated: true)
         configure()
     }
-      
-      override func viewWillLayoutSubviews() {
+    
+    override func viewWillLayoutSubviews() {
         floatingButton.layer.cornerRadius = floatingButton.frame.width / 2.0
     }
-
+    
     
     private func configure() {
         collectionView.dataSource = self
@@ -82,7 +99,7 @@ class HomeController: UIViewController {
         collectionView.snp.makeConstraints {
             $0.top.bottom.left.right.equalToSuperview()
         }
-    
+        
         floatingButton.snp.makeConstraints {
             $0.right.equalToSuperview().offset(-15)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-15)
@@ -95,6 +112,7 @@ class HomeController: UIViewController {
     
     
     func setCollectionViewRegister(_ collectionView: UICollectionView) {
+        collectionView.register(HomeFilterCell.self, forCellWithReuseIdentifier: "HomeFilterCell")
         collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
         collectionView.register(HomeCountryCategoryCell.self, forCellWithReuseIdentifier: "HomeCountryCategoryCell")
         collectionView.register(HomeUserPostCell.self, forCellWithReuseIdentifier: "HomeUserPostCell")
@@ -117,7 +135,7 @@ extension HomeController {
         
         let itemSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
-            heightDimension: .absolute(200)
+            heightDimension: .absolute(50)
         )
         
         let item: NSCollectionLayoutItem = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -132,10 +150,10 @@ extension HomeController {
         
         let groupSize: NSCollectionLayoutSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1),
-            heightDimension: .absolute(200)
+            heightDimension: .absolute(50)
         )
         
-        let group: NSCollectionLayoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: item, count: 3)
+        let group: NSCollectionLayoutGroup = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 3)
         
         let section: NSCollectionLayoutSection = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .none
@@ -283,48 +301,60 @@ extension HomeController {
 extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 4
+        return 5
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 6
+        switch dataSoruce[section] {
+        case .filter:
+            return 3
+        default:
+            return 6
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        if indexPath.section == 0 {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell
-            return cell!
-        } else if indexPath.section == 1 {
+        switch dataSoruce[indexPath.section] {
+        case .filter:
+            let filterCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeFilterCell", for: indexPath) as? HomeFilterCell
+            return filterCell!
+        case .location:
             let countryCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCountryCategoryCell", for: indexPath) as? HomeCountryCategoryCell
-            
             return countryCell!
-        } else if indexPath.section == 2 {
+        case .field:
+            let categoryCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell
+            return categoryCell!
+        case .realTime:
             let postCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeUserPostCell", for: indexPath) as? HomeUserPostCell
-            
             return postCell!
-        } else {
+        case .user:
             let recruitCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeRecruitUserCell", for: indexPath) as? HomeRecruitUserCell
-            
             return recruitCell!
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
-        if indexPath.section == 0 {
-            let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeCategoryHeaderView", for: indexPath) as? HomeCategoryHeaderView
+        
+        switch dataSoruce[indexPath.section] {
+            
+        case .filter:
+            let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeSearchHeaderView", for: indexPath) as? HomeSearchHeaderView
             
             return header!
-        } else if indexPath.section == 1 {
+        case .location:
             let countryHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeCountryCategoryHeaderView", for: indexPath) as? HomeCountryCategoryHeaderView
             countryHeader?.country = "광진구"
             return countryHeader!
-        } else if indexPath.section == 2 {
+        case .field:
+            let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeCategoryHeaderView", for: indexPath) as? HomeCategoryHeaderView
+            
+            return header!
+        case .realTime:
             let postHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeUserPostHeaderView", for: indexPath) as? HomeUserPostHeaderView
             
             return postHeader!
-        } else {
+        case .user:
             let recruitHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeRecruitHeaderView", for: indexPath) as? HomeRecruitHeaderView
             
             return recruitHeader!
@@ -363,6 +393,6 @@ final class ConnectNetwork {
     deinit {
         print(#function)
     }
-   
+    
     
 }
