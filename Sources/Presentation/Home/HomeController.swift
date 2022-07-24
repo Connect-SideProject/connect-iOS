@@ -8,7 +8,6 @@
 
 import UIKit
 import SnapKit
-import Network
 import ReactorKit
 import RxSwift
 import RxCocoa
@@ -403,24 +402,6 @@ extension HomeController: ReactorKit.View {
     
     func bind(reactor: Reactor) {
         
-    }
-    
-    
-}
-
-//MARK: Network
-final class ConnectNetwork {
-    static let shared: ConnectNetwork = ConnectNetwork()
-    private let queue: DispatchQueue
-    private let monitor: NWPathMonitor
-    
-    private init() {
-        queue = DispatchQueue.global()
-        monitor = NWPathMonitor()
-    }
-    
-    deinit {
-        print(#function)
     }
     
     
