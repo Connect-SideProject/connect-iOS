@@ -58,7 +58,8 @@ let targets = [
       .external(name: "RxCocoa"),
       .external(name: "SnapKit"),
       .external(name: "FlexLayout"),
-      .external(name: "PinLayout")
+      .external(name: "PinLayout"),
+      .external(name: "RxDataSources")
     ],
     settings: settings
   ),

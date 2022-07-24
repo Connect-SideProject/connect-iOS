@@ -26,8 +26,12 @@ let dependencies = Dependencies(
       requirement: .upToNextMajor(from: "5.0.1")
     ),
     .remote(
-      url: "https://github.com/layoutBox/PinLayout.git",
-      requirement: .upToNextMajor(from: "1.10.3")
+        url: "https://github.com/layoutBox/PinLayout.git",
+        requirement: .upToNextMajor(from: "1.10.3")
+    ),
+    .remote(
+        url: "https://github.com/RxSwiftCommunity/RxDataSources",
+        requirement: .upToNextMajor(from: "5.0.0")
     )
   ],
   platforms: [.iOS]
