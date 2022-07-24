@@ -25,6 +25,10 @@ let dependencies = Dependencies(
     .remote(
       url: "https://github.com/layoutBox/FlexLayout.git",
       requirement: .upToNextMajor(from: "1.3.18")
+    ),
+    .remote(
+        url: "https://github.com/RxSwiftCommunity/RxDataSources",
+        requirement: .upToNextMajor(from: "5.0.0")
     )
   ],
   platforms: [.iOS]
