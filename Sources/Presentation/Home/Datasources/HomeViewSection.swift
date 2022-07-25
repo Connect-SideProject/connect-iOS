@@ -44,7 +44,7 @@ extension HomeViewSection: SectionModelType {
 
 
 enum HomeViewSectionItem {
-    case filter
+    case filter(HomeFilterReactor)
     case location
     case field
     case realTime

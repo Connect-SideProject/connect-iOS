@@ -14,16 +14,6 @@ import RxCocoa
 import RxDataSources
 
 
-
-enum HomeSection: Int {
-    case filter
-    case location
-    case field
-    case realTime
-    case user
-    
-}
-
 /// 홈 화면 컨트롤러.
 class HomeController: UIViewController {
     
@@ -39,38 +29,48 @@ class HomeController: UIViewController {
         return $0
     }(UIButton())
     
-    private let dataSoruce: [HomeSection] = [.filter,.location,.field,.realTime,.user]
     
-    private lazy var collectionView: UICollectionView = {
-        let compositionalLayout: UICollectionViewCompositionalLayout = UICollectionViewCompositionalLayout { [weak self] (section,env) ->  NSCollectionLayoutSection? in
-            guard let `self` = self else { return nil }
-            
-            switch self.dataSoruce[section] {
-            case .filter:
-                return self.setFilterLayout()
-            case .location:
-                return self.setCountryProjectLayout()
-            case .field:
-                return self.setCategoryLayout()
-            case .realTime:
-                return self.setUserPostLayout()
-            case .user:
-                return self.setRecruitUserSection()
-            }
-            
-        }
+    let datasources: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
+    
+        private lazy var collectionView: UICollectionView = {
         
-        let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: compositionalLayout)
+            let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         return collectionView
     }()
     
-    init(reactor: Reactor) {
-        super.init(nibName: nil, bundle: nil)
-        self.reactor = reactor
+    
+    static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
+        return .init { datasource, collectionView, indexPath, sectionItem in
+            switch sectionItem {
+            case let .filter(reactor):
+                let filterCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeFilterCell", for: indexPath) as? HomeFilterCell
+                filterCell?.reactor = reactor
+                
+                return filterCell!
+            case .location:
+                let locationCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCountryCategoryCell", for: indexPath) as? HomeCountryCategoryCell
+                return locationCell!
+            case .field:
+                let fieldCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell
+                return fieldCell!
+            case .realTime:
+                let realTimeCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeUserPostCell", for: indexPath) as? HomeUserPostCell
+                return realTimeCell!
+            case .user:
+                let userCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeRecruitUserCell", for: indexPath) as? HomeRecruitUserCell
+                return userCell!
+            }
+        }
     }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
+    init(reactor: Reactor) {
+        defer { self.reactor = reactor }
+        self.datasources = type(of: self).dataSourcesFactory()
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required convenience init?(coder: NSCoder) {
+       fatalError("init(coder:) has not been implemented")
     }
     
     deinit {
@@ -91,8 +91,6 @@ class HomeController: UIViewController {
     
     
     private func configure() {
-        collectionView.dataSource = self
-        collectionView.delegate = self
         view.backgroundColor = .white
         [collectionView,floatingButton].forEach {
             view.addSubview($0)
@@ -300,101 +298,38 @@ extension HomeController {
 
 
 //MARK: Delegate
-extension HomeController: UICollectionViewDelegate, UICollectionViewDataSource {
-    
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 5
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch dataSoruce[section] {
-        case .filter:
-            return 3
-        default:
-            return 6
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch dataSoruce[indexPath.section] {
-        case .filter:
-            let filterCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeFilterCell", for: indexPath) as? HomeFilterCell
-            return filterCell!
-        case .location:
-            let countryCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCountryCategoryCell", for: indexPath) as? HomeCountryCategoryCell
-            return countryCell!
-        case .field:
-            let categoryCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell
-            return categoryCell!
-        case .realTime:
-            let postCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeUserPostCell", for: indexPath) as? HomeUserPostCell
-            return postCell!
-        case .user:
-            let recruitCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeRecruitUserCell", for: indexPath) as? HomeRecruitUserCell
-            return recruitCell!
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        
-        
-        switch dataSoruce[indexPath.section] {
-            
-        case .filter:
-            let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeSearchHeaderView", for: indexPath) as? HomeSearchHeaderView
-            
-            return header!
-        case .location:
-            let countryHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeCountryCategoryHeaderView", for: indexPath) as? HomeCountryCategoryHeaderView
-            countryHeader?.country = "광진구"
-            return countryHeader!
-        case .field:
-            let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeCategoryHeaderView", for: indexPath) as? HomeCategoryHeaderView
-            
-            return header!
-        case .realTime:
-            let postHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeUserPostHeaderView", for: indexPath) as? HomeUserPostHeaderView
-            
-            return postHeader!
-        case .user:
-            let recruitHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "HomeRecruitHeaderView", for: indexPath) as? HomeRecruitHeaderView
-            
-            return recruitHeader!
-        }
-    }
-    
+
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print(#function)
     }
     
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        reactor?.action
-            .map{ _ in Reactor.Action.didScroll}
-            .bind(to: reactor!.action)
-            .disposed(by: disposeBag)
-        
-        reactor?.state
-            .map { !$0.isScroll}
-            .observe(on: MainScheduler.instance)
-            .bind(to: self.floatingButton.rx.isHidden)
-            .disposed(by: disposeBag)
-    }
-    
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        reactor?.action
-            .map { _ in Reactor.Action.didEndScroll}
-            .bind(to: reactor!.action)
-            .disposed(by: disposeBag)
-        
-        reactor?.state
-            .map { $0.isScroll}
-            .observe(on: MainScheduler.instance)
-            .bind(to: self.floatingButton.rx.isHidden)
-            .disposed(by: disposeBag)
-    }
-    
-}
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        reactor?.action
+//            .map{ _ in Reactor.Action.didScroll}
+//            .bind(to: reactor!.action)
+//            .disposed(by: disposeBag)
+//
+//        reactor?.state
+//            .map { !$0.isScroll}
+//            .observe(on: MainScheduler.instance)
+//            .bind(to: self.floatingButton.rx.isHidden)
+//            .disposed(by: disposeBag)
+//    }
+//
+//    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+//        reactor?.action
+//            .map { _ in Reactor.Action.didEndScroll}
+//            .bind(to: reactor!.action)
+//            .disposed(by: disposeBag)
+//
+//        reactor?.state
+//            .map { $0.isScroll}
+//            .observe(on: MainScheduler.instance)
+//            .bind(to: self.floatingButton.rx.isHidden)
+//            .disposed(by: disposeBag)
+//    }
+
 
 
 
