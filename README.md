@@ -63,104 +63,127 @@
 > Dependencies.swift에 작성된 외부 라이브러리 반영시 명령어.
 > 최초 라이브러리 반영이후 Dependencies.swift 내용에 변동이 없다면 추가 수행하지 않아도 됩니다.
 
-#### Project.swift
-> 프로젝트 생성을 위한 정보가 담긴 파일
+#### Project+Templates.swift
+> 프로젝트 생성을 위한 템플릿 파일
 
 ```swift
+//  Project+Templates.swift
 import ProjectDescription
 
-let projectName: String = "connect"
-let organizationName: String = "sideproj"
-let bundleName: String = "com.sideproj"
-let bundleID: String = "com.sideproj.connect"
-
-let baseSetting: [String: SettingValue] = [
-  "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
-  "OTHER_LDFLAGS": "$(inherited) -Xlinker -interposable"
-]
-
-/// info.plist 내용 지정.
-/// 프로젝트에서 필요한 info.plist 내용을 Key:Value의 형태로 작성한다.
-let infoPlist: [String: InfoPlist.Value] = [
-  "CFBundleName": "\(projectName)",
-  "CFBundleDisplayName": "\(projectName)",
-  "CFBundleIdentifier": "\(bundleID)",
-  "CFBundleShortVersionString": "1.0",
-  "CFBundleVersion": "0",
-  "CFBuildVersion": "0",
-  "UILaunchStoryboardName": "Launch Screen",
-  "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
-  "UIUserInterfaceStyle": "Light",
-  "UIApplicationSceneManifest": [
-    "UIApplicationSupportsMultipleScenes": false,
-    "UISceneConfigurations": [
-      "UIWindowSceneSessionRoleApplication": [
-        [
-          "UISceneConfigurationName": "Default Configuration",
-          "UISceneDelegateClassName": "$(PRODUCT_MODULE_NAME).SceneDelegate"
-        ]
-      ]
+extension Project {
+  public static func feature(
+    name: String,
+    products: [Product],
+    settings: Settings? = nil,
+    infoPlist: InfoPlist = .default,
+    dependencies: [TargetDependency] = []
+  ) -> Project {
+    
+    var targets: [Target] = []
+    
+    if products.contains(.app) {
+      let target: Target = .init(
+        name: name,
+        platform: .iOS,
+        product: .app,
+        bundleId: "com.sideproj.\(name)",
+        deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
+        infoPlist: infoPlist,
+        sources: ["Sources/**"],
+        resources: ["Resources/**"],
+        dependencies: dependencies,
+        settings: settings
+      )
+      targets.append(target)
+    }
+    
+    if products.contains(.unitTests) {
+      let target: Target = .init(
+        name: "\(name)Tests",
+        platform: .iOS,
+        product: .unitTests,
+        bundleId: "com.sideproj.\(name)Tests",
+        infoPlist: .default,
+        sources: ["\(name)Tests/**"],
+        resources: ["\(name)Tests/**"],
+        dependencies: [.target(name: name)]
+      )
+      targets.append(target)
+    }
+    
+    if products.contains(.uiTests) {
+      let target: Target = .init(
+        name: "\(name)UITests",
+        platform: .iOS,
+        product: .uiTests,
+        bundleId: "com.sideproj.\(name)UITests",
+        sources: "\(name)UITests/**",
+        dependencies: [.target(name: name)]
+      )
+      targets.append(target)
+    }
+    
+    return Project(
+      name: name,
+      targets: targets
+    )
+  }
+  
+  public static func makeSettings() -> Settings {
+    
+    let baseSetting: [String: SettingValue] = [:]
+    
+    return .settings(
+      base: baseSetting,
+      configurations: [
+        .release(name: .release)
+      ],
+      defaultSettings: .recommended
+    )
+  }
+  
+  // info.plist의 내용을 직접 지정
+  public static func makeInfoPlist(
+    name: String,
+    bundleName: String = "com.sideproj"
+  ) -> [String: InfoPlist.Value] {
+    return [
+      "CFBundleName": .string(name),
+      "CFBundleDisplayName": .string(name),
+      "CFBundleIdentifier": .string("\(bundleName).connect"),
+      "CFBundleShortVersionString": .string("1.0"),
+      "CFBundleVersion": .string("0"),
+      "CFBuildVersion": .string("0"),
+      "UILaunchStoryboardName": .string("Launch Screen"),
+      "UISupportedInterfaceOrientations": .array([.string("UIInterfaceOrientationPortrait")]),
+      "UIUserInterfaceStyle": .string("Light"),
+      "UIApplicationSceneManifest": .dictionary([
+        "UIApplicationSupportsMultipleScenes": .boolean(false),
+        "UISceneConfigurations": .dictionary([
+          "UIWindowSceneSessionRoleApplication": .array([
+            .dictionary([
+              "UISceneConfigurationName": .string("Default Configuration"),
+              "UISceneDelegateClassName": .string("$(PRODUCT_MODULE_NAME).SceneDelegate")
+            ])
+          ])
+        ])
+      ])
     ]
-  ],
-  /// 추가 설정항목 작성.
-]
+  }
+}
+```
 
-/// Target 별 기본 설정항목. 
-/// (별도 필요한 설정이 있는지 잘 모르겠음. 우선 예제대로 작성.)
-let settings: Settings = .settings(
-  base: baseSetting,
-  configurations: [
-    .release(name: .release)
-  ],
-  defaultSettings: .recommended
-)
+#### Project.swift
+```swift
+import ProjectDescription
+import ProjectDescriptionHelpers
 
-let targets = [
-  /// 앱 메인.
-  Target(
-    name: projectName,
-    platform: .iOS,
-    product: .app,
-    bundleId: "\(bundleID)",
-    deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]), /// 개발환경 최소 버전.
-    infoPlist: .extendingDefault(with: infoPlist), /// 상단에 작성된 info.plist내용 반영을 위해 설정.
-    sources: "Sources/**",                         /// 앱 개발시 작성되는 코드 영역의 경로 설정.
-    resources: "Resources/**",                     /// 개발시 필요한 사진파일이나 등등의 리소스 경로 설정.
-    dependencies: [
-      /// Dependencies.swift에 정의된 외부 라이브러리 설정
-      .external(name: "ReactorKit"),
-      .external(name: "SnapKit")
-    ],
-    settings: settings
-  ),
-  /// 테스트.
-  Target(
-    name: "\(projectName)Tests",
-    platform: .iOS,
-    product: .unitTests,
-    bundleId: "\(bundleName).\(projectName)Tests",
-    sources: "\(projectName)Tests/**",
-    dependencies: [
-      .target(name: projectName)
-    ]
-  ),
-  /// UI 테스트.
-  Target(
-    name: "\(projectName)UITests",
-    platform: .iOS,
-    product: .uiTests,
-    bundleId: "\(bundleName).\(projectName)UITests",
-    sources: "\(projectName)UITests/**",
-    dependencies: [
-      .target(name: projectName)
-    ]
-  )
-]
-
-let project = Project(
-  name: projectName,
-  organizationName: organizationName,
-  targets: targets
+let app = Project.feature(
+  name: "connect",
+  products: [.app, .unitTests, .uiTests],
+  dependencies: [
+    ...
+  ]
 )
 ```
 
