@@ -13,7 +13,6 @@ import ReactorKit
 
 final class HomeFilterCell: UICollectionViewCell  {
     
-    var disposeBag: DisposeBag = DisposeBag()
     
     private let filterButton: UIButton = {
         
@@ -51,18 +50,6 @@ final class HomeFilterCell: UICollectionViewCell  {
             $0.left.right.equalTo(filterButton)
             $0.height.equalTo(2)
         }
-    }
-    
-}
-
-
-
-extension HomeFilterCell: ReactorKit.View {
-    
-    typealias Reactor = HomeFilterReactor
-    
-    func bind(reactor: Reactor) {
-        
     }
     
 }
