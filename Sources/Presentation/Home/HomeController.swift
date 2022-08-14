@@ -33,16 +33,22 @@ class HomeController: UIViewController {
     
     
     
-    let datasources: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
+    let dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
     
-        private lazy var collectionView: UICollectionView = {
+    
+    private lazy var collectionView: UICollectionView = {
+        let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
+        collectionView.contentInsetAdjustmentBehavior = .never
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.showsHorizontalScrollIndicator = false
         
-            let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
         return collectionView
     }()
     
     
-    static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
+    
+    private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
         return .init { datasource, collectionView, indexPath, sectionItem in
             switch sectionItem {
             case let .field(reactor):
@@ -55,7 +61,7 @@ class HomeController: UIViewController {
     
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
-        self.datasources = type(of: self).dataSourcesFactory()
+        self.dataSource = type(of: self).dataSourcesFactory()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -72,6 +78,8 @@ class HomeController: UIViewController {
         super.viewDidLoad()
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.setToolbarHidden(false, animated: true)
+        
+        
         configure()
     }
     
@@ -105,23 +113,9 @@ class HomeController: UIViewController {
         }
         
         
-        setCollectionViewRegister(collectionView)
+
     }
-    
-    
-    func setCollectionViewRegister(_ collectionView: UICollectionView) {
-        collectionView.register(HomeFilterCell.self, forCellWithReuseIdentifier: "HomeFilterCell")
-        collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
-        collectionView.register(HomeCountryCategoryCell.self, forCellWithReuseIdentifier: "HomeCountryCategoryCell")
-        collectionView.register(HomeUserPostCell.self, forCellWithReuseIdentifier: "HomeUserPostCell")
-        collectionView.register(HomeRecruitUserCell.self, forCellWithReuseIdentifier: "HomeRecruitUserCell")
-        
-        collectionView.register(HomeSearchHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchHeaderView")
-        collectionView.register(HomeCategoryHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeCategoryHeaderView")
-        collectionView.register(HomeCountryCategoryHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeCountryCategoryHeaderView")
-        collectionView.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
-        collectionView.register(HomeRecruitHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeRecruitHeaderView")
-    }
+
 }
 
 
@@ -132,7 +126,23 @@ extension HomeController: ReactorKit.View {
     
     func bind(reactor: Reactor) {
         
+        self.collectionView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
+        
+        
+        
     }
     
+    
+}
+
+
+
+extension HomeController: UICollectionViewDelegateFlowLayout {
+    
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return .zero
+    }
     
 }

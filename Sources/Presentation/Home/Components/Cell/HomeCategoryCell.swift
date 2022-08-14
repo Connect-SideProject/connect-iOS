@@ -8,6 +8,7 @@
 
 import UIKit
 import ReactorKit
+import SnapKit
 
 
 /// 홈 카테고리 셀
@@ -21,7 +22,7 @@ final class HomeCategoryCell: UICollectionViewCell {
         $0.textColor = .black
         $0.textAlignment = .center
         $0.numberOfLines = 1
-        $0.font = .systemFont(ofSize: 9)
+        $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         return $0
     }(UILabel())
     
@@ -57,7 +58,17 @@ final class HomeCategoryCell: UICollectionViewCell {
         containerView.addSubview(imageView)
         
         _ = [titleLabel,containerView].map {
-            self.containerView.addSubview($0)
+            containerView.addSubview($0)
+        }
+        
+        containerView.snp.makeConstraints {
+            $0.top.left.right.equalToSuperview()
+        }
+        
+        titleLabel.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.top.equalTo(containerView.snp.bottom).offset(6)
+            $0.left.right.equalToSuperview()
         }
         
         
