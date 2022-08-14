@@ -6,7 +6,6 @@
 //  Copyright © 2022 sideproj. All rights reserved.
 //
 
-import UIKit
 import RxDataSources
 
 
