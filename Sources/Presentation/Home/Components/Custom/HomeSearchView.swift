@@ -16,8 +16,7 @@ final class HomeSearchView: BaseView {
     
     //MARK: Property
     private let placeHolderLabel: UILabel = {
-        $0.text = "키워드로 검색해 보세요"
-        $0.textColor = UIColor(red: 199/255, green: 202/255, blue: 209/255, alpha: 1.0)
+        $0.textColor = UIColor.gray01
         $0.numberOfLines = 1
         
         return $0
@@ -43,8 +42,10 @@ final class HomeSearchView: BaseView {
     
     
     private func configure()  {
-        
-        _ = [searchImageView,placeHolderLabel].map { addSubview($0)}
+                
+        _ = [searchImageView,placeHolderLabel].map {
+            addSubview($0)
+        }
         
         searchImageView.snp.makeConstraints {
             $0.left.equalToSuperview()
