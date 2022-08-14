@@ -9,7 +9,7 @@
 import ReactorKit
 
 
-final class HomeFilterReactor: Reactor {
+final class HomeFieldReactor: Reactor {
     
     let initialState: State
     

@@ -29,6 +29,9 @@ class HomeController: UIViewController {
         return $0
     }(UIButton())
     
+    private let searchView: HomeSearchView = HomeSearchView()
+    
+    
     
     let datasources: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
     
@@ -42,23 +45,10 @@ class HomeController: UIViewController {
     static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
         return .init { datasource, collectionView, indexPath, sectionItem in
             switch sectionItem {
-            case let .filter(reactor):
-                let filterCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeFilterCell", for: indexPath) as? HomeFilterCell
-                filterCell?.reactor = reactor
-                
-                return filterCell!
-            case .location:
-                let locationCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCountryCategoryCell", for: indexPath) as? HomeCountryCategoryCell
-                return locationCell!
-            case .field:
+            case let .field(reactor):
                 let fieldCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell
+                fieldCell?.reactor = reactor
                 return fieldCell!
-            case .realTime:
-                let realTimeCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeUserPostCell", for: indexPath) as? HomeUserPostCell
-                return realTimeCell!
-            case .user:
-                let userCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeRecruitUserCell", for: indexPath) as? HomeRecruitUserCell
-                return userCell!
             }
         }
     }
@@ -91,18 +81,26 @@ class HomeController: UIViewController {
     
     
     private func configure() {
-        view.backgroundColor = .white
         [collectionView,floatingButton].forEach {
             view.addSubview($0)
         }
+        
+        collectionView.addSubview(searchView)
         
         collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
+        searchView.snp.makeConstraints {
+            $0.right.equalTo(self.view).offset(-20)
+            $0.left.equalToSuperview().offset(20)
+            $0.top.equalToSuperview().offset(12)
+            $0.height.equalTo(44)
+        }
+        
         floatingButton.snp.makeConstraints {
             $0.right.equalToSuperview().offset(-15)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-15)
+            $0.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(-15)
             $0.width.height.equalTo(75)
         }
         
