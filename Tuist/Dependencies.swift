@@ -14,12 +14,16 @@ let dependencies = Dependencies(
   ],
   swiftPackageManager: [
     .remote(
-      url: "https://github.com/ReactorKit/ReactorKit.git",
-      requirement: .upToNextMajor(from: "3.0.0")
-    ),
-    .remote(
       url: "https://github.com/ReactiveX/RxSwift.git",
       requirement: .exact("6.0.0")
+    ),
+    .remote(
+        url: "https://github.com/RxSwiftCommunity/RxDataSources",
+        requirement: .upToNextMajor(from: "5.0.0")
+    ),
+    .remote(
+      url: "https://github.com/ReactorKit/ReactorKit.git",
+      requirement: .upToNextMajor(from: "3.0.0")
     ),
     .remote(
       url: "https://github.com/SnapKit/SnapKit.git",
@@ -30,8 +34,8 @@ let dependencies = Dependencies(
         requirement: .upToNextMajor(from: "1.10.3")
     ),
     .remote(
-        url: "https://github.com/RxSwiftCommunity/RxDataSources",
-        requirement: .upToNextMajor(from: "5.0.0")
+        url: "https://github.com/devxoul/Then",
+        requirement: .upToNextMajor(from: "3.0.0")
     )
   ],
   platforms: [.iOS]
