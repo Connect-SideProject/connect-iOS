@@ -10,12 +10,12 @@ import Foundation
 
 enum PathType {
   case userProfile
-  case updateProfile(Profile)
+//  case updateProfile(Profile)
 }
 
 enum HTTPMethod {
   case get, post, put, delete
-  
+
   var string: String {
     switch self {
     case .get:
@@ -37,49 +37,45 @@ struct EndPoint {
     components.host = ""
     return components.url!
   }
-  
+
   let path: PathType
-  
+
   init(path: PathType) {
     self.path = path
   }
 }
 
 extension EndPoint {
-  
+
   var header: [String: String]? {
     return ["Authorization": UserManager.shared.accessToken]
   }
-  
+
   var url: URL? {
-    
+
     var components = URLComponents()
     components.scheme = baseURL.scheme
     components.host = baseURL.host
-    
+
     var queryItems: [URLQueryItem] = []
-    
+
     switch path {
     case .userProfile:
       components.path = ""
-    case .updateProfile:
-      components.path = ""
     }
-    
+
     components.queryItems = queryItems
-    
+
     return components.url
   }
-  
+
   var parameter: [String: Any]? {
     switch path {
-    case let .updateProfile(profile):
-      return profile.asDictionary()!
     default:
       return nil
     }
   }
-  
+
   var method: HTTPMethod {
     return .get
   }

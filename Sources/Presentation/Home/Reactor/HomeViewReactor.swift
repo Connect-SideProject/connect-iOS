@@ -6,7 +6,6 @@
 //  Copyright © 2022 sideproj. All rights reserved.
 //
 
-import Foundation
 import ReactorKit
 
 
@@ -25,11 +24,17 @@ final class HomeViewReactor: Reactor {
     
     struct State {
         var isScroll: Bool
+        var section: [HomeViewSection]
     }
     
     init() {
         defer { _ = self.state }
-        self.initialState = State(isScroll: false)
+        self.initialState = State(
+            isScroll: false,
+            section: [
+                .field([])
+            ]
+        )
     }
     
     func mutate(action: Action) -> Observable<Mutation> {

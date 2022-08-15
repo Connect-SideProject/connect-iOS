@@ -32,13 +32,13 @@ final class ApiManagerStub: ApiService {
       return .error(URLError(.unknown))
     }
     
-    let data = SampleData(
-      path: endPoint.path
-    ).create()
+//    let data = SampleData(
+//      path: endPoint.path
+//    ).create()
     
-    if let decode = try? JSONDecoder().decode(T.self, from: data) {
-      return .just(decode)
-    }
+//    if let decode = try? JSONDecoder().decode(T.self, from: data) {
+//      return .just(decode)
+//    }
     
     return .empty()
   }

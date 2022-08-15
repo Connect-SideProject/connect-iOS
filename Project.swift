@@ -6,6 +6,7 @@ let app = Project.feature(
   products: [.app, .unitTests, .uiTests],
   dependencies: [
     .external(name: "RxCocoa"),
+    .external(name: "RxDataSources"),
     .external(name: "ReactorKit"),
     .external(name: "SnapKit"),
     .external(name: "FlexLayout"),
