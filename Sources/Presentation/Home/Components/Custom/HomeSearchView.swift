@@ -28,6 +28,7 @@ final class HomeSearchView: BaseView {
         $0.contentMode = .scaleAspectFill
         $0.isUserInteractionEnabled = false
         $0.backgroundColor = .black
+        $0.image = UIImage(named: "home_search_filter")
         
         return $0
     }(UIImageView())
