@@ -27,7 +27,7 @@ enum JobGroup: Codable, Equatable, CustomStringConvertible {
   }
 }
 
-struct Profile: Decodable, Equatable {
+struct Profile: Codable, Equatable {
   
   let profileURL: String
   let userName: String
