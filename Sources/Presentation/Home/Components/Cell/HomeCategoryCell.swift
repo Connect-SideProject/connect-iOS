@@ -71,8 +71,10 @@ final class HomeCategoryCell: UICollectionViewCell {
             $0.left.right.equalToSuperview()
         }
         
-        
-        
+    }
+    
+    public func bind(items: [MockStruct]) {
+        self.titleLabel.text = items.first?.title
     }
     
 }
