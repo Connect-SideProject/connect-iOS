@@ -9,9 +9,8 @@
 import UIKit
 import SnapKit
 import ReactorKit
-import RxSwift
-import RxCocoa
 import RxDataSources
+import Then
 
 
 /// 홈 화면 컨트롤러.
@@ -36,28 +35,29 @@ class HomeController: UIViewController {
     let dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
     
     
-    private lazy var collectionView: UICollectionView = {
-        let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-        collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
-        collectionView.contentInsetAdjustmentBehavior = .never
-        collectionView.showsVerticalScrollIndicator = false
-        collectionView.showsHorizontalScrollIndicator = false
-        
-        return collectionView
-    }()
+    private var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout()).then {
+        $0.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
+        $0.contentInsetAdjustmentBehavior = .never
+        $0.showsVerticalScrollIndicator = false
+        $0.showsHorizontalScrollIndicator = false
+        $0.backgroundColor = .white
+    }
+
+
     
     
     
     private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
-        return .init { datasource, collectionView, indexPath, sectionItem in
+        return .init(
+        configureCell: { datasource, collectionView, indexPath, sectionItem in
             switch sectionItem {
-            case let .field(reactor):
+            case let .field(items):
                 let fieldCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell
-                fieldCell?.reactor = reactor
+                fieldCell?.bind(items: items)
                 return fieldCell!
             }
         }
-    }
+    )}
     
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
@@ -76,6 +76,7 @@ class HomeController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.backgroundColor = .white
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.setToolbarHidden(false, animated: true)
         
@@ -125,8 +126,15 @@ extension HomeController: ReactorKit.View {
     typealias Reactor = HomeViewReactor
     
     func bind(reactor: Reactor) {
+        reactor.action.onNext(.viewDidLoad)
         
         self.collectionView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map{ $0.section }
+            .filter { $0 != nil }
+            .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
         
         

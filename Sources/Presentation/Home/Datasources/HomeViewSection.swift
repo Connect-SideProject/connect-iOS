@@ -9,8 +9,16 @@
 import RxDataSources
 
 
+
 enum HomeViewSection {
     case field([HomeViewSectionItem])
+    
+    func getSectionType() -> HomeSectionType {
+        switch self {
+        case .field: return .field
+        }
+    }
+    
 }
 
 extension HomeViewSection: SectionModelType {
@@ -31,5 +39,5 @@ extension HomeViewSection: SectionModelType {
 
 
 enum HomeViewSectionItem {
-    case field(HomeFieldReactor)
+    case field([MockStruct])
 }
