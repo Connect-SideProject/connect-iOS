@@ -11,15 +11,7 @@ import Foundation
 struct SampleData {
   
   let path: PathType
-//  let userName: String
-//  let jobGroup: JobGroup
-//  let location: String
-//  let attentions: String
-//  let portfolioURL: String
-//  let career: String
-//  let skills: [String]
-//  let isPushOn: Bool
-//  let isLocationExpose: Bool
+  
   func create() -> Data {
     switch path {
     case .userProfile:

@@ -15,25 +15,52 @@ enum ProfileDirectionType {
   case horizontal, vertical
 }
 
-class ProfileView: UIView {
+struct ProfileViewItem {
   
-  lazy var profileImageView = ProfileImageView(imageSize: imageSize)
+  let url: URL?
+  let userName: String
+  let jobGroup: JobGroup
   
-  var userNameLabel: UILabel = {
+  internal init(url: URL?, userName: String, jobGroup: JobGroup) {
+    self.url = url
+    self.userName = userName
+    self.jobGroup = jobGroup
+  }
+}
+
+protocol ProfileViewDelegate: AnyObject {
+  func didTapEditProfileButton()
+}
+
+final class ProfileView: UIView {
+  
+  private lazy var profileImageView = ProfileImageView(imageSize: imageSize)
+  
+  private var userNameLabel: UILabel = {
     let label = UILabel()
     label.textColor = .black
     label.font = UIFont.systemFont(ofSize: 20, weight: .medium)
     return label
   }()
   
-  var userPositionLabel: UILabel = {
+  private var userPositionLabel: UILabel = {
     let label = UILabel()
     label.textColor = .gray
     label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
     return label
   }()
   
+  private lazy var profileEditButton: RoundRutton = {
+    let button = RoundRutton()
+    button.setTitle("프로필 편집", for: .normal)
+    button.setTitleColor(.black, for: .normal)
+    button.addTarget(self, action: #selector(didTapEditProfileButton), for: .touchUpInside)
+    return button
+  }()
+  
   private let flexContainer = UIView()
+  
+  weak var delegate: ProfileViewDelegate?
 
   let imageSize: ProfileImageSize
   let direction: Flex.Direction
@@ -56,23 +83,19 @@ class ProfileView: UIView {
   override func layoutSubviews() {
     super.layoutSubviews()
     
-    flexContainer.pin.layout()
+    flexContainer.pin.width(100%).layout()
     flexContainer.flex.layout()
   }
   
-  func update(
-    url: URL? = nil,
-    userName: String = "",
-    jobGroup: JobGroup = .none
-  ) {
-    if let url = url {
+  func update(item: ProfileViewItem) {
+    if let url = item.url {
       Task {
         await self.profileImageView.setImage(url: url)
       }
     }
     
-    userNameLabel.text = userName
-    userPositionLabel.text = jobGroup.description
+    userNameLabel.text = item.userName
+    userPositionLabel.text = item.jobGroup.description
   }
 }
 
@@ -93,6 +116,19 @@ extension ProfileView {
           flex.addItem(userNameLabel)
           flex.addItem(userPositionLabel)
         }
+      
+      flex.addItem()
+        .grow(1)
+        .define { flex in
+          flex.addItem(profileEditButton)
+            .alignSelf(.end)
+            .height(35)
+            .width(100)
+        }
     }
+  }
+  
+  @objc private func didTapEditProfileButton() {
+    delegate?.didTapEditProfileButton()
   }
 }
