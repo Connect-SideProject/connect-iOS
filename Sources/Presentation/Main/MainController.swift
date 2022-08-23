@@ -9,7 +9,7 @@
 import UIKit
 
 /// 하단 탭바가 포함된 화면 컨트롤러.
-class MainController: UITabBarController {
+final class MainController: UITabBarController {
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -48,10 +48,12 @@ extension MainController {
     )
     
     /// MY 화면.
-    let profileController = ProfileController()
+    let profileDIContainer = ProfileDIContainer(
+      apiService: ApiManagerStub()
+    )
     
     let profileNavigationController = UINavigationController(
-      rootViewController: profileController
+      rootViewController: profileDIContainer.makeController()
     )
     profileNavigationController.tabBarItem = .init(
       title: "main.tabItem.profile".localized(),
