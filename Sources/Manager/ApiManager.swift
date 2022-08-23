@@ -24,7 +24,8 @@ class ApiManager: ApiService {
     var request = URLRequest(url: url)
     request.httpMethod = endPoint.method.string
 
-    if let jsonData = try? JSONSerialization.data(withJSONObject: endPoint.parameter) {
+    if let parameter = endPoint.parameter,
+        let jsonData = try? JSONSerialization.data(withJSONObject: parameter) {
       request.httpBody = jsonData
     }
     
