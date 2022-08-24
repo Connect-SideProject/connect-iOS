@@ -9,6 +9,7 @@
 import UIKit
 import ReactorKit
 import SnapKit
+import RxCocoa
 
 
 /// 홈 카테고리 셀
@@ -73,20 +74,25 @@ final class HomeCategoryCell: UICollectionViewCell {
         
     }
     
-    public func bind(items: [MockStruct]) {
-        self.titleLabel.text = items.first?.title
-    }
     
 }
 
 
 
 extension HomeCategoryCell: ReactorKit.View {
-    typealias Reactor = HomeFieldReactor
+    typealias Reactor = HomeMenuCellReactor
     
     
-    func bind(reactor: HomeFieldReactor) {
+    func bind(reactor: HomeMenuCellReactor) {
+        reactor.state
+            .map{ $0.menuType.getTitle()}
+            .bind(to: self.titleLabel.rx.text)
+            .disposed(by: disposeBag)
         
+        reactor.state
+            .map{ $0.menuType.getImage() }
+            .bind(to: self.imageView.rx.image)
+            .disposed(by: disposeBag)
     }
     
 }
