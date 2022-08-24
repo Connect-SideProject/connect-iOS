@@ -27,12 +27,6 @@ final class SignInController: UIViewController {
     $0.textColor = .black
   }
   
-  private let stackView = UIStackView().then {
-    $0.axis = .vertical
-    $0.distribution = .fillEqually
-    $0.spacing = 20
-  }
-  
   private let descriptionLabel = UILabel().then {
     $0.text = "이용약관 및 개인정보 처리방침 동의합니다."
     $0.font = .systemFont(ofSize: 14, weight: .semibold)
@@ -68,16 +62,6 @@ extension SignInController {
     view.backgroundColor = .white
     
     view.addSubview(flexContainer)
-    
-    stackView.addSubview(signInLabel)
-    
-    let buttons = makeSignInButtons()
-    
-    buttons.forEach {
-      stackView.addSubview($0)
-    }
-    
-    stackView.addSubview(descriptionLabel)
     
     flexContainer.flex
       .direction(.column)
