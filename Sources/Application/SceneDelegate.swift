@@ -16,8 +16,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     guard let scene = (scene as? UIWindowScene) else { return }
     window = .init(windowScene: scene)
+    
+    let controller = SplashController()
+    controller.delegate = self
+    
+    window?.rootViewController = controller
+    window?.makeKeyAndVisible()
+  }
+}
 
-    let controller = MainController()
+extension SceneDelegate: SplashDelegate {
+  func didFinishSplashLoading() {
+    
+    var controller: UIViewController!
+    
+    /// 로그인 상태 체크.
+    if UserManager.shared.accessToken.isEmpty {
+      controller = SignInController()
+    } else {
+      controller = MainController()
+    }
+    
     window?.rootViewController = controller
     window?.makeKeyAndVisible()
   }
