@@ -17,6 +17,9 @@ import Then
 class HomeController: UIViewController {
     
     //MARK: Property
+    
+    typealias Reactor = HomeViewReactor
+    
     var disposeBag: DisposeBag = DisposeBag()
     
     
@@ -51,10 +54,15 @@ class HomeController: UIViewController {
         return .init(
         configureCell: { datasource, collectionView, indexPath, sectionItem in
             switch sectionItem {
-            case let .field(items):
-                let fieldCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell
-                fieldCell?.bind(items: items)
-                return fieldCell!
+            case let .commerce(cellReactor),
+                let .finance(cellReactor),
+                let .health(cellReactor),
+                let .travel(cellReactor):
+                
+                guard let menuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell else { return UICollectionViewCell() }
+                
+                menuCell.reactor = cellReactor
+                return menuCell
             }
         }
     )}
@@ -123,21 +131,19 @@ class HomeController: UIViewController {
 
 extension HomeController: ReactorKit.View {
     
-    typealias Reactor = HomeViewReactor
-    
     func bind(reactor: Reactor) {
-        reactor.action.onNext(.viewDidLoad)
+        self.rx.viewDidLoad
+            .map { Reactor.Action.viewDidLoad }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
         
         self.collectionView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
         reactor.state
             .map{ $0.section }
-            .filter { $0 != nil }
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
-        
-        
         
     }
     
@@ -153,4 +159,10 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         return .zero
     }
     
+}
+
+extension HomeController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 54, height: 78)
+    }
 }

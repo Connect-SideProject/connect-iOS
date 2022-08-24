@@ -31,7 +31,7 @@ final class HomeViewReactor: Reactor {
     
     enum Mutation {
         case setDidScrollView(Bool)
-        case setFieldItemList([MockStruct])
+        case setFieldItemList(HomeViewSection)
     }
     
     struct State {
@@ -58,12 +58,12 @@ final class HomeViewReactor: Reactor {
             let didendScroll = Observable<Mutation>.just(.setDidScrollView(false))
             return didendScroll
         case .viewDidLoad:
-            let setLoadCollectionView = Observable<Mutation>.just(.setFieldItemList([
-                MockStruct(image: "", title: "커머스"),
-                MockStruct(image: "", title: "금융"),
-                MockStruct(image: "", title: "헬스케어"),
-                MockStruct(image: "", title: "여행")
-            ]))
+            let setLoadCollectionView = Observable<Mutation>.just(.setFieldItemList(HomeViewSection.field([
+                .commerce(HomeMenuCellReactor(menuType: .commerce)),
+                .finance(HomeMenuCellReactor(menuType: .finance)),
+                .health(HomeMenuCellReactor(menuType: .health)),
+                .travel(HomeMenuCellReactor(menuType: .health))
+            ])))
 
             return setLoadCollectionView
         }
@@ -79,7 +79,7 @@ final class HomeViewReactor: Reactor {
             var newState = state
             guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
             
-            newState.section[sectionIndex] = self.createFieldItem(items: items)
+            newState.section[sectionIndex] = items
             return newState
         }
         
@@ -103,12 +103,5 @@ private extension HomeViewReactor {
         return index
     }
     
-    
-    func createFieldItem(items: [MockStruct]) -> HomeViewSection {
-        guard items.count > 0 else { return .field([]) }
-        
-        let sectionItems = items.map { $0 }
-        return .field([.field(sectionItems)])
-    }
     
 }

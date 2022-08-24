@@ -67,8 +67,8 @@ struct SampleData {
         isLocationExpose: true
       )
       return makeData(parameter: profile.asDictionary()!)
-    case .updateProfile(let profile):
-      return makeData(parameter: profile.asDictionary()!)
+//    case .updateProfile(let profile):
+//      return makeData(parameter: profile.asDictionary()!)
     }
   }
 }

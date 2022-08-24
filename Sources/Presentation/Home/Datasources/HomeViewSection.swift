@@ -39,5 +39,8 @@ extension HomeViewSection: SectionModelType {
 
 
 enum HomeViewSectionItem {
-    case field([MockStruct])
+    case commerce(HomeMenuCellReactor)
+    case finance(HomeMenuCellReactor)
+    case health(HomeMenuCellReactor)
+    case travel(HomeMenuCellReactor)
 }
