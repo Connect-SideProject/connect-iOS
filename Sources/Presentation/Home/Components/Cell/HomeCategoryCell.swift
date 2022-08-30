@@ -17,9 +17,11 @@ final class HomeCategoryCell: UICollectionViewCell {
     
     //MARK: Property
     
+    typealias Reactor = HomeMenuCellReactor
+    
     var disposeBag: DisposeBag = DisposeBag()
     
-    private let titleLabel: UILabel = {
+    private let menuTitleLabel: UILabel = {
         $0.textColor = .black
         $0.textAlignment = .center
         $0.numberOfLines = 1
@@ -36,7 +38,7 @@ final class HomeCategoryCell: UICollectionViewCell {
         return $0
     }(UIView())
     
-    private let imageView: UIImageView = {
+    private let menuImageView: UIImageView = {
         $0.contentMode = .scaleToFill
         
         return $0
@@ -56,17 +58,18 @@ final class HomeCategoryCell: UICollectionViewCell {
     
     private func configure() {
         
-        containerView.addSubview(imageView)
-        
-        _ = [titleLabel,containerView].map {
+        _ = [menuTitleLabel,menuImageView].map {
             containerView.addSubview($0)
         }
         
+        self.contentView.addSubview(containerView)
+        
+        
         containerView.snp.makeConstraints {
-            $0.top.left.right.equalToSuperview()
+            $0.top.left.right.bottom.equalToSuperview()
         }
         
-        titleLabel.snp.makeConstraints {
+        menuTitleLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.top.equalTo(containerView.snp.bottom).offset(6)
             $0.left.right.equalToSuperview()
@@ -80,18 +83,20 @@ final class HomeCategoryCell: UICollectionViewCell {
 
 
 extension HomeCategoryCell: ReactorKit.View {
-    typealias Reactor = HomeMenuCellReactor
     
     
-    func bind(reactor: HomeMenuCellReactor) {
+    func bind(reactor: Reactor) {
+        
         reactor.state
             .map{ $0.menuType.getTitle()}
-            .bind(to: self.titleLabel.rx.text)
+            .distinctUntilChanged()
+            .bind(to: self.menuTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .map{ $0.menuType.getImage() }
-            .bind(to: self.imageView.rx.image)
+            .distinctUntilChanged()
+            .bind(to: self.menuImageView.rx.image)
             .disposed(by: disposeBag)
     }
     
