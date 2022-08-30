@@ -9,40 +9,29 @@
 import ReactorKit
 
 
-struct MockStruct {
-    var image: String
-    var title: String
-}
-
-enum HomeSectionType: String, Equatable {
-    case field
-}
-
 
 final class HomeViewReactor: Reactor {
     
     let initialState: State
     
     enum Action {
-        case didScroll
-        case didEndScroll
         case viewDidLoad
     }
     
     enum Mutation {
-        case setDidScrollView(Bool)
+        case setLoading(Bool)
         case setFieldItemList(HomeViewSection)
     }
     
     struct State {
-        var isScroll: Bool
+        var isLoading: Bool
         var section: [HomeViewSection]
     }
     
     init() {
         defer { _ = self.state }
         self.initialState = State(
-            isScroll: false,
+            isLoading: false,
             section: [
                 .field([])
             ]
@@ -51,35 +40,31 @@ final class HomeViewReactor: Reactor {
     
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .didScroll:
-            let didScroll = Observable<Mutation>.just(.setDidScrollView(true))
-            return didScroll
-        case .didEndScroll:
-            let didendScroll = Observable<Mutation>.just(.setDidScrollView(false))
-            return didendScroll
         case .viewDidLoad:
-            let setLoadCollectionView = Observable<Mutation>.just(.setFieldItemList(HomeViewSection.field([
-                .commerce(HomeMenuCellReactor(menuType: .commerce)),
-                .finance(HomeMenuCellReactor(menuType: .finance)),
-                .health(HomeMenuCellReactor(menuType: .health)),
-                .travel(HomeMenuCellReactor(menuType: .health))
+            let setLoadCollectionView = Observable<Mutation>.just(.setFieldItemList(.field([
+                .commerce(HomeMenuCellReactor(menuType: .commercemenu)),
             ])))
 
-            return setLoadCollectionView
+            return .concat(
+                .just(.setLoading(true)),
+                setLoadCollectionView,
+                .just(.setLoading(false))
+            )
         }
     }
     
     func reduce(state: State, mutation: Mutation) -> State {
         switch mutation {
-        case let .setDidScrollView(isState):
+        case let .setLoading(isLoading):
             var newState = state
-            newState.isScroll = isState
+            newState.isLoading = isLoading
+            
             return newState
         case let .setFieldItemList(items):
             var newState = state
-            guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
-            
+            guard let sectionIndex = self.getIndex(section: .field([])) else { return newState}
             newState.section[sectionIndex] = items
+            print("Items value: \(items) or new Section \(newState.section)")
             return newState
         }
         
@@ -94,7 +79,7 @@ final class HomeViewReactor: Reactor {
 private extension HomeViewReactor {
     func getIndex(section: HomeViewSection) -> Int? {
         var index: Int? = nil
-        
+
         for i in 0 ..< self.currentState.section.count {
             if self.currentState.section[i].getSectionType() == section.getSectionType() {
                 index = i
@@ -102,6 +87,6 @@ private extension HomeViewReactor {
         }
         return index
     }
-    
-    
+
+
 }

@@ -8,17 +8,22 @@
 
 import RxDataSources
 
+enum HomeListType: String, Equatable {
+    case commerce
+    case finance
+    case health
+    case travel
+}
 
 
 enum HomeViewSection {
     case field([HomeViewSectionItem])
-    
-    func getSectionType() -> HomeSectionType {
+
+    public func getSectionType() -> HomeListType {
         switch self {
-        case .field: return .field
+        case .field: return .commerce
         }
     }
-    
 }
 
 extension HomeViewSection: SectionModelType {

@@ -56,7 +56,7 @@ extension UIColor {
     }
     
     @nonobjc class var green06: UIColor {
-        return .init(red: 99/255, green: 146/255, blue: 0/255, alpha: 1.0)
+        return .init(red: 2/255, green: 130/255, blue: 54/255, alpha: 1.0)
     }
     
 }

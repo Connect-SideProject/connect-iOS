@@ -11,6 +11,7 @@ import SnapKit
 import ReactorKit
 import RxDataSources
 import Then
+import RxCocoa
 
 
 /// 홈 화면 컨트롤러.
@@ -40,10 +41,10 @@ class HomeController: UIViewController {
     
     private var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout()).then {
         $0.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
-        $0.contentInsetAdjustmentBehavior = .never
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
         $0.backgroundColor = .white
+        
     }
 
 
@@ -53,16 +54,17 @@ class HomeController: UIViewController {
     private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
         return .init(
         configureCell: { datasource, collectionView, indexPath, sectionItem in
+            print("Section Item : \(sectionItem)")
             switch sectionItem {
-            case let .commerce(cellReactor),
-                let .finance(cellReactor),
-                let .health(cellReactor),
-                let .travel(cellReactor):
+            case let .commerce(cellReactor):
                 
                 guard let menuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell else { return UICollectionViewCell() }
-                
                 menuCell.reactor = cellReactor
                 return menuCell
+                
+                
+            default:
+                return UICollectionViewCell()
             }
         }
     )}
@@ -88,6 +90,9 @@ class HomeController: UIViewController {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.setToolbarHidden(false, animated: true)
         
+        let bottomSheetVC = BaseBottomSheetView(sheetTitle: .interestField, collectionType: .table)
+        bottomSheetVC.modalPresentationStyle = .overFullScreen
+        self.present(bottomSheetVC, animated: true)
         
         configure()
     }
@@ -137,17 +142,29 @@ extension HomeController: ReactorKit.View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        self.collectionView.rx.setDelegate(self)
-            .disposed(by: disposeBag)
+        bindCollectionView(reactor: reactor)
         
-        reactor.state
-            .map{ $0.section }
-            .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
-            .disposed(by: disposeBag)
         
     }
     
     
+}
+
+extension HomeController {
+    func bindCollectionView(reactor: Reactor) {
+        
+        self.collectionView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
+        
+        print("Datasource Check : \(self.dataSource)")
+        
+        reactor.state
+            .map { $0.section }
+            .debug()
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
+            .disposed(by: disposeBag)
+    }
 }
 
 
@@ -159,10 +176,9 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         return .zero
     }
     
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: 100, height: 100)
+    }
+    
 }
 
-extension HomeController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 54, height: 78)
-    }
-}
