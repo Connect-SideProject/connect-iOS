@@ -8,17 +8,20 @@
 import UIKit
 import Then
 import SnapKit
+import ReactorKit
+import RxDataSources
 
 enum BottomSheettTitle: String {
-    case interestField = "관심분야"
     case onOffLine = "온/오프라인"
     case aligment = "정렬"
     case studyType = "종류"
 }
 
 enum CollectionType {
-    case table
-    case collection
+    case onOffLineTable
+    case aligmentTable
+    case studyTypeTable
+    }
 }
 
 protocol BaseBottomSheetViewFactory {
@@ -71,6 +74,7 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
     init(sheetTitle: BottomSheettTitle, collectionType: CollectionType) {
         self.titleLabel.text = sheetTitle.rawValue
         self.collectionType = collectionType
+//        self.datasources = type(of: self).
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -78,6 +82,7 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private let datasources: RxTableViewSectionedReloadDataSource<BottomSheetSection<CollectionType>>
     
     private func configure() {
         
@@ -116,8 +121,6 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
             $0.bottom.equalToSuperview().offset(-24)
             $0.height.equalTo(41)
         }
-        
-        
         
     }
     
