@@ -21,7 +21,6 @@ enum CollectionType {
     case onOffLineTable
     case aligmentTable
     case studyTypeTable
-    }
 }
 
 protocol BaseBottomSheetViewFactory {
@@ -82,7 +81,7 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private let datasources: RxTableViewSectionedReloadDataSource<BottomSheetSection<CollectionType>>
+//    private let datasources: RxTableViewSectionedReloadDataSource<BottomSheetSection<CollectionType>>
     
     private func configure() {
         
