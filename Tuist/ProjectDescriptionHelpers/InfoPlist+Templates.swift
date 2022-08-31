@@ -48,7 +48,7 @@ extension InfoPlist {
     extentions.keys.enumerated().forEach { offset, key in
       dictionary.updateValue(extentions[key]!, forKey: key)
     }
-    
+
     return .extendingDefault(with: dictionary)
   }
 }
