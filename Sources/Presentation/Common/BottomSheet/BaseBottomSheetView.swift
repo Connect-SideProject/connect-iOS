@@ -15,6 +15,21 @@ enum BottomSheettTitle: String {
     case onOffLine = "온/오프라인"
     case aligment = "정렬"
     case studyType = "종류"
+    
+    struct sheetModel {
+        var title: String
+    }
+    
+    var sheetSectionModel: [sheetModel] {
+        switch self {
+        case .onOffLine:
+            return [sheetModel(title: "전체"), sheetModel(title: "온라인"), sheetModel(title: "오프라인")]
+        case .aligment:
+            return [sheetModel(title: "전체"), sheetModel(title: "인기순"), sheetModel(title: "거리순")]
+        case .studyType:
+            return [sheetModel(title: "전체"), sheetModel(title: "스터디"), sheetModel(title: "프로젝트")]
+        }
+    }
 }
 
 enum onOffLineType: String {
@@ -23,19 +38,15 @@ enum onOffLineType: String {
     case offLine = "오프라인"
 }
 
-enum CollectionType {
-    case onOffLineTable(onOffLineType)
-    case aligmentTable
-    case studyTypeTable
-}
-
-protocol BaseBottomSheetViewFactory {
-    typealias collectionType = CollectionType
-}
 
 
-
-class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
+class BaseBottomSheetView: UIViewController {
+    
+    
+    //MARK: Property
+    typealias Reactor = BottomSheetReactor
+    
+    var disposeBag: DisposeBag = DisposeBag()
     
     private let dimView: UIView = UIView().then {
         $0.backgroundColor = .black.withAlphaComponent(0.5)
@@ -73,18 +84,14 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         $0.separatorInset = .zero
     }
     
-    
-    
-    var collectionType: CollectionType
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         configure()
     }
     
-    init(sheetTitle: BottomSheettTitle, collectionType: CollectionType) {
+    init(sheetTitle: BottomSheettTitle, collectionType: BottomSheettTitle) {
         self.titleLabel.text = sheetTitle.rawValue
-        self.collectionType = collectionType
+        defer { self.reactor = BottomSheetReactor(type: collectionType) }
         self.datasources = type(of: self).dataSourcesFactory()
         super.init(nibName: nil, bundle: nil)
     }
@@ -93,10 +100,10 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private let datasources: RxTableViewSectionedReloadDataSource<BottomSheetSection<CollectionType>>
+    private let datasources: RxTableViewSectionedReloadDataSource<BottomSheetSection>
     
     
-    private static func dataSourcesFactory() -> RxTableViewSectionedReloadDataSource<BottomSheetSection<CollectionType>> {
+    private static func dataSourcesFactory() -> RxTableViewSectionedReloadDataSource<BottomSheetSection> {
         return .init { datasource, tableView, indexPath, sectionItem in
             switch sectionItem {
             case let .all(cellRector):
@@ -131,7 +138,8 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         
         tableView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom)
-            $0.left.right.equalToSuperview()
+            $0.left.equalToSuperview().offset(20)
+            $0.right.equalToSuperview().offset(-20)
             $0.bottom.equalTo(confirmButton.snp.top)
         }
         
@@ -155,5 +163,38 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         }
         
     }
+    
+}
+
+
+extension BaseBottomSheetView: ReactorKit.View {
+    
+    
+    func bind(reactor: Reactor) {
+        
+        self.rx.viewDidLoad
+            .map { Reactor.Action.load }
+            .bind(to: reactor.action )
+            .disposed(by: disposeBag)
+        
+        
+        
+        self.tableView.rx
+            .setDelegate(self)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.section }
+            .debug("BottomSheetCell")
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.tableView.rx.items(dataSource: self.datasources))
+            .disposed(by: disposeBag)
+    }
+    
+}
+
+
+extension BaseBottomSheetView: UITableViewDelegate {
+    
     
 }
