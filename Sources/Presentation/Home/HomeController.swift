@@ -90,7 +90,7 @@ class HomeController: UIViewController {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.setToolbarHidden(false, animated: true)
         
-        let bottomSheetVC = BaseBottomSheetView(sheetTitle: .aligment, collectionType: .aligmentTable)
+        let bottomSheetVC = BaseBottomSheetView(sheetTitle: .aligment, collectionType: .aligment)
         bottomSheetVC.modalPresentationStyle = .overFullScreen
         self.present(bottomSheetVC, animated: true)
         

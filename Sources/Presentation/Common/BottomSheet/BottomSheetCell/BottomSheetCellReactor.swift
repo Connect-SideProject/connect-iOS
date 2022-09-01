@@ -8,18 +8,19 @@
 import ReactorKit
 
 
-final class BottomSheetCellReactor<T>: Reactor {
+final class BottomSheetCellReactor: Reactor {
     
     typealias Action = NoAction
     
     struct State {
-        var menuType: T
+        var menuType: [BottomSheettTitle.sheetModel]
     }
     
     let initialState: State
     
-    init(menuType: T) {
+    init(menuType: [BottomSheettTitle.sheetModel]) {
         self.initialState = State(menuType: menuType)
+        print("Cell Model : \(menuType.count) or Menu : \(menuType)")
         _ = self.state
     }
     
