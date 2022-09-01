@@ -17,8 +17,14 @@ enum BottomSheettTitle: String {
     case studyType = "종류"
 }
 
+enum onOffLineType: String {
+    case all = "전체"
+    case online = "온라인"
+    case offLine = "오프라인"
+}
+
 enum CollectionType {
-    case onOffLineTable
+    case onOffLineTable(onOffLineType)
     case aligmentTable
     case studyTypeTable
 }
@@ -61,6 +67,12 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         $0.setTitleColor(UIColor.white, for: .normal)
     }
     
+    private let tableView: UITableView = UITableView().then {
+        $0.register(BottomSheetCell.self, forCellReuseIdentifier: "BottomSheetCell")
+        $0.separatorColor = .gray02
+        $0.separatorInset = .zero
+    }
+    
     
     
     var collectionType: CollectionType
@@ -73,7 +85,7 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
     init(sheetTitle: BottomSheettTitle, collectionType: CollectionType) {
         self.titleLabel.text = sheetTitle.rawValue
         self.collectionType = collectionType
-//        self.datasources = type(of: self).
+        self.datasources = type(of: self).dataSourcesFactory()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -81,7 +93,22 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         fatalError("init(coder:) has not been implemented")
     }
     
-//    private let datasources: RxTableViewSectionedReloadDataSource<BottomSheetSection<CollectionType>>
+    private let datasources: RxTableViewSectionedReloadDataSource<BottomSheetSection<CollectionType>>
+    
+    
+    private static func dataSourcesFactory() -> RxTableViewSectionedReloadDataSource<BottomSheetSection<CollectionType>> {
+        return .init { datasource, tableView, indexPath, sectionItem in
+            switch sectionItem {
+            case let .all(cellRector):
+                let cell = tableView.dequeueReusableCell(withIdentifier: "BottomSheetCell", for: indexPath) as? BottomSheetCell
+                cell?.reactor = cellRector
+                
+                return cell!
+            default:
+                return UITableViewCell()
+            }
+        }
+    }
     
     private func configure() {
         
@@ -89,7 +116,7 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         
         dimView.addSubview(containerView)
         
-        _ = [titleLabel,deleteButton, confirmButton].map {
+        _ = [tableView, titleLabel, deleteButton, confirmButton].map {
             containerView.addSubview($0)
         }
         
@@ -100,6 +127,12 @@ class BaseBottomSheetView: UIViewController, BaseBottomSheetViewFactory {
         containerView.snp.makeConstraints {
             $0.bottom.left.right.equalToSuperview()
             $0.height.equalTo(409)
+        }
+        
+        tableView.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom)
+            $0.left.right.equalToSuperview()
+            $0.bottom.equalTo(confirmButton.snp.top)
         }
         
         titleLabel.snp.makeConstraints {
