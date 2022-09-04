@@ -14,6 +14,10 @@ let dependencies = Dependencies(
   ],
   swiftPackageManager: [
     .remote(
+      url: "https://github.com/kakao/kakao-ios-sdk",
+      requirement: .branch("master")
+    ),
+    .remote(
       url: "https://github.com/ReactiveX/RxSwift.git",
       requirement: .exact("6.0.0")
     ),
