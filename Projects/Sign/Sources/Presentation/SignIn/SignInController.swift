@@ -7,19 +7,16 @@
 
 import UIKit
 
+import CODomain
+import COExtensions
 import FlexLayout
 import PinLayout
+import ReactorKit
 import Then
 
-enum SignInProviderType: Int {
-  case kakao = 0, naver, apple, none
-}
-
-protocol SignInDelegate: AnyObject {
-  func didTapSignInButton(type: SignInProviderType)
-}
-
-final class SignInController: UIViewController {
+public final class SignInController: UIViewController, ReactorKit.View {
+  
+  public var disposeBag: DisposeBag = .init()
   
   private let signInLabel = UILabel().then {
     $0.text = "로그인"
@@ -36,9 +33,7 @@ final class SignInController: UIViewController {
   
   private let flexContainer = UIView()
   
-  weak var delegate: SignInDelegate?
-  
-  override func viewDidLayoutSubviews() {
+  public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     
     flexContainer.pin
@@ -49,10 +44,20 @@ final class SignInController: UIViewController {
     flexContainer.flex.layout()
   }
   
-  override func viewDidLoad() {
+  public override func viewDidLoad() {
     super.viewDidLoad()
     
     configureUI()
+  }
+  
+  
+  public func bind(reactor: SignInReactor) {
+    reactor.state
+      .map { $0.accessToken }
+      .filter { !$0.isEmpty }
+      .bind { accessToken in
+        print(accessToken)
+      }.disposed(by: disposeBag)
   }
 }
 
@@ -90,28 +95,32 @@ extension SignInController {
     let titleColors: [UIColor] = [.black, .black, .white]
     let backgroundColors: [UIColor] = [.yellow, .green, .black]
     
-    return ["Kakao로 시작하기", "Naver로 시작하기", "Apple로 시작하기"].enumerated().map { offset, title in
-      let button = UIButton()
-      button.setTitle(title, for: .normal)
-      button.setTitleColor(titleColors[offset], for: .normal)
-      button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-      
-      button.backgroundColor = backgroundColors[offset]
-      
-      button.layer.cornerRadius = 8
-      button.layer.masksToBounds = true
-      
-      button.tag = offset
-      
-      button.addTarget(self, action: #selector(didTapSignInButton(sender:)), for: .touchUpInside)
-      
-      return button
+    return AuthType.allCases.enumerated()
+      .filter { $0.offset < titleColors.count }
+      .map { offset, type in
+        let button = UIButton()
+        button.setTitle("\(type.description)로 시작하기", for: .normal)
+        button.setTitleColor(titleColors[offset], for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
+        
+        button.backgroundColor = backgroundColors[offset]
+        
+        button.layer.cornerRadius = 8
+        button.layer.masksToBounds = true
+        
+        button.tag = offset
+        
+        button.addTarget(self, action: #selector(didTapSignInButton(sender:)), for: .touchUpInside)
+        
+        return button
     }
   }
   
   @objc private func didTapSignInButton(sender: UIButton) {
-    delegate?.didTapSignInButton(
-      type: SignInProviderType(rawValue: sender.tag) ?? .none
+    reactor?.action.onNext(
+      .didTapSignInButton(
+        type: AuthType(rawValue: sender.tag) ?? .none
+      )
     )
   }
 }
