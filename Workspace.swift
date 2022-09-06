@@ -11,7 +11,7 @@ let workspace = Workspace(
   name: "connect",
   projects: [
     "App",
-    "Projects/**",
+    "Features/**",
     "Core/**",
     "Domain/**",
     "UI/**"
