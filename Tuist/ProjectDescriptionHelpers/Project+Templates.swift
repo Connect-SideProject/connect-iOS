@@ -10,14 +10,21 @@ import ProjectDescription
 extension Project {
   public static func feature(
     name: String,
-    products: [Product],
+    products: [COProduct],
+    infoExtension: [String: InfoPlist.Value] = [:],
     settings: Settings? = .default,
-    dependencies: [TargetDependency] = []
+    dependencies: [TargetDependency] = [],
+    testDependencies: [TargetDependency] = []
   ) -> Project {
     
     var targets: [Target] = []
+    var schemes: [Scheme] = []
     
-    let infoPlist: InfoPlist = .default(name: name)
+    var infoPlist: InfoPlist = .base(name: name)
+    
+    if !infoExtension.isEmpty {
+      infoPlist = .custom(name: name, extentions: infoExtension)
+    }
     
     if products.contains(.app) {
       let target: Target = .init(
@@ -35,41 +42,70 @@ extension Project {
       targets.append(target)
     }
     
-    products.filter { $0.isFramework }
-      .forEach {
-        let target: Target = .init(
-          name: name,
-          platform: .iOS,
-          product: $0,
-          bundleId: "com.sideproj.\(name)",
-          deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
-          infoPlist: infoPlist,
-          sources: ["Sources/**"],
-          resources: ["Resources/**"],
-          dependencies: dependencies,
-          settings: settings
-        )
-        targets.append(target)
-      }
+    if products.contains(.demoApp) {
+      let appTarget: Target = .init(
+        name: "\(name)DemoApp",
+        platform: .iOS,
+        product: .app,
+        bundleId: "com.sideproj.\(name)DemoApp",
+        deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
+        infoPlist: .base(name: "\(name)DemoApp"),
+        sources: ["Sources/**"],
+        resources: ["Resources/**"],
+        dependencies: [.target(name: name)],
+        settings: settings
+      )
+      targets.append(appTarget)
+      
+      let scheme: Scheme = .init(
+        name: "\(name)DemoApp",
+        shared: true,
+        hidden: false,
+        buildAction: .init(targets: ["\(name)DemoApp"]),
+        runAction: .runAction(executable: "\(name)DemoApp")
+      )
+      
+      schemes.append(scheme)
+    }
     
-    products.filter { $0.isLibrary }
-      .forEach {
-        let target: Target = .init(
-          name: name,
-          platform: .iOS,
-          product: $0,
-          bundleId: "com.sideproj.\(name)",
-          deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
-          infoPlist: infoPlist,
-          sources: ["Sources/**"],
-          resources: ["Resources/**"],
-          dependencies: dependencies,
-          settings: settings
-        )
-        targets.append(target)
-      }
+    if products.filter({ $0.isFramework }).count != 0 {
+      
+      let frameworkTarget: Target = .init(
+        name: name,
+        platform: .iOS,
+        product: products.contains(.framework(.static)) ? .staticFramework : .framework,
+        bundleId: "com.sideproj.\(name)",
+        deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
+        infoPlist: infoPlist,
+        sources: ["Sources/**"],
+        resources: ["Resources/**"],
+        dependencies: dependencies,
+        settings: settings
+      )
+      targets.append(frameworkTarget)
+    }
+    
+    if products.filter({ $0.isLibrary }).count != 0 {
+      let target: Target = .init(
+        name: name,
+        platform: .iOS,
+        product: products.contains(.library(.static)) ? .staticLibrary : .dynamicLibrary,
+        bundleId: "com.sideproj.\(name)",
+        deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
+        infoPlist: infoPlist,
+        sources: ["Sources/**"],
+        resources: ["Resources/**"],
+        dependencies: dependencies,
+        settings: settings
+      )
+      targets.append(target)
+    }
     
     if products.contains(.unitTests) {
+      
+      var dependencies: [TargetDependency] = [.target(name: name), .xctest]
+      dependencies += testDependencies
+      
       let target: Target = .init(
         name: "\(name)Tests",
         platform: .iOS,
@@ -78,7 +114,7 @@ extension Project {
         infoPlist: .default,
         sources: ["\(name)Tests/**"],
         resources: ["\(name)Tests/**"],
-        dependencies: [.target(name: name)]
+        dependencies: dependencies
       )
       targets.append(target)
     }
@@ -97,24 +133,14 @@ extension Project {
     
     return Project(
       name: name,
-      targets: targets
+      targets: targets,
+      schemes: schemes
     )
   }
 }
 
 extension Product {
-  enum Environment {
-    case `static`, `dynamic`
-  }
-  
-  static func framework(_ environment: Environment) -> Self {
-    return environment == .static ? .staticFramework : .framework
-  }
-  
-  static func library(_ environment: Environment) -> Self {
-    return environment == .static ? .staticLibrary : .dynamicLibrary
-  }
-  
+
   var isFramework: Bool {
     return (self == Product.staticFramework || self == Product.framework)
   }
