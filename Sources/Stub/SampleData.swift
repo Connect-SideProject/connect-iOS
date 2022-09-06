@@ -22,6 +22,21 @@ struct SampleData {
 //  let isLocationExpose: Bool
   func create() -> Data {
     switch path {
+    case let .signIn(authType):
+      let profile: Profile = .init(
+        authType: authType,
+        profileURL: "https://avatars.githubusercontent.com/u/24970070",
+        nickname: "시원",
+        roles: [.developer],
+        region: .init(state: "SEO", city: "SUNGNAM"),
+        interestings: ["HEALTH"],
+        portfolioURL: "https://portfolio.com",
+        career: "JUNIOR",
+        skills: ["Swift", "RxSwift"],
+        isPushOn: true,
+        isLocationExpose: true
+      )
+      return makeData(parameter: profile.asDictionary()!)
     case .userProfile:
       let profile: Profile = .init(
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
