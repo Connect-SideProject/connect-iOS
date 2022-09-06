@@ -3,7 +3,7 @@ import ProjectDescriptionHelpers
 
 let extensions = Project.feature(
   name: "COExtensions",
-  products: [.framework],
+  products: [.framework(.dynamic)],
   dependencies: [
     .external(name: "RxCocoa")
   ]
