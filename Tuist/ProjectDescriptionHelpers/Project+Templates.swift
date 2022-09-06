@@ -10,10 +10,11 @@ import ProjectDescription
 extension Project {
   public static func feature(
     name: String,
-    products: [Product],
-    infoDict: [String: InfoPlist.Value] = [:],
+    products: [COProduct],
+    infoExtension: [String: InfoPlist.Value] = [:],
     settings: Settings? = .default,
-    dependencies: [TargetDependency] = []
+    dependencies: [TargetDependency] = [],
+    testDependencies: [TargetDependency] = []
   ) -> Project {
     
     var targets: [Target] = []
@@ -21,8 +22,8 @@ extension Project {
     
     var infoPlist: InfoPlist = .base(name: name)
     
-    if !infoDict.isEmpty {
-      infoPlist = .custom(name: name, extentions: infoDict)
+    if !infoExtension.isEmpty {
+      infoPlist = .custom(name: name, extentions: infoExtension)
     }
     
     if products.contains(.app) {
@@ -41,14 +42,14 @@ extension Project {
       targets.append(target)
     }
     
-    if products.filter({ $0.isFramework }).count != 0 {
+    if products.contains(.demoApp) {
       let appTarget: Target = .init(
-        name: "\(name)App",
+        name: "\(name)DemoApp",
         platform: .iOS,
         product: .app,
-        bundleId: "com.sideproj.\(name)App",
+        bundleId: "com.sideproj.\(name)DemoApp",
         deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
-        infoPlist: infoPlist,
+        infoPlist: .base(name: "\(name)DemoApp"),
         sources: ["Sources/**"],
         resources: ["Resources/**"],
         dependencies: [.target(name: name)],
@@ -56,10 +57,23 @@ extension Project {
       )
       targets.append(appTarget)
       
+      let scheme: Scheme = .init(
+        name: "\(name)DemoApp",
+        shared: true,
+        hidden: false,
+        buildAction: .init(targets: ["\(name)DemoApp"]),
+        runAction: .runAction(executable: "\(name)DemoApp")
+      )
+      
+      schemes.append(scheme)
+    }
+    
+    if products.filter({ $0.isFramework }).count != 0 {
+      
       let frameworkTarget: Target = .init(
         name: name,
         platform: .iOS,
-        product: products.contains(.staticFramework) ? .staticFramework : .framework,
+        product: products.contains(.framework(.static)) ? .staticFramework : .framework,
         bundleId: "com.sideproj.\(name)",
         deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
         infoPlist: infoPlist,
@@ -69,23 +83,13 @@ extension Project {
         settings: settings
       )
       targets.append(frameworkTarget)
-      
-      let scheme: Scheme = .init(
-        name: "\(name)App",
-        shared: true,
-        hidden: false,
-        buildAction: .init(targets: ["\(name)App"]),
-        runAction: .runAction(executable: "\(name)App")
-      )
-      
-      schemes.append(scheme)
     }
     
     if products.filter({ $0.isLibrary }).count != 0 {
       let target: Target = .init(
         name: name,
         platform: .iOS,
-        product: products.contains(.staticLibrary) ? .staticLibrary : .dynamicLibrary,
+        product: products.contains(.library(.static)) ? .staticLibrary : .dynamicLibrary,
         bundleId: "com.sideproj.\(name)",
         deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
         infoPlist: infoPlist,
@@ -98,6 +102,10 @@ extension Project {
     }
     
     if products.contains(.unitTests) {
+      
+      var dependencies: [TargetDependency] = [.target(name: name), .xctest]
+      dependencies += testDependencies
+      
       let target: Target = .init(
         name: "\(name)Tests",
         platform: .iOS,
@@ -106,7 +114,7 @@ extension Project {
         infoPlist: .default,
         sources: ["\(name)Tests/**"],
         resources: ["\(name)Tests/**"],
-        dependencies: [.target(name: name)]
+        dependencies: dependencies
       )
       targets.append(target)
     }
@@ -132,7 +140,7 @@ extension Project {
 }
 
 extension Product {
-  
+
   var isFramework: Bool {
     return (self == Product.staticFramework || self == Product.framework)
   }

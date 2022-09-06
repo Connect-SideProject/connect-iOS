@@ -3,6 +3,6 @@ import ProjectDescriptionHelpers
 
 let domain = Project.feature(
   name: "CODomain",
-  products: [.staticFramework],
+  products: [.framework(.static)],
   dependencies: []
 )
