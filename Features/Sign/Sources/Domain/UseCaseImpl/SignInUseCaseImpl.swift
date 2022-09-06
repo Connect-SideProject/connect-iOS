@@ -27,28 +27,48 @@ public final class SignInUseCaseImpl: SignInUseCase {
   }
 }
 
-public extension SignInUseCaseImpl {
-  func signIn(authType: AuthType) -> Observable<CODomain.Profile> {
+extension SignInUseCaseImpl {
+  public func signIn(authType: AuthType) -> Observable<CODomain.Profile> {
     switch authType {
     case .kakao:
       if UserApi.isKakaoTalkLoginAvailable() {
         return repository.requestAccessTokenWithKakaoTalk()
           .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
             guard let self = self else { return .empty() }
-            self.userService.update(accessToken: accessToken)
-            return self.fetchProfile(authType: authType)
+            return self.combine(accessToken, authType: authType)
           }
       } else {
         return repository.requestAccessTokenWithKakaoAccount()
+          .debug()
           .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
             guard let self = self else { return .empty() }
-            self.userService.update(accessToken: accessToken)
-            return self.fetchProfile(authType: authType)
+            return self.combine(accessToken, authType: authType)
           }
       }
+    case .naver:
+      return repository.requestAccessTokenWithNaver()
+        .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
+          guard let self = self else { return .empty() }
+          return self.combine(accessToken, authType: authType)
+        }
+    case .apple:
+      return repository.requestAccessTokenWithApple()
+        .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
+          guard let self = self else { return .empty() }
+          return self.combine(accessToken, authType: authType)
+        }
     default:
       return .empty()
     }
+  }
+  
+  private func combine(_ accessToken: String, authType: AuthType) -> Observable<CODomain.Profile> {
+    updateAccessToken(accessToken)
+    return fetchProfile(authType: authType)
+  }
+  
+  private func updateAccessToken(_ accessToken: String) {
+    userService.update(accessToken: accessToken)
   }
   
   private func fetchProfile(authType: AuthType) -> Observable<CODomain.Profile> {
