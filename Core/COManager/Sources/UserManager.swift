@@ -10,12 +10,6 @@ import Foundation
 
 import COExtensions
 
-public protocol UserService {
-  var accessToken: String { get }
-  func update(accessToken: String)
-  func remove()
-}
-
 public class UserManager: UserService {
   
   public static let shared: UserManager = UserManager()
