@@ -14,9 +14,11 @@ import PinLayout
 import ReactorKit
 import Then
 
+public protocol SignInDelegate: AnyObject {
+  func routeToSignUp()
+}
+
 public final class SignInController: UIViewController, ReactorKit.View {
-  
-  public var disposeBag: DisposeBag = .init()
   
   private let signInLabel = UILabel().then {
     $0.text = "로그인"
@@ -32,6 +34,10 @@ public final class SignInController: UIViewController, ReactorKit.View {
   }
   
   private let flexContainer = UIView()
+  
+  weak var delegate: SignInDelegate?
+  
+  public var disposeBag: DisposeBag = .init()
   
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
@@ -50,13 +56,24 @@ public final class SignInController: UIViewController, ReactorKit.View {
     configureUI()
   }
   
-  
   public func bind(reactor: SignInReactor) {
     reactor.state
-      .map { $0.accessToken }
-      .filter { !$0.isEmpty }
-      .bind { accessToken in
-        print(accessToken)
+      .map { $0.profile }
+      .filter { $0 != nil }
+      .bind { profile in
+        print(profile)
+      }.disposed(by: disposeBag)
+    
+    reactor.state
+      .map { $0.error?.asURLError }
+      .filter { $0 != nil }
+      .bind { [weak self] error in
+        switch error?.code {
+        case URLError.Code.needSignUp:
+          self?.delegate?.routeToSignUp()
+        default:
+          break
+        }
       }.disposed(by: disposeBag)
   }
 }
@@ -65,6 +82,8 @@ extension SignInController {
   private func configureUI() {
     
     view.backgroundColor = .white
+    
+    navigationController?.setNavigationBarHidden(true, animated: false)
     
     view.addSubview(flexContainer)
     

@@ -16,13 +16,17 @@ public final class SignInReactor: Reactor {
   }
   
   public enum Mutation {
-    case setAccessToken(String)
-    case setProfile(Profile)
+    case setProfile(Profile?)
+    case setError(URLError?)
   }
   
   public struct State {
-    var accessToken: String = ""
-    var profile: Profile = .init()
+    var profile: Profile?
+    var error: URLError?
+  }
+  
+  private let errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
+    return .just(.setError(error.asURLError))
   }
   
   public var initialState: State = .init()
@@ -40,8 +44,7 @@ public final class SignInReactor: Reactor {
         .flatMap { profile -> Observable<Mutation> in
           return .just(.setProfile(profile))
         }
-    default:
-      return .empty()
+        .catch(errorHandler)
     }
   }
   
@@ -49,10 +52,10 @@ public final class SignInReactor: Reactor {
     var newState = state
     
     switch mutation {
-    case .setAccessToken(let accessToken):
-      newState.accessToken = accessToken
-    case .setProfile(let profile):
+    case let .setProfile(profile):
       newState.profile = profile
+    case let .setError(error):
+      newState.error = error
     }
     
     return newState
