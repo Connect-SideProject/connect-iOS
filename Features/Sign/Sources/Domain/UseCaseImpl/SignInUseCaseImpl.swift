@@ -8,12 +8,11 @@
 import Foundation
 
 import CODomain
-import CONetwork
 import COManager
 import KakaoSDKUser
 import RxSwift
 
-public final class SignInUseCaseImpl: SignInUseCase {
+public final class SignInUseCaseImpl: NSObject, SignInUseCase {
   
   private let repository: SignInRepository
   private let userService: UserService
@@ -28,38 +27,29 @@ public final class SignInUseCaseImpl: SignInUseCase {
 }
 
 extension SignInUseCaseImpl {
-  public func signIn(authType: AuthType) -> Observable<CODomain.Profile> {
-    switch authType {
-    case .kakao:
-      if UserApi.isKakaoTalkLoginAvailable() {
-        return repository.requestAccessTokenWithKakaoTalk()
-          .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
-            guard let self = self else { return .empty() }
-            return self.combine(accessToken, authType: authType)
-          }
-      } else {
-        return repository.requestAccessTokenWithKakaoAccount()
-          .debug()
-          .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
-            guard let self = self else { return .empty() }
-            return self.combine(accessToken, authType: authType)
-          }
-      }
-    case .naver:
-      return repository.requestAccessTokenWithNaver()
+  public func signInWithKakao() -> Observable<CODomain.Profile> {
+    if UserApi.isKakaoTalkLoginAvailable() {
+      return repository.requestAccessTokenWithKakaoTalk()
         .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
           guard let self = self else { return .empty() }
-          return self.combine(accessToken, authType: authType)
+          return self.combine(accessToken, authType: .kakao)
         }
-    case .apple:
-      return repository.requestAccessTokenWithApple()
+    } else {
+      return repository.requestAccessTokenWithKakaoAccount()
+        .debug()
         .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
           guard let self = self else { return .empty() }
-          return self.combine(accessToken, authType: authType)
+          return self.combine(accessToken, authType: .kakao)
         }
-    default:
-      return .empty()
     }
+  }
+  
+  public func signInWithNaver(accessToken: String) -> Observable<CODomain.Profile> {
+    return combine(accessToken, authType: .naver)
+  }
+  
+  public func signInWithApple() -> Observable<CODomain.Profile> {
+    return .empty()
   }
   
   private func combine(_ accessToken: String, authType: AuthType) -> Observable<CODomain.Profile> {

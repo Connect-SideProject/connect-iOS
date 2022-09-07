@@ -24,14 +24,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     let container = SignInDIContainer(
       apiService: ApiManaerStub(state: .response(204)),
-      userService: UserManagerStub()
+      userService: UserManagerStub(),
+      delegate: self
     )
     
-    let signInController = container.makeController()
-    signInController.delegate = self
-    
     controller = UINavigationController(
-      rootViewController: signInController
+      rootViewController: container.makeController()
     )
     window?.rootViewController = controller
     window?.makeKeyAndVisible()
