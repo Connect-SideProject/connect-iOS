@@ -17,8 +17,8 @@ let app = Project.feature(
   ],
   dependencies: [
     .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
-    .project(target: "COExtensions", path: .relativeToRoot("Core/COExtensions")),
-    .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI"))
+    .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
+    .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
     .xcframework(path: "Framework/NaverThirdPartyLogin.xcframework")
   ]
 )
