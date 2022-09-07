@@ -6,15 +6,15 @@ let sign = Project.feature(
   products: [.framework(.dynamic), .demoApp, .unitTests],
   infoExtension: [
     "LSApplicationQueriesSchemes": .array(
-      ["kakaokompassauth", "kakaolink"]
+      [.string("kakaokompassauth"), .string("kakaolink"), .string("naversearchapp"), .string("naversearchthirdlogin")]
     )
   ],
   dependencies: [
     .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
-    .project(target: "COCommon", path: .relativeToRoot("Core/COCommon")),
-    .project(target: "COManager", path: .relativeToRoot("Core/COManager")),
+    .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
     .project(target: "CONetwork", path: .relativeToRoot("Core/CONetwork")),
+    .project(target: "CODomain", path: .relativeToRoot("Domain/CODomain")),
     .external(name: "KakaoSDKUser"),
-    .external(name: "ReactorKit"),
+    .external(name: "ReactorKit")
   ]
 )

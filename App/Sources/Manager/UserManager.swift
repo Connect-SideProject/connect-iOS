@@ -8,11 +8,7 @@
 
 import Foundation
 
-public protocol UserService {
-  var accessToken: String { get }
-  func update(accessToken: String)
-  func remove()
-}
+import COManager
 
 public class UserManager: UserService {
   
