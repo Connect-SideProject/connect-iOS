@@ -65,7 +65,7 @@ public final class SignInController: UIViewController, ReactorKit.View {
       }.disposed(by: disposeBag)
     
     reactor.state
-      .map { $0.error?.asURLError }
+      .map { $0.error }
       .filter { $0 != nil }
       .bind { [weak self] error in
         switch error?.code {

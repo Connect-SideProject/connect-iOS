@@ -14,6 +14,8 @@ import Sign
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
   var window: UIWindow?
+  
+  var controller: UINavigationController!
 
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
@@ -31,22 +33,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 extension SceneDelegate: SplashDelegate {
   func didFinishSplashLoading() {
     
-    var controller: UIViewController!
-    
     /// 로그인 상태 체크.
     if UserManager.shared.accessToken.isEmpty {
-      let signIn = SignInController()
-      signIn.reactor = .init(
-        useCase: SignInUseCaseImpl(
-          repository: SignInRepositoryImpl()
-        )
+      let container = SignInDIContainer(
+        apiService: ApiManaerStub(state: .response(204)),
+        userService: UserManager.shared,
+        delegate: self
       )
-      controller = signIn
+      
+      controller = UINavigationController(
+        rootViewController: container.makeController()
+      )
     } else {
-      controller = MainController()
+      controller = UINavigationController(
+        rootViewController: MainController()
+      )
     }
     
     window?.rootViewController = controller
     window?.makeKeyAndVisible()
+  }
+}
+
+extension SceneDelegate: SignInDelegate {
+  func routeToSignUp() {
+    let signUpController = SignUpController()
+    controller.pushViewController(signUpController, animated: true)
   }
 }

@@ -21,10 +21,12 @@ public final class SignInDIContainer: DIContainer {
   
   private let apiService: ApiService
   private let userService: UserService
+  private let delegate: SignInDelegate
   
-  public init(apiService: ApiService, userService: UserService) {
+  public init(apiService: ApiService, userService: UserService, delegate: SignInDelegate) {
     self.apiService = apiService
     self.userService = userService
+    self.delegate = delegate
   }
   
   public func makeSignInRepository() -> Repository {
@@ -46,6 +48,7 @@ public final class SignInDIContainer: DIContainer {
   
   public func makeController() -> ViewController {
     let controller = SignInController()
+    controller.delegate = delegate
     controller.reactor = makeReactor()
     return controller
   }

@@ -51,10 +51,6 @@ extension SignInRepositoryImpl {
       }
   }
   
-  public func requestAccessTokenWithNaver() -> Observable<String> {
-    return .just("accessToken")
-  }
-  
   public func requestAccessTokenWithApple() -> Observable<String> {
     return .just("accessToken")
   }

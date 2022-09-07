@@ -11,5 +11,7 @@ import CODomain
 import RxSwift
 
 public protocol SignInUseCase {
-  func signIn(authType: AuthType) -> Observable<Profile>
+  func signInWithKakao() -> Observable<Profile>
+  func signInWithNaver(accessToken: String) -> Observable<Profile>
+  func signInWithApple() -> Observable<Profile>
 }
