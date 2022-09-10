@@ -10,7 +10,7 @@ import Foundation
 import CODomain
 import ReactorKit
 
-public final class SignInReactor: NSObject, Reactor {
+public final class SignInReactor: Reactor {
   public enum Action {
     case didTapSignInButton(type: AuthType)
   }
@@ -31,13 +31,10 @@ public final class SignInReactor: NSObject, Reactor {
     return .just(.setError(error.asURLError))
   }
   
-  private let disposeBag = DisposeBag()
-  
   private let useCase: SignInUseCase
   
   public init(useCase: SignInUseCase) {
     self.useCase = useCase
-    super.init()
   }
   
   public func mutate(action: Action) -> Observable<Mutation> {
@@ -48,7 +45,6 @@ public final class SignInReactor: NSObject, Reactor {
           return .just(.setProfile(profile))
         }.catch(errorHandler)
     }
-    return .empty()
   }
   
   public func reduce(state: State, mutation: Mutation) -> State {
