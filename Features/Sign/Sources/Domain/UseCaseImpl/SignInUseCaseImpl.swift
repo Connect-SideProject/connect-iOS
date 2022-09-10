@@ -18,6 +18,8 @@ public final class SignInUseCaseImpl: NSObject, SignInUseCase {
   private let loginConnection = NaverThirdPartyLoginConnection.getSharedInstance()
   private let accessTokenSubject = PublishSubject<String>()
   
+  private let isStub: Bool
+  
   private let repository: SignInRepository
   private let userService: UserService
   
@@ -27,6 +29,7 @@ public final class SignInUseCaseImpl: NSObject, SignInUseCase {
   ) {
     self.repository = repository
     self.userService = userService
+    self.isStub = (userService is UserManagerStub)
     super.init()
         
     loginConnection?.delegate = self
@@ -52,6 +55,11 @@ extension SignInUseCaseImpl {
           }
       }
     case .naver:
+      
+      if isStub {
+        return combine("accessToken", authType: authType)
+      }
+      
       loginConnection?.requestThirdPartyLogin()
       
       return accessTokenSubject
@@ -62,6 +70,11 @@ extension SignInUseCaseImpl {
         }.debug()
       
     case .apple:
+      
+      if isStub {
+        return combine("accessToken", authType: authType)
+      }
+      
       return .empty()
     case .none:
       return .empty()
