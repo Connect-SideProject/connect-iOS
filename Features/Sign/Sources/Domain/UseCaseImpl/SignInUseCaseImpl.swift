@@ -10,9 +10,13 @@ import Foundation
 import CODomain
 import COManager
 import KakaoSDKUser
+import NaverThirdPartyLogin
 import RxSwift
 
 public final class SignInUseCaseImpl: NSObject, SignInUseCase {
+  
+  private let loginConnection = NaverThirdPartyLoginConnection.getSharedInstance()
+  private let accessTokenSubject = PublishSubject<String>()
   
   private let repository: SignInRepository
   private let userService: UserService
@@ -23,33 +27,45 @@ public final class SignInUseCaseImpl: NSObject, SignInUseCase {
   ) {
     self.repository = repository
     self.userService = userService
+    super.init()
+        
+    loginConnection?.delegate = self
   }
 }
 
 extension SignInUseCaseImpl {
-  public func signInWithKakao() -> Observable<CODomain.Profile> {
-    if UserApi.isKakaoTalkLoginAvailable() {
-      return repository.requestAccessTokenWithKakaoTalk()
+  public func signIn(authType: AuthType) -> Observable<CODomain.Profile> {
+    switch authType {
+    case .kakao:
+      if UserApi.isKakaoTalkLoginAvailable() {
+        return repository.requestAccessTokenWithKakaoTalk()
+          .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
+            guard let self = self else { return .empty() }
+            return self.combine(accessToken, authType: .kakao)
+          }
+      } else {
+        return repository.requestAccessTokenWithKakaoAccount()
+          .debug()
+          .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
+            guard let self = self else { return .empty() }
+            return self.combine(accessToken, authType: .kakao)
+          }
+      }
+    case .naver:
+      loginConnection?.requestThirdPartyLogin()
+      
+      return accessTokenSubject
+        .asObservable()
         .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
           guard let self = self else { return .empty() }
-          return self.combine(accessToken, authType: .kakao)
-        }
-    } else {
-      return repository.requestAccessTokenWithKakaoAccount()
-        .debug()
-        .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
-          guard let self = self else { return .empty() }
-          return self.combine(accessToken, authType: .kakao)
-        }
+          return self.combine(accessToken, authType: authType)
+        }.debug()
+      
+    case .apple:
+      return .empty()
+    case .none:
+      return .empty()
     }
-  }
-  
-  public func signInWithNaver(accessToken: String) -> Observable<CODomain.Profile> {
-    return combine(accessToken, authType: .naver)
-  }
-  
-  public func signInWithApple() -> Observable<CODomain.Profile> {
-    return .empty()
   }
   
   private func combine(_ accessToken: String, authType: AuthType) -> Observable<CODomain.Profile> {
@@ -64,5 +80,38 @@ extension SignInUseCaseImpl {
   private func fetchProfile(authType: AuthType) -> Observable<CODomain.Profile> {
     return repository.requestProfile(authType: authType)
       .asObservable()
+  }
+}
+
+extension SignInUseCaseImpl: NaverThirdPartyLoginConnectionDelegate {
+  public func oauth20ConnectionDidFinishRequestACTokenWithAuthCode() {
+    print("oauth20ConnectionDidFinishRequestACTokenWithAuthCode")
+    
+    if let accessToken = loginConnection?.accessToken {
+      print("accessToken: \(accessToken)")
+      accessTokenSubject.onNext(accessToken)
+    } else {
+      print("accessToken is Nil!")
+    }
+  }
+  
+  public func oauth20ConnectionDidFinishRequestACTokenWithRefreshToken() {
+    print("oauth20ConnectionDidFinishRequestACTokenWithRefreshToken")
+    
+    if let accessToken = loginConnection?.accessToken {
+      print("accessToken: \(accessToken)")
+      accessTokenSubject.onNext(accessToken)
+    } else {
+      print("accessToken is Nil!")
+    }
+  }
+  
+  public func oauth20ConnectionDidFinishDeleteToken() {
+    print("oauth20ConnectionDidFinishDeleteToken")
+  }
+  
+  public func oauth20Connection(_ oauthConnection: NaverThirdPartyLoginConnection!, didFailWithError error: Error!) {
+    print("oauth20Connection error: \(String(describing: error))")
+    accessTokenSubject.onNext(oauthConnection.accessToken)
   }
 }

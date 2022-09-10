@@ -21,9 +21,9 @@ public final class SignInDIContainer: DIContainer {
   
   private let apiService: ApiService
   private let userService: UserService
-  private let delegate: SignInDelegate
+  private var delegate: SignInDelegate?
   
-  public init(apiService: ApiService, userService: UserService, delegate: SignInDelegate) {
+  public init(apiService: ApiService, userService: UserService, delegate: SignInDelegate? = nil) {
     self.apiService = apiService
     self.userService = userService
     self.delegate = delegate
