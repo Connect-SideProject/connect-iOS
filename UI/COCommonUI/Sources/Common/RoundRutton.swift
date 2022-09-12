@@ -8,19 +8,22 @@
 
 import UIKit
 
-class RoundRutton: UIButton {
+public final class RoundRutton: UIButton {
 
-  override func draw(_ rect: CGRect) {
+  public override func draw(_ rect: CGRect) {
     super.draw(rect)
     
     layer.borderWidth = 1
     layer.borderColor = UIColor.lightGray.cgColor
     
-    layer.cornerRadius = 8
-    layer.masksToBounds = false
+    layer.cornerRadius = cornerRadius
+    layer.masksToBounds = true
   }
   
-  init() {
+  private let cornerRadius: CGFloat
+  
+  public init(cornerRadius: CGFloat = 8) {
+    self.cornerRadius = cornerRadius
     super.init(frame: .zero)
   }
   
