@@ -7,6 +7,15 @@
 
 import UIKit
 
+import FlexLayout
+import PinLayout
+
+public typealias CheckBoxItem = (title: String, index: Int)
+
+public enum CheckBoxContainerDirection {
+  case horizontal, vertical
+}
+
 public final class CheckBoxContainerView: UIView {
   
   public let flexContainer = UIView()
@@ -24,7 +33,12 @@ public final class CheckBoxContainerView: UIView {
   
   private var checkBoxViews: [CheckBoxView] = []
   
-  public init(titles: [String]) {
+  public private(set) var checkedItem: CheckBoxItem?
+  
+  private let direction: CheckBoxContainerDirection
+  
+  public init(titles: [String], direction: CheckBoxContainerDirection = .horizontal) {
+    self.direction = direction
     super.init(frame: .zero)
     
     self.checkBoxViews = titles.enumerated().map { [weak self] offset, element in
@@ -44,9 +58,6 @@ public final class CheckBoxContainerView: UIView {
   }
   
   func didTapCheckBox(sender: UIButton) {
-    print(sender.tag)
-    print(sender.isSelected)
-    
     let selectedList = checkBoxViews.map { $0.checkBoxButton.isSelected }.filter { $0 }
     let selectedTag = checkBoxViews.map { $0.checkBoxButton.isSelected ? $0.checkBoxButton.tag : -1 }
       .filter { $0 != -1 }
@@ -54,6 +65,7 @@ public final class CheckBoxContainerView: UIView {
     
     if selectedList.count == 0 {
       sender.isSelected = true
+      self.checkedItem = (title: sender.currentTitle ?? "", index: sender.tag)
     } else {
       
       if selectedTag == sender.tag {
@@ -62,19 +74,24 @@ public final class CheckBoxContainerView: UIView {
       
       let _ = checkBoxViews.map { $0.checkBoxButton.isSelected = false }
       sender.isSelected = true
+      self.checkedItem = (title: sender.currentTitle ?? "", index: sender.tag)
     }
   }
 }
 
 extension CheckBoxContainerView {
   private func configureUI() {
-    backgroundColor = .white
     
     addSubview(flexContainer)
     
     flexContainer.flex
-      .direction(.row)
+      .direction(direction == .horizontal ? .row : .column)
       .define { flex in
+        if direction == .vertical {
+          flex.addItem()
+            .height(10)
+        }
+        
         checkBoxViews.forEach {
           flex.addItem($0)
             .marginLeft(10)
@@ -83,7 +100,62 @@ extension CheckBoxContainerView {
   }
 }
 
-public final class CheckBoxView: UIView {
+public final class CheckBoxSingleView: UIView {
+  
+  public let flexContainer = UIView()
+  
+  public override func layoutSubviews() {
+    super.layoutSubviews()
+    
+    flexContainer.pin
+      .width(of: self)
+      .height(of: self)
+      .layout()
+    
+    flexContainer.flex.layout()
+  }
+  
+  private let checkBoxView: CheckBoxView
+  
+  public private(set) var isChecked: Bool = false
+  
+  public init(title: String) {
+    self.checkBoxView = CheckBoxView(title: title)
+    super.init(frame: .zero)
+        
+    configureUI()
+    
+    checkBoxView.handler = { [weak self] sender in
+      self?.didTapCheckBox(sender: sender)
+    }
+  }
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  func didTapCheckBox(sender: UIButton) {
+    sender.isSelected.toggle()
+    
+    isChecked = sender.isSelected
+  }
+}
+
+extension CheckBoxSingleView {
+  private func configureUI() {
+    
+    addSubview(flexContainer)
+    
+    flexContainer.flex
+      .direction(.row)
+      .define { flex in
+        flex.addItem(checkBoxView)
+          .marginLeft(10)
+    }
+  }
+}
+
+private final class CheckBoxView: UIView {
 
   fileprivate let checkBoxButton = UIButton(type: .custom).then {
     let nomalImage = UIImage(systemName: "square")
@@ -125,11 +197,11 @@ public final class CheckBoxView: UIView {
 
 extension CheckBoxView {
   private func configureUI() {
-    backgroundColor = .white
     
     addSubview(flexContainer)
     
     flexContainer.flex
+      .alignItems(.start)
       .define { flex in
         checkBoxButton.setTitle(title, for: .normal)
         flex.addItem(checkBoxButton)
