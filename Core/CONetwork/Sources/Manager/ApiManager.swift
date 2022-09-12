@@ -40,42 +40,98 @@ public final class ApiManager: ApiService {
         )
       }
     }
+    print("====================Request====================")
+    print("Method: \(endPoint.method.string)")
+    print("Header: \(endPoint.header)")
+    print("URL: \(url.absoluteString)")
+    print("Parameter: \(endPoint.parameter)")
+    print("===============================================")
     
     return Observable<T>.create { observer in
-      let _ = URLSession.shared.rx.response(request: request)
-        .flatMap { response, data -> Observable<T> in
+      let task = URLSession.shared.dataTask(with: request) { data, response, error in
           
-          // 성공 상태코드가 204 등 200이 아닌 경우 대응
-          guard 200 ..< 300 ~= response.statusCode else {
-            
-            // 회원가입이 필요한 경우.
-            if response.statusCode == 204 {
-              observer.onError(URLError(.needSignUp))
-              return .empty()
-            }
-            
-            observer.onError(URLError(.badServerResponse))
-            return .empty()
+        guard let response = response as? HTTPURLResponse else { return }
+        
+        print("====================Response====================")
+        print("StatusCode: \(response.statusCode)")
+        print("================================================")
+        // 성공 상태코드가 204 등 200이 아닌 경우 대응
+        guard 200 ..< 300 ~= response.statusCode else {
+          
+          // 회원가입이 필요한 경우.
+          if response.statusCode == 204 {
+            observer.onError(URLError(.needSignUp))
+            return
           }
           
-          let base = try? JSONDecoder().decode(Base<T>.self, from: data)
-          
-          // 에러코드 존재하면 서버에러 발생으로 판단.
-          if let _ = base?.errorCode {
-            observer.onError(URLError(.badServerResponse))
-            return .empty()
-          }
-          
-          if let data = base?.data {
-            observer.onNext(data)
-            return .empty()
-          }
-          
-          observer.onError(URLError(.dataNotAllowed))
-          return .empty()
+          observer.onError(URLError(.badServerResponse))
+          return
         }
+        
+        guard let data = data else {
+          observer.onError(URLError(.badServerResponse))
+          return
+        }
+        
+        let base = try? JSONDecoder().decode(Base<T>.self, from: data)
+        print("====================Response====================")
+        print("Data: \(base)")
+        print("================================================")
+        // 에러코드 존재하면 서버에러 발생으로 판단.
+        if let _ = base?.errorCode {
+          observer.onError(URLError(.badServerResponse))
+          return
+        }
+        
+        if let data = base?.data {
+          observer.onNext(data)
+          observer.on(.completed)
+          return
+        }
+        
+        observer.onError(URLError(.dataNotAllowed))
+        return
+      }
+
+      task.resume()
+
+      return Disposables.create(with: task.cancel)
       
-      return Disposables.create()
+//
+//      let _ = URLSession.shared.rx.response(request: request)
+//        .flatMap { response, data -> Observable<T> in
+//          print(response.statusCode)
+//          // 성공 상태코드가 204 등 200이 아닌 경우 대응
+//          guard 200 ..< 300 ~= response.statusCode else {
+//
+//            // 회원가입이 필요한 경우.
+//            if response.statusCode == 204 {
+//              observer.onError(URLError(.needSignUp))
+//              return .empty()
+//            }
+//
+//            observer.onError(URLError(.badServerResponse))
+//            return .empty()
+//          }
+//
+//          let base = try? JSONDecoder().decode(Base<T>.self, from: data)
+//          print(base)
+//          // 에러코드 존재하면 서버에러 발생으로 판단.
+//          if let _ = base?.errorCode {
+//            observer.onError(URLError(.badServerResponse))
+//            return .empty()
+//          }
+//
+//          if let data = base?.data {
+//            observer.onNext(data)
+//            return .empty()
+//          }
+//
+//          observer.onError(URLError(.dataNotAllowed))
+//          return .empty()
+//        }
+//
+//      return Disposables.create()
     }
   }
 }

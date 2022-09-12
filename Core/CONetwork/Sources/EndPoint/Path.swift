@@ -25,8 +25,6 @@ public enum Path {
   
   public var parameter: [String: Any]? {
     switch self {
-    case let .signIn(authType):
-      return ["auth-type": authType.description]
     case let .updateProfile(profile):
       return profile.asDictionary()!
     default:
