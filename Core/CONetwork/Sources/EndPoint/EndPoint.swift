@@ -48,7 +48,15 @@ public extension EndPoint {
   }
   
   var header: [String: String]? {
-    return ["Authorization": accessToken]
+    switch path {
+    case let .signIn(authType):
+      return [
+        "access-token": accessToken,
+        "auth-type": authType.description
+      ]
+    default:
+      return ["Authorization": accessToken]
+    }
   }
   
   var url: URL? {
@@ -56,10 +64,7 @@ public extension EndPoint {
     var components = URLComponents()
     components.scheme = baseURL.scheme
     components.host = baseURL.host
-    
-    let queryItems: [URLQueryItem] = []
     components.path = path.string
-    components.queryItems = queryItems
     
     return components.url
   }
