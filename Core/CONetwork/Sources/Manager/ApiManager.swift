@@ -9,7 +9,6 @@
 import Foundation
 
 import CODomain
-import RxCocoa
 import RxSwift
 
 public final class ApiManager: ApiService {
@@ -48,19 +47,21 @@ public final class ApiManager: ApiService {
           
           // 성공 상태코드가 204 등 200이 아닌 경우 대응
           guard 200 ..< 300 ~= response.statusCode else {
+            
+            // 회원가입이 필요한 경우.
+            if response.statusCode == 204 {
+              observer.onError(URLError(.needSignUp))
+              return .empty()
+            }
+            
             observer.onError(URLError(.badServerResponse))
             return .empty()
           }
           
           let base = try? JSONDecoder().decode(Base<T>.self, from: data)
           
-          if let message = base?.message, !message.isEmpty {
-            
-            if base?.statusCode == 204, message == "success" {
-              observer.onError(URLError(.needSignUp))
-              return .empty()
-            }
-            
+          // 에러코드 존재하면 서버에러 발생으로 판단.
+          if let _ = base?.errorCode {
             observer.onError(URLError(.badServerResponse))
             return .empty()
           }
