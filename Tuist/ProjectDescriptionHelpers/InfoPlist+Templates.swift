@@ -31,6 +31,17 @@ extension InfoPlist {
             ])
           ])
         ])
+      ]),
+      "NSAppTransportSecurity": .dictionary([
+        "NSAllowsArbitraryLoads": .boolean(true),
+        "NSExceptionDomains": .dictionary([
+          "contpass.site": .dictionary([
+            "NSIncludesSubdomains": .boolean(true),
+            "NSTemporaryExceptionAllowsInsecureHTTPLoads": .boolean(true),
+            "NSExceptionRequiresForwardSecrecy": .boolean(false),
+            "NSTemporaryExceptionMinimumTLSVersion": .string("TLSv1.2")
+          ])
+        ])
       ])
     ]
   }
