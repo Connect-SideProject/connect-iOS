@@ -15,7 +15,9 @@ public class UserManager: UserService {
   public static let shared: UserManager = UserManager()
   
   public var accessToken: String {
-    return UserDefaults.standard.string(forKey: .accessToken)
+    let token = UserDefaults.standard.string(forKey: .accessToken)
+    print("token::::::::::::::: \(token) ::::::::::::::::::")
+    return token
   }
   
   private init() {}
