@@ -5,9 +5,11 @@
 //  Created by sean on 2022/09/04.
 //
 
+import AuthenticationServices
 import Foundation
 
 import CODomain
+import COExtensions
 import COManager
 import KakaoSDKUser
 import NaverThirdPartyLogin
@@ -17,6 +19,7 @@ public final class SignInUseCaseImpl: NSObject, SignInUseCase {
   
   private let loginConnection = NaverThirdPartyLoginConnection.getSharedInstance()
   private let accessTokenSubject = PublishSubject<String>()
+  private let authorizationCodeSubject = PublishSubject<String>()
   
   private let isStub: Bool
   
@@ -75,7 +78,21 @@ extension SignInUseCaseImpl {
         return combine("accessToken", authType: authType)
       }
       
-      return .empty()
+      let appleIDProvider = ASAuthorizationAppleIDProvider()
+      let request = appleIDProvider.createRequest()
+      request.requestedScopes = [.fullName, .email]
+      
+      let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+      authorizationController.delegate = self
+      authorizationController.presentationContextProvider = self
+      authorizationController.performRequests()
+      
+      return authorizationCodeSubject
+        .asObservable()
+        .flatMap { [weak self] authorizationCode -> Observable<CODomain.Profile> in
+          guard let self = self else { return .empty() }
+          return self.combine(authorizationCode, authType: authType)
+        }.debug()
     case .none:
       return .empty()
     }
@@ -126,5 +143,29 @@ extension SignInUseCaseImpl: NaverThirdPartyLoginConnectionDelegate {
   public func oauth20Connection(_ oauthConnection: NaverThirdPartyLoginConnection!, didFailWithError error: Error!) {
     print("oauth20Connection error: \(String(describing: error))")
     accessTokenSubject.onNext(oauthConnection.accessToken)
+  }
+}
+
+extension SignInUseCaseImpl: ASAuthorizationControllerDelegate {
+  public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+    switch authorization.credential {
+    case let appleIDCredential as ASAuthorizationAppleIDCredential:
+      if let code = appleIDCredential.authorizationCode,
+         let authorizationCode = String(data: code, encoding: .utf8) {
+        authorizationCodeSubject.onNext(authorizationCode)
+      }
+    default:
+      break
+    }
+  }
+  
+  public func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+    print("authorizationController error: \(error)")
+  }
+}
+
+extension SignInUseCaseImpl: ASAuthorizationControllerPresentationContextProviding {
+  public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+    return UIApplication.keyWindow ?? ASPresentationAnchor()
   }
 }

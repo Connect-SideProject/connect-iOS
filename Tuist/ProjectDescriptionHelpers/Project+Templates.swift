@@ -36,6 +36,7 @@ extension Project {
         infoPlist: infoPlist,
         sources: ["Sources/**"],
         resources: ["Resources/**"],
+        entitlements: .relativeToRoot("App/connect.entitlements"),
         dependencies: dependencies,
         settings: settings
       )
