@@ -12,33 +12,35 @@ import PinLayout
 
 public typealias CheckBoxItem = (title: String, index: Int)
 
+/// CheckBoxContainer의 CheckBoxView가 나열되는 방향
 public enum CheckBoxContainerDirection {
   case horizontal, vertical
 }
 
+/// CheckBoxContainer의 버튼 이벤트 처리 종류
+/// radio: 컨테이너 버튼체크 중복되지 않도록 동작 (라디오버튼)
+/// default: 컨테이너 버튼체크 중복가능 (기본)
+public enum CheckBoxContainerEventType {
+  case radio, `default`
+}
+
+/// 두개 이상의 CheckBox가 포함된 Container.
 public final class CheckBoxContainerView: UIView {
   
-  public let flexContainer = UIView()
+  public private(set) var checkedItems: [CheckBoxItem]?
   
-  public override func layoutSubviews() {
-    super.layoutSubviews()
-    
-    flexContainer.pin
-      .width(of: self)
-      .height(of: self)
-      .layout()
-    
-    flexContainer.flex.layout()
-  }
+  public var handler: ([CheckBoxItem]) -> Void = { _ in }
   
   private var checkBoxViews: [CheckBoxView] = []
   
-  public private(set) var checkedItem: CheckBoxItem?
+  private let flexContainer = UIView()
   
   private let direction: CheckBoxContainerDirection
+  private let eventType: CheckBoxContainerEventType
   
-  public init(titles: [String], direction: CheckBoxContainerDirection = .horizontal) {
+  public init(titles: [String], direction: CheckBoxContainerDirection = .horizontal, eventType: CheckBoxContainerEventType = .default) {
     self.direction = direction
+    self.eventType = eventType
     super.init(frame: .zero)
     
     self.checkBoxViews = titles.enumerated().map { [weak self] offset, element in
@@ -57,31 +59,35 @@ public final class CheckBoxContainerView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
   
-  func didTapCheckBox(sender: UIButton) {
-    let selectedList = checkBoxViews.map { $0.checkBoxButton.isSelected }.filter { $0 }
-    let selectedTag = checkBoxViews.map { $0.checkBoxButton.isSelected ? $0.checkBoxButton.tag : -1 }
-      .filter { $0 != -1 }
-      .reduce(0, +)
+  public override func layoutSubviews() {
+    super.layoutSubviews()
     
-    if selectedList.count == 0 {
-      sender.isSelected = true
-      self.checkedItem = (title: sender.currentTitle ?? "", index: sender.tag)
-    } else {
-      
-      if selectedTag == sender.tag {
-        return
+    flexContainer.pin
+      .width(of: self)
+      .height(of: self)
+      .layout()
+    
+    flexContainer.flex.layout()
+  }
+  
+  /// 모든 CheckBox 체크 설정 및 해제.
+  public func checkedAll() {
+    let selectedList = checkBoxViews.map { $0.checkBoxButton.isSelected }.filter { $0 }
+    
+    let _ = checkBoxViews.map {
+      if selectedList.count == checkBoxViews.count {
+        $0.checkBoxButton.isSelected = false
+      } else {
+        $0.checkBoxButton.isSelected = true
       }
-      
-      let _ = checkBoxViews.map { $0.checkBoxButton.isSelected = false }
-      sender.isSelected = true
-      self.checkedItem = (title: sender.currentTitle ?? "", index: sender.tag)
     }
+    
+    updateCheckedItems()
   }
 }
 
-extension CheckBoxContainerView {
-  private func configureUI() {
-    
+private extension CheckBoxContainerView {
+  func configureUI() {
     addSubview(flexContainer)
     
     flexContainer.flex
@@ -98,51 +104,95 @@ extension CheckBoxContainerView {
         }
     }
   }
+  
+  func didTapCheckBox(sender: UIButton) {
+    switch eventType {
+    case .radio:
+      methodRadio(sender: sender)
+    case .default:
+      methodDefault(sender: sender)
+    }
+    
+    handler(checkedItems ?? [])
+  }
+  
+  func methodRadio(sender: UIButton) {
+    let selectedList = checkBoxViews.map { $0.checkBoxButton.isSelected }.filter { $0 }
+    let selectedTag = checkBoxViews.map { $0.checkBoxButton.isSelected ? $0.checkBoxButton.tag : -1 }
+      .filter { $0 != -1 }
+      .reduce(0, +)
+    
+    if selectedList.count == 0 {
+      sender.isSelected = true
+      self.checkedItems = [(title: sender.currentTitle ?? "", index: sender.tag)]
+    } else {
+      
+      if selectedTag == sender.tag {
+        return
+      }
+      
+      let _ = checkBoxViews.map { $0.checkBoxButton.isSelected = false }
+      sender.isSelected = true
+      self.checkedItems = [(title: sender.currentTitle ?? "", index: sender.tag)]
+    }
+  }
+  
+  func methodDefault(sender: UIButton) {
+    sender.isSelected.toggle()
+    
+    updateCheckedItems()
+  }
+  
+  func updateCheckedItems() {
+    self.checkedItems = checkBoxViews
+      .map {
+        if $0.checkBoxButton.isSelected {
+          return CheckBoxItem(title: $0.checkBoxButton.currentTitle ?? "", index: $0.checkBoxButton.tag)
+        } else {
+          return CheckBoxItem(title: "", index: -1)
+        }
+      }
+      .filter { $0.index != -1 }
+  }
 }
 
+/// 단일 CheckBox.
 public final class CheckBoxSingleView: UIView {
+  
+  private lazy var checkBoxView = CheckBoxView(title: title)
+  
+  /// 단일 CheckBox의 체크 여부.
+  public private(set) var isChecked: Bool = false
+  
+  /// 단일 CheckBox의 체크 이벤트 핸들러.
+  public var handler: (Bool) -> Void = { _ in }
   
   public let flexContainer = UIView()
   
-  public override func layoutSubviews() {
-    super.layoutSubviews()
-    
-    flexContainer.pin
-      .width(of: self)
-      .height(of: self)
-      .layout()
-    
-    flexContainer.flex.layout()
-  }
-  
-  private let checkBoxView: CheckBoxView
-  
-  public private(set) var isChecked: Bool = false
+  private let title: String
   
   public init(title: String) {
-    self.checkBoxView = CheckBoxView(title: title)
+    self.title = title
     super.init(frame: .zero)
-        
+    
     configureUI()
     
-    checkBoxView.handler = { [weak self] sender in
-      self?.didTapCheckBox(sender: sender)
-    }
+    bindEvent()
   }
   
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
   
-  func didTapCheckBox(sender: UIButton) {
-    sender.isSelected.toggle()
+  public func setChecked(_ isChecked: Bool) {
+    self.isChecked = isChecked
     
-    isChecked = sender.isSelected
+    checkBoxView.checkBoxButton.isSelected = isChecked
   }
 }
 
-extension CheckBoxSingleView {
-  private func configureUI() {
+private extension CheckBoxSingleView {
+  func configureUI() {
     
     addSubview(flexContainer)
     
@@ -153,11 +203,27 @@ extension CheckBoxSingleView {
           .marginLeft(10)
     }
   }
+  
+  func bindEvent() {
+    checkBoxView.handler = { [weak self] sender in
+      guard let self = self else { return }
+      sender.isSelected.toggle()
+      self.isChecked = sender.isSelected
+      self.handler(sender.isSelected)
+    }
+  }
+  
+  func didTapCheckBox(_ sender: UIButton) {
+    sender.isSelected.toggle()
+    
+    isChecked = sender.isSelected
+  }
 }
 
-private final class CheckBoxView: UIView {
+/// [v] Title 형태의 기본 CheckBox.
+fileprivate final class CheckBoxView: UIView {
 
-  fileprivate let checkBoxButton = UIButton(type: .custom).then {
+  fileprivate lazy var checkBoxButton = UIButton(type: .custom).then {
     let nomalImage = UIImage(systemName: "square")
     let selectedImage = UIImage(systemName: "checkmark.square.fill")
     $0.setImage(nomalImage, for: .normal)
@@ -168,7 +234,7 @@ private final class CheckBoxView: UIView {
   
   fileprivate var handler: (UIButton) -> Void = { _ in }
   
-  public let flexContainer = UIView()
+  private let flexContainer = UIView()
   
   public override func layoutSubviews() {
     super.layoutSubviews()
@@ -193,6 +259,10 @@ private final class CheckBoxView: UIView {
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
+  
+  @objc public func didTapCheckBox(_ sender: UIButton) {
+    handler(sender)
+  }
 }
 
 extension CheckBoxView {
@@ -207,9 +277,5 @@ extension CheckBoxView {
         flex.addItem(checkBoxButton)
           .height(30)
     }
-  }
-  
-  @objc private func didTapCheckBox(_ sender: UIButton) {
-    handler(sender)
   }
 }

@@ -20,13 +20,13 @@ public struct SampleData {
     case let .signIn(authType):
       let profile: Profile = .init(
         authType: authType,
-        profileURL: "https://avatars.githubusercontent.com/u/24970070",
         nickname: "시원",
         roles: [.developer],
         region: .init(state: "SEO", city: "SUNGNAM"),
-        interestings: ["HEALTH"],
+        interestings: [.health],
+        profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
-        career: "JUNIOR",
+        career: .junior,
         skills: ["Swift", "RxSwift"],
         isPushOn: true,
         isLocationExpose: true
@@ -34,13 +34,13 @@ public struct SampleData {
       return makeData(parameter: profile.asDictionary()!)
     case .userProfile:
       let profile: Profile = .init(
-        profileURL: "https://avatars.githubusercontent.com/u/24970070",
         nickname: "시원",
         roles: [.developer],
         region: .init(state: "SEO", city: "SUNGNAM"),
-        interestings: ["HEALTH"],
+        interestings: [.health],
+        profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
-        career: "JUNIOR",
+        career: .junior,
         skills: ["Swift", "RxSwift"],
         isPushOn: true,
         isLocationExpose: true

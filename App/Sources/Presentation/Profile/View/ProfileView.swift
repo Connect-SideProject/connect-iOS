@@ -74,7 +74,7 @@ class ProfileView: UIView {
     }
     
     userNameLabel.text = userName
-    userPositionLabel.text = roles.map { $0.description }.reduce("", { acc, value in
+    userPositionLabel.text = roles.map { $0.rawValue }.reduce("", { acc, value in
       acc + ", \(value)"
     })
   }
