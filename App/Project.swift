@@ -2,7 +2,7 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let app = Project.feature(
-  name: "connect",
+  name: "App",
   products: [.app, .unitTests, .uiTests],
   infoExtension: [
     "LSApplicationQueriesSchemes": .array(
@@ -18,7 +18,6 @@ let app = Project.feature(
   dependencies: [
     .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
     .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
-    .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
-    .xcframework(path: "Framework/NaverThirdPartyLogin.xcframework")
+    .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI"))
   ]
 )
