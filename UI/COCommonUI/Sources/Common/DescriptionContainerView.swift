@@ -22,7 +22,7 @@ public class DescriptionContainerView: UIView {
     $0.textColor = .black
   }
   
-  private let textField = UITextField().then {
+  public let textField = UITextField().then {
     $0.font = .systemFont(ofSize: 14, weight: .semibold)
     $0.textColor = .black
     $0.leftViewMode = .always

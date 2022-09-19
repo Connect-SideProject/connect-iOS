@@ -8,9 +8,11 @@
 import UIKit
 
 import COCommonUI
+import CODomain
 import COExtensions
+import ReactorKit
 
-public final class SignUpController: UIViewController {
+public final class SignUpController: UIViewController, ReactorKit.View {
   
   private let nicknameContainerView = DescriptionContainerView(
     type: .textField("닉네임", "닉네임을 입력하세요.")
@@ -21,15 +23,33 @@ public final class SignUpController: UIViewController {
   )
   
   private let periodContainerView = DescriptionContainerView(
-    type: .custom("경력기간", CheckBoxContainerView(titles: ["지망생", "주니어", "시니어"]))
+    type: .custom("경력기간", CheckBoxContainerView(
+        titles: [Career.aspirant.description, Career.junior.description, Career.senior.description],
+        eventType: .radio
+      )
+    )
   )
   
   private let interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", SelectionButtonView(titles: ["금융", "패션/뷰티", "엔터테인먼트", "헬스케어"]))
+    type: .custom("관심분야", SelectionButtonView(
+      titles: [Interestring.finance.description,
+               Interestring.fashion.description,
+               Interestring.entertainment.description,
+               Interestring.health.description]
+      )
+    )
   )
   
   private let jobContainerView = DescriptionContainerView(
     type: .custom("원하는 역할", SelectionButtonView(titles: ["기획자", "개발자", "디자이너", "마케터"]))
+  )
+  
+  private let portfolioContainerView = DescriptionContainerView(
+    type: .textField("포트폴리오", "포트폴리오 URL을 입력 해주세요. (선택)")
+  )
+  
+  private let skillContainerView = DescriptionContainerView(
+    type: .custom("보유 스킬", SelectionButtonView(titles: ["iOS", "Android", "Backend", "Frontend"]))
   )
   
   private let upper14YearsOldCheckBoxView = CheckBoxSingleView(
@@ -40,8 +60,8 @@ public final class SignUpController: UIViewController {
     title: "모든 필수 이용약관에 동의합니다."
   )
   
-  private let checkBoxContainerView = CheckBoxContainerView(
-    titles: [" 커넥트잇 이용약관(필수)  >", " 개인정보처리방침(필수)  >", " 위치기반서비스 이용약관(필수)  >"],
+  private let termsCheckBoxContainerView = CheckBoxContainerView(
+    titles: [Terms.service.description, Terms.privacy.description, Terms.location.description],
     direction: .vertical
   ).then {
     $0.backgroundColor = .lightGray
@@ -49,7 +69,7 @@ public final class SignUpController: UIViewController {
     $0.layer.masksToBounds = true
   }
   
-  private let startButton = RoundRutton().then {
+  private lazy var startButton = RoundRutton().then {
     $0.setTitle("시작하기", for: .normal)
     $0.setTitleColor(.white, for: .normal)
     $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
@@ -62,6 +82,8 @@ public final class SignUpController: UIViewController {
   }
   
   private let flexContainer = UIView()
+  
+  public var disposeBag = DisposeBag()
   
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
@@ -79,13 +101,21 @@ public final class SignUpController: UIViewController {
       .all()
       .layout()
     
-    containerScrollView.contentSize = flexContainer.frame.size
+    containerScrollView.contentSize = .init(
+      width: flexContainer.frame.size.width,
+      height: flexContainer.frame.size.height + 100
+    )
   }
   
   public override func viewDidLoad() {
     super.viewDidLoad()
     
     configureUI()
+    bindEvent()
+  }
+  
+  public func bind(reactor: SignUpReactor) {
+    
   }
 }
 
@@ -107,7 +137,10 @@ extension SignUpController {
          locationContainerView,
          periodContainerView,
          interestsContainerView,
-         jobContainerView].forEach {
+         jobContainerView,
+         skillContainerView,
+         portfolioContainerView
+        ].forEach {
           flex.addItem($0)
             .marginBottom(20)
         }
@@ -119,7 +152,7 @@ extension SignUpController {
             .height(26)
         }
         
-        flex.addItem(checkBoxContainerView)
+        flex.addItem(termsCheckBoxContainerView)
           .marginVertical(20)
           .marginLeft(10)
           .marginBottom(40)
@@ -131,20 +164,50 @@ extension SignUpController {
     }
   }
   
+  private func bindEvent() {
+    termsCheckBoxContainerView.handler = { [weak self] checkItems in
+      print(checkItems)
+      
+      if checkItems.count == 3 {
+        self?.acceptAllCheckBoxView.setChecked(true)
+      } else {
+        self?.acceptAllCheckBoxView.setChecked(false)
+      }
+    }
+    
+    acceptAllCheckBoxView.handler = { [weak self] isChecked in
+      self?.termsCheckBoxContainerView.checkedAll()
+    }
+  }
+  
   @objc func didTapStartButton() {
-    if let job = jobContainerView.customView as? SelectionButtonView {
-      print(job.selectedItems)
-    }
     
-    if let checkbox = periodContainerView.customView as? CheckBoxContainerView {
-      print(checkbox.checkedItem)
-    }
+    let nickname = nicknameContainerView.textField.text ?? ""
+    let location = locationContainerView.textField.text ?? ""
     
-    if let interests = interestsContainerView.customView as? SelectionButtonView {
-      print(interests.selectedItems)
-    }
+    guard let period = periodContainerView.customView as? CheckBoxContainerView,
+          let checkedItems = period.checkedItems else { return }
+
+    let interesting: [Interestring] = (interestsContainerView.customView as! SelectionButtonView).selectedItems.map { Interestring(rawValue: $0) ?? .none }
     
-    print(upper14YearsOldCheckBoxView.isChecked)
-    print(acceptAllCheckBoxView.isChecked)
+    let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") ?? .none
+    let role: [Role] = (jobContainerView.customView as! SelectionButtonView).selectedItems.map { Role(rawValue: $0) ?? .none }
+    
+    let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.map { Terms(rawValue: $0.title) ?? .none } ?? []
+    
+    let parameter: SignUpParameter = .init(
+      authType: .kakao,
+      nickname: nickname,
+      region: .init(state: "", city: ""),
+      interesting: interesting,
+      career: carrer,
+      role: role,
+      profileURL: nil,
+      portfolioURL: "",
+      skills: [""],
+      terms: terms
+    )
+    
+    reactor?.action.onNext(.didTapSignUpButton(parameter))
   }
 }

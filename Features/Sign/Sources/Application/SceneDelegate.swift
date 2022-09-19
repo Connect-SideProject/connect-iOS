@@ -39,6 +39,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 extension SceneDelegate: SignInDelegate {
   func routeToSignUp() {
     let signUpController = SignUpController()
+    signUpController.reactor = .init()
     controller.pushViewController(signUpController, animated: true)
   }
 }
