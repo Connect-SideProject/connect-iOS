@@ -8,21 +8,42 @@
 
 import Foundation
 
-public enum Role: Codable, Equatable, CustomStringConvertible {
-  case developer, designer, planner, marketer, none
+public enum Role: String, Codable, Equatable {
+  case developer = "개발자"
+  case designer = "디자이너"
+  case planner = "기획자"
+  case marketer = "마케터"
+  case none
   
-  public var description: String {
+  public init?(rawValue: String) {
+    switch rawValue {
+    case "개발자":
+      self = .developer
+    case "디자이너":
+      self = .designer
+    case "기획자":
+      self = .planner
+    case "마케터":
+      self = .marketer
+    default:
+      self = .none
+    }
+  }
+  
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.singleValueContainer()
+    
     switch self {
     case .developer:
-      return "developer"
+      try container.encode("DEVELOPER")
     case .designer:
-      return "designer"
+      try container.encode("DESIGNER")
     case .planner:
-      return "planner"
+      try container.encode("PLANNER")
     case .marketer:
-      return "marketer"
-    default:
-      return ""
+      try container.encode("MARKETER")
+    case .none:
+      break
     }
   }
 }
@@ -40,13 +61,13 @@ public struct Region: Codable, Equatable {
 public struct Profile: Codable, Equatable {
   
   let authType: AuthType
-  let profileURL: String
   let nickname: String
   let roles: [Role]
   let region: Region
-  let interestings: [String]
+  let interestings: [Interestring]
+  let profileURL: String?
   let portfolioURL: String?
-  let career: String
+  let career: Career
   let skills: [String]
   let isPushOn: Bool
   let isLocationExpose: Bool
@@ -55,25 +76,41 @@ public struct Profile: Codable, Equatable {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     
     self.authType = try container.decodeIfPresent(AuthType.self, forKey: .authType) ?? .none
-    self.profileURL =       try container.decodeIfPresent(String.self, forKey: .profileURL) ?? ""
     self.nickname =         try container.decodeIfPresent(String.self, forKey: .nickname) ?? ""
     self.roles =            try container.decodeIfPresent([Role].self, forKey: .roles) ?? []
     self.region =           try container.decodeIfPresent(Region.self, forKey: .region) ?? .init()
-    self.interestings =     try container.decodeIfPresent([String].self, forKey: .interestings) ?? []
-    self.portfolioURL =     try container.decodeIfPresent(String.self, forKey: .portfolioURL) ?? nil
-    self.career =           try container.decodeIfPresent(String.self, forKey: .career) ?? ""
+    self.interestings =     try container.decodeIfPresent([Interestring].self, forKey: .interestings) ?? []
+    self.profileURL =       try container.decodeIfPresent(String.self, forKey: .profileURL)
+    self.portfolioURL =     try container.decodeIfPresent(String.self, forKey: .portfolioURL)
+    self.career =           try container.decodeIfPresent(Career.self, forKey: .career) ?? .none
     self.skills =           try container.decodeIfPresent([String].self, forKey: .skills) ?? []
     self.isPushOn =         try container.decodeIfPresent(Bool.self, forKey: .isPushOn) ?? false
     self.isLocationExpose = try container.decodeIfPresent(Bool.self, forKey: .isLocationExpose) ?? false
   }
   
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    
+    try container.encode(authType, forKey: .authType)
+    try container.encode(nickname, forKey: .nickname)
+    try container.encode(roles, forKey: .roles)
+    try container.encode(region, forKey: .region)
+    try container.encode(interestings, forKey: .interestings)
+    try container.encode(profileURL, forKey: .profileURL)
+    try container.encode(portfolioURL, forKey: .portfolioURL)
+    try container.encode(career, forKey: .career)
+    try container.encode(skills, forKey: .skills)
+    try container.encode(isPushOn, forKey: .isPushOn)
+    try container.encode(isLocationExpose, forKey: .isLocationExpose)
+  }
+  
   enum CodingKeys: String, CodingKey {
     case authType = "auth_type"
-    case profileURL = "profile_url"
     case nickname
     case roles = "role"
     case region
     case interestings = "interestings"
+    case profileURL = "profile_url"
     case portfolioURL = "portfolio_url"
     case career
     case skills
@@ -85,13 +122,13 @@ public struct Profile: Codable, Equatable {
 public extension Profile {
   init(
     authType: AuthType = .none,
-    profileURL: String = "",
     nickname: String = "",
     roles: [Role] = [],
     region: Region = .init(),
-    interestings: [String] = [],
+    interestings: [Interestring] = [],
+    profileURL: String? = nil,
     portfolioURL: String? = nil,
-    career: String = "",
+    career: Career = .none,
     skills: [String] = [],
     isPushOn: Bool = false,
     isLocationExpose: Bool = false
