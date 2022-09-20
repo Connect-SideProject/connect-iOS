@@ -10,6 +10,7 @@ import ProjectDescription
 extension Project {
   public static func feature(
     name: String,
+    bundleId: String = "",
     products: [COProduct],
     infoExtension: [String: InfoPlist.Value] = [:],
     settings: Settings? = .default,
@@ -23,7 +24,11 @@ extension Project {
     var infoPlist: InfoPlist = .base(name: name)
     
     if !infoExtension.isEmpty {
-      infoPlist = .custom(name: name, extentions: infoExtension)
+      infoPlist = .custom(
+        name: name,
+        bundleId: bundleId,
+        extentions: infoExtension
+      )
     }
     
     if products.contains(.app) {
@@ -31,7 +36,7 @@ extension Project {
         name: name,
         platform: .iOS,
         product: .app,
-        bundleId: "com.sideproj.\(name)",
+        bundleId: bundleId.isEmpty ? "com.sideproj.\(name)" : bundleId,
         deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
         infoPlist: infoPlist,
         sources: ["Sources/**"],

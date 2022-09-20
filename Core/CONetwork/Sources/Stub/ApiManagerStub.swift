@@ -52,4 +52,8 @@ public final class ApiManaerStub: ApiService {
     
     return .error(URLError(.cannotDecodeRawData))
   }
+  
+  public func requestOutBound<T>(endPoint: EndPoint) -> RxSwift.Observable<T> where T : Decodable {
+    return .empty()
+  }
 }

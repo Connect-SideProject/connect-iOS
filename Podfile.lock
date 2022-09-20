@@ -1,16 +1,20 @@
 PODS:
   - naveridlogin-sdk-ios (4.1.5)
+  - NMapsMap (3.16.0)
 
 DEPENDENCIES:
   - naveridlogin-sdk-ios
+  - NMapsMap
 
 SPEC REPOS:
   trunk:
     - naveridlogin-sdk-ios
+    - NMapsMap
 
 SPEC CHECKSUMS:
   naveridlogin-sdk-ios: 4351fe7162cd6b8b6dbb37bd7cc205304fa1d889
+  NMapsMap: a2593320fca2bb09e521c05b4dffee4da42e96ed
 
-PODFILE CHECKSUM: cc6a4fd8b24d478b3b49153d81603e58d9c82c5f
+PODFILE CHECKSUM: ef5c99cd156a62b12a10c429c8de009cc2b0cb05
 
 COCOAPODS: 1.11.3
