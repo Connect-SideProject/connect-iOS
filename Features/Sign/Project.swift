@@ -16,6 +16,6 @@ let sign = Project.feature(
     .project(target: "CODomain", path: .relativeToRoot("Domain/CODomain")),
     .external(name: "KakaoSDKUser"),
     .external(name: "ReactorKit"),
-    .xcframework(path: .relativeToRoot("Pods/naveridlogin-sdk-ios/NaverThirdPartyLogin.xcframework"))
+    .xcframework(path: .CocoaPods.Framework.naverLogin)
   ]
 )
