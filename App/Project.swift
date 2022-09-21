@@ -1,10 +1,15 @@
+import Foundation
 import ProjectDescription
 import ProjectDescriptionHelpers
+
+let excludedFramework = ProcessInfo.processInfo.environment["TUIST_EXCLUEDED_FRAMEWORK"]
+let isExcludedFramework = (excludedFramework == "TRUE")
 
 let app = Project.feature(
   name: "App",
   bundleId: "com.sideproj.connect",
   products: [.app, .unitTests, .uiTests],
+  isExcludedFramework: isExcludedFramework,
   infoExtension: [
     "LSApplicationQueriesSchemes": .array(
       [.string("kakaokompassauth"), .string("naversearchapp"), .string("naversearchthirdlogin")]
@@ -27,9 +32,9 @@ let app = Project.feature(
     .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
     .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
     .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
-    .external(name: "FloatingPanel"),
-    .external(name: "ReactorKit"),
-    .external(name: "KakaoSDKUser"),
+    .project(target: "COThirdParty", path: .relativeToRoot("Core/COThirdParty")),
+  ],
+  externalDependencies: [
     .xcframework(path: .CocoaPods.Framework.naverLogin),
     .xcframework(path: .CocoaPods.Framework.naverMaps)
   ]

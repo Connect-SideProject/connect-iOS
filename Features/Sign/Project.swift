@@ -14,8 +14,7 @@ let sign = Project.feature(
     .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
     .project(target: "CONetwork", path: .relativeToRoot("Core/CONetwork")),
     .project(target: "CODomain", path: .relativeToRoot("Domain/CODomain")),
-    .external(name: "KakaoSDKUser"),
-    .external(name: "ReactorKit"),
+    .project(target: "COThirdParty", path: .relativeToRoot("Core/COThirdParty")),
     .xcframework(path: .CocoaPods.Framework.naverLogin)
   ]
 )

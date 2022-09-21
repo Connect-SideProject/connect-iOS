@@ -12,10 +12,12 @@ extension Project {
     name: String,
     bundleId: String = "",
     products: [COProduct],
+    isExcludedFramework: Bool = false,
     infoExtension: [String: InfoPlist.Value] = [:],
     settings: Settings? = .default,
     dependencies: [TargetDependency] = [],
-    testDependencies: [TargetDependency] = []
+    testDependencies: [TargetDependency] = [],
+    externalDependencies: [TargetDependency] = []
   ) -> Project {
     
     var targets: [Target] = []
@@ -42,7 +44,7 @@ extension Project {
         sources: ["Sources/**"],
         resources: ["Resources/**"],
         entitlements: .relativeToRoot("App/connect.entitlements"),
-        dependencies: dependencies,
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
         settings: settings
       )
       targets.append(target)
@@ -85,7 +87,7 @@ extension Project {
         infoPlist: infoPlist,
         sources: ["Sources/**"],
         resources: ["Resources/**"],
-        dependencies: dependencies,
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
         settings: settings
       )
       targets.append(frameworkTarget)
@@ -101,7 +103,7 @@ extension Project {
         infoPlist: infoPlist,
         sources: ["Sources/**"],
         resources: ["Resources/**"],
-        dependencies: dependencies,
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
         settings: settings
       )
       targets.append(target)
