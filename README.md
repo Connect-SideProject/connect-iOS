@@ -52,6 +52,20 @@
 
 > 프로젝트 파일 및 폴더 변경시 .xcodeproj가 수시로 변경되어 협업시 빈번한 깃 충돌등의 이슈 해결을 위해 사용합니다.
 
+ :exclamation: **주의! CocoaPod 라이브러리 사용으로 아래순서에 따라 명령어 진행 필요**
+
+> :one: **`tuist fetch`**
+> SPM, Carthage로 정의된 외부 라이브러리를 가져온다.
+
+> :two: **`TUIST_EXCLUEDED_FRAMEWORK=TRUE tuist generate && pod install`** 
+> CocoaPod을 사용한 라이브러리 제외하고 빌드 진행 && 이후 CocoaPod을 이용하여 라이브러리 가져온다.
+
+> :three: **`Xcode Close`** 
+> Xcode를 종료한다 (명령어 아님 수동으로 완전종료 진행한다).
+
+> :four: **`tuist generate`** 
+> 모든 의존성을 포함하여 Xcode workspace 생성한다.
+
 * 대표 명령어 3가지
 > :one: **`tuist generate`**
 > Project.swift 파일에 작성된 내용대로 프로젝트 생성 명령어.
@@ -72,32 +86,116 @@ import ProjectDescription
 
 extension Project {
   public static func feature(
-    name: String,
-    products: [Product],
-    settings: Settings? = nil,
-    infoPlist: InfoPlist = .default,
-    dependencies: [TargetDependency] = []
+    name: String,                      // 설정할 모듈의 이름
+    bundleId: String = "",             // 'com.sideproj.\(name)' 대신 사용할 번들 Id (Option)
+    products: [COProduct],             // .framework(.dynamic | .static) 프레임워크 지정
+    isExcludedFramework: Bool = false, // CocoaPod사용으로 Pod에 해당하는 프레임워크를 제외하고 빌드하기 위한 환경변수.
+    infoExtension: [String: InfoPlist.Value] = [:], // 기본 지정된 info.plist에 더 추가할 내용이 있는경우 작성.
+    settings: Settings? = .default,
+    dependencies: [TargetDependency] = [],          // 해당 모듈의 의존성.
+    testDependencies: [TargetDependency] = [],      // 테스트용 의존성.
+    externalDependencies: [TargetDependency] = []   // isExcludedFramework에 해당하는 의존성.
   ) -> Project {
     
     var targets: [Target] = []
+    var schemes: [Scheme] = []
     
+    var infoPlist: InfoPlist = .base(name: name)
+    
+    if !infoExtension.isEmpty {
+      infoPlist = .custom(
+        name: name,
+        bundleId: bundleId,
+        extentions: infoExtension
+      )
+    }
+    
+    // 메인 앱 타겟.
     if products.contains(.app) {
       let target: Target = .init(
         name: name,
         platform: .iOS,
         product: .app,
-        bundleId: "com.sideproj.\(name)",
+        bundleId: bundleId.isEmpty ? "com.sideproj.\(name)" : bundleId,
         deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
         infoPlist: infoPlist,
         sources: ["Sources/**"],
         resources: ["Resources/**"],
-        dependencies: dependencies,
+        entitlements: .relativeToRoot("App/connect.entitlements"),
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
         settings: settings
       )
       targets.append(target)
     }
     
+    // Feature 모듈 데모 앱 타겟.
+    if products.contains(.demoApp) {
+      let appTarget: Target = .init(
+        name: "\(name)DemoApp",
+        platform: .iOS,
+        product: .app,
+        bundleId: "com.sideproj.\(name)DemoApp",
+        deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
+        infoPlist: .base(name: "\(name)DemoApp"),
+        sources: ["Sources/**"],
+        resources: ["Resources/**"],
+        dependencies: [.target(name: name)],
+        settings: settings
+      )
+      targets.append(appTarget)
+      
+      let scheme: Scheme = .init(
+        name: "\(name)DemoApp",
+        shared: true,
+        hidden: false,
+        buildAction: .init(targets: ["\(name)DemoApp"]),
+        runAction: .runAction(executable: "\(name)DemoApp")
+      )
+      
+      schemes.append(scheme)
+    }
+    
+    // static, dynamic 프레임워크 타켓.
+    if products.filter({ $0.isFramework }).count != 0 {
+      
+      let frameworkTarget: Target = .init(
+        name: name,
+        platform: .iOS,
+        product: products.contains(.framework(.static)) ? .staticFramework : .framework,
+        bundleId: "com.sideproj.\(name)",
+        deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
+        infoPlist: infoPlist,
+        sources: ["Sources/**"],
+        resources: ["Resources/**"],
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
+        settings: settings
+      )
+      targets.append(frameworkTarget)
+    }
+    
+    // static, dynamic 라이브러리 타켓.
+    if products.filter({ $0.isLibrary }).count != 0 {
+      let target: Target = .init(
+        name: name,
+        platform: .iOS,
+        product: products.contains(.library(.static)) ? .staticLibrary : .dynamicLibrary,
+        bundleId: "com.sideproj.\(name)",
+        deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
+        infoPlist: infoPlist,
+        sources: ["Sources/**"],
+        resources: ["Resources/**"],
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
+        settings: settings
+      )
+      targets.append(target)
+    }
+    
+    // 유닛테스트 타켓.
     if products.contains(.unitTests) {
+      
+      var dependencies: [TargetDependency] = [.target(name: name), .xctest]
+      dependencies += testDependencies
+      
       let target: Target = .init(
         name: "\(name)Tests",
         platform: .iOS,
@@ -106,11 +204,12 @@ extension Project {
         infoPlist: .default,
         sources: ["\(name)Tests/**"],
         resources: ["\(name)Tests/**"],
-        dependencies: [.target(name: name)]
+        dependencies: dependencies
       )
       targets.append(target)
     }
     
+    // UI테스트 타켓.
     if products.contains(.uiTests) {
       let target: Target = .init(
         name: "\(name)UITests",
@@ -125,64 +224,55 @@ extension Project {
     
     return Project(
       name: name,
-      targets: targets
+      targets: targets,
+      schemes: schemes
     )
-  }
-  
-  public static func makeSettings() -> Settings {
-    
-    let baseSetting: [String: SettingValue] = [:]
-    
-    return .settings(
-      base: baseSetting,
-      configurations: [
-        .release(name: .release)
-      ],
-      defaultSettings: .recommended
-    )
-  }
-  
-  // info.plist의 내용을 직접 지정
-  public static func makeInfoPlist(
-    name: String,
-    bundleName: String = "com.sideproj"
-  ) -> [String: InfoPlist.Value] {
-    return [
-      "CFBundleName": .string(name),
-      "CFBundleDisplayName": .string(name),
-      "CFBundleIdentifier": .string("\(bundleName).connect"),
-      "CFBundleShortVersionString": .string("1.0"),
-      "CFBundleVersion": .string("0"),
-      "CFBuildVersion": .string("0"),
-      "UILaunchStoryboardName": .string("Launch Screen"),
-      "UISupportedInterfaceOrientations": .array([.string("UIInterfaceOrientationPortrait")]),
-      "UIUserInterfaceStyle": .string("Light"),
-      "UIApplicationSceneManifest": .dictionary([
-        "UIApplicationSupportsMultipleScenes": .boolean(false),
-        "UISceneConfigurations": .dictionary([
-          "UIWindowSceneSessionRoleApplication": .array([
-            .dictionary([
-              "UISceneConfigurationName": .string("Default Configuration"),
-              "UISceneDelegateClassName": .string("$(PRODUCT_MODULE_NAME).SceneDelegate")
-            ])
-          ])
-        ])
-      ])
-    ]
   }
 }
 ```
 
 #### Project.swift
 ```swift
+import Foundation
 import ProjectDescription
 import ProjectDescriptionHelpers
 
+// CocoaPod 라이브러리 최초 install시 프로젝트 파일이 없는경우 빌드제외시키기 위한 환경변수.
+let excludedFramework = ProcessInfo.processInfo.environment["TUIST_EXCLUEDED_FRAMEWORK"]
+let isExcludedFramework = (excludedFramework == "TRUE")
+
 let app = Project.feature(
-  name: "connect",
+  name: "App",
+  bundleId: "com.sideproj.connect",
   products: [.app, .unitTests, .uiTests],
+  isExcludedFramework: isExcludedFramework,
+  infoExtension: [
+    "LSApplicationQueriesSchemes": .array(
+      [.string("kakaokompassauth"), .string("naversearchapp"), .string("naversearchthirdlogin")]
+    ),
+    "CFBundleURLTypes": .array([
+      .dictionary([
+        "CFBundleURLSchemes": .array(["connectIT"]),
+        "CFBundleURLName": .string("connectIT")
+      ]),
+      .dictionary([
+        "CFBundleURLSchemes": .array(["kakaoee72a7c08c0e36ae98010b8d02f646cf"])
+      ])
+    ]),
+    "NMFClientId": .string("y5sse5c8he"),
+    "NSLocationAlwaysAndWhenInUseUsageDescription": .string("사용자의 위치를 가져옵니다."),
+    "NSLocationWhenInUseUsageDescription": .string("사용자의 위치를 가져옵니다."),
+    "NSLocationAlwaysUsageDescription": .string("사용자의 위치를 가져옵니다.")
+  ],
   dependencies: [
-    ...
+    .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
+    .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
+    .project(target: "COThirdParty", path: .relativeToRoot("Core/COThirdParty")),
+  ],
+  externalDependencies: [
+    .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
+    .xcframework(path: .CocoaPods.Framework.naverLogin),
+    .xcframework(path: .CocoaPods.Framework.naverMaps)
   ]
 )
 ```
