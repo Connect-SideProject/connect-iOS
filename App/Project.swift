@@ -29,12 +29,12 @@ let app = Project.feature(
     "NSLocationAlwaysUsageDescription": .string("사용자의 위치를 가져옵니다.")
   ],
   dependencies: [
-    .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
     .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
     .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
     .project(target: "COThirdParty", path: .relativeToRoot("Core/COThirdParty")),
   ],
   externalDependencies: [
+    .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
     .xcframework(path: .CocoaPods.Framework.naverLogin),
     .xcframework(path: .CocoaPods.Framework.naverMaps)
   ]
