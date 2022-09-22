@@ -8,6 +8,5 @@ let foundation = Project.feature(
     .project(target: "COCommon", path: .relativeToRoot("Core/COCommon")),
     .project(target: "COManager", path: .relativeToRoot("Core/COManager")),
     .project(target: "COExtensions", path: .relativeToRoot("Core/COExtensions"))
-
   ]
 )

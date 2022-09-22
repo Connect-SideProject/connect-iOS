@@ -13,6 +13,7 @@ import FlexLayout
 import PinLayout
 import ReactorKit
 import Then
+import KakaoSDKCommon
 
 public protocol SignInDelegate: AnyObject {
   func routeToSignUp()
@@ -35,7 +36,7 @@ public final class SignInController: UIViewController, ReactorKit.View {
   
   private let flexContainer = UIView()
   
-  weak var delegate: SignInDelegate?
+  public weak var delegate: SignInDelegate?
   
   public var disposeBag: DisposeBag = .init()
   
@@ -54,6 +55,8 @@ public final class SignInController: UIViewController, ReactorKit.View {
     super.viewDidLoad()
     
     configureUI()
+    
+    KakaoSDK.initSDK(appKey: "ee72a7c08c0e36ae98010b8d02f646cf")
   }
   
   public func bind(reactor: SignInReactor) {
@@ -67,6 +70,7 @@ public final class SignInController: UIViewController, ReactorKit.View {
     reactor.state
       .map { $0.error }
       .filter { $0 != nil }
+      .observe(on: MainScheduler.instance)
       .bind { [weak self] error in
         switch error?.code {
         case URLError.Code.needSignUp:

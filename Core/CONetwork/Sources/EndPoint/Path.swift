@@ -16,9 +16,11 @@ public enum Path {
     switch self {
     case .signIn:
       return "/api/member/auth/login"
+    case .serchPlace:
+      return "/v2/local/search/address.json"
     case .userProfile:
       return ""
-    case .updateProfile(let profile):
+    case .updateProfile:
       return ""
     }
   }
@@ -33,6 +35,7 @@ public enum Path {
   }
   
   case signIn(AuthType)
+  case serchPlace(String)
   case userProfile
   case updateProfile(Codable)
 }

@@ -24,8 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     let container = SignInDIContainer(
       apiService: ApiManaerStub(state: .response(204)),
-      userService: UserManagerStub(),
-      delegate: self
+      userService: UserManagerStub()
     )
     
     controller = UINavigationController(

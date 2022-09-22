@@ -54,6 +54,8 @@ public extension EndPoint {
         "access-token": accessToken,
         "auth-type": authType.description
       ]
+    case .serchPlace:
+      return ["Authorization": "KakaoAK ccd2be71137221d2c9eac97cee497f1a"]
     default:
       return ["Authorization": accessToken]
     }
@@ -65,6 +67,14 @@ public extension EndPoint {
     components.scheme = baseURL.scheme
     components.host = baseURL.host
     components.path = path.string
+    
+    switch path {
+    case .serchPlace(let query):
+      components.host = "dapi.kakao.com"
+      components.queryItems = [URLQueryItem(name: "query", value: query)]
+    default:
+      break
+    }
     
     return components.url
   }
@@ -79,7 +89,8 @@ public extension EndPoint {
       return .put
     case .signIn:
       return .post
+    default:
+      return .get
     }
-    return .get
   }
 }
