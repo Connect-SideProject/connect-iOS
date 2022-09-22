@@ -86,7 +86,7 @@ extension Project {
         deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
         infoPlist: infoPlist,
         sources: ["Sources/**"],
-        resources: ["Resources/**"],
+        resources: products.contains(.framework(.dynamic)) ? ["Resources/**"] : nil,
         dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
         settings: settings
       )
