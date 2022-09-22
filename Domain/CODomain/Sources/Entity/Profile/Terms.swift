@@ -11,7 +11,6 @@ public enum Terms: String, CustomStringConvertible, Codable {
   case service = "SEVICE"
   case location = "LOCATION"
   case privacy = "PRIVACY"
-  case none
   
   public var description: String {
     switch self {
@@ -21,8 +20,6 @@ public enum Terms: String, CustomStringConvertible, Codable {
       return "위치기반 이용약관"
     case .privacy:
       return "개인정보 이용약관"
-    case .none:
-      return ""
     }
   }
   
@@ -35,7 +32,7 @@ public enum Terms: String, CustomStringConvertible, Codable {
     case "개인정보 이용약관":
       self = .privacy
     default:
-      self = .none
+      return nil
     }
   }
   
@@ -49,8 +46,6 @@ public enum Terms: String, CustomStringConvertible, Codable {
       try container.encode("LOCATION")
     case .privacy:
       try container.encode("PRIVACY")
-    case .none:
-      break
     }
   }
 }

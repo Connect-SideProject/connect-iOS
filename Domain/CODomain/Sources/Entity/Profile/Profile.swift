@@ -13,7 +13,6 @@ public enum Role: String, Codable, Equatable {
   case designer = "디자이너"
   case planner = "기획자"
   case marketer = "마케터"
-  case none
   
   public init?(rawValue: String) {
     switch rawValue {
@@ -26,7 +25,7 @@ public enum Role: String, Codable, Equatable {
     case "마케터":
       self = .marketer
     default:
-      self = .none
+      return nil
     }
   }
   
@@ -42,8 +41,6 @@ public enum Role: String, Codable, Equatable {
       try container.encode("PLANNER")
     case .marketer:
       try container.encode("MARKETER")
-    case .none:
-      break
     }
   }
 }

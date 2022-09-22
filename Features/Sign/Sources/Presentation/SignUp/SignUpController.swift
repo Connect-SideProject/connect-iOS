@@ -41,7 +41,9 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   )
   
   private let jobContainerView = DescriptionContainerView(
-    type: .custom("원하는 역할", SelectionButtonView(titles: ["기획자", "개발자", "디자이너", "마케터"]))
+    type: .custom("원하는 역할", SelectionButtonView(
+      titles: ["기획자", "개발자", "디자이너", "마케터"])
+    )
   )
   
   private let portfolioContainerView = DescriptionContainerView(
@@ -49,7 +51,9 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   )
   
   private let skillContainerView = DescriptionContainerView(
-    type: .custom("보유 스킬", SelectionButtonView(titles: ["iOS", "Android", "Backend", "Frontend"]))
+    type: .custom("보유 스킬", SelectionButtonView(
+      titles: ["iOS", "Android", "Backend", "Frontend"])
+    )
   )
   
   private let upper14YearsOldCheckBoxView = CheckBoxSingleView(
@@ -102,8 +106,8 @@ public final class SignUpController: UIViewController, ReactorKit.View {
       .layout()
     
     containerScrollView.contentSize = .init(
-      width: flexContainer.frame.size.width,
-      height: flexContainer.frame.size.height + 100
+      width: flexContainer.bounds.size.width,
+      height: flexContainer.bounds.size.height + 100
     )
   }
   
@@ -142,20 +146,20 @@ extension SignUpController {
          portfolioContainerView
         ].forEach {
           flex.addItem($0)
-            .marginBottom(20)
+            .marginBottom(18)
         }
         
         [upper14YearsOldCheckBoxView,
          acceptAllCheckBoxView].forEach {
           flex.addItem($0)
-            .marginTop(8)
+            .marginTop(4)
             .height(26)
         }
         
         flex.addItem(termsCheckBoxContainerView)
           .marginVertical(20)
           .marginLeft(10)
-          .marginBottom(40)
+          .marginBottom(20)
           .height(110)
         
         flex.addItem(startButton)
@@ -184,27 +188,36 @@ extension SignUpController {
     
     let nickname = nicknameContainerView.textField.text ?? ""
     let location = locationContainerView.textField.text ?? ""
+    let locations = location.components(separatedBy: " ")
+    var region: Region = .init(state: "", city: "")
+    if locations.count == 2 {
+      region = .init(state: locations[0], city: locations[1])
+    }
     
     guard let period = periodContainerView.customView as? CheckBoxContainerView,
           let checkedItems = period.checkedItems else { return }
 
-    let interesting: [Interestring] = (interestsContainerView.customView as! SelectionButtonView).selectedItems.map { Interestring(rawValue: $0) ?? .none }
+    let interesting: [Interestring] = (interestsContainerView.customView as? SelectionButtonView)?.selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
     
-    let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") ?? .none
-    let role: [Role] = (jobContainerView.customView as! SelectionButtonView).selectedItems.map { Role(rawValue: $0) ?? .none }
+    guard let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") else { return }
+    let role: [Role] = (jobContainerView.customView as? SelectionButtonView)?.selectedItems.compactMap { Role(rawValue: $0) } ?? []
     
-    let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.map { Terms(rawValue: $0.title) ?? .none } ?? []
+    let portfolioURL = portfolioContainerView.textField.text ?? ""
+    
+    let skills: [String] = (skillContainerView.customView as? SelectionButtonView)?.selectedItems.map { $0 } ?? []
+    
+    let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.compactMap { Terms(rawValue: $0.title) } ?? []
     
     let parameter: SignUpParameter = .init(
       authType: .kakao,
       nickname: nickname,
-      region: .init(state: "", city: ""),
+      region: region,
       interesting: interesting,
       career: carrer,
       role: role,
       profileURL: nil,
-      portfolioURL: "",
-      skills: [""],
+      portfolioURL: portfolioURL,
+      skills: skills,
       terms: terms
     )
     
