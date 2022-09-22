@@ -36,13 +36,15 @@ extension SceneDelegate: SplashDelegate {
     /// 로그인 상태 체크.
     if UserManager.shared.accessToken.isEmpty {
       let container = SignInDIContainer(
-        apiService: ApiManaerStub(state: .response(204)),
-        userService: UserManager.shared,
-        delegate: self
+        apiService: ApiManager.shared,
+        userService: UserManager.shared
       )
       
+      let signInController = container.makeController()
+      signInController.delegate = self
+      
       controller = UINavigationController(
-        rootViewController: container.makeController()
+        rootViewController: signInController
       )
     } else {
       controller = UINavigationController(

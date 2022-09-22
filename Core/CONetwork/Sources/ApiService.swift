@@ -12,4 +12,5 @@ import RxSwift
 
 public protocol ApiService {
   func request<T>(endPoint: EndPoint) -> Observable<T> where T: Decodable
+  func requestOutBound<T>(endPoint: EndPoint) -> Observable<T> where T: Decodable
 }

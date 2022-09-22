@@ -10,11 +10,14 @@ import ProjectDescription
 extension Project {
   public static func feature(
     name: String,
+    bundleId: String = "",
     products: [COProduct],
+    isExcludedFramework: Bool = false,
     infoExtension: [String: InfoPlist.Value] = [:],
     settings: Settings? = .default,
     dependencies: [TargetDependency] = [],
-    testDependencies: [TargetDependency] = []
+    testDependencies: [TargetDependency] = [],
+    externalDependencies: [TargetDependency] = []
   ) -> Project {
     
     var targets: [Target] = []
@@ -23,7 +26,11 @@ extension Project {
     var infoPlist: InfoPlist = .base(name: name)
     
     if !infoExtension.isEmpty {
-      infoPlist = .custom(name: name, extentions: infoExtension)
+      infoPlist = .custom(
+        name: name,
+        bundleId: bundleId,
+        extentions: infoExtension
+      )
     }
     
     if products.contains(.app) {
@@ -31,13 +38,13 @@ extension Project {
         name: name,
         platform: .iOS,
         product: .app,
-        bundleId: "com.sideproj.\(name)",
+        bundleId: bundleId.isEmpty ? "com.sideproj.\(name)" : bundleId,
         deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
         infoPlist: infoPlist,
         sources: ["Sources/**"],
         resources: ["Resources/**"],
         entitlements: .relativeToRoot("App/connect.entitlements"),
-        dependencies: dependencies,
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
         settings: settings
       )
       targets.append(target)
@@ -79,8 +86,8 @@ extension Project {
         deploymentTarget: .iOS(targetVersion: "15.0", devices: [.iphone]),
         infoPlist: infoPlist,
         sources: ["Sources/**"],
-        resources: ["Resources/**"],
-        dependencies: dependencies,
+        resources: products.contains(.framework(.dynamic)) ? ["Resources/**"] : nil,
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
         settings: settings
       )
       targets.append(frameworkTarget)
@@ -96,7 +103,7 @@ extension Project {
         infoPlist: infoPlist,
         sources: ["Sources/**"],
         resources: ["Resources/**"],
-        dependencies: dependencies,
+        dependencies: isExcludedFramework ? dependencies : dependencies + externalDependencies,
         settings: settings
       )
       targets.append(target)
