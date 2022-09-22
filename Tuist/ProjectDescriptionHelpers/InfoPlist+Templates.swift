@@ -10,11 +10,11 @@ import ProjectDescription
 // info.plist의 내용을 직접 지정
 extension InfoPlist {
   
-  static func base(name: String) -> [String: InfoPlist.Value] {
+  static func app(name: String, bundleId: String = "") -> [String: InfoPlist.Value] {
     return [
       "CFBundleName": .string(name),
       "CFBundleDisplayName": .string(name),
-      "CFBundleIdentifier": .string("com.butterfree.\(name)"),
+      "CFBundleIdentifier": bundleId.isEmpty ? .string("com.sideproj.\(name)") : .string(bundleId),
       "CFBundleShortVersionString": .string("1.0"),
       "CFBundleVersion": .string("0"),
       "CFBuildVersion": .string("0"),
@@ -31,19 +31,31 @@ extension InfoPlist {
             ])
           ])
         ])
+      ]),
+      "NSAppTransportSecurity": .dictionary([
+        "NSAllowsArbitraryLoads": .boolean(true),
+        "NSExceptionDomains": .dictionary([
+          "contpass.site": .dictionary([
+            "NSIncludesSubdomains": .boolean(true),
+            "NSTemporaryExceptionAllowsInsecureHTTPLoads": .boolean(true),
+            "NSExceptionRequiresForwardSecrecy": .boolean(false),
+            "NSTemporaryExceptionMinimumTLSVersion": .string("TLSv1.2")
+          ])
+        ])
       ])
     ]
   }
   
-  public static func `default`(name: String) -> Self {
-    return .extendingDefault(with: InfoPlist.base(name: name))
+  public static func base(name: String) -> Self {
+    return .extendingDefault(with: InfoPlist.app(name: name))
   }
   
   public static func custom(
     name: String,
+    bundleId: String = "",
     extentions: [String: InfoPlist.Value]
   ) -> Self {
-    var dictionary = InfoPlist.base(name: name)
+    var dictionary = InfoPlist.app(name: name, bundleId: bundleId)
     
     extentions.keys.enumerated().forEach { offset, key in
       dictionary.updateValue(extentions[key]!, forKey: key)
