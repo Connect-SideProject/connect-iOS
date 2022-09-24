@@ -64,7 +64,7 @@ public struct Profile: Codable, Equatable {
   let interestings: [Interestring]
   let profileURL: String?
   let portfolioURL: String?
-  let career: Career
+  let career: Career?
   let skills: [String]
   let isPushOn: Bool
   let isLocationExpose: Bool
@@ -79,7 +79,7 @@ public struct Profile: Codable, Equatable {
     self.interestings =     try container.decodeIfPresent([Interestring].self, forKey: .interestings) ?? []
     self.profileURL =       try container.decodeIfPresent(String.self, forKey: .profileURL)
     self.portfolioURL =     try container.decodeIfPresent(String.self, forKey: .portfolioURL)
-    self.career =           try container.decodeIfPresent(Career.self, forKey: .career) ?? .none
+    self.career =           try container.decodeIfPresent(Career.self, forKey: .career)
     self.skills =           try container.decodeIfPresent([String].self, forKey: .skills) ?? []
     self.isPushOn =         try container.decodeIfPresent(Bool.self, forKey: .isPushOn) ?? false
     self.isLocationExpose = try container.decodeIfPresent(Bool.self, forKey: .isLocationExpose) ?? false
@@ -125,7 +125,7 @@ public extension Profile {
     interestings: [Interestring] = [],
     profileURL: String? = nil,
     portfolioURL: String? = nil,
-    career: Career = .none,
+    career: Career? = nil,
     skills: [String] = [],
     isPushOn: Bool = false,
     isLocationExpose: Bool = false
