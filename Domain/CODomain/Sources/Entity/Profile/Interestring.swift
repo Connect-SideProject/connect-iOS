@@ -12,7 +12,6 @@ public enum Interestring: String, Codable, CustomStringConvertible {
   case fashion = "FASHION"
   case health = "HEALTH"
   case entertainment = "ENTERTAINMENT"
-  case none
   
   public var description: String {
     switch self {
@@ -24,8 +23,6 @@ public enum Interestring: String, Codable, CustomStringConvertible {
       return "헬스케어"
     case .entertainment:
       return "엔터테인먼트"
-    case .none:
-      return ""
     }
   }
   
@@ -40,7 +37,7 @@ public enum Interestring: String, Codable, CustomStringConvertible {
     case "엔터테인먼트":
       self = .entertainment
     default:
-      self = .none
+      return nil
     }
   }
   
@@ -56,8 +53,6 @@ public enum Interestring: String, Codable, CustomStringConvertible {
       try container.encode("HEALTH")
     case .entertainment:
       try container.encode("ENTERTAINMENT")
-    case .none:
-      break
     }
   }
 }

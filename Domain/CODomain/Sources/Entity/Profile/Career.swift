@@ -11,7 +11,6 @@ public enum Career: String, Codable, CustomStringConvertible {
   case aspirant = "ASPIRANT"
   case junior = "JUNIOR"
   case senior = "SENIOR"
-  case none
   
   public var description: String {
     switch self {
@@ -21,8 +20,6 @@ public enum Career: String, Codable, CustomStringConvertible {
       return "주니어"
     case .senior:
       return "시니어"
-    case .none:
-      return ""
     }
   }
   
@@ -35,7 +32,7 @@ public enum Career: String, Codable, CustomStringConvertible {
     case "시니어":
       self = .senior
     default:
-      self = .none
+      return nil
     }
   }
   
@@ -49,8 +46,6 @@ public enum Career: String, Codable, CustomStringConvertible {
       try container.encode("JUNIOR")
     case .senior:
       try container.encode("SENIOR")
-    case .none:
-      break
     }
   }
 }
