@@ -65,7 +65,7 @@ class ProfileView: UIView {
   func update(
     url: URL? = nil,
     userName: String = "",
-    roles: [Role] = [.none]
+    roles: [Role] = []
   ) {
     if let url = url {
       Task {

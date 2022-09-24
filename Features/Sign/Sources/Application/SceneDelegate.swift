@@ -27,8 +27,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
       userService: UserManagerStub()
     )
     
+    let signController = container.makeController()
+    signController.delegate = self
+    
     controller = UINavigationController(
-      rootViewController: container.makeController()
+      rootViewController: signController
     )
     window?.rootViewController = controller
     window?.makeKeyAndVisible()
