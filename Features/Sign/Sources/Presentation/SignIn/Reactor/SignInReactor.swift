@@ -8,9 +8,10 @@
 import Foundation
 
 import CODomain
+import COExtensions
 import ReactorKit
 
-public final class SignInReactor: Reactor {
+public final class SignInReactor: Reactor, ErrorHandlerable {
   public enum Action {
     case didTapSignInButton(type: AuthType)
   }
@@ -27,7 +28,7 @@ public final class SignInReactor: Reactor {
   
   public var initialState: State = .init()
   
-  private let errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
+  public let errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
     return .just(.setError(error.asURLError))
   }
   
