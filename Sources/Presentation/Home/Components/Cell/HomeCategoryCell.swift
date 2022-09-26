@@ -88,14 +88,16 @@ extension HomeCategoryCell: ReactorKit.View {
     func bind(reactor: Reactor) {
         
         reactor.state
-            .map{ $0.menuType.getTitle()}
+            .map{ $0.menuType.getTitle() }
             .distinctUntilChanged()
+            .debug("Home Category Title")
             .bind(to: self.menuTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .map{ $0.menuType.getImage() }
             .distinctUntilChanged()
+            .debug("Home CateGory Image")
             .bind(to: self.menuImageView.rx.image)
             .disposed(by: disposeBag)
     }

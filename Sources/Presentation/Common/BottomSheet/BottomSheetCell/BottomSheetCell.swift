@@ -65,7 +65,10 @@ final class BottomSheetCell: UITableViewCell {
 extension BottomSheetCell: ReactorKit.View {
     
     
-    func bind(reactor: Reactor<CollectionType>) {
-        
+    func bind(reactor: Reactor) {
+        reactor.state.map { $0.menuType }
+            .debug("Reactor Cell Bind ")
+            .bind(to: self.typeTitleLabel.rx.text)
+            .disposed(by: disposeBag)
     }
 }

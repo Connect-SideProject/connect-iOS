@@ -15,27 +15,6 @@ enum BottomSheettTitle: String {
     case onOffLine = "온/오프라인"
     case aligment = "정렬"
     case studyType = "종류"
-    
-    struct sheetModel {
-        var title: String
-    }
-    
-    var sheetSectionModel: [sheetModel] {
-        switch self {
-        case .onOffLine:
-            return [sheetModel(title: "전체"), sheetModel(title: "온라인"), sheetModel(title: "오프라인")]
-        case .aligment:
-            return [sheetModel(title: "전체"), sheetModel(title: "인기순"), sheetModel(title: "거리순")]
-        case .studyType:
-            return [sheetModel(title: "전체"), sheetModel(title: "스터디"), sheetModel(title: "프로젝트")]
-        }
-    }
-}
-
-enum onOffLineType: String {
-    case all = "전체"
-    case online = "온라인"
-    case offLine = "오프라인"
 }
 
 
@@ -89,9 +68,9 @@ class BaseBottomSheetView: UIViewController {
         configure()
     }
     
-    init(sheetTitle: BottomSheettTitle, collectionType: BottomSheettTitle) {
+    init(sheetTitle: BottomSheettTitle) {
         self.titleLabel.text = sheetTitle.rawValue
-        defer { self.reactor = BottomSheetReactor(type: collectionType) }
+        defer { self.reactor = BottomSheetReactor(type: sheetTitle) }
         self.datasources = type(of: self).dataSourcesFactory()
         super.init(nibName: nil, bundle: nil)
     }
@@ -184,7 +163,7 @@ extension BaseBottomSheetView: ReactorKit.View {
             .disposed(by: disposeBag)
         
         reactor.state
-            .map { $0.section }
+            .map { [$0.section] }
             .debug("BottomSheetCell")
             .observe(on: MainScheduler.instance)
             .bind(to: self.tableView.rx.items(dataSource: self.datasources))
