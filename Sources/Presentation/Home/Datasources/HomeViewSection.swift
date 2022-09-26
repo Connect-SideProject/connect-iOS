@@ -44,8 +44,5 @@ extension HomeViewSection: SectionModelType {
 
 
 enum HomeViewSectionItem {
-    case commerce(HomeMenuCellReactor)
-    case finance(HomeMenuCellReactor)
-    case health(HomeMenuCellReactor)
-    case travel(HomeMenuCellReactor)
+    case homeMenu(HomeMenuCellReactor)
 }

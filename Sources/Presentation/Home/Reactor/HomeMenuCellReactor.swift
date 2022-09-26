@@ -7,6 +7,9 @@
 //
 
 
+import ReactorKit
+import UIKit
+
 enum HomeMenuCategory {
     case commercemenu
     case financemenu
@@ -32,8 +35,6 @@ enum HomeMenuCategory {
     }
 }
 
-import ReactorKit
-import UIKit
 
 
 final class HomeMenuCellReactor: Reactor {
@@ -49,8 +50,10 @@ final class HomeMenuCellReactor: Reactor {
     let initialState: State
     
     init(menuType: HomeMenuCategory) {
+        defer { _ = self.state }
         self.initialState = State(menuType: menuType)
-        _ = self.state
+        print("Menu Type : \(menuType)")
+        
     }
     
     

@@ -9,18 +9,21 @@ import RxDataSources
 
 
 enum BottomSheetSection {
-    case utilSection([BottomSheetSectionItem])
+    case utilSection([Item])
 }
 
 extension BottomSheetSection: SectionModelType {
-    var items: [BottomSheetSectionItem] {
+    typealias Item = BottomSheetSectionItem
+    
+    
+    var items: [Item] {
         switch self {
         case let .utilSection(items): return items
         }
     }
     
     
-    init(original: BottomSheetSection, items: [BottomSheetSectionItem]) {
+    init(original: BottomSheetSection, items: [Item]) {
         switch original {
         case .utilSection: self = .utilSection(items)
         }
@@ -30,6 +33,4 @@ extension BottomSheetSection: SectionModelType {
 
 enum BottomSheetSectionItem {
     case all(BottomSheetCellReactor)
-    case online(BottomSheetCellReactor)
-    case offline(BottomSheetCellReactor)
 }

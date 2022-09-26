@@ -56,9 +56,10 @@ class HomeController: UIViewController {
         configureCell: { datasource, collectionView, indexPath, sectionItem in
             print("Section Item : \(sectionItem)")
             switch sectionItem {
-            case let .commerce(cellReactor):
+            case let .homeMenu(cellReactor):
                 
                 guard let menuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell else { return UICollectionViewCell() }
+                
                 menuCell.reactor = cellReactor
                 return menuCell
                 
@@ -90,7 +91,7 @@ class HomeController: UIViewController {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.setToolbarHidden(false, animated: true)
         
-        let bottomSheetVC = BaseBottomSheetView(sheetTitle: .aligment, collectionType: .aligment)
+        let bottomSheetVC = BaseBottomSheetView(sheetTitle: .studyType)
         bottomSheetVC.modalPresentationStyle = .overFullScreen
         self.present(bottomSheetVC, animated: true)
         
@@ -160,7 +161,7 @@ extension HomeController {
         
         reactor.state
             .map { $0.section }
-            .debug()
+            .debug("HomeController Section")
             .observe(on: MainScheduler.instance)
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
@@ -171,14 +172,6 @@ extension HomeController {
 
 extension HomeController: UICollectionViewDelegateFlowLayout {
     
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return .zero
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 100, height: 100)
-    }
-    
+
 }
 

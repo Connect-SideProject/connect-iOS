@@ -13,14 +13,14 @@ final class BottomSheetCellReactor: Reactor {
     typealias Action = NoAction
     
     struct State {
-        var menuType: [BottomSheettTitle.sheetModel]
+        var menuType: String
     }
     
     let initialState: State
     
-    init(menuType: [BottomSheettTitle.sheetModel]) {
+    init(menuType: String) {
         self.initialState = State(menuType: menuType)
-        print("Cell Model : \(menuType.count) or Menu : \(menuType)")
+        print("Cell Model : \(menuType) or Menu : \(menuType)")
         _ = self.state
     }
     
