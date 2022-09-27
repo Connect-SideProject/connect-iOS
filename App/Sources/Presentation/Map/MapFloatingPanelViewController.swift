@@ -85,11 +85,7 @@ class MapFloatingPanelViewController: UIViewController {
     
     public func checkEmpty(isEmpty: Bool) {
         print("isEmpty = \(isEmpty)")
-        if isEmpty {
-            emptyView.isHidden = false
-        } else {
-            emptyView.isHidden = true
-        }
+        emptyView.isHidden = !isEmpty
     }
 }
 

@@ -184,7 +184,7 @@ class MapController: UIViewController, View {
             .subscribe(onNext: { [weak self] kakaoAddresses, isEmpty in
                 guard let `self` = self else { return }
                 let contentViewController = MapFloatingPanelViewController(kakaoAddressResults: kakaoAddresses)
-//                contentViewController.checkEmpty(isEmpty: isEmpty)
+                contentViewController.checkEmpty(isEmpty: isEmpty)
                 self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
             })
             .disposed(by: disposeBag)
@@ -196,7 +196,7 @@ class MapController: UIViewController, View {
         view.addSubview(naverMapView)
         view.addSubview(mapSearchBar)
         view.addSubview(loadingView)
-        mapSearchBar.searchTextField.delegate = self
+        mapSearchBar.delegate = self
 //        moveCameraUpdate(mapView: naverMapView.mapView, mapCoordinate: MapCoordinate(lat: 40.5666102, lng: 126.9783884))
 //        addCustomImageMarker(mapView: mapView, imageName: "", mapCoordinate: MapCoordinate(lat: 37.5666102, lng: 126.9783881))
 //        addCustomImageMarker(mapView: mapView, imageName: "", mapCoordinate: MapCoordinate(lat: 37.5666102, lng: 126.9783882))
@@ -436,14 +436,13 @@ class MapFloatingPanelLayout: FloatingPanelLayout {
     }
 }
 
-extension MapController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+extension MapController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let reactor = reactor,
-              let text = textField.text else {
-            return false
-        }
+              let text = searchBar.text else { return }
         reactor.textObserver.onNext(text)
-        textField.resignFirstResponder()
-        return true
+        searchBar.searchTextField.resignFirstResponder()
     }
+    
+//    accesory
 }
