@@ -10,7 +10,17 @@ import UIKit
 
 extension UIView {
     
-    
+    public func addShadow(
+        color: CGColor? = nil,
+        offset: CGSize,
+        radius: CGFloat? = nil,
+        opacity: Float? = nil
+    )  {
+        self.layer.shadowColor = color
+        self.layer.shadowRadius = radius ?? 0.0
+        self.layer.shadowOffset = offset
+        self.layer.shadowOpacity = opacity ?? 0.0
+    }
     
 }
 

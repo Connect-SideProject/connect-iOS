@@ -20,9 +20,5 @@ class HomeCoordinator: BaseCoordinator {
         self.childrenCoordinator = []
     }
     
-//    func moveToListDetail() {
-//        let listVC = PostListController()
-//        presenter.pushViewController(listVC, animated: true)
-//    }
     
 }

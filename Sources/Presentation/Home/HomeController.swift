@@ -15,7 +15,7 @@ import RxCocoa
 
 
 /// 홈 화면 컨트롤러.
-class HomeController: UIViewController {
+final class HomeController: UIViewController {
     
     //MARK: Property
     
@@ -24,13 +24,11 @@ class HomeController: UIViewController {
     var disposeBag: DisposeBag = DisposeBag()
     
     
-    private let floatingButton: UIButton = {
-        $0.backgroundColor = .black
+    private let floatingButton: UIButton = UIButton().then {
+        $0.backgroundColor = UIColor.white
         $0.layer.masksToBounds = false
-        $0.clipsToBounds = true
-        
-        return $0
-    }(UIButton())
+        $0.setImage(UIImage(named: "home_search_floating"), for: .normal)
+    }
     
     private let searchView: HomeSearchView = HomeSearchView()
     
@@ -91,15 +89,12 @@ class HomeController: UIViewController {
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.setToolbarHidden(false, animated: true)
         
-        let bottomSheetVC = BaseBottomSheetView(sheetTitle: .studyType)
-        bottomSheetVC.modalPresentationStyle = .overFullScreen
-        self.present(bottomSheetVC, animated: true)
-        
         configure()
     }
     
     override func viewWillLayoutSubviews() {
-        floatingButton.layer.cornerRadius = floatingButton.frame.width / 2.0
+        floatingButton.addShadow(color: UIColor.gray06.cgColor, offset: CGSize(width: 0, height: 1), radius: 5, opacity: 0.2)
+        floatingButton.layer.cornerRadius = floatingButton.frame.height / 2.0
     }
     
     
@@ -161,7 +156,6 @@ extension HomeController {
         
         reactor.state
             .map { $0.section }
-            .debug("HomeController Section")
             .observe(on: MainScheduler.instance)
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)

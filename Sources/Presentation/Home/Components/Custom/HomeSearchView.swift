@@ -26,9 +26,7 @@ final class HomeSearchView: BaseView {
 
     private let imageView: UIImageView = {
         $0.contentMode = .scaleAspectFill
-        $0.isUserInteractionEnabled = false
-        $0.backgroundColor = .black
-        $0.image = UIImage(named: "home_search_filter")
+        $0.image = UIImage(named: "home_seach_filter")
         
         return $0
     }(UIImageView())
@@ -45,10 +43,9 @@ final class HomeSearchView: BaseView {
     
     
     private func configure()  {
-        self.layer.borderColor = UIColor.gray03.cgColor
-        self.layer.borderWidth = 1
         self.clipsToBounds = true
         self.layer.cornerRadius = 12
+        self.backgroundColor = UIColor.gray01
         
                 
         _ = [imageView,placeHolderLabel].map {
@@ -58,7 +55,7 @@ final class HomeSearchView: BaseView {
         imageView.snp.makeConstraints {
             $0.left.equalToSuperview().offset(15)
             $0.centerY.equalToSuperview()
-            $0.width.height.equalTo(28)
+            $0.width.height.equalTo(24)
         }
         placeHolderLabel.snp.makeConstraints {
             $0.centerY.equalTo(imageView)
