@@ -67,7 +67,6 @@ final class HomeViewReactor: Reactor {
             var newState = state
             guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
             newState.section[sectionIndex] = items
-            print("Items value: \(items) or new Section \(newState.section)")
             return newState
         }
         
