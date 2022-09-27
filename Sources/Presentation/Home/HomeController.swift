@@ -30,6 +30,11 @@ final class HomeController: UIViewController {
         $0.setImage(UIImage(named: "home_search_floating"), for: .normal)
     }
     
+    private let homeIndicatorView:UIActivityIndicatorView = UIActivityIndicatorView().then {
+        $0.backgroundColor = .gray
+        
+    }
+    
     private let searchView: HomeSearchView = HomeSearchView()
     
     
@@ -39,6 +44,7 @@ final class HomeController: UIViewController {
     
     private var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout()).then {
         $0.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
+        $0.register(HomeStudyMenuCell.self, forCellWithReuseIdentifier: "HomeStudyMenuCell")
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
         $0.backgroundColor = .white
@@ -46,13 +52,9 @@ final class HomeController: UIViewController {
     }
 
 
-    
-    
-    
     private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
         return .init(
         configureCell: { datasource, collectionView, indexPath, sectionItem in
-            print("Section Item : \(sectionItem)")
             switch sectionItem {
             case let .homeMenu(cellReactor):
                 
@@ -61,7 +63,10 @@ final class HomeController: UIViewController {
                 menuCell.reactor = cellReactor
                 return menuCell
                 
-                
+            case .homeStudyMenu:
+                guard let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeMenuCellReactor", for: indexPath) as? HomeStudyMenuCell else { return  UICollectionViewCell() }
+
+                return studyMenuCell
             default:
                 return UICollectionViewCell()
             }
@@ -99,9 +104,11 @@ final class HomeController: UIViewController {
     
     
     private func configure() {
-        [collectionView,floatingButton].forEach {
+        [collectionView, floatingButton, homeIndicatorView].forEach {
             view.addSubview($0)
         }
+        self.view.bringSubviewToFront(self.homeIndicatorView)
+
         
         collectionView.addSubview(searchView)
         
@@ -122,6 +129,11 @@ final class HomeController: UIViewController {
             $0.width.height.equalTo(75)
         }
         
+        homeIndicatorView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(24)
+        }
+        
         
 
     }
@@ -139,6 +151,12 @@ extension HomeController: ReactorKit.View {
             .disposed(by: disposeBag)
         
         bindCollectionView(reactor: reactor)
+        
+        reactor.state.map { $0.isLoading }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(to: homeIndicatorView.rx.isAnimating)
+            .disposed(by: disposeBag)
         
         
     }
