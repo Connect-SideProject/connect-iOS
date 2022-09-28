@@ -8,6 +8,7 @@
 
 import Foundation
 
+import COAuth
 import COManager
 
 public enum HTTPMethod {
@@ -55,7 +56,7 @@ public extension EndPoint {
         "auth-type": authType.description
       ]
     case .serchPlace:
-      return ["Authorization": "KakaoAK ccd2be71137221d2c9eac97cee497f1a"]
+      return ["Authorization": Auth.ThirdParty.kakao]
     default:
       return ["Authorization": accessToken]
     }
