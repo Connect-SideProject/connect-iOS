@@ -22,27 +22,25 @@ public final class SignInDIContainer: DIContainer {
   private let apiService: ApiService
   private let userService: UserService
   
-  weak var delegate: SignInDelegate?
-  
   public init(apiService: ApiService, userService: UserService) {
     self.apiService = apiService
     self.userService = userService
   }
   
-  public func makeSignInRepository() -> Repository {
+  public func makeRepository() -> Repository {
     return SignInRepositoryImpl(apiService: apiService)
   }
   
-  public func makeSignInUseCase() -> UserCase {
+  public func makeUseCase() -> UserCase {
     return SignInUseCaseImpl(
-      repository: makeSignInRepository(),
+      repository: makeRepository(),
       userService: userService
     )
   }
   
   public func makeReactor() -> Reactor {
     return Reactor(
-      useCase: makeSignInUseCase()
+      useCase: makeUseCase()
     )
   }
   

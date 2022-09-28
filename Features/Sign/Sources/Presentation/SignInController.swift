@@ -140,10 +140,8 @@ extension SignInController {
   }
   
   @objc private func didTapSignInButton(sender: UIButton) {
-    reactor?.action.onNext(
-      .didTapSignInButton(
-        type: AuthType(rawValue: sender.tag) ?? .none
-      )
-    )
+    guard let authType: AuthType = .init(rawValue: sender.tag) else { return }
+    
+    reactor?.action.onNext(.didTapSignInButton(type: authType))
   }
 }

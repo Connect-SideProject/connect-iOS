@@ -10,7 +10,7 @@ import Foundation
 
 import COExtensions
 
-public class UserManager: UserService {
+public final class UserManager: UserService {
   
   public static let shared: UserManager = UserManager()
   
