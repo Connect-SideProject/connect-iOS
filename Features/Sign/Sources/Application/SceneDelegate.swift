@@ -40,8 +40,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 extension SceneDelegate: SignInDelegate {
   func routeToSignUp() {
-    let signUpController = SignUpController()
-    signUpController.reactor = .init()
+    let container = SignUpDIContainer(
+      apiService: ApiManaerStub(),
+      userService: UserManagerStub()
+    )
+    let signUpController = container.makeController()
+    signUpController.delegate = self
     controller.pushViewController(signUpController, animated: true)
+  }
+}
+
+extension SceneDelegate: SignUpDelegate {
+  func routeToHome() {
+    controller.pushViewController(UIViewController(), animated: true)
   }
 }

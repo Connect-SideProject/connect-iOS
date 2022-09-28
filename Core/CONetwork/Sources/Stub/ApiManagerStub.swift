@@ -45,12 +45,17 @@ public final class ApiManaerStub: ApiService {
     let data = SampleData(
       path: endPoint.path
     ).create()
-    
-    if let data = try? JSONDecoder().decode(T.self, from: data) {
-      return .just(data)
+    print("====================Sample====================")
+    print(String(data: data, encoding: .utf8) ?? "")
+    print(T.Type.self)
+    print("====================Sample====================")
+    do {
+      let json = try JSONDecoder().decode(T.self, from: data)
+      return .just(json)
+    } catch let error {
+      print(error.localizedDescription)
+      return .error(URLError(.cannotDecodeRawData))
     }
-    
-    return .error(URLError(.cannotDecodeRawData))
   }
   
   public func requestOutBound<T>(endPoint: EndPoint) -> RxSwift.Observable<T> where T : Decodable {
