@@ -10,7 +10,13 @@ import UIKit
 import COCommonUI
 import CODomain
 import COExtensions
+import COManager
 import ReactorKit
+import RxCocoa
+
+public protocol SignUpDelegate: AnyObject {
+  func routeToHome()
+}
 
 public final class SignUpController: UIViewController, ReactorKit.View {
   
@@ -46,14 +52,14 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     )
   )
   
-  private let portfolioContainerView = DescriptionContainerView(
-    type: .textField("포트폴리오", "포트폴리오 URL을 입력 해주세요. (선택)")
-  )
-  
   private let skillContainerView = DescriptionContainerView(
     type: .custom("보유 스킬", SelectionButtonView(
-      titles: ["iOS", "Android", "Backend", "Frontend"])
+      titles: ["iOS", "Android", "SPRING", "Frontend"])
     )
+  )
+  
+  private let portfolioContainerView = DescriptionContainerView(
+    type: .textField("포트폴리오", "포트폴리오 URL을 입력 해주세요. (선택)")
   )
   
   private let upper14YearsOldCheckBoxView = CheckBoxSingleView(
@@ -86,6 +92,8 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   }
   
   private let flexContainer = UIView()
+  
+  public weak var delegate: SignUpDelegate?
   
   public var disposeBag = DisposeBag()
   
@@ -120,6 +128,28 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   public func bind(reactor: SignUpReactor) {
     
+    locationContainerView.textField.rx.value
+      .filter { !($0 ?? "").isEmpty }
+      .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+      .debug()
+      .flatMap { query -> Observable<Reactor.Action> in
+        return .just(.searchAddress(query ?? ""))
+      }.bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    reactor.state
+      .map { $0.regions }
+      .observe(on: MainScheduler.instance)
+      .bind { regions in
+        print(regions)
+      }.disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.profile }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] _ in
+        self?.delegate?.routeToHome()
+      }.disposed(by: disposeBag)
   }
 }
 
@@ -182,6 +212,13 @@ extension SignUpController {
     acceptAllCheckBoxView.handler = { [weak self] isChecked in
       self?.termsCheckBoxContainerView.checkedAll()
     }
+    
+    let job = jobContainerView.customView?.casting(type: SelectionButtonView.self)
+    job?.handler = { [weak self] _ in
+      print(job?.selectedItems.map { Role(rawValue: $0) })
+      print(RoleSkillsManager.shared.roleAndSkillsList.map { $0.roleName })
+      print(RoleSkillsManager.shared.roleAndSkillsList.map { $0.skills.map { $0.name } })
+    }
   }
   
   @objc func didTapStartButton() {
@@ -189,32 +226,29 @@ extension SignUpController {
     let nickname = nicknameContainerView.textField.text ?? ""
     let location = locationContainerView.textField.text ?? ""
     let locations = location.components(separatedBy: " ")
-    var region: Region = .init(state: "", city: "")
-    if locations.count == 2 {
-      region = .init(state: locations[0], city: locations[1])
-    }
+    var region: Region = .init(code: "", name: "")
     
-    guard let period = periodContainerView.customView as? CheckBoxContainerView,
+    guard let period = periodContainerView.customView?.casting(type: CheckBoxContainerView.self),
           let checkedItems = period.checkedItems else { return }
 
-    let interesting: [Interestring] = (interestsContainerView.customView as? SelectionButtonView)?.selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
+    let interestings: [Interestring] = interestsContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
     
     guard let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") else { return }
-    let role: [Role] = (jobContainerView.customView as? SelectionButtonView)?.selectedItems.compactMap { Role(rawValue: $0) } ?? []
+    let roles: [Role] = jobContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.compactMap { Role(rawValue: $0) } ?? []
     
     let portfolioURL = portfolioContainerView.textField.text ?? ""
     
-    let skills: [String] = (skillContainerView.customView as? SelectionButtonView)?.selectedItems.map { $0 } ?? []
+    let skills: [String] = skillContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.map { $0 } ?? []
     
     let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.compactMap { Terms(rawValue: $0.title) } ?? []
     
     let parameter: SignUpParameter = .init(
-      authType: .kakao,
+      authType: .naver,
       nickname: nickname,
       region: region,
-      interesting: interesting,
+      interestings: interestings,
       career: carrer,
-      role: role,
+      roles: roles,
       profileURL: nil,
       portfolioURL: portfolioURL,
       skills: skills,

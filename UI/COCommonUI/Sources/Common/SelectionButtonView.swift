@@ -9,7 +9,7 @@ import UIKit
 
 import Then
 
-public final class SelectionButtonView: UIView {
+public final class SelectionButtonView: UIView, CastableView {
   
   private lazy var collectionViewLayout = UICollectionViewFlowLayout().then {
     $0.scrollDirection = .horizontal
@@ -28,6 +28,7 @@ public final class SelectionButtonView: UIView {
   }
   
   public private(set) var selectedItems: [String] = []
+  public var handler: (String) -> Void = { _ in }
   
   private var dictionary: [String : Bool] = [:]
   private let titles: [String]
@@ -81,7 +82,6 @@ extension SelectionButtonView: UICollectionViewDataSource {
 extension SelectionButtonView: UICollectionViewDelegateFlowLayout {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     let selectedTitle = titles[indexPath.item]
-    print(selectedTitle)
     
     dictionary[selectedTitle]?.toggle()
     
@@ -90,7 +90,7 @@ extension SelectionButtonView: UICollectionViewDelegateFlowLayout {
     } else {
       selectedItems = selectedItems.filter { $0 != selectedTitle }
     }
-    
+    handler(selectedTitle)
     collectionView.reloadData()
   }
   

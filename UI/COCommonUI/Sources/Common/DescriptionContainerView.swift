@@ -12,7 +12,7 @@ import Then
 public enum DescriptionType {
   // DescriptionLabel, View
   case textField(String, String?)
-  case custom(String, UIView)
+  case custom(String, CastableView)
 }
 
 public class DescriptionContainerView: UIView {
@@ -36,7 +36,7 @@ public class DescriptionContainerView: UIView {
     $0.leftView = view
   }
   
-  public private(set) var customView: UIView?
+  public private(set) var customView: CastableView?
   
   public let flexContainer = UIView()
   
