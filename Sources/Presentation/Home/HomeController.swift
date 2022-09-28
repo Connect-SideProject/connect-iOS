@@ -53,8 +53,7 @@ final class HomeController: UIViewController {
 
 
     private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
-        return .init(
-        configureCell: { datasource, collectionView, indexPath, sectionItem in
+        return .init { datasource, collectionView, indexPath, sectionItem in
             switch sectionItem {
             case let .homeMenu(cellReactor):
                 
@@ -63,15 +62,17 @@ final class HomeController: UIViewController {
                 menuCell.reactor = cellReactor
                 return menuCell
                 
-            case .homeStudyMenu:
-                guard let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeMenuCellReactor", for: indexPath) as? HomeStudyMenuCell else { return  UICollectionViewCell() }
-
+            case let .homeStudyMenu(cellReactor):
+                let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyMenuCell", for: indexPath) as! HomeStudyMenuCell
+                print("studyMenu Cell Add")
+                studyMenuCell.reactor = cellReactor
                 return studyMenuCell
+                
             default:
                 return UICollectionViewCell()
             }
         }
-    )}
+    }
     
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
@@ -169,8 +170,6 @@ extension HomeController {
         
         self.collectionView.rx.setDelegate(self)
             .disposed(by: disposeBag)
-        
-        print("Datasource Check : \(self.dataSource)")
         
         reactor.state
             .map { $0.section }
