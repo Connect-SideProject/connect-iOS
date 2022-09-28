@@ -20,7 +20,7 @@ final class HomeViewReactor: Reactor {
     
     enum Mutation {
         case setLoading(Bool)
-        case setFieldItemList(HomeViewSection)
+        case setSubMenuItems(HomeViewSection)
     }
     
     struct State {
@@ -33,7 +33,8 @@ final class HomeViewReactor: Reactor {
         self.initialState = State(
             isLoading: false,
             section: [
-                .field([])
+                .field([]),
+                .homeSubMenu([])
             ]
         )
     }
@@ -41,18 +42,17 @@ final class HomeViewReactor: Reactor {
     func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
-            let setLoadCollectionView = Observable<Mutation>.just(.setFieldItemList(.field([
-                .homeMenu(HomeMenuCellReactor(menuType: .travelmenu)),
-                .homeMenu(HomeMenuCellReactor(menuType: .financemenu)),
-                .homeMenu(HomeMenuCellReactor(menuType: .commercemenu)),
-                .homeMenu(HomeMenuCellReactor(menuType: .healthmenu))
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            let setMenuItems = Observable<Mutation>.just(.setSubMenuItems(.homeSubMenu([
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .all)),
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .project)),
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .study))
             ])))
-
-            return .concat(
-                .just(.setLoading(true)),
-                setLoadCollectionView,
-                .just(.setLoading(false))
-            )
+            
+            return .concat([
+                startLoading,setMenuItems,endLoading
+            ])
         }
     }
     
@@ -63,25 +63,25 @@ final class HomeViewReactor: Reactor {
             newState.isLoading = isLoading
             
             return newState
-        case let .setFieldItemList(items):
+
+        case let .setSubMenuItems(items):
             var newState = state
-            guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
+            guard let sectionIndex = self.getIndex(section: .homeSubMenu([])) else { return newState }
             newState.section[sectionIndex] = items
+            
+            print("Home SubMenu Items : \(items) or Section Index : \(sectionIndex) or \(newState.section)")
             return newState
         }
         
         
     }
-    
-    
-    
 }
 
 
 private extension HomeViewReactor {
     func getIndex(section: HomeViewSection) -> Int? {
         var index: Int? = nil
-
+        
         for i in 0 ..< self.currentState.section.count {
             if self.currentState.section[i].getSectionType() == section.getSectionType() {
                 index = i
@@ -89,6 +89,5 @@ private extension HomeViewReactor {
         }
         return index
     }
-
-
 }
+
