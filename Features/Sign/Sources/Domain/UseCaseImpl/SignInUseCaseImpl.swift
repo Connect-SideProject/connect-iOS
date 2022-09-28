@@ -148,9 +148,9 @@ extension SignInUseCaseImpl: ASAuthorizationControllerDelegate {
   public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
     switch authorization.credential {
     case let appleIDCredential as ASAuthorizationAppleIDCredential:
-      if let code = appleIDCredential.authorizationCode,
-         let authorizationCode = String(data: code, encoding: .utf8) {
-        authorizationCodeSubject.onNext(authorizationCode)
+      if let identityToken = appleIDCredential.identityToken,
+         let token = String(data: identityToken, encoding: .utf8) {
+        authorizationCodeSubject.onNext(token)
       }
     default:
       break
