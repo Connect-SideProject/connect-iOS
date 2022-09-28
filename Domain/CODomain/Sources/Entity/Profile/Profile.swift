@@ -29,35 +29,74 @@ public enum Role: String, Codable, Equatable {
     }
   }
   
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer().decode(String.self)
+    
+    switch container {
+    case "DEV":
+      self = .developer
+    case "DESIGN":
+      self = .designer
+    case "PM":
+      self = .planner
+    case "MAK":
+      self = .marketer
+    default:
+      fatalError("")
+    }
+  }
+  
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
     
     switch self {
     case .developer:
-      try container.encode("DEVELOPER")
+      try container.encode("DEV")
     case .designer:
-      try container.encode("DESIGNER")
+      try container.encode("DESIGN")
     case .planner:
-      try container.encode("PLANNER")
+      try container.encode("PM")
     case .marketer:
-      try container.encode("MARKETER")
+      try container.encode("MAK")
     }
   }
 }
 
 public struct Region: Codable, Equatable {
-  let state: String
-  let city: String
   
-  public init(state: String = "", city: String = "") {
-    self.state = state
-    self.city = city
+  let code: String
+  let name: String
+  
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    
+    self.code = try container.decodeIfPresent(String.self, forKey: .code) ?? ""
+    self.name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+  }
+  
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    
+    try container.encode(code, forKey: .code)
+    try container.encode(name, forKey: .name)
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case code = "regionCode"
+    case name = "regionName"
+  }
+}
+
+public extension Region {
+  init(code: String = "", name: String = "") {
+    self.code = code
+    self.name = name
   }
 }
 
 public struct Profile: Codable, Equatable {
   
-  let authType: AuthType
+  let authType: AuthType?
   let nickname: String
   let roles: [Role]
   let region: Region
@@ -70,9 +109,9 @@ public struct Profile: Codable, Equatable {
   let isLocationExpose: Bool
   
   public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let container =         try decoder.container(keyedBy: CodingKeys.self)
     
-    self.authType = try container.decodeIfPresent(AuthType.self, forKey: .authType) ?? .none
+    self.authType =         try container.decodeIfPresent(AuthType.self, forKey: .authType)
     self.nickname =         try container.decodeIfPresent(String.self, forKey: .nickname) ?? ""
     self.roles =            try container.decodeIfPresent([Role].self, forKey: .roles) ?? []
     self.region =           try container.decodeIfPresent(Region.self, forKey: .region) ?? .init()
@@ -106,7 +145,7 @@ public struct Profile: Codable, Equatable {
     case nickname
     case roles = "role"
     case region
-    case interestings = "interestings"
+    case interestings = "interesting"
     case profileURL = "profile_url"
     case portfolioURL = "portfolio_url"
     case career
@@ -116,9 +155,9 @@ public struct Profile: Codable, Equatable {
   }
 }
 
-public extension Profile {
-  init(
-    authType: AuthType = .none,
+extension Profile {
+  public init(
+    authType: AuthType? = nil,
     nickname: String = "",
     roles: [Role] = [],
     region: Region = .init(),
