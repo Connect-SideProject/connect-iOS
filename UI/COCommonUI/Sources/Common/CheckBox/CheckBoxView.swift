@@ -25,7 +25,7 @@ public enum CheckBoxContainerEventType {
 }
 
 /// 두개 이상의 CheckBox가 포함된 Container.
-public final class CheckBoxContainerView: UIView {
+public final class CheckBoxContainerView: UIView, CastableView {
   
   public private(set) var checkedItems: [CheckBoxItem]?
   
