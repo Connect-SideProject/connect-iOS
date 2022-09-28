@@ -49,17 +49,19 @@ public extension EndPoint {
   }
   
   var header: [String: String]? {
+    var common: [String: String] = ["Content-Type": "application/json"]
     switch path {
     case let .signIn(authType):
-      return [
-        "access-token": accessToken,
-        "auth-type": authType.description
-      ]
+      let _ = ["access-token": accessToken,
+               "auth-type": authType.description].map { common[$0.key] = $0.value }
     case .serchPlace:
       return ["Authorization": Auth.ThirdParty.kakao]
+    case .allSkills:
+      break
     default:
-      return ["Authorization": accessToken]
+      let _ = ["access-token": accessToken].map { common[$0.key] = $0.value }
     }
+    return common
   }
   
   var url: URL? {
@@ -86,7 +88,7 @@ public extension EndPoint {
   
   var method: HTTPMethod {
     switch path {
-    case .userProfile, .updateProfile:
+    case .signUp, .userProfile, .updateProfile:
       return .put
     case .signIn:
       return .post

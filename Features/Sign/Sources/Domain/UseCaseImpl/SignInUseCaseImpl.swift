@@ -93,8 +93,6 @@ extension SignInUseCaseImpl {
           guard let self = self else { return .empty() }
           return self.combine(authorizationCode, authType: authType)
         }.debug()
-    case .none:
-      return .empty()
     }
   }
   

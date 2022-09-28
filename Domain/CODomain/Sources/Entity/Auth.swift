@@ -17,12 +17,12 @@ public enum AuthType: Int, CustomStringConvertible, CaseIterable, Codable {
       return "NAVER"
     case .apple:
       return "APPLE"
-    case .none:
+    default:
       return ""
     }
   }
   
-  case kakao = 0, naver, apple, none
+  case kakao = 0, naver, apple
   
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer().decode(String.self)
@@ -35,7 +35,7 @@ public enum AuthType: Int, CustomStringConvertible, CaseIterable, Codable {
     case "APPLE":
       self = .apple
     default:
-      self = .none
+      fatalError("")
     }
   }
   
@@ -49,8 +49,6 @@ public enum AuthType: Int, CustomStringConvertible, CaseIterable, Codable {
       try container.encode("NAVER")
     case .apple:
       try container.encode("APPLE")
-    case .none:
-      try container.encode("")
     }
   }
 }
