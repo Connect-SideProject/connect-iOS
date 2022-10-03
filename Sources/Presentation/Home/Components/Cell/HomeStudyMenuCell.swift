@@ -52,10 +52,16 @@ final class HomeStudyMenuCell: UICollectionViewCell {
     typealias Reactor = HomeStudyMenuReactor
     
     var disposeBag: DisposeBag = DisposeBag()
+        
+    private let studyMenuContainerView: UIView = UIView().then {
+        $0.backgroundColor = UIColor.white
+    }
     
-    private let studyMenuButton: UIButton = UIButton().then {
-        $0.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        $0.titleLabel?.textColor = .black
+    private let studyMenuTitleLabel: UILabel = UILabel().then {
+        $0.font = UIFont.boldSystemFont(ofSize: 16)
+        $0.textAlignment = .center
+        $0.numberOfLines = 1
+        $0.textColor = UIColor.black
     }
     
     
@@ -77,10 +83,18 @@ final class HomeStudyMenuCell: UICollectionViewCell {
     
     //MARK: Configure
     private func configure() {
-        self.contentView.addSubview(studyMenuButton)
-        self.backgroundColor = .black
-        studyMenuButton.snp.makeConstraints {
+        studyMenuContainerView.addSubview(studyMenuTitleLabel)
+        
+        self.contentView.addSubview(studyMenuContainerView)
+        
+        
+        studyMenuContainerView.snp.makeConstraints {
             $0.edges.equalToSuperview()
+        }
+        
+        studyMenuTitleLabel.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.height.equalTo(19)
         }
     }
 
@@ -93,11 +107,13 @@ extension HomeStudyMenuCell: ReactorKit.View {
     
     func bind(reactor: Reactor) {
         
+        
         reactor.state.map { $0.menuType.getTitle()}
-            .debug("StudyMenu Cell")
             .observe(on: MainScheduler.instance)
-            .bind(to: self.studyMenuButton.rx.title())
+            .bind(to: studyMenuTitleLabel.rx.text)
             .disposed(by: disposeBag)
+        
+        
     }
     
 }

@@ -184,6 +184,20 @@ extension HomeController {
             .observe(on: MainScheduler.instance)
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
+        
+        
+        collectionView
+            .rx.itemSelected
+            .throttle(.seconds(3), scheduler: MainScheduler.instance)
+            .subscribe(onNext: { indexPath in
+                switch self.dataSource[indexPath] {
+                case .homeMenu:
+                    break
+                case .homeStudyMenu:
+                    print("CollectionView Click Section")
+                }
+            }).disposed(by: disposeBag)
+        
     }
 }
 
@@ -196,6 +210,27 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         switch self.dataSource[section] {
         case .homeSubMenu:
             return CGSize(width: collectionView.frame.size.width, height: 44)
+        default:
+            return .zero
+        }
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        switch self.dataSource[section] {
+        case .field:
+            return 1
+        case .homeSubMenu:
+            return .zero
+            
+        }
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        switch self.dataSource[section] {
+        case .homeSubMenu:
+            return UIEdgeInsets(top: 25, left: 0, bottom: 0, right: 0)
         default:
             return .zero
         }

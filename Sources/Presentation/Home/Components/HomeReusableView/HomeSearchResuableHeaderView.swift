@@ -31,7 +31,9 @@ final class HomeSearchResuableHeaderView: UICollectionReusableView {
         self.addSubview(homeSearchView)
         
         homeSearchView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.bottom.equalToSuperview()
+            $0.left.equalToSuperview().offset(20)
+            $0.right.equalToSuperview().offset(-20)
         }
     }
     
