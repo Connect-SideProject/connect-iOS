@@ -94,21 +94,25 @@ public extension Region {
   }
 }
 
-public struct Profile: Codable, Equatable {
+public class Profile: NSObject, NSCoding, Codable {
   
-  let authType: AuthType?
-  let nickname: String
-  let roles: [Role]
-  let region: Region
-  let interestings: [Interestring]
-  let profileURL: String?
-  let portfolioURL: String?
-  let career: Career?
-  let skills: [String]
-  let isPushOn: Bool
-  let isLocationExpose: Bool
+  var authType: AuthType? = nil
+  var nickname: String = ""
+  var roles: [Role] = []
+  var region: Region? = nil
+  var interestings: [Interestring] = []
+  var profileURL: String? = nil
+  var portfolioURL: String? = nil
+  var career: Career? = nil
+  var skills: [String] = []
+  var isPushOn: Bool = false
+  var isLocationExpose: Bool = false
   
-  public init(from decoder: Decoder) throws {
+  public override init() {
+    super.init()
+  }
+  
+  required public init(from decoder: Decoder) throws {
     let container =         try decoder.container(keyedBy: CodingKeys.self)
     
     self.authType =         try container.decodeIfPresent(AuthType.self, forKey: .authType)
@@ -140,6 +144,34 @@ public struct Profile: Codable, Equatable {
     try container.encode(isLocationExpose, forKey: .isLocationExpose)
   }
   
+  public required init?(coder: NSCoder) {
+    self.authType =         coder.decodeObject(forKey: CodingKeys.authType.rawValue) as? AuthType
+    self.nickname =         coder.decodeObject(forKey: CodingKeys.nickname.rawValue) as? String ?? ""
+    self.roles =            coder.decodeObject(forKey: CodingKeys.roles.rawValue) as? [Role] ?? []
+    self.region =           coder.decodeObject(forKey: CodingKeys.region.rawValue) as? Region ?? nil
+    self.interestings =     coder.decodeObject(forKey: CodingKeys.interestings.rawValue) as? [Interestring] ?? []
+    self.profileURL =       coder.decodeObject(forKey: CodingKeys.profileURL.rawValue) as? String ?? ""
+    self.portfolioURL =     coder.decodeObject(forKey: CodingKeys.portfolioURL.rawValue) as? String ?? ""
+    self.career =           coder.decodeObject(forKey: CodingKeys.career.rawValue) as? Career ?? nil
+    self.skills =           coder.decodeObject(forKey: CodingKeys.skills.rawValue) as? [String] ?? []
+    self.isPushOn =         coder.decodeBool(forKey: CodingKeys.isPushOn.rawValue)
+    self.isLocationExpose = coder.decodeBool(forKey: CodingKeys.isLocationExpose.rawValue)
+  }
+  
+  public func encode(with coder: NSCoder) {
+    coder.encode(authType, forKey: CodingKeys.authType.rawValue)
+    coder.encode(nickname, forKey: CodingKeys.nickname.rawValue)
+    coder.encode(roles, forKey: CodingKeys.roles.rawValue)
+    coder.encode(region, forKey: CodingKeys.region.rawValue)
+    coder.encode(interestings, forKey: CodingKeys.interestings.rawValue)
+    coder.encode(profileURL, forKey: CodingKeys.profileURL.rawValue)
+    coder.encode(portfolioURL, forKey: CodingKeys.portfolioURL.rawValue)
+    coder.encode(career, forKey: CodingKeys.career.rawValue)
+    coder.encode(skills, forKey: CodingKeys.skills.rawValue)
+    coder.encode(isPushOn, forKey: CodingKeys.isPushOn.rawValue)
+    coder.encode(isLocationExpose, forKey: CodingKeys.isLocationExpose.rawValue)
+  }
+  
   enum CodingKeys: String, CodingKey {
     case authType = "auth_type"
     case nickname
@@ -156,7 +188,7 @@ public struct Profile: Codable, Equatable {
 }
 
 extension Profile {
-  public init(
+  public convenience init(
     authType: AuthType? = nil,
     nickname: String = "",
     roles: [Role] = [],
@@ -169,6 +201,8 @@ extension Profile {
     isPushOn: Bool = false,
     isLocationExpose: Bool = false
   ) {
+    self.init()
+    
     self.authType = authType
     self.profileURL = profileURL
     self.nickname = nickname

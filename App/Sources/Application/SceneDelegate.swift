@@ -8,6 +8,7 @@
 
 import UIKit
 
+import CODomain
 import COManager
 import CONetwork
 import Sign
@@ -60,10 +61,13 @@ extension SceneDelegate: SplashDelegate {
 }
 
 extension SceneDelegate: SignInDelegate {
-  func routeToSignUp() {
+  func routeToSignUp(authType: CODomain.AuthType, accessToken: String) {
     let container = SignUpDIContainer(
       apiService: ApiManager.shared,
-      userService: UserManager.shared
+      userService: UserManager.shared,
+      roleSkillsService: RoleSkillsManager.shared,
+      authType: authType,
+      accessToken: accessToken
     )
     let signUpController = container.makeController()
     signUpController.delegate = self

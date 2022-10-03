@@ -7,6 +7,7 @@
 
 import UIKit
 
+import FlexLayout
 import Then
 
 public enum DescriptionType {
@@ -16,7 +17,7 @@ public enum DescriptionType {
 }
 
 public class DescriptionContainerView: UIView {
-
+  
   private let descriptionLabel = UILabel().then {
     $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = .black
@@ -37,6 +38,7 @@ public class DescriptionContainerView: UIView {
   }
   
   public private(set) var customView: CastableView?
+  public private(set) var customViews: [CastableView]?
   
   public let flexContainer = UIView()
   
@@ -69,6 +71,10 @@ public class DescriptionContainerView: UIView {
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
+  
+  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    endEditing(true)
+  }
 }
 
 extension DescriptionContainerView {
@@ -81,13 +87,102 @@ extension DescriptionContainerView {
       .define { flex in
         flex.addItem(descriptionLabel)
           .marginBottom(4)
+        
         if let customView = customView {
-          flex.addItem(customView)
-            .height(36)
+          
+          if let containerView = customView as? CastableContainerView {
+            flex.addItem(containerView)
+          } else {
+            flex.addItem(customView)
+              .height(36)
+          }
         } else {
           flex.addItem(textField)
             .height(36)
         }
+      }
+  }
+}
+
+public final class CastableContainerView: UIView, CastableView {
+  
+  enum Height {
+    static let `default`: CGFloat = 30
+  }
+  
+  enum Margin {
+    static let `default`: CGFloat = 6
+  }
+  
+  public var handler: ([String]) -> Void = { _ in }
+  public var selectedItems: [String] = []
+  
+  public let flexContainer = UIView()
+  
+  private let views: [CastableView]
+  private let direction: Flex.Direction
+  
+  public init(views: [CastableView], direction: Flex.Direction = .column) {
+    self.views = views
+    self.direction = direction
+    super.init(frame: .zero)
+    
+    configureUI()
+    bindEvent()
+  }
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  public override func layoutSubviews() {
+    super.layoutSubviews()
+    
+    self.pin
+      .width(of: self)
+      .height(of: self)
+  }
+  
+  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    endEditing(true)
+  }
+}
+
+extension CastableContainerView {
+  private func configureUI() {
+    
+    let height = CGFloat(36 * views.count)
+    
+    backgroundColor = .clear
+    
+    addSubview(flexContainer)
+    
+    flexContainer.flex
+      .direction(direction)
+      .define { flex in
+        views.forEach {
+          if direction == .column || direction == .columnReverse {
+            flex.addItem($0)
+              .minHeight(height)
+              .marginBottom(Margin.default)
+          } else {
+            flex.addItem($0)
+              .height(Height.default)
+              .marginRight(Margin.default)
+          }
+        }
+      }
+  }
+  
+  private func bindEvent() {
+    let views = views.map { $0.casting(type: SelectionButtonView.self) }
+    
+    let handler: (String) -> Void = { [weak self] _ in
+      let selectedItems = views.map { $0.selectedItems }.flatMap { $0 }
+      self?.selectedItems = selectedItems
+      self?.handler(selectedItems)
     }
+    
+    let _ = views.map { $0.handler = handler }
   }
 }

@@ -9,9 +9,9 @@ import Foundation
 
 public struct SignUpParameter: Parameterable {
   
-  let authType: AuthType?
+  var authType: AuthType?
   let nickname: String
-  let region: Region
+  var region: Region?
   let interestings: [Interestring]
   let career: Career?
   let roles: [Role]
@@ -47,6 +47,7 @@ public struct SignUpParameter: Parameterable {
     try container.encode(portfolioURL, forKey: .portfolioURL)
     try container.encode(career, forKey: .career)
     try container.encode(skills, forKey: .skills)
+    try container.encode(terms, forKey: .terms)
   }
   
   enum CodingKeys: String, CodingKey {
@@ -64,7 +65,7 @@ public struct SignUpParameter: Parameterable {
 }
 
 public extension SignUpParameter {
-  init(authType: AuthType, nickname: String, region: Region, interestings: [Interestring], career: Career?, roles: [Role], profileURL: String? = nil, portfolioURL: String? = nil, skills: [String], terms: [Terms]) {
+  init(authType: AuthType? = nil, nickname: String, region: Region? = nil, interestings: [Interestring], career: Career?, roles: [Role], profileURL: String? = nil, portfolioURL: String? = nil, skills: [String], terms: [Terms]) {
     self.authType = authType
     self.nickname = nickname
     self.region = region
@@ -75,5 +76,17 @@ public extension SignUpParameter {
     self.portfolioURL = portfolioURL
     self.skills = skills
     self.terms = terms
+  }
+  
+  mutating func updateAuthType(_ authType: AuthType) {
+    self.authType = authType
+  }
+  
+  mutating func updateRegion(_ region: Region) {
+    self.region = region
+  }
+  
+  func checkedTermsCount() -> Int {
+    return terms.count
   }
 }

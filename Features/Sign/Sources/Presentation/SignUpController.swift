@@ -46,15 +46,19 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     )
   )
   
-  private let jobContainerView = DescriptionContainerView(
+  private lazy var jobContainerView = DescriptionContainerView(
     type: .custom("원하는 역할", SelectionButtonView(
-      titles: ["기획자", "개발자", "디자이너", "마케터"])
+      titles: roleSkillsService.roleSkillsList.map { $0.roleName })
     )
   )
   
-  private let skillContainerView = DescriptionContainerView(
-    type: .custom("보유 스킬", SelectionButtonView(
-      titles: ["iOS", "Android", "SPRING", "Frontend"])
+  private lazy var skillContainerView = DescriptionContainerView(
+    type: .custom(
+      "보유 스킬",
+      CastableContainerView(
+        views: roleSkillsService.roleSkillsList
+          .map { SelectionButtonView(titles: $0.skills.map { $0.name }, direction: .vertical) },
+        direction: .column)
     )
   )
   
@@ -97,26 +101,37 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   public var disposeBag = DisposeBag()
   
+  let roleSkillsService: RoleSkillsService
+  
+  init(roleSkillsService: RoleSkillsService) {
+    self.roleSkillsService = roleSkillsService
+    super.init(nibName: nil, bundle: nil)
+  }
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    
-    flexContainer.pin
-      .width(of: view)
-      .height(of: view)
-      .top(CGFloat(UIApplication.keyWindow?.safeAreaInsets.top ?? 0))
-      .left().right()
-      .layout()
-    
-    flexContainer.flex.layout()
     
     containerScrollView.pin
       .all()
       .layout()
     
     containerScrollView.contentSize = .init(
-      width: flexContainer.bounds.size.width,
-      height: flexContainer.bounds.size.height + 100
+      width: view.bounds.size.width,
+      height: view.bounds.size.height + 660
     )
+    
+    flexContainer.pin
+      .width(of: view)
+      .height(containerScrollView.contentSize.height)
+      .top(CGFloat(UIApplication.keyWindow?.safeAreaInsets.top ?? 0))
+      .left().right()
+      .layout()
+    
+    flexContainer.flex.layout()
   }
   
   public override func viewDidLoad() {
@@ -138,18 +153,16 @@ public final class SignUpController: UIViewController, ReactorKit.View {
       .disposed(by: disposeBag)
     
     reactor.state
-      .map { $0.regions }
-      .observe(on: MainScheduler.instance)
-      .bind { regions in
-        print(regions)
-      }.disposed(by: disposeBag)
-    
-    reactor.state
       .compactMap { $0.profile }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] _ in
         self?.delegate?.routeToHome()
       }.disposed(by: disposeBag)
+  }
+  
+  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    view.endEditing(true)
+    flexContainer.endEditing(true)
   }
 }
 
@@ -199,6 +212,12 @@ extension SignUpController {
   }
   
   private func bindEvent() {
+    
+    skillContainerView.customView?
+      .casting(type: CastableContainerView.self).handler = {
+        print($0)
+    }
+    
     termsCheckBoxContainerView.handler = { [weak self] checkItems in
       print(checkItems)
       
@@ -212,21 +231,12 @@ extension SignUpController {
     acceptAllCheckBoxView.handler = { [weak self] isChecked in
       self?.termsCheckBoxContainerView.checkedAll()
     }
-    
-    let job = jobContainerView.customView?.casting(type: SelectionButtonView.self)
-    job?.handler = { [weak self] _ in
-      print(job?.selectedItems.map { Role(rawValue: $0) })
-      print(RoleSkillsManager.shared.roleAndSkillsList.map { $0.roleName })
-      print(RoleSkillsManager.shared.roleAndSkillsList.map { $0.skills.map { $0.name } })
-    }
   }
   
   @objc func didTapStartButton() {
     
     let nickname = nicknameContainerView.textField.text ?? ""
     let location = locationContainerView.textField.text ?? ""
-    let locations = location.components(separatedBy: " ")
-    var region: Region = .init(code: "", name: "")
     
     guard let period = periodContainerView.customView?.casting(type: CheckBoxContainerView.self),
           let checkedItems = period.checkedItems else { return }
@@ -238,14 +248,13 @@ extension SignUpController {
     
     let portfolioURL = portfolioContainerView.textField.text ?? ""
     
-    let skills: [String] = skillContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.map { $0 } ?? []
+    let skills: [String] = skillContainerView.customView?.casting(type: CastableContainerView.self).selectedItems.map { $0 } ?? []
     
     let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.compactMap { Terms(rawValue: $0.title) } ?? []
     
     let parameter: SignUpParameter = .init(
-      authType: .naver,
       nickname: nickname,
-      region: region,
+      region: .init(),
       interestings: interestings,
       career: carrer,
       roles: roles,
