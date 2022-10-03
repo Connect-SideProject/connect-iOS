@@ -11,5 +11,6 @@ import CODomain
 import RxSwift
 
 public protocol SignInUseCase {
-  func signIn(authType: AuthType) -> Observable<Profile>
+  func accessTokenFromThirdParty(authType: AuthType) -> Observable<String>
+  func signIn(authType: AuthType, accessToken: String) -> Observable<Profile>
 }

@@ -16,7 +16,8 @@ import Then
 import KakaoSDKCommon
 
 public protocol SignInDelegate: AnyObject {
-  func routeToSignUp()
+  func routeToSignUp(authType: AuthType, accessToken: String)
+  func routeToHome()
 }
 
 public final class SignInController: UIViewController, ReactorKit.View {
@@ -61,23 +62,18 @@ public final class SignInController: UIViewController, ReactorKit.View {
   
   public func bind(reactor: SignInReactor) {
     reactor.state
-      .map { $0.profile }
+      .map { $0.route }
       .filter { $0 != nil }
-      .bind { profile in
-        print(profile)
-      }.disposed(by: disposeBag)
-    
-    reactor.state
-      .map { $0.error }
-      .filter { $0 != nil }
-      .observe(on: MainScheduler.instance)
-      .bind { [weak self] error in
-        switch error?.code {
-        case URLError.Code.needSignUp:
-          self?.delegate?.routeToSignUp()
+      .bind { [weak self] route in
+        switch route {
+        case .home:
+          self?.delegate?.routeToHome()
+        case let .signUp(authType, accessToken):
+          self?.delegate?.routeToSignUp(authType: authType, accessToken: accessToken)
         default:
           break
         }
+        
       }.disposed(by: disposeBag)
   }
 }

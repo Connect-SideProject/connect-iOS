@@ -9,42 +9,75 @@ import Foundation
 
 import CODomain
 import COExtensions
+import COManager
 import ReactorKit
 
+public enum SignInRoute {
+  case signUp(AuthType, String), home
+}
+
 public final class SignInReactor: Reactor, ErrorHandlerable {
+  
   public enum Action {
     case didTapSignInButton(type: AuthType)
   }
   
   public enum Mutation {
+    case setAuthType(AuthType?)
+    case setAccessToken(String?)
     case setProfile(Profile?)
+    case setRoute(SignInRoute)
     case setError(URLError?)
   }
   
   public struct State {
+    var authType: AuthType?
+    var accessToken: String?
     var profile: Profile?
+    var route: SignInRoute?
     var error: URLError?
   }
   
   public var initialState: State = .init()
   
-  public let errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
-    return .just(.setError(error.asURLError))
+  public lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { [weak self] error in
+    let error = error.asURLError
+    
+    if error?.code == .needSignUp {
+      guard let authType = self?.currentState.authType,
+            let accessToken = self?.currentState.accessToken else {
+              return .empty()
+            }
+      
+      return .just(.setRoute(.signUp(authType, accessToken)))
+    }
+    
+    return .just(.setError(error))
   }
   
   private let useCase: SignInUseCase
+  private let userService: UserService
   
-  public init(useCase: SignInUseCase) {
+  public init(useCase: SignInUseCase, userService: UserService = UserManager.shared) {
     self.useCase = useCase
+    self.userService = userService
   }
   
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
-    case .didTapSignInButton(let type):
-      return useCase.signIn(authType: type)
-        .flatMap { profile -> Observable<Mutation> in
-          return .just(.setProfile(profile))
-        }.catch(errorHandler)
+    case .didTapSignInButton(let authType):
+      let _authType: Observable<Mutation> = .just(.setAuthType(authType))
+      
+      let accessToken = useCase.accessTokenFromThirdParty(authType: authType)
+        .flatMap { accessToken -> Observable<Mutation> in
+          return .just(.setAccessToken(accessToken))
+        }
+      
+      return Observable.concat(
+        _authType,
+        accessToken,
+        signInProcess()
+      )
     }
   }
   
@@ -52,12 +85,30 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
     var newState = state
     
     switch mutation {
+    case let .setAuthType(authType):
+      newState.authType = authType
+    case let .setAccessToken(accessToken):
+      newState.accessToken = accessToken
     case let .setProfile(profile):
       newState.profile = profile
+    case let .setRoute(route):
+      newState.route = route
     case let .setError(error):
       newState.error = error
     }
     
     return newState
+  }
+}
+
+private extension SignInReactor {
+  func signInProcess() -> Observable<Mutation> {
+    guard let authType = currentState.authType,
+            let accessToken = currentState.accessToken else { return .empty() }
+    return useCase.signIn(authType: authType, accessToken: accessToken)
+      .flatMap { [weak self] profile -> Observable<Mutation> in
+        self?.userService.update(accessToken: accessToken)
+        return .just(.setProfile(profile))
+      }.catch(errorHandler)
   }
 }
