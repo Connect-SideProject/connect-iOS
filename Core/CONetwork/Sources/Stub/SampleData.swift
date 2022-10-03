@@ -17,7 +17,7 @@ public struct SampleData {
   
   public func create() -> Data {
     switch path {
-    case let .signIn(authType):
+    case let .signIn(authType, _):
       let profile: Profile = .init(
         authType: authType,
         nickname: "시원",

@@ -33,8 +33,7 @@ public final class SignInDIContainer: DIContainer {
   
   public func makeUseCase() -> UserCase {
     return SignInUseCaseImpl(
-      repository: makeRepository(),
-      userService: userService
+      repository: makeRepository()
     )
   }
   

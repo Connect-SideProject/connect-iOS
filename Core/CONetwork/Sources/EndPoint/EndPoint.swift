@@ -51,7 +51,7 @@ public extension EndPoint {
   var header: [String: String]? {
     var common: [String: String] = ["Content-Type": "application/json"]
     switch path {
-    case let .signIn(authType):
+    case let .signIn(authType, accessToken):
       let _ = ["access-token": accessToken,
                "auth-type": authType.description].map { common[$0.key] = $0.value }
     case .serchPlace:

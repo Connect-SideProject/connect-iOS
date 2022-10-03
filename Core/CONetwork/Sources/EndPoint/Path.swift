@@ -12,7 +12,7 @@ import COExtensions
 
 public enum Path {
   case allSkills
-  case signIn(AuthType)
+  case signIn(AuthType, String)
   case signUp(SignUpParameter)
   case serchPlace(String)
   case userProfile
