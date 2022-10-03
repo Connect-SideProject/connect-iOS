@@ -9,10 +9,14 @@ import Foundation
 
 public class Skill: NSObject, NSCoding, Codable, Identifiable {
   
-  public let id: Int
-  public let code: String
-  public let name: String
-  public let isAddUser: String
+  public var id: Int = 0
+  public var code: String = ""
+  public var name: String = ""
+  public var isAddUser: String = ""
+  
+  public override init() {
+    super.init()
+  }
   
   required public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -54,11 +58,27 @@ public class Skill: NSObject, NSCoding, Codable, Identifiable {
   }
 }
 
-public class RoleAndSkills: NSObject, NSCoding, Codable {
+public extension Skill {
+  convenience init(id: Int = 0, code: String = "", name: String = "", isAddUser: String = "") {
+    self.init()
+    
+    self.id = id
+    self.code = code
+    self.name = name
+    self.isAddUser = isAddUser
+  }
+}
 
-  public let roleCode: String
-  public let roleName: String
-  public let skills: [Skill]
+public class RoleSkills: NSObject, NSCoding, Codable, Identifiable {
+
+  public var id: Int = -1
+  public var roleCode: String = ""
+  public var roleName: String = ""
+  public var skills: [Skill] = []
+  
+  public override init() {
+    super.init()
+  }
   
   required public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -92,5 +112,16 @@ public class RoleAndSkills: NSObject, NSCoding, Codable {
     case roleCode = "code_cd"
     case roleName = "code_nm"
     case skills = "codes"
+  }
+}
+
+public extension RoleSkills {
+  convenience init(id: Int = -1, roleCode: String = "", roleName: String = "", skills: [Skill] = []) {
+    self.init()
+    
+    self.id = id
+    self.roleCode = roleCode
+    self.roleName = roleName
+    self.skills = skills
   }
 }

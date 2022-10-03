@@ -10,7 +10,7 @@ import Foundation
 
 public enum UserDefaultsKeys: String {
   case accessToken
-  case roleAndSkillsList
+  case roleSkillsList
 }
 
 public extension UserDefaults {

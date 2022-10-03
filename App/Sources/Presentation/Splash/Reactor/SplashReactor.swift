@@ -36,14 +36,14 @@ public final class SplashReactor: Reactor, ErrorHandlerable {
   }
   
   private let apiService: ApiService
-  private let roleAndSkillsService: RoleSkillsService
+  private let roleSkillsService: RoleSkillsService
   
   public init(
     apiService: ApiService = ApiManager.shared,
-    roleAndSkillsService: RoleSkillsService = RoleSkillsManager.shared
+    roleSkillsService: RoleSkillsService = RoleSkillsManager.shared
   ) {
     self.apiService = apiService
-    self.roleAndSkillsService = roleAndSkillsService
+    self.roleSkillsService = roleSkillsService
   }
   
   public func mutate(action: Action) -> Observable<Mutation> {
@@ -51,13 +51,13 @@ public final class SplashReactor: Reactor, ErrorHandlerable {
     case .requestRolesAndSkills:
       return apiService.request(endPoint: .init(path: .allSkills))
         .debug()
-        .flatMap { [weak self] (roleAndSkills: [RoleAndSkills]) -> Observable<Mutation> in
+        .flatMap { [weak self] (roleSkills: [RoleSkills]) -> Observable<Mutation> in
           guard let self = self else { return .empty() }
           
-          if self.roleAndSkillsService.isExists {
+          if self.roleSkillsService.isExists {
             return .just(.setIsFinishRequests(false))
           } else {
-            self.roleAndSkillsService.update(roleAndSkills)
+            self.roleSkillsService.update(roleSkills)
             return .just(.setIsFinishRequests(true))
           }
         }.catch(errorHandler)

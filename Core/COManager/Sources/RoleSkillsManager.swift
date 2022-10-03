@@ -10,29 +10,21 @@ import Foundation
 import CODomain
 import COExtensions
 
-public protocol RoleSkillsService {
-  var isExists: Bool { get }
-  
-  var roleAndSkillsList: [RoleAndSkills] { get }
-  
-  func update(_ roleAndSkillsList: [RoleAndSkills])
-}
-
 public final class RoleSkillsManager: RoleSkillsService {
   
   public static let shared: RoleSkillsManager = RoleSkillsManager()
   
   public var isExists: Bool {
-    return UserDefaults.standard.isExists(forKey: .roleAndSkillsList)
+    return UserDefaults.standard.isExists(forKey: .roleSkillsList)
   }
   
-  public var roleAndSkillsList: [RoleAndSkills] {
-    return UserDefaults.standard.object(type: [RoleAndSkills].self, forKey: .roleAndSkillsList) ?? []
+  public var roleSkillsList: [RoleSkills] {
+    return UserDefaults.standard.object(type: [RoleSkills].self, forKey: .roleSkillsList) ?? []
   }
   
   private init() {}
   
-  public func update(_ roleAndSkillsList: [RoleAndSkills]) {
-    UserDefaults.standard.set(object: roleAndSkillsList, forKey: .roleAndSkillsList)
+  public func update(_ roleSkillsList: [RoleSkills]) {
+    UserDefaults.standard.set(object: roleSkillsList, forKey: .roleSkillsList)
   }
 }
