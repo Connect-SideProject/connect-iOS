@@ -69,7 +69,7 @@ final class HomeViewReactor: Reactor {
             guard let sectionIndex = self.getIndex(section: .homeSubMenu([])) else { return newState }
             newState.section[sectionIndex] = items
             
-            print("Home SubMenu Items : \(items) or Section Index : \(sectionIndex) or \(newState.section)")
+            print("new Section : \(newState.section[sectionIndex])")
             return newState
         }
         
