@@ -11,12 +11,16 @@ import Then
 import ReactorKit
 
 enum HomeSubMenuType: String {
-    case all = "전체"
-    case project = "프로젝트"
-    case study = "스터디"
+    case all
+    case project
+    case study
     
     func getTitle() -> String {
-        self.rawValue
+        switch self {
+        case .all: return "전체"
+        case .project: return "프로젝트"
+        case .study: return "스터디"
+        }
     }
 }
 
@@ -35,6 +39,7 @@ final class HomeStudyMenuReactor: Reactor {
     init(menuType: HomeSubMenuType) {
         defer { _ = self.state }
         self.initialState = State(menuType: menuType)
+        print("study Menu Type: \(menuType)")
     }
     
 }
