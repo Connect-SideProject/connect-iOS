@@ -66,9 +66,8 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
       var parameter = parameter
       parameter.updateAuthType(authType)
       parameter.updateRegion(region)
-      print(parameter)
       
-      return useCase.signUp(parameter: parameter)
+      return useCase.signUp(parameter: parameter, accessToken: accessToken)
         .debug()
         .flatMap { profile -> Observable<Mutation> in
           return .just(.setProfile(profile))

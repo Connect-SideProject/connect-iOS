@@ -37,7 +37,7 @@ extension SignUpUseCaseImpl {
     }
   }
   
-  public func signUp(parameter: SignUpParameter) -> Observable<Profile> {
-    return repository.requestSignUp(parameter: parameter)
+  public func signUp(parameter: SignUpParameter, accessToken: String) -> Observable<Profile> {
+    return repository.requestSignUp(parameter: parameter, accessToken: accessToken)
   }
 }

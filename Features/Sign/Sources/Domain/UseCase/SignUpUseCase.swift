@@ -12,5 +12,5 @@ import RxSwift
 
 public protocol SignUpUseCase {
   func getRegionList(query: String) -> Observable<[Region]>
-  func signUp(parameter: SignUpParameter) -> Observable<Profile>
+  func signUp(parameter: SignUpParameter, accessToken: String) -> Observable<Profile>
 }
