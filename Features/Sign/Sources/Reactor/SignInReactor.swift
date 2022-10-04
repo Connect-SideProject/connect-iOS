@@ -44,16 +44,17 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
     let error = error.asURLError
     
     if error?.code == .needSignUp {
-      guard let authType = self?.currentState.authType,
-            let accessToken = self?.currentState.accessToken else {
-              return .empty()
-            }
-      
+      guard let authType = self?.authType,
+            let accessToken = self?.accessToken else {
+        return .empty()
+      }
       return .just(.setRoute(.signUp(authType, accessToken)))
     }
-    
     return .just(.setError(error))
   }
+  
+  private var authType: AuthType? = nil
+  private var accessToken: String = ""
   
   private let useCase: SignInUseCase
   private let userService: UserService
@@ -66,18 +67,17 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .didTapSignInButton(let authType):
-      let _authType: Observable<Mutation> = .just(.setAuthType(authType))
+      self.authType = authType
       
-      let accessToken = useCase.accessTokenFromThirdParty(authType: authType)
-        .flatMap { accessToken -> Observable<Mutation> in
-          return .just(.setAccessToken(accessToken))
+      let accessToken: Observable<String> = useCase.accessTokenFromThirdParty(authType: authType)
+      
+      return accessToken
+        .flatMap { [weak self] accessToken -> Observable<Mutation> in
+          guard let self = self else { return .empty() }
+          self.accessToken = accessToken
+          
+          return self.signInProcess(authType: authType, accessToken: accessToken)
         }
-      
-      return Observable.concat(
-        _authType,
-        accessToken,
-        signInProcess()
-      )
     }
   }
   
@@ -102,9 +102,7 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
 }
 
 private extension SignInReactor {
-  func signInProcess() -> Observable<Mutation> {
-    guard let authType = currentState.authType,
-            let accessToken = currentState.accessToken else { return .empty() }
+  func signInProcess(authType: AuthType, accessToken: String) -> Observable<Mutation> {
     return useCase.signIn(authType: authType, accessToken: accessToken)
       .flatMap { [weak self] profile -> Observable<Mutation> in
         self?.userService.update(accessToken: accessToken)

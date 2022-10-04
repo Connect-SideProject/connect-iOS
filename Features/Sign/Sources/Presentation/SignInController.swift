@@ -64,6 +64,7 @@ public final class SignInController: UIViewController, ReactorKit.View {
     reactor.state
       .map { $0.route }
       .filter { $0 != nil }
+      .observe(on: MainScheduler.instance)
       .bind { [weak self] route in
         switch route {
         case .home:
