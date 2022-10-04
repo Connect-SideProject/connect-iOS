@@ -13,7 +13,7 @@ import COExtensions
 public enum Path {
   case allSkills
   case signIn(AuthType, String)
-  case signUp(SignUpParameter)
+  case signUp(SignUpParameter, String)
   case serchPlace(String)
   case userProfile
   case updateProfile(Codable)
@@ -37,7 +37,7 @@ public enum Path {
   
   public var parameter: [String: Any]? {
     switch self {
-    case let .signUp(parameter):
+    case let .signUp(parameter, _):
       return parameter.asDictionary()
     case let .updateProfile(profile):
       return profile.asDictionary()

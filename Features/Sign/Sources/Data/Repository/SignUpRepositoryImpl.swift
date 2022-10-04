@@ -26,8 +26,8 @@ extension SignUpRepositoryImpl {
     return apiService.requestOutBound(endPoint: .init(path: .serchPlace(query)))
   }
   
-  public func requestSignUp(parameter: SignUpParameter) -> Observable<CODomain.Profile> {
-    return apiService.request(endPoint: .init(path: .signUp(parameter)))
+  public func requestSignUp(parameter: SignUpParameter, accessToken: String) -> Observable<CODomain.Profile> {
+    return apiService.request(endPoint: .init(path: .signUp(parameter, accessToken)))
   }
 }
 

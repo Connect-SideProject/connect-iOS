@@ -13,5 +13,5 @@ import RxSwift
 
 public protocol SignUpRepository {
   func requestSearchAddress(query: String) -> Observable<KakaoMapAddresses>
-  func requestSignUp(parameter: SignUpParameter) -> Observable<Profile>
+  func requestSignUp(parameter: SignUpParameter, accessToken: String) -> Observable<Profile>
 }
