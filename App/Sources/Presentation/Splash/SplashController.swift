@@ -32,18 +32,13 @@ final class SplashController: UIViewController, ReactorKit.View {
     
     /// 스킬리스트 요청
     Observable.just(())
+      .delay(.milliseconds(300), scheduler: MainScheduler.instance)
       .map { Reactor.Action.requestRolesAndSkills }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
-    /// 스킬리스트 네트워크 실패시 진행을 위한 처리.
-    Observable.just(())
-      .delay(.seconds(3), scheduler: MainScheduler.instance)
-      .map { Reactor.Action.waitCompletedAfterDelay }
-      .bind(to: reactor.action)
-      .disposed(by: disposeBag)
-    
     reactor.state
+      .debug()
       .map { $0.isFinishRequests }
       .filter { $0 }
       .observe(on: MainScheduler.instance)
