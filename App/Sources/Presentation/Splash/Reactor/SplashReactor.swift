@@ -16,7 +16,6 @@ import ReactorKit
 public final class SplashReactor: Reactor, ErrorHandlerable {
   public enum Action {
     case requestRolesAndSkills
-    case waitCompletedAfterDelay
   }
   
   public enum Mutation {
@@ -49,20 +48,16 @@ public final class SplashReactor: Reactor, ErrorHandlerable {
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .requestRolesAndSkills:
+      
+      if roleSkillsService.isExists {
+        return .just(.setIsFinishRequests(true))
+      }
+      
       return apiService.request(endPoint: .init(path: .allSkills))
-        .debug()
         .flatMap { [weak self] (roleSkills: [RoleSkills]) -> Observable<Mutation> in
-          guard let self = self else { return .empty() }
-          
-          if self.roleSkillsService.isExists {
-            return .just(.setIsFinishRequests(false))
-          } else {
-            self.roleSkillsService.update(roleSkills)
+            self?.roleSkillsService.update(roleSkills)
             return .just(.setIsFinishRequests(true))
-          }
         }.catch(errorHandler)
-    case .waitCompletedAfterDelay:
-      return .just(.setIsFinishRequests(true))
     }
   }
   
