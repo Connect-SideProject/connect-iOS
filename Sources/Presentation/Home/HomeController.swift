@@ -36,6 +36,11 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
     }
     
     
+    private let selectedLineView: UIView = UIView().then {
+        $0.backgroundColor = UIColor.green04
+    }
+    
+    
     
     let dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
     
@@ -46,6 +51,7 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
         flowLayout.itemSize = CGSize(width: 60, height: 40)
     })).then { collectionView in
         collectionView.register(HomeSearchResuableHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView")
+        collectionView.register(HomeStudyMenuFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView")
         collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
         collectionView.register(HomeStudyMenuCell.self, forCellWithReuseIdentifier: "HomeStudyMenuCell")
         collectionView.showsVerticalScrollIndicator = false
@@ -78,6 +84,14 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
                     case .homeStudyMenu:
                         guard let searchHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView", for: indexPath) as? HomeSearchResuableHeaderView else { return UICollectionReusableView() }
                         return searchHeaderView
+                    default:
+                        return UICollectionReusableView()
+                    }
+                case UICollectionView.elementKindSectionFooter:
+                    switch dataSource[indexPath] {
+                    case .homeStudyMenu:
+                        guard let homeMenuUnderLineView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView", for: indexPath) as? HomeStudyMenuFooterView else { return UICollectionReusableView() }
+                        return homeMenuUnderLineView
                     default:
                         return UICollectionReusableView()
                     }
@@ -121,7 +135,7 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
     
     
     private func configure() {
-        [collectionView, floatingButton, homeIndicatorView].forEach {
+        [collectionView, floatingButton, homeIndicatorView, selectedLineView].forEach {
             view.addSubview($0)
         }
         self.view.bringSubviewToFront(self.homeIndicatorView)
@@ -188,7 +202,6 @@ extension HomeController {
         
         collectionView
             .rx.itemSelected
-            .throttle(.seconds(3), scheduler: MainScheduler.instance)
             .subscribe(onNext: { indexPath in
                 switch self.dataSource[indexPath] {
                 case .homeMenu:
@@ -210,6 +223,16 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         switch self.dataSource[section] {
         case .homeSubMenu:
             return CGSize(width: collectionView.frame.size.width, height: 44)
+        default:
+            return .zero
+        }
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+        switch self.dataSource[section] {
+        case .homeSubMenu:
+            return CGSize(width: collectionView.frame.size.width, height: 1)
         default:
             return .zero
         }
