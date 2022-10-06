@@ -5,18 +5,20 @@
 //  Created by sean on 2022/06/02.
 //  Copyright © 2022 sideproj. All rights reserved.
 //
-
 import UIKit
 
 import FlexLayout
 import PinLayout
 import ReactorKit
 import RxCocoa
+import COCommonUI
+import CODomain
+import COExtensions
 
 /// MY 화면 컨트롤러.
-final class ProfileController: UIViewController, ReactorKit.View {
+public final class ProfileController: UIViewController, ReactorKit.View {
   
-  typealias Reactor = ProfileReactor
+  public typealias Reactor = ProfileReactor
   
   private lazy var profileView: ProfileView = {
     let view = ProfileView(direction: .row)
@@ -34,12 +36,25 @@ final class ProfileController: UIViewController, ReactorKit.View {
     stackView.distribution = .equalSpacing
     return stackView
   }()
+
+  private lazy var skillContainerView = DescriptionContainerView(
+    type: .custom(
+      "보유 스킬",
+      CastableContainerView(
+        views: [RoundSelectionButtonView(
+          titles: reactor?.currentState.profile?.skills.map { $0 } ?? [""],
+          isSelectable: false,
+          direction: .vertical
+        )],
+        direction: .column)
+    )
+  )
   
   private let flexContainer = UIView()
   
-  var disposeBag: DisposeBag = .init()
+  public var disposeBag: DisposeBag = .init()
   
-  override func viewDidLayoutSubviews() {
+  public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     
     flexContainer.pin
@@ -52,14 +67,14 @@ final class ProfileController: UIViewController, ReactorKit.View {
     flexContainer.flex.layout()
   }
   
-  override func viewDidLoad() {
+  public override func viewDidLoad() {
     super.viewDidLoad()
     
     configureUI()
     bindEvent()
   }
   
-  func bind(reactor: Reactor) {
+  public func bind(reactor: Reactor) {
     Observable.just(())
       .map { _ in Reactor.Action.requestProfile }
       .bind(to: reactor.action)
@@ -71,11 +86,9 @@ final class ProfileController: UIViewController, ReactorKit.View {
       .bind { [weak self] profile in
         
         self?.profileView.update(
-          item: .init(
-            url: .init(string: profile.profileURL),
-            userName: profile.userName,
-            jobGroup: profile.jobGroup
-          )
+          url: .init(string: profile.profileURL ?? ""),
+          userName: profile.nickname,
+          roles: profile.roles
         )
       }.disposed(by: disposeBag)
     
@@ -116,19 +129,28 @@ extension ProfileController {
           .height(100)
         
         flex.addItem(buttonContainerView)
-          .margin(20)
           .height(35)
+          .marginVertical(10)
+          .marginHorizontal(20)
         
         flex.addItem(stackView)
           .height(120)
-          .marginTop(10)
-          .margin(20)
+          .marginVertical(10)
+          .marginHorizontal(20)
+        
+        flex.addItem(skillContainerView)
+          .marginHorizontal(20)
       }
   }
   
   private func bindEvent() {
     buttonContainerView.handler = { offset in
       print(offset)
+    }
+    
+    skillContainerView.customView?
+      .casting(type: CastableContainerView.self).handler = {
+        print($0)
     }
   }
   

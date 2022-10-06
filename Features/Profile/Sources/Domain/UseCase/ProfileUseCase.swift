@@ -9,8 +9,9 @@
 import Foundation
 
 import RxSwift
+import CODomain
 
-protocol ProfileUseCase {
+public protocol ProfileUseCase {
   func getProfile() -> Observable<Profile>
   func updateProfile(_ profile: Profile) -> Observable<Profile>
 }

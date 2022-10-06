@@ -9,6 +9,7 @@
 import Foundation
 
 import RxSwift
+import CODomain
 
 final class ProfileUseCaseImpl: ProfileUseCase {
   

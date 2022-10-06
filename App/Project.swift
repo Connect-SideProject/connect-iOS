@@ -34,7 +34,7 @@ let app = Project.feature(
     .project(target: "COThirdParty", path: .relativeToRoot("Core/COThirdParty")),
   ],
   externalDependencies: [
-    .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
+    .project(target: "COFeatures", path: .relativeToRoot("Features/COFeatures")),
     .xcframework(path: .CocoaPods.Framework.naverLogin),
     .xcframework(path: .CocoaPods.Framework.naverMaps)
   ]
