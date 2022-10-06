@@ -37,7 +37,7 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   )
   
   private let interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", SelectionButtonView(
+    type: .custom("관심분야", RoundSelectionButtonView(
       titles: [Interestring.finance.description,
                Interestring.fashion.description,
                Interestring.entertainment.description,
@@ -47,7 +47,7 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   )
   
   private lazy var jobContainerView = DescriptionContainerView(
-    type: .custom("원하는 역할", SelectionButtonView(
+    type: .custom("원하는 역할", RoundSelectionButtonView(
       titles: roleSkillsService.roleSkillsList.map { $0.roleName })
     )
   )
@@ -57,7 +57,7 @@ public final class SignUpController: UIViewController, ReactorKit.View {
       "보유 스킬",
       CastableContainerView(
         views: roleSkillsService.roleSkillsList
-          .map { SelectionButtonView(titles: $0.skills.map { $0.name }, direction: .vertical) },
+          .map { RoundSelectionButtonView(titles: $0.skills.map { $0.name }, direction: .vertical) },
         direction: .column)
     )
   )
@@ -241,10 +241,10 @@ extension SignUpController {
     guard let period = periodContainerView.customView?.casting(type: CheckBoxContainerView.self),
           let checkedItems = period.checkedItems else { return }
 
-    let interestings: [Interestring] = interestsContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
+    let interestings: [Interestring] = interestsContainerView.customView?.casting(type: RoundSelectionButtonView.self).selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
     
     guard let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") else { return }
-    let roles: [Role] = jobContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.compactMap { Role(rawValue: $0) } ?? []
+    let roles: [Role] = jobContainerView.customView?.casting(type: RoundSelectionButtonView.self).selectedItems.compactMap { Role(rawValue: $0) } ?? []
     
     let portfolioURL = portfolioContainerView.textField.text ?? ""
     

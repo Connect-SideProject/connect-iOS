@@ -175,7 +175,7 @@ extension CastableContainerView {
   }
   
   private func bindEvent() {
-    let views = views.map { $0.casting(type: SelectionButtonView.self) }
+    let views = views.map { $0.casting(type: RoundSelectionButtonView.self) }
     
     let handler: (String) -> Void = { [weak self] _ in
       let selectedItems = views.map { $0.selectedItems }.flatMap { $0 }
