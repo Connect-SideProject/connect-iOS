@@ -1,5 +1,5 @@
 //
-//  SelectionButtonView.swift
+//  RoundSelectionButtonView.swift
 //  COCommonUI
 //
 //  Created by sean on 2022/09/12.
@@ -9,7 +9,7 @@ import UIKit
 
 import Then
 
-public final class SelectionButtonView: UIView, CastableView {
+public final class RoundSelectionButtonView: UIView, CastableView {
   
   private lazy var collectionViewLayout = LeftAlignedCollectionViewFlowLayout().then {
     $0.scrollDirection = direction
@@ -32,15 +32,36 @@ public final class SelectionButtonView: UIView, CastableView {
   
   private var dictionary: [String : Bool] = [:]
   private let titles: [String]
+  private let isSelectable: Bool
   private let direction: UICollectionView.ScrollDirection
   
-  public init(titles: [String], direction: UICollectionView.ScrollDirection = .horizontal) {
+  /**
+  라운드 형태의 선택버튼 생성자.
+
+  - parameter titles: 선택버튼에 설정되는 타이틀.
+  - parameter isSelectable: 버튼 선택가능 여부 / false: 선택되어있는 상태로 설정.
+  - parameter direction: 버튼의 길이가 넘어가는경우 스크롤 및 보여지는 방향 설정.
+  */
+  public init(
+    titles: [String],
+    isSelectable: Bool = true,
+    direction: UICollectionView.ScrollDirection = .horizontal
+  ) {
     self.titles = titles
+    self.isSelectable = isSelectable
     self.direction = direction
     super.init(frame: .zero)
     
     // 입력된 title만큼 dictionary 초기화
-    let _ = titles.map { self.dictionary[$0] = false }
+    let _ = titles.map {
+      if isSelectable {
+        self.dictionary[$0] = false
+      } else {
+        self.dictionary[$0] = true
+        // 선택 비활성화 시 선택된 아이템에 추가.
+        self.selectedItems.append($0)
+      }
+    }
     
     configureUI()
   }
@@ -54,7 +75,7 @@ public final class SelectionButtonView: UIView, CastableView {
   }
 }
 
-extension SelectionButtonView {
+extension RoundSelectionButtonView {
   private func configureUI() {
     collectionView.showsHorizontalScrollIndicator = false
     collectionView.showsVerticalScrollIndicator = false
@@ -74,7 +95,7 @@ extension SelectionButtonView {
   }
 }
 
-extension SelectionButtonView: UICollectionViewDataSource {
+extension RoundSelectionButtonView: UICollectionViewDataSource {
   public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return dictionary.count
   }
@@ -92,8 +113,11 @@ extension SelectionButtonView: UICollectionViewDataSource {
   }
 }
 
-extension SelectionButtonView: UICollectionViewDelegateFlowLayout {
+extension RoundSelectionButtonView: UICollectionViewDelegateFlowLayout {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    
+    guard isSelectable else { return }
+    
     let selectedTitle = titles[indexPath.item]
     
     dictionary[selectedTitle]?.toggle()
