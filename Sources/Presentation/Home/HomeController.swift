@@ -48,12 +48,12 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
     private lazy var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then({ flowLayout in
         flowLayout.minimumLineSpacing = .zero
         flowLayout.minimumInteritemSpacing = .zero
-        flowLayout.itemSize = CGSize(width: 60, height: 40)
     })).then { collectionView in
         collectionView.register(HomeSearchResuableHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView")
         collectionView.register(HomeStudyMenuFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView")
         collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
         collectionView.register(HomeStudyMenuCell.self, forCellWithReuseIdentifier: "HomeStudyMenuCell")
+        collectionView.register(HomeStudyListCell.self, forCellWithReuseIdentifier: "HomeStudyListCell")
         collectionView.showsVerticalScrollIndicator = false
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.backgroundColor = .white
@@ -72,10 +72,13 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
                     return menuCell
                     
                 case let .homeStudyMenu(cellReactor):
-                    let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyMenuCell", for: indexPath) as? HomeStudyMenuCell
-                    studyMenuCell?.reactor = cellReactor
-                    return studyMenuCell!
-                
+                    guard let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyMenuCell", for: indexPath) as? HomeStudyMenuCell else { return UICollectionViewCell() }
+                    studyMenuCell.reactor = cellReactor
+                    return studyMenuCell
+                    
+                case .homeStudyList:
+                    guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return UICollectionViewCell() }
+                    return studyListCell
                 }
             },configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
                 switch kind {
@@ -135,6 +138,8 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
     
     
     private func configure() {
+        var tabbarHeight: CGFloat = tabBarController?.tabBar.frame.size.height ?? 0.0
+        
         [collectionView, floatingButton, homeIndicatorView, selectedLineView].forEach {
             view.addSubview($0)
         }
@@ -145,9 +150,12 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
             $0.edges.equalToSuperview()
         }
         
+        print("Tabbar Frame : \(tabBarController?.tabBar.frame.size.height)")
+        
+        
         floatingButton.snp.makeConstraints {
-            $0.right.equalToSuperview().offset(-15)
-            $0.bottom.equalTo(self.view.safeAreaLayoutGuide).offset(-15)
+            $0.right.equalToSuperview().offset(-20)
+            $0.bottom.equalToSuperview().offset(-(tabbarHeight + 12))
             $0.width.height.equalTo(75)
         }
         
@@ -208,6 +216,8 @@ extension HomeController {
                     break
                 case .homeStudyMenu:
                     print("CollectionView Click Section")
+                case .homeStudyList:
+                    print("CollectionView StudyList Click")
                 }
             }).disposed(by: disposeBag)
         
@@ -223,6 +233,17 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         switch self.dataSource[section] {
         case .homeSubMenu:
             return CGSize(width: collectionView.frame.size.width, height: 44)
+        default:
+            return .zero
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        switch self.dataSource[indexPath] {
+        case .homeStudyMenu:
+            return CGSize(width: 60, height: 40)
+        case .homeStudyList:
+            return CGSize(width: collectionView.frame.size.width - 40, height: 97)
         default:
             return .zero
         }
@@ -244,6 +265,8 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         case .field:
             return 1
         case .homeSubMenu:
+            return .zero
+        case .homeStudyList:
             return .zero
             
         }

@@ -21,6 +21,7 @@ final class HomeViewReactor: Reactor {
     enum Mutation {
         case setLoading(Bool)
         case setSubMenuItems(HomeViewSection)
+        case setStudyListItems(HomeViewSection)
     }
     
     struct State {
@@ -34,7 +35,8 @@ final class HomeViewReactor: Reactor {
             isLoading: false,
             section: [
                 .field([]),
-                .homeSubMenu([])
+                .homeSubMenu([]),
+                .homeStudyList([])
             ]
         )
     }
@@ -50,8 +52,14 @@ final class HomeViewReactor: Reactor {
                 .homeStudyMenu(HomeStudyMenuReactor(menuType: .study))
             ])))
             
+            let setStudyListItems = Observable<Mutation>.just(.setStudyListItems(.homeStudyList([
+                .homeStudyList,
+                .homeStudyList,
+                .homeStudyList
+            ])))
+                        
             return .concat([
-                startLoading,setMenuItems,endLoading
+                startLoading,setMenuItems,setStudyListItems,endLoading
             ])
         }
     }
@@ -68,8 +76,13 @@ final class HomeViewReactor: Reactor {
             var newState = state
             guard let sectionIndex = self.getIndex(section: .homeSubMenu([])) else { return newState }
             newState.section[sectionIndex] = items
+            return newState
             
-            print("new Section : \(newState.section[sectionIndex])")
+        case let .setStudyListItems(items):
+            var newState = state
+            guard let sectionIndex = self.getIndex(section: .homeStudyList([])) else { return newState }
+            newState.section[sectionIndex] = items
+            
             return newState
         }
         
