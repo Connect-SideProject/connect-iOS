@@ -9,11 +9,13 @@
 import Foundation
 import UIKit
 
-enum MessageType: CustomStringConvertible, Equatable {
+import COExtensions
+
+public enum MessageType: CustomStringConvertible, Equatable {
   case needSignIn
   case message(String)
   
-  var description: String {
+  public var description: String {
     switch self {
     case .needSignIn:
       return "로그인이 필요합니다."
@@ -23,16 +25,16 @@ enum MessageType: CustomStringConvertible, Equatable {
   }
 }
 
-enum AlertButtonType {
+public enum AlertButtonType {
   case confirm(String), cancel(String)
 }
 
-final class CommonAlert: UIAlertController {
+public final class CommonAlert: UIAlertController {
   
-  static let shared: CommonAlert = CommonAlert(extra: "")
+  public static let shared: CommonAlert = CommonAlert(extra: "")
   
-  var confirmHandler: () -> Void = {}
-  var cancelHandler: () -> Void = {}
+  public var confirmHandler: () -> Void = {}
+  public var cancelHandler: () -> Void = {}
   
   convenience init(
     title: String = "",
@@ -45,7 +47,7 @@ final class CommonAlert: UIAlertController {
   
   /// 1. 메세지 설정.
   @discardableResult
-  func setMessage(_ message: MessageType) -> Self {
+  public func setMessage(_ message: MessageType) -> Self {
     
     switch message {
     case .needSignIn:
@@ -59,7 +61,7 @@ final class CommonAlert: UIAlertController {
   
   /// 2. 버튼 설정.
   @discardableResult
-  func appendButton(type: AlertButtonType) -> Self {
+  public func appendButton(type: AlertButtonType) -> Self {
     
     var action: UIAlertAction!
     
@@ -86,7 +88,7 @@ final class CommonAlert: UIAlertController {
   
   /// 3. Alert 노출.
   @discardableResult
-  func show() -> Self {
+  public func show() -> Self {
     
     if actions.isEmpty {
       let action: UIAlertAction = .init(

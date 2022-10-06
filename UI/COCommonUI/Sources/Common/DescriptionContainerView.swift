@@ -86,7 +86,7 @@ extension DescriptionContainerView {
     flexContainer.flex
       .define { flex in
         flex.addItem(descriptionLabel)
-          .marginBottom(4)
+          .marginBottom(10)
         
         if let customView = customView {
           

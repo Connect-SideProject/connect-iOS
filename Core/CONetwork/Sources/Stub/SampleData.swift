@@ -49,7 +49,7 @@ public struct SampleData {
       let profile: Profile = .init(
         nickname: "시원",
         roles: [.developer],
-        region: .init(code: "SEO", name: "SUNGNAM"),
+        region: .init(code: "32321321", name: "경기 성남시"),
         interestings: [.health],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
