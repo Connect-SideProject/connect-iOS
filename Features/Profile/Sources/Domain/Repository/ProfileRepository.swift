@@ -9,6 +9,7 @@
 import Foundation
 
 import RxSwift
+import CODomain
 
 protocol ProfileRepository {
   func userProfile() -> Observable<Profile>

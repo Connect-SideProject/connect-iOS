@@ -8,11 +8,15 @@
 
 import Foundation
 
-public enum Role: String, Codable, Equatable {
+public enum Role: String, Codable, Equatable, CustomStringConvertible {
   case developer = "개발자"
   case designer = "디자이너"
   case planner = "기획자"
   case marketer = "마케터"
+  
+  public var description: String {
+    return self.rawValue
+  }
   
   public init?(rawValue: String) {
     switch rawValue {
@@ -62,7 +66,11 @@ public enum Role: String, Codable, Equatable {
   }
 }
 
-public struct Region: Codable, Equatable {
+public struct Region: Codable, Equatable, CustomStringConvertible {
+  
+  public var description: String {
+    return name
+  }
   
   let code: String
   let name: String
@@ -97,14 +105,14 @@ public extension Region {
 public class Profile: NSObject, NSCoding, Codable {
   
   var authType: AuthType? = nil
-  var nickname: String = ""
-  var roles: [Role] = []
-  var region: Region? = nil
-  var interestings: [Interestring] = []
-  var profileURL: String? = nil
-  var portfolioURL: String? = nil
-  var career: Career? = nil
-  var skills: [String] = []
+  public var nickname: String = ""
+  public var roles: [Role] = []
+  public var region: Region? = nil
+  public var interestings: [Interestring] = []
+  public var profileURL: String? = nil
+  public var portfolioURL: String? = nil
+  public var career: Career? = nil
+  public  var skills: [String] = []
   var isPushOn: Bool = false
   var isLocationExpose: Bool = false
   

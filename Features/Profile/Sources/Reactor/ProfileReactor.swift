@@ -10,6 +10,8 @@ import Foundation
 
 import ReactorKit
 import RxCocoa
+import CODomain
+import COCommonUI
 
 /// Profile
 enum ProfileSubtitle: String, CustomStringConvertible {
@@ -17,7 +19,7 @@ enum ProfileSubtitle: String, CustomStringConvertible {
     switch self {
     case .location:
       return "활동지역"
-    case .attentions:
+    case .interestings:
       return "관심분야"
     case .portfolio:
       return "포트폴리오"
@@ -28,38 +30,38 @@ enum ProfileSubtitle: String, CustomStringConvertible {
     }
   }
   
-  case location, attentions, portfolio, career, skills
+  case location, interestings, portfolio, career, skills
 }
 
-typealias ProfileSubItem = (subtitle: String, content: String)
+public typealias ProfileSubItem = (subtitle: String, content: String)
 
-final class ProfileReactor: Reactor {
-  enum Action {
+public final class ProfileReactor: Reactor {
+  public enum Action {
     /// 프로필 요청
     case requestProfile
   }
   
-  enum Mutation {
+  public enum Mutation {
     case setProfile(Profile)
     case setProfileSubItems([ProfileSubItem])
     case setMessage(MessageType?)
   }
   
-  struct State {
+  public struct State {
     var profile: Profile?
     var profileSubItems: [ProfileSubItem]?
     var message: MessageType?
   }
   
-  var initialState: State = .init()
+  public var initialState: State = .init()
   
-  let profileUseCase: ProfileUseCase
+  private let profileUseCase: ProfileUseCase
   
-  init(profileUseCase: ProfileUseCase) {
+  public init(profileUseCase: ProfileUseCase) {
     self.profileUseCase = profileUseCase
   }
   
-  func mutate(action: Action) -> Observable<Mutation> {
+  public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .requestProfile:
       return profileUseCase.getProfile()
@@ -70,13 +72,10 @@ final class ProfileReactor: Reactor {
           
           // 타입을 활용하여 타이틀과 해당 내용 표시를 위해 처리.
           let items: [Items] = [
-            (.location, profile.location),
-            (.attentions, profile.attentions),
-            (.portfolio, profile.portfolioURL),
-            (.career, profile.career),
-            (.skills, profile.skills.enumerated().map { offset, element -> String in
-              return offset != profile.skills.count - 1 ? "\(element), " : "\(element)"
-            }.reduce("") { $0 + $1 })
+            (.location, profile.region?.description ?? ""),
+            (.interestings, profile.interestings.map { $0.description }.reduce("") { $0 + $1 } ),
+            (.portfolio, profile.portfolioURL ?? ""),
+            (.career, profile.career?.description ?? "")
           ]
           
           // 뷰에서 보여지는 최종 형태로 변환.
@@ -91,7 +90,7 @@ final class ProfileReactor: Reactor {
     }
   }
   
-  func reduce(state: State, mutation: Mutation) -> State {
+  public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
     case let .setProfile(profile):
