@@ -12,16 +12,19 @@ import RxDataSources
 enum HomeListType: String, Equatable {
     case homeMenu
     case homeStudyMenu
+    case homeStudyList
 }
 
 enum HomeViewSection {
     case field([HomeViewSectionItem])
     case homeSubMenu([HomeViewSectionItem])
+    case homeStudyList([HomeViewSectionItem])
     
     func getSectionType() -> HomeListType {
         switch self {
         case .field: return .homeMenu
         case .homeSubMenu: return .homeStudyMenu
+        case .homeStudyList: return .homeStudyList
         }
     }
 }
@@ -32,6 +35,7 @@ extension HomeViewSection: SectionModelType {
         switch self {
         case let .field(items): return items
         case let .homeSubMenu(items): return items
+        case let .homeStudyList(items): return items
         }
         
     }
@@ -40,6 +44,7 @@ extension HomeViewSection: SectionModelType {
         switch original {
         case .field: self = .field(items)
         case .homeSubMenu: self = .homeSubMenu(items)
+        case .homeStudyList: self = .homeStudyList(items)
         }
     }
     
@@ -49,4 +54,5 @@ extension HomeViewSection: SectionModelType {
 enum HomeViewSectionItem {
     case homeMenu(HomeMenuCellReactor)
     case homeStudyMenu(HomeStudyMenuReactor)
+    case homeStudyList
 }
