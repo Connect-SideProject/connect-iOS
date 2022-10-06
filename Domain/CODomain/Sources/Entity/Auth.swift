@@ -17,8 +17,6 @@ public enum AuthType: Int, CustomStringConvertible, CaseIterable, Codable {
       return "NAVER"
     case .apple:
       return "APPLE"
-    default:
-      return ""
     }
   }
   

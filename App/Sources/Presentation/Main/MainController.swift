@@ -8,6 +8,9 @@
 
 import UIKit
 
+import Profile
+import CONetwork
+
 /// 하단 탭바가 포함된 화면 컨트롤러.
 final class MainController: UITabBarController {
   
@@ -49,7 +52,7 @@ extension MainController {
     
     /// MY 화면.
     let profileDIContainer = ProfileDIContainer(
-      apiService: ApiManagerStub()
+      apiService: ApiManager.shared
     )
     
     let profileNavigationController = UINavigationController(
