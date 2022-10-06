@@ -51,6 +51,7 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
     })).then { collectionView in
         collectionView.register(HomeSearchResuableHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView")
         collectionView.register(HomeStudyMenuFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView")
+        collectionView.register(HomeStudyListFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView")
         collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
         collectionView.register(HomeStudyMenuCell.self, forCellWithReuseIdentifier: "HomeStudyMenuCell")
         collectionView.register(HomeStudyListCell.self, forCellWithReuseIdentifier: "HomeStudyListCell")
@@ -94,7 +95,12 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
                     switch dataSource[indexPath] {
                     case .homeStudyMenu:
                         guard let homeMenuUnderLineView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView", for: indexPath) as? HomeStudyMenuFooterView else { return UICollectionReusableView() }
+                        
                         return homeMenuUnderLineView
+                    case .homeStudyList:
+                        guard let homeStudyListView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView", for: indexPath) as? HomeStudyListFooterView else { return UICollectionReusableView() }
+                        
+                        return homeStudyListView
                     default:
                         return UICollectionReusableView()
                     }
@@ -149,10 +155,7 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
         collectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
-        print("Tabbar Frame : \(tabBarController?.tabBar.frame.size.height)")
-        
-        
+                
         floatingButton.snp.makeConstraints {
             $0.right.equalToSuperview().offset(-20)
             $0.bottom.equalToSuperview().offset(-(tabbarHeight + 12))
@@ -254,6 +257,8 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         switch self.dataSource[section] {
         case .homeSubMenu:
             return CGSize(width: collectionView.frame.size.width, height: 1)
+        case .homeStudyList:
+            return CGSize(width: collectionView.frame.size.width, height: 60)
         default:
             return .zero
         }
@@ -267,7 +272,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         case .homeSubMenu:
             return .zero
         case .homeStudyList:
-            return .zero
+            return 8
             
         }
     }

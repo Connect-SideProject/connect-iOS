@@ -18,6 +18,8 @@ final class HomeStudyListCell: UICollectionViewCell {
         $0.backgroundColor = UIColor.white
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 13
+        $0.layer.borderColor = UIColor.gray02.cgColor
+        $0.layer.borderWidth = 1
     }
     
     private let studyListStateView: UIView = UIView().then {
