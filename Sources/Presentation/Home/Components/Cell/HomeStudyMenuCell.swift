@@ -61,7 +61,7 @@ final class HomeStudyMenuCell: UICollectionViewCell {
         $0.font = UIFont.boldSystemFont(ofSize: 16)
         $0.textAlignment = .center
         $0.numberOfLines = 1
-        $0.textColor = UIColor.black
+        $0.textColor = UIColor.gray04
     }
     
     
@@ -113,6 +113,12 @@ extension HomeStudyMenuCell: ReactorKit.View {
             .bind(to: studyMenuTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
+        
+        reactor.state.map { $0.menuType.getTitle() }
+            .filter{ $0 == "전체" }
+            .map { _ in UIColor.black }
+            .bind(to: self.studyMenuTitleLabel.rx.textColor)
+            .disposed(by: disposeBag)
         
     }
     
