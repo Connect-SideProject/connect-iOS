@@ -48,16 +48,26 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
     private lazy var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then({ flowLayout in
         flowLayout.minimumLineSpacing = .zero
         flowLayout.minimumInteritemSpacing = .zero
-    })).then { collectionView in
-        collectionView.register(HomeSearchResuableHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView")
-        collectionView.register(HomeStudyMenuFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView")
-        collectionView.register(HomeStudyListFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView")
-        collectionView.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
-        collectionView.register(HomeStudyMenuCell.self, forCellWithReuseIdentifier: "HomeStudyMenuCell")
-        collectionView.register(HomeStudyListCell.self, forCellWithReuseIdentifier: "HomeStudyListCell")
-        collectionView.showsVerticalScrollIndicator = false
-        collectionView.showsHorizontalScrollIndicator = false
-        collectionView.backgroundColor = .white
+    })).then {
+        $0.register(HomeSearchResuableHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView")
+        $0.register(HomeStudyMenuFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView")
+        $0.register(HomeStudyListFooterView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView")
+        $0.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
+        $0.register(HomeStudyMenuCell.self, forCellWithReuseIdentifier: "HomeStudyMenuCell")
+        $0.register(HomeStudyListCell.self, forCellWithReuseIdentifier: "HomeStudyListCell")
+        $0.showsVerticalScrollIndicator = false
+        $0.showsHorizontalScrollIndicator = false
+        $0.backgroundColor = .white
+    }
+    
+    private let releaseFlowLayout: UICollectionViewFlowLayout = UICollectionViewFlowLayout().then {
+        $0.scrollDirection = .horizontal
+    }
+    
+    private lazy var releaseCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: releaseFlowLayout).then {
+        $0.backgroundColor = .gray01
+        $0.showsVerticalScrollIndicator = false
+        $0.showsHorizontalScrollIndicator = false
     }
     
     
