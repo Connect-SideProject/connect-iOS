@@ -282,6 +282,8 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         switch self.dataSource[section] {
         case .homeSubMenu:
             return UIEdgeInsets(top: 25, left: 0, bottom: 0, right: 0)
+        case .homeStudyList:
+            return UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
         default:
             return .zero
         }
