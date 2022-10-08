@@ -36,6 +36,21 @@ public enum Terms: String, CustomStringConvertible, Codable {
     }
   }
   
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer().decode(String.self)
+    
+    switch container {
+    case "SEVICE":
+      self = .service
+    case "LOCATION":
+      self = .location
+    case "PRIVACY":
+      self = .privacy
+    default:
+      fatalError("")
+    }
+  }
+  
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
     

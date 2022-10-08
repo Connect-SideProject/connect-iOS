@@ -8,6 +8,8 @@
 
 import ReactorKit
 
+import CODomain
+
 class MapFloatingReactor: Reactor {
     
     var initialState: State = State(string: "")

@@ -8,6 +8,7 @@
 
 import ReactorKit
 
+import CODomain
 import CONetwork
 
 class MapReactor: Reactor {

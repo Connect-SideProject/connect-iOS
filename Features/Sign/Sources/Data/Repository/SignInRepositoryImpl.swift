@@ -55,7 +55,7 @@ extension SignInRepositoryImpl {
     return .just("accessToken")
   }
   
-  public func requestProfile(authType: AuthType) -> Observable<CODomain.Profile> {
-    return apiService.request(endPoint: .init(path: .signIn(authType)))
+  public func requestProfile(authType: AuthType, accessToken: String) -> Observable<CODomain.Profile> {
+    return apiService.request(endPoint: .init(path: .signIn(authType, accessToken)))
   }
 }

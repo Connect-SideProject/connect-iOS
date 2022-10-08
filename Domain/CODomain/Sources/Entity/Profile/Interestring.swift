@@ -41,6 +41,23 @@ public enum Interestring: String, Codable, CustomStringConvertible {
     }
   }
   
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer().decode(String.self)
+    
+    switch container {
+    case "FINANCE":
+      self = .finance
+    case "FASHION":
+      self = .fashion
+    case "HEALTH":
+      self = .health
+    case "ENTERTAINMENT":
+      self = .entertainment
+    default:
+      fatalError("")
+    }
+  }
+  
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
     

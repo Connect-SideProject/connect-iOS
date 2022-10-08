@@ -104,7 +104,7 @@ class AnonymousProfileController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
+      
         profileImageView.snp.makeConstraints { make in
             make.width.height.equalTo(60)
             make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
