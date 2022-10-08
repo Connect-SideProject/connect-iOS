@@ -36,6 +36,21 @@ public enum Career: String, Codable, CustomStringConvertible {
     }
   }
   
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer().decode(String.self)
+    
+    switch container {
+    case "ASPIRANT":
+      self = .aspirant
+    case "JUNIOR":
+      self = .junior
+    case "SENIOR":
+      self = .senior
+    default:
+      fatalError("")
+    }
+  }
+  
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
     

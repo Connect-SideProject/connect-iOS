@@ -14,7 +14,7 @@ public protocol DIContainer {
   associatedtype ViewController
   
   func makeReactor() -> Reactor
-  func makeSignInRepository() -> Repository
-  func makeSignInUseCase() -> UserCase
+  func makeRepository() -> Repository
+  func makeUseCase() -> UserCase
   func makeController() -> ViewController
 }

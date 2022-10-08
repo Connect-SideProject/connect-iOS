@@ -17,12 +17,12 @@ public struct SampleData {
   
   public func create() -> Data {
     switch path {
-    case let .signIn(authType):
+    case let .signIn(authType, _):
       let profile: Profile = .init(
         authType: authType,
         nickname: "시원",
         roles: [.developer],
-        region: .init(state: "SEO", city: "SUNGNAM"),
+        region: .init(code: "SEO", name: "SUNGNAM"),
         interestings: [.health],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
@@ -31,12 +31,25 @@ public struct SampleData {
         isPushOn: true,
         isLocationExpose: true
       )
-      return makeData(parameter: profile.asDictionary()!)
+      return makeData(dictionary: profile.asDictionary()!)
+    case .signUp:
+      let profile: Profile = .init(
+        authType: .kakao,
+        nickname: "시원",
+        roles: [.developer],
+        region: .init(code: "SEO", name: "SUNGNAM"),
+        interestings: [.health],
+        profileURL: "https://avatars.githubusercontent.com/u/24970070",
+        portfolioURL: "https://portfolio.com",
+        career: .junior,
+        skills: ["Swift", "RxSwift"]
+      )
+      return makeData(dictionary: profile.asDictionary()!)
     case .userProfile:
       let profile: Profile = .init(
         nickname: "시원",
         roles: [.developer],
-        region: .init(state: "SEO", city: "SUNGNAM"),
+        region: .init(code: "SEO", name: "SUNGNAM"),
         interestings: [.health],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
@@ -45,9 +58,9 @@ public struct SampleData {
         isPushOn: true,
         isLocationExpose: true
       )
-      return makeData(parameter: profile.asDictionary()!)
+      return makeData(dictionary: profile.asDictionary()!)
     case .updateProfile(let profile):
-      return makeData(parameter: profile.asDictionary()!)
+      return makeData(dictionary: profile.asDictionary()!)
     default:
       return Data()
     }
@@ -55,11 +68,11 @@ public struct SampleData {
 }
 
 public extension SampleData {
-  func makeData(parameter: [String: Any]) -> Data {
-    return try! JSONSerialization.data(withJSONObject: parameter)
-  }
+  func makeData(dictionary: [String: Any]) -> Data {
+    return try! JSONSerialization.data(withJSONObject: dictionary, options: [.fragmentsAllowed])
+    }
   
-  func makeData(parameters: [[String: Any]]) -> Data {
-    return try! JSONSerialization.data(withJSONObject: parameters)
-  }
+  func makeData(dictionary: [[String: Any]]) -> Data {
+    return try! JSONSerialization.data(withJSONObject: dictionary, options: [.fragmentsAllowed])
+    }
 }

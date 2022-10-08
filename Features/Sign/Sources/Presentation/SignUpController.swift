@@ -10,7 +10,13 @@ import UIKit
 import COCommonUI
 import CODomain
 import COExtensions
+import COManager
 import ReactorKit
+import RxCocoa
+
+public protocol SignUpDelegate: AnyObject {
+  func routeToHome()
+}
 
 public final class SignUpController: UIViewController, ReactorKit.View {
   
@@ -40,20 +46,24 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     )
   )
   
-  private let jobContainerView = DescriptionContainerView(
+  private lazy var jobContainerView = DescriptionContainerView(
     type: .custom("원하는 역할", SelectionButtonView(
-      titles: ["기획자", "개발자", "디자이너", "마케터"])
+      titles: roleSkillsService.roleSkillsList.map { $0.roleName })
+    )
+  )
+  
+  private lazy var skillContainerView = DescriptionContainerView(
+    type: .custom(
+      "보유 스킬",
+      CastableContainerView(
+        views: roleSkillsService.roleSkillsList
+          .map { SelectionButtonView(titles: $0.skills.map { $0.name }, direction: .vertical) },
+        direction: .column)
     )
   )
   
   private let portfolioContainerView = DescriptionContainerView(
     type: .textField("포트폴리오", "포트폴리오 URL을 입력 해주세요. (선택)")
-  )
-  
-  private let skillContainerView = DescriptionContainerView(
-    type: .custom("보유 스킬", SelectionButtonView(
-      titles: ["iOS", "Android", "Backend", "Frontend"])
-    )
   )
   
   private let upper14YearsOldCheckBoxView = CheckBoxSingleView(
@@ -87,28 +97,41 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   private let flexContainer = UIView()
   
+  public weak var delegate: SignUpDelegate?
+  
   public var disposeBag = DisposeBag()
+  
+  let roleSkillsService: RoleSkillsService
+  
+  init(roleSkillsService: RoleSkillsService) {
+    self.roleSkillsService = roleSkillsService
+    super.init(nibName: nil, bundle: nil)
+  }
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
   
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
-    
-    flexContainer.pin
-      .width(of: view)
-      .height(of: view)
-      .top(CGFloat(UIApplication.keyWindow?.safeAreaInsets.top ?? 0))
-      .left().right()
-      .layout()
-    
-    flexContainer.flex.layout()
     
     containerScrollView.pin
       .all()
       .layout()
     
     containerScrollView.contentSize = .init(
-      width: flexContainer.bounds.size.width,
-      height: flexContainer.bounds.size.height + 100
+      width: view.bounds.size.width,
+      height: view.bounds.size.height + 660
     )
+    
+    flexContainer.pin
+      .width(of: view)
+      .height(containerScrollView.contentSize.height)
+      .top(CGFloat(UIApplication.keyWindow?.safeAreaInsets.top ?? 0))
+      .left().right()
+      .layout()
+    
+    flexContainer.flex.layout()
   }
   
   public override func viewDidLoad() {
@@ -120,6 +143,26 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   public func bind(reactor: SignUpReactor) {
     
+    locationContainerView.textField.rx.value
+      .filter { !($0 ?? "").isEmpty }
+      .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+      .debug()
+      .flatMap { query -> Observable<Reactor.Action> in
+        return .just(.searchAddress(query ?? ""))
+      }.bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.profile }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] _ in
+        self?.delegate?.routeToHome()
+      }.disposed(by: disposeBag)
+  }
+  
+  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    view.endEditing(true)
+    flexContainer.endEditing(true)
   }
 }
 
@@ -169,6 +212,12 @@ extension SignUpController {
   }
   
   private func bindEvent() {
+    
+    skillContainerView.customView?
+      .casting(type: CastableContainerView.self).handler = {
+        print($0)
+    }
+    
     termsCheckBoxContainerView.handler = { [weak self] checkItems in
       print(checkItems)
       
@@ -188,33 +237,27 @@ extension SignUpController {
     
     let nickname = nicknameContainerView.textField.text ?? ""
     let location = locationContainerView.textField.text ?? ""
-    let locations = location.components(separatedBy: " ")
-    var region: Region = .init(state: "", city: "")
-    if locations.count == 2 {
-      region = .init(state: locations[0], city: locations[1])
-    }
     
-    guard let period = periodContainerView.customView as? CheckBoxContainerView,
+    guard let period = periodContainerView.customView?.casting(type: CheckBoxContainerView.self),
           let checkedItems = period.checkedItems else { return }
 
-    let interesting: [Interestring] = (interestsContainerView.customView as? SelectionButtonView)?.selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
+    let interestings: [Interestring] = interestsContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
     
     guard let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") else { return }
-    let role: [Role] = (jobContainerView.customView as? SelectionButtonView)?.selectedItems.compactMap { Role(rawValue: $0) } ?? []
+    let roles: [Role] = jobContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.compactMap { Role(rawValue: $0) } ?? []
     
     let portfolioURL = portfolioContainerView.textField.text ?? ""
     
-    let skills: [String] = (skillContainerView.customView as? SelectionButtonView)?.selectedItems.map { $0 } ?? []
+    let skills: [String] = skillContainerView.customView?.casting(type: CastableContainerView.self).selectedItems.map { $0 } ?? []
     
     let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.compactMap { Terms(rawValue: $0.title) } ?? []
     
     let parameter: SignUpParameter = .init(
-      authType: .kakao,
       nickname: nickname,
-      region: region,
-      interesting: interesting,
+      region: .init(),
+      interestings: interestings,
       career: carrer,
-      role: role,
+      roles: roles,
       profileURL: nil,
       portfolioURL: portfolioURL,
       skills: skills,

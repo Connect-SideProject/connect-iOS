@@ -8,6 +8,8 @@
 
 import UIKit
 
+import CODomain
+import COManager
 import CONetwork
 import Sign
 
@@ -23,6 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     window = .init(windowScene: scene)
     
     let controller = SplashController()
+    controller.reactor = .init()
     controller.delegate = self
     
     window?.rootViewController = controller
@@ -58,8 +61,22 @@ extension SceneDelegate: SplashDelegate {
 }
 
 extension SceneDelegate: SignInDelegate {
-  func routeToSignUp() {
-    let signUpController = SignUpController()
+  func routeToSignUp(authType: CODomain.AuthType, accessToken: String) {
+    let container = SignUpDIContainer(
+      apiService: ApiManager.shared,
+      userService: UserManager.shared,
+      roleSkillsService: RoleSkillsManager.shared,
+      authType: authType,
+      accessToken: accessToken
+    )
+    let signUpController = container.makeController()
+    signUpController.delegate = self
     controller.pushViewController(signUpController, animated: true)
+  }
+}
+
+extension SceneDelegate: SignUpDelegate {
+  func routeToHome() {
+    controller.pushViewController(MainController(), animated: true)
   }
 }

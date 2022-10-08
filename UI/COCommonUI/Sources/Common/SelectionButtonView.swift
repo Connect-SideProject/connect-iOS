@@ -9,10 +9,10 @@ import UIKit
 
 import Then
 
-public final class SelectionButtonView: UIView {
+public final class SelectionButtonView: UIView, CastableView {
   
-  private lazy var collectionViewLayout = UICollectionViewFlowLayout().then {
-    $0.scrollDirection = .horizontal
+  private lazy var collectionViewLayout = LeftAlignedCollectionViewFlowLayout().then {
+    $0.scrollDirection = direction
     $0.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
   }
   
@@ -28,12 +28,15 @@ public final class SelectionButtonView: UIView {
   }
   
   public private(set) var selectedItems: [String] = []
+  public var handler: (String) -> Void = { _ in }
   
   private var dictionary: [String : Bool] = [:]
   private let titles: [String]
+  private let direction: UICollectionView.ScrollDirection
   
-  public init(titles: [String]) {
+  public init(titles: [String], direction: UICollectionView.ScrollDirection = .horizontal) {
     self.titles = titles
+    self.direction = direction
     super.init(frame: .zero)
     
     // 입력된 title만큼 dictionary 초기화
@@ -45,10 +48,21 @@ public final class SelectionButtonView: UIView {
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
+  
+  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    endEditing(true)
+  }
 }
 
 extension SelectionButtonView {
   private func configureUI() {
+    collectionView.showsHorizontalScrollIndicator = false
+    collectionView.showsVerticalScrollIndicator = false
+    
+    if direction == .vertical {
+      collectionView.isScrollEnabled = false
+    }
+    
     addSubview(collectionView)
     
     NSLayoutConstraint.activate([
@@ -81,7 +95,6 @@ extension SelectionButtonView: UICollectionViewDataSource {
 extension SelectionButtonView: UICollectionViewDelegateFlowLayout {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     let selectedTitle = titles[indexPath.item]
-    print(selectedTitle)
     
     dictionary[selectedTitle]?.toggle()
     
@@ -90,7 +103,7 @@ extension SelectionButtonView: UICollectionViewDelegateFlowLayout {
     } else {
       selectedItems = selectedItems.filter { $0 != selectedTitle }
     }
-    
+    handler(selectedTitle)
     collectionView.reloadData()
   }
   
@@ -110,10 +123,9 @@ extension SelectionButtonView: UICollectionViewDelegateFlowLayout {
   }
   
   public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-    return .zero
+    return 8
   }
 }
-
 
 final class RoundCollectionViewCell: UICollectionViewCell {
   
