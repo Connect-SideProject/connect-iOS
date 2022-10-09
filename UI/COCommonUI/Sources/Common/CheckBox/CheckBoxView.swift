@@ -70,6 +70,14 @@ public final class CheckBoxContainerView: UIView, CastableView {
     flexContainer.flex.layout()
   }
   
+  public func setSelectedItems(items: [String]) {
+    let _ = checkBoxViews.map {
+      if items.contains($0.title) {
+        $0.checkBoxButton.isSelected = true
+      }
+    }
+  }
+  
   /// 모든 CheckBox 체크 설정 및 해제.
   public func checkedAll() {
     let selectedList = checkBoxViews.map { $0.checkBoxButton.isSelected }.filter { $0 }
@@ -247,7 +255,7 @@ fileprivate final class CheckBoxView: UIView {
     flexContainer.flex.layout()
   }
   
-  private let title: String
+  public private(set) var title: String
   
   public init(title: String) {
     self.title = title
