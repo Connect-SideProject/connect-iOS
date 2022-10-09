@@ -112,7 +112,7 @@ public class Profile: NSObject, NSCoding, Codable {
   public var profileURL: String? = nil
   public var portfolioURL: String? = nil
   public var career: Career? = nil
-  public  var skills: [String] = []
+  public var skills: [String] = []
   var isPushOn: Bool = false
   var isLocationExpose: Bool = false
   

@@ -10,6 +10,7 @@ import Foundation
 import CODomain
 
 public final class UserManagerStub: UserService {
+  public private(set) var isExists: Bool
   
   public private(set) var profile: CODomain.Profile? = nil
   
@@ -27,7 +28,7 @@ public final class UserManagerStub: UserService {
     self.accessToken = ""
   }
   
-  public init() {
-    
+  public init(isExists: Bool = true) {
+    self.isExists = isExists
   }
 }

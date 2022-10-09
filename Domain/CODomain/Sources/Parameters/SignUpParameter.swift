@@ -55,7 +55,7 @@ public struct SignUpParameter: Parameterable {
     case nickname
     case roles = "role"
     case region
-    case interestings = "interestings"
+    case interestings = "interesting"
     case profileURL = "profile_url"
     case portfolioURL = "portfolio_url"
     case career

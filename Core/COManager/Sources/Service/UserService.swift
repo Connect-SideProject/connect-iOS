@@ -10,6 +10,7 @@ import Foundation
 import CODomain
 
 public protocol UserService {
+  var isExists: Bool { get }
   var accessToken: String { get }
   var profile: Profile? { get }
   func update(accessToken: String)

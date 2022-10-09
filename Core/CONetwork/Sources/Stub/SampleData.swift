@@ -54,7 +54,7 @@ public struct SampleData {
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
         career: .junior,
-        skills: ["Swift", "RxSwift"],
+        skills: ["iOS", "Figma", "Zeplin", "Excel"],
         isPushOn: true,
         isLocationExpose: true
       )
