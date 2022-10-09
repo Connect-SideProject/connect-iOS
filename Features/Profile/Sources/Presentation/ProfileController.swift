@@ -15,6 +15,10 @@ import COCommonUI
 import CODomain
 import COExtensions
 
+public protocol ProfileControllerDelegate: AnyObject {
+  func routeToEditProfile()
+}
+
 /// MY 화면 컨트롤러.
 public final class ProfileController: UIViewController, ReactorKit.View {
   
@@ -30,13 +34,8 @@ public final class ProfileController: UIViewController, ReactorKit.View {
     types: [.appliedGroup, .wroteGroup, .bookmarkedGroup]
   )
   
-  private let stackView: UIStackView = {
-    let stackView = UIStackView()
-    stackView.axis = .vertical
-    stackView.distribution = .equalSpacing
-    return stackView
-  }()
-
+  private let listContainerView = UIView()
+  
   private lazy var skillContainerView = DescriptionContainerView(
     type: .custom(
       "보유 스킬",
@@ -51,6 +50,8 @@ public final class ProfileController: UIViewController, ReactorKit.View {
   )
   
   private let flexContainer = UIView()
+  
+  public weak var delegate: ProfileControllerDelegate?
   
   public var disposeBag: DisposeBag = .init()
   
@@ -74,6 +75,12 @@ public final class ProfileController: UIViewController, ReactorKit.View {
     bindEvent()
   }
   
+  public override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    
+    navigationController?.setNavigationBarHidden(true, animated: false)
+  }
+  
   public func bind(reactor: Reactor) {
     Observable.just(())
       .map { _ in Reactor.Action.requestProfile }
@@ -93,11 +100,11 @@ public final class ProfileController: UIViewController, ReactorKit.View {
       }.disposed(by: disposeBag)
     
     reactor.state
-      .compactMap { $0.profileSubItems }
+      .compactMap { $0.profileViewItems }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] items in
         
-        self?.appendProfileSubItemViews(items: items)
+        self?.defineProfileListViews(items: items)
         
       }.disposed(by: disposeBag)
     
@@ -117,8 +124,6 @@ public final class ProfileController: UIViewController, ReactorKit.View {
 extension ProfileController {
   
   private func configureUI() {
-    navigationController?.setNavigationBarHidden(true, animated: false)
-    
     view.backgroundColor = .white
     
     view.addSubview(flexContainer)
@@ -133,7 +138,8 @@ extension ProfileController {
           .marginVertical(10)
           .marginHorizontal(20)
         
-        flex.addItem(stackView)
+        flex.addItem(listContainerView)
+          .justifyContent(.spaceBetween)
           .height(120)
           .marginVertical(10)
           .marginHorizontal(20)
@@ -154,18 +160,20 @@ extension ProfileController {
     }
   }
   
-  private func appendProfileSubItemViews(items: [ProfileSubItem]) {
+  private func defineProfileListViews(items: [ProfileViewItem]) {
     
-    let stackViews: [ProfileSubItemStackView] = items.map { .init(item: $0) }
+    let views: [ProfileListView] = items.map { .init(item: $0) }
     
-    stackViews.forEach {
-      self.stackView.addArrangedSubview($0)
+    listContainerView.flex.define { flex in
+      views.forEach {
+        flex.addItem($0)
+      }
     }
   }
 }
 
 extension ProfileController: ProfileViewDelegate {
   func didTapEditProfileButton() {
-    print("didTapEditButton")
+    delegate?.routeToEditProfile()
   }
 }
