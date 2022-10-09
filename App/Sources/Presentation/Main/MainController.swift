@@ -9,10 +9,13 @@
 import UIKit
 
 import Profile
+import COManager
 import CONetwork
 
 /// 하단 탭바가 포함된 화면 컨트롤러.
 final class MainController: UITabBarController {
+  
+  private var profileNavigationController: UINavigationController!
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -52,17 +55,22 @@ extension MainController {
     
     /// MY 화면.
     let profileDIContainer = ProfileDIContainer(
-      apiService: ApiManager.shared
+      apiService: ApiManager.shared,
+      userService: UserManager.shared,
+      roleSkillsService: RoleSkillsManager.shared,
+      type: .base
     )
-    
-    let profileNavigationController = UINavigationController(
-      rootViewController: profileDIContainer.makeController()
-    )
-    profileNavigationController.tabBarItem = .init(
-      title: "main.tabItem.profile".localized(),
-      image: nil,
-      selectedImage: nil
-    )
+    if let profileController = profileDIContainer.makeController() as? ProfileController {
+      profileController.delegate = self
+      profileNavigationController = UINavigationController(
+        rootViewController: profileController
+      )
+      profileNavigationController.tabBarItem = .init(
+        title: "main.tabItem.profile".localized(),
+        image: nil,
+        selectedImage: nil
+      )
+    }
     
     self.viewControllers = [
       homeController,
@@ -94,5 +102,13 @@ extension MainController {
     self.tabBar.backgroundColor = .white
     self.tabBar.layer.borderWidth = 1
     self.tabBar.layer.borderColor = UIColor.white.cgColor
+  }
+}
+
+extension MainController: ProfileControllerDelegate {
+  func routeToEditProfile() {
+    
+    let viewController = UIViewController()
+    profileNavigationController.pushViewController(viewController, animated: true)
   }
 }

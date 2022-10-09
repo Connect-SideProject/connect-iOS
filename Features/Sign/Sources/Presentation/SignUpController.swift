@@ -236,7 +236,6 @@ extension SignUpController {
   @objc func didTapStartButton() {
     
     let nickname = nicknameContainerView.textField.text ?? ""
-    let location = locationContainerView.textField.text ?? ""
     
     guard let period = periodContainerView.customView?.casting(type: CheckBoxContainerView.self),
           let checkedItems = period.checkedItems else { return }
@@ -246,9 +245,9 @@ extension SignUpController {
     guard let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") else { return }
     let roles: [Role] = jobContainerView.customView?.casting(type: RoundSelectionButtonView.self).selectedItems.compactMap { Role(rawValue: $0) } ?? []
     
-    let portfolioURL = portfolioContainerView.textField.text ?? ""
+    let portfolioURL = portfolioContainerView.textField.text
     
-    let skills: [String] = skillContainerView.customView?.casting(type: CastableContainerView.self).selectedItems.map { $0 } ?? []
+    let skills: [String] = skillContainerView.customView?.casting(type: CastableContainerView.self).selectedItems.flatMap { $0 } ?? []
     
     let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.compactMap { Terms(rawValue: $0.title) } ?? []
     

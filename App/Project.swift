@@ -26,7 +26,9 @@ let app = Project.feature(
     "NMFClientId": .string("y5sse5c8he"),
     "NSLocationAlwaysAndWhenInUseUsageDescription": .string("사용자의 위치를 가져옵니다."),
     "NSLocationWhenInUseUsageDescription": .string("사용자의 위치를 가져옵니다."),
-    "NSLocationAlwaysUsageDescription": .string("사용자의 위치를 가져옵니다.")
+    "NSLocationAlwaysUsageDescription": .string("사용자의 위치를 가져옵니다."),
+    "NSCameraUsageDescription": .string("사용자 프로필 사진에 활용하기 위해서 접근권한이 필요합니다."),
+    "NSPhotoLibraryUsageDescription": .string("사용자 프로필 사진에 활용하기 위해서 접근권한이 필요합니다.")
   ],
   dependencies: [
     .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
