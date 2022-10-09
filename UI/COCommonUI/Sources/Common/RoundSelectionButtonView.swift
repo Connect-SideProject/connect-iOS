@@ -36,12 +36,12 @@ public final class RoundSelectionButtonView: UIView, CastableView {
   private let direction: UICollectionView.ScrollDirection
   
   /**
-  라운드 형태의 선택버튼 생성자.
-
-  - parameter titles: 선택버튼에 설정되는 타이틀.
-  - parameter isSelectable: 버튼 선택가능 여부 / false: 선택되어있는 상태로 설정.
-  - parameter direction: 버튼의 길이가 넘어가는경우 스크롤 및 보여지는 방향 설정.
-  */
+   라운드 형태의 선택버튼 생성자.
+   
+   - parameter titles: 선택버튼에 설정되는 타이틀.
+   - parameter isSelectable: 버튼 선택가능 여부 / false: 선택되어있는 상태로 설정.
+   - parameter direction: 버튼의 길이가 넘어가는경우 스크롤 및 보여지는 방향 설정.
+   */
   public init(
     titles: [String],
     isSelectable: Bool = true,
@@ -68,6 +68,15 @@ public final class RoundSelectionButtonView: UIView, CastableView {
   
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+  
+  public func setSelectedItems(items: [String]) {
+    
+    let _ = items.filter { self.dictionary.keys.contains($0) }
+      .map {
+        self.dictionary[$0] = true
+        self.selectedItems.append($0)
+      }
   }
   
   public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

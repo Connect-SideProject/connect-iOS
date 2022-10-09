@@ -20,7 +20,9 @@ final class IndicatorImageView: UIImageView {
   
   override var image: UIImage? {
     didSet {
-      indicatorView.stopAnimating()
+      DispatchQueue.main.async {
+        self.indicatorView.stopAnimating()
+      }
     }
   }
   
@@ -47,6 +49,8 @@ final class IndicatorImageView: UIImageView {
   
   /// indicatorView 애니메이션 취소.
   func stopLoading() {
-    indicatorView.stopAnimating()
+    DispatchQueue.main.async {
+      self.indicatorView.stopAnimating()
+    }
   }
 }
