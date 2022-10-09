@@ -15,6 +15,8 @@ import COCommonUI
 
 /// Profile
 enum ProfileSubtitle: String, CustomStringConvertible {
+  case location, interestings, portfolio, career, skills
+  
   var description: String {
     switch self {
     case .location:
@@ -29,11 +31,9 @@ enum ProfileSubtitle: String, CustomStringConvertible {
       return "보유스킬"
     }
   }
-  
-  case location, interestings, portfolio, career, skills
 }
 
-public typealias ProfileSubItem = (subtitle: String, content: String)
+public typealias ProfileViewItem = (subtitle: String, content: String)
 
 public final class ProfileReactor: Reactor {
   public enum Action {
@@ -43,13 +43,13 @@ public final class ProfileReactor: Reactor {
   
   public enum Mutation {
     case setProfile(Profile)
-    case setProfileSubItems([ProfileSubItem])
+    case setProfileViewItems([ProfileViewItem])
     case setMessage(MessageType?)
   }
   
   public struct State {
     var profile: Profile?
-    var profileSubItems: [ProfileSubItem]?
+    var profileViewItems: [ProfileViewItem]?
     var message: MessageType?
   }
   
@@ -79,10 +79,10 @@ public final class ProfileReactor: Reactor {
           ]
           
           // 뷰에서 보여지는 최종 형태로 변환.
-          let profileSubItems: [ProfileSubItem] = items.map { (subtitle: $0.description, content: $1) }
+          let profileViewItems: [ProfileViewItem] = items.map { (subtitle: $0.description, content: $1) }
           
           return Observable.just(.setProfile(profile))
-            .concat(Observable.just(.setProfileSubItems(profileSubItems)))
+            .concat(Observable.just(.setProfileViewItems(profileViewItems)))
         }.catch { _ in
           // 미로그인과 그외 에러 구분처리 필요.
           return .just(.setMessage(.needSignIn))
@@ -95,8 +95,8 @@ public final class ProfileReactor: Reactor {
     switch mutation {
     case let .setProfile(profile):
       newState.profile = profile
-    case let .setProfileSubItems(profileSubItems):
-      newState.profileSubItems = profileSubItems
+    case let .setProfileViewItems(profileViewItems):
+      newState.profileViewItems = profileViewItems
     case let .setMessage(message):
       newState.message = message
     }

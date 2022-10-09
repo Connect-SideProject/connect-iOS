@@ -24,15 +24,36 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     window = .init(windowScene: scene)
     
     let container = ProfileDIContainer(
-      apiService: ApiManaerStub()
+      apiService: ApiManaerStub(),
+      userService: UserManagerStub(),
+      roleSkillsService: RoleSkillsManagerStub(isExists: true),
+      type: .base
     )
     
-    let profileController = container.makeController()
-    
-    controller = UINavigationController(
-      rootViewController: profileController
-    )
+    if let profileController = container.makeController() as? ProfileController {
+      profileController.delegate = self
+      controller = UINavigationController(
+        rootViewController: profileController
+      )
+    }
+
     window?.rootViewController = controller
     window?.makeKeyAndVisible()
+  }
+}
+
+extension SceneDelegate: ProfileControllerDelegate {
+  func routeToEditProfile() {
+    
+    let container = ProfileDIContainer(
+      apiService: ApiManaerStub(),
+      userService: UserManagerStub(),
+      roleSkillsService: RoleSkillsManagerStub(isExists: true),
+      type: .edit
+    )
+    
+    if let profileEditController = container.makeController() as? ProfileEditController {
+      controller.pushViewController(profileEditController, animated: true)
+    }
   }
 }

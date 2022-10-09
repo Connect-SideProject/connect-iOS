@@ -6,25 +6,42 @@
 //
 
 import Foundation
+import UIKit
 
+import COManager
 import CONetwork
+
+public enum ProfileDIType {
+  case base, edit
+}
 
 /// 각 항목 의존성 주입을 위한 컨테이너
 /// 추후 라이브러리로 대체 예정..
 public final class ProfileDIContainer {
   typealias Repository = ProfileRepositoryImpl
   typealias UseCase = ProfileUseCaseImpl
-  public typealias Controller = ProfileController
   
   private let apiService: ApiService
+  private let userService: UserService
+  private let roleSkillsService: RoleSkillsService
+  private let type: ProfileDIType
   
-  public init(apiService: ApiService) {
+  public init(
+    apiService: ApiService,
+    userService: UserService,
+    roleSkillsService: RoleSkillsService,
+    type: ProfileDIType
+  ) {
     self.apiService = apiService
+    self.userService = userService
+    self.roleSkillsService = roleSkillsService
+    self.type = type
   }
   
   func makeRepository() -> Repository {
     return ProfileRepositoryImpl(
-      apiService: apiService
+      apiService: apiService,
+      userService: userService
     )
   }
   
@@ -33,11 +50,19 @@ public final class ProfileDIContainer {
     return ProfileUseCaseImpl(repository: repository)
   }
   
-  public func makeController() -> Controller {
-    let controller = Controller()
-    controller.reactor = .init(
-      profileUseCase: makeUseCase()
-    )
-    return controller
+  public func makeController() -> UIViewController {
+    if type == .base {
+      let controller = ProfileController()
+      controller.reactor = .init(
+        profileUseCase: makeUseCase()
+      )
+      return controller
+    } else {
+      let controller = ProfileEditController(roleSkillsService: roleSkillsService)
+      controller.reactor = .init(
+        profileUseCase: makeUseCase()
+      )
+      return controller
+    }
   }
 }
