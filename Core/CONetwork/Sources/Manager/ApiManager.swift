@@ -55,16 +55,10 @@ public final class ApiManager: ApiService {
         print("====================Response====================")
         print("StatusCode: \(response.statusCode)")
         print("================================================")
-        // 성공 상태코드가 204 등 200이 아닌 경우 대응
-        guard 200 == response.statusCode else {
-          
-          // 회원가입이 필요한 경우.
-          if response.statusCode == 204 {
-            observer.onError(URLError(.needSignUp))
-            return
-          }
-          
-          observer.onError(URLError(.badServerResponse))
+        
+        // 회원가입이 필요한 경우.
+        if response.statusCode == 204 {
+          observer.onError(URLError(.needSignUp))
           return
         }
         

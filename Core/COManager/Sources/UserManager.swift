@@ -15,6 +15,10 @@ public final class UserManager: UserService {
   
   public static let shared: UserManager = UserManager()
   
+  public var isExists: Bool {
+    return UserDefaults.standard.isExists(forKey: .accessToken)
+  }
+  
   public var accessToken: String {
     return UserDefaults.standard.string(forKey: .accessToken)
   }
