@@ -7,6 +7,7 @@ let thirdParty = Project.feature(
   dependencies: [
     .external(name: "KakaoSDKUser"),
     .external(name: "RxCocoa"),
+    .external(name: "RxDataSources"),
     .external(name: "ReactorKit"),
     .external(name: "FloatingPanel")
   ]

@@ -8,7 +8,7 @@
 
 import UIKit
 
-extension UIView {
+public extension UIView {
     
     public func addShadow(
         color: CGColor? = nil,
