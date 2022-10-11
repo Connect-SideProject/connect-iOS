@@ -68,6 +68,8 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
         $0.backgroundColor = .gray01
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
+        
+        
     }
     
     
