@@ -32,7 +32,6 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
     
     private let homeIndicatorView:UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.backgroundColor = .gray
-        
     }
     
     
@@ -40,6 +39,17 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
         $0.backgroundColor = UIColor.green04
     }
     
+    
+    private let homeScrollView: UIScrollView = UIScrollView().then {
+        $0.backgroundColor = .clear
+        $0.showsVerticalScrollIndicator = true
+        $0.showsHorizontalScrollIndicator = false
+    }
+    
+    
+    private let homeScrollContainerView: UIView = UIView().then {
+        $0.backgroundColor = .clear
+    }
     
     
     let dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
@@ -158,14 +168,21 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
     private func configure() {
         var tabbarHeight: CGFloat = tabBarController?.tabBar.frame.size.height ?? 0.0
         
-        [collectionView, floatingButton, homeIndicatorView, selectedLineView].forEach {
+        [collectionView, floatingButton, homeIndicatorView, selectedLineView, releaseCollectionView].forEach {
             view.addSubview($0)
         }
         self.view.bringSubviewToFront(self.homeIndicatorView)
         
         
         collectionView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.left.right.equalToSuperview()
+            $0.bottom.equalTo(releaseCollectionView.snp.top)
+        }
+        
+        releaseCollectionView.snp.makeConstraints {
+            $0.left.right.equalToSuperview()
+            $0.height.equalTo(318)
+            $0.bottom.equalToSuperview().offset(-tabbarHeight)
         }
                 
         floatingButton.snp.makeConstraints {
@@ -178,8 +195,6 @@ final class HomeController: UIViewController, UIScrollViewDelegate {
             $0.center.equalToSuperview()
             $0.width.height.equalTo(24)
         }
-        
-        
         
     }
     
