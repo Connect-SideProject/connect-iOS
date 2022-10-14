@@ -20,19 +20,19 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   public enum Mutation {
     case setRegion(Region?)
     case setProfile(Profile?)
-    case setError(URLError?)
+    case setError(COError?)
   }
   
   public struct State {
     var region: Region?
     var profile: Profile?
-    var error: URLError?
+    var error: COError?
   }
   
   public var initialState: State = .init()
   
   public var errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
-    return .just(.setError(error.asURLError))
+    return .just(.setError(error.asCOError))
   }
   
   private let useCase: SignUpUseCase
@@ -56,11 +56,11 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
       
     case let .didTapSignUpButton(parameter):
       guard let region = currentState.region else {
-        return .just(.setError(URLError(.dataNotAllowed)))
+        return .just(.setError(COError.message(nil, "지역을 검색 해주세요.")))
       }
       
       guard parameter.checkedTermsCount() == 3 else {
-        return .just(.setError(URLError(.dataNotAllowed)))
+        return .just(.setError(COError.message(nil, "필수 항목을 모두 체크해주세요.")))
       }
       
       var parameter = parameter

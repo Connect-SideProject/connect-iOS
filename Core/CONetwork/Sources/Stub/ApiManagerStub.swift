@@ -32,12 +32,12 @@ public final class ApiManaerStub: ApiService {
     case .response(let statusCode) where statusCode != 200 :
       switch statusCode {
       case 204:
-        return .error(URLError(.needSignUp))
+        return .error(COError.needSignUp)
       default:
         break
       }
     case .error:
-      return .error(URLError(.unknown))
+      return .error(COError.unknown)
     default:
       break
     }
@@ -54,7 +54,7 @@ public final class ApiManaerStub: ApiService {
       return .just(json)
     } catch let error {
       print(error.localizedDescription)
-      return .error(URLError(.cannotDecodeRawData))
+      return .error(COError.cannotDecodeJsonData)
     }
   }
   
