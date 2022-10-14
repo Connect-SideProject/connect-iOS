@@ -58,12 +58,12 @@ public final class ApiManager: ApiService {
         
         // 회원가입이 필요한 경우.
         if response.statusCode == 204 {
-          observer.onError(URLError(.needSignUp))
+          observer.onError(COError.needSignUp)
           return
         }
         
         guard let data = data else {
-          observer.onError(URLError(.badServerResponse))
+          observer.onError(COError.responseDataIsNil)
           return
         }
         
@@ -72,8 +72,8 @@ public final class ApiManager: ApiService {
         print("Data: \(String(describing: base))")
         print("================================================")
         // 에러코드 존재하면 서버에러 발생으로 판단.
-        if let _ = base?.errorCode {
-          observer.onError(URLError(.badServerResponse))
+        if let errorCode = base?.errorCode, let message = base?.message {
+          observer.onError(COError.message(errorCode, message))
           return
         }
         
@@ -83,7 +83,7 @@ public final class ApiManager: ApiService {
           return
         }
         
-        observer.onError(URLError(.dataNotAllowed))
+        observer.onError(COError.dataNotAllowed)
         return
       }
       
@@ -133,12 +133,12 @@ public final class ApiManager: ApiService {
         print("================================================")
         // 성공 상태코드가 204 등 200이 아닌 경우 대응
         guard 200 ..< 300 ~= response.statusCode else {
-          observer.onError(URLError(.badServerResponse))
+          observer.onError(COError.statusCode(response.statusCode))
           return
         }
         
         guard let data = data else {
-          observer.onError(URLError(.badServerResponse))
+          observer.onError(COError.responseDataIsNil)
           return
         }
         
@@ -152,7 +152,7 @@ public final class ApiManager: ApiService {
           observer.on(.completed)
           return
         } catch {
-          observer.onError(URLError(.dataNotAllowed))
+          observer.onError(COError.dataNotAllowed)
         }
         return
       }

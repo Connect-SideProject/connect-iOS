@@ -20,18 +20,18 @@ public final class SplashReactor: Reactor, ErrorHandlerable {
   
   public enum Mutation {
     case setIsFinishRequests(Bool)
-    case setError(URLError?)
+    case setError(COError?)
   }
   
   public struct State {
     var isFinishRequests: Bool = false
-    var error: URLError?
+    var error: COError?
   }
   
   public var initialState: State = .init()
   
   public let errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
-    return .just(.setError(error.asURLError))
+    return .just(.setError(error.asCOError))
   }
   
   private let apiService: ApiService

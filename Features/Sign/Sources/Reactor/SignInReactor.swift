@@ -27,7 +27,7 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
     case setAccessToken(String?)
     case setProfile(Profile?)
     case setRoute(SignInRoute)
-    case setError(URLError?)
+    case setError(COError?)
   }
   
   public struct State {
@@ -35,15 +35,15 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
     var accessToken: String?
     var profile: Profile?
     var route: SignInRoute?
-    var error: URLError?
+    var error: COError?
   }
   
   public var initialState: State = .init()
   
   public lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { [weak self] error in
-    let error = error.asURLError
+    let error = error.asCOError
     
-    if error?.code == .needSignUp {
+    if error == .needSignUp {
       guard let authType = self?.authType,
             let accessToken = self?.accessToken else {
         return .empty()
