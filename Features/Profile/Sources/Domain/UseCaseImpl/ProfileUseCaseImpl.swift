@@ -10,13 +10,16 @@ import Foundation
 
 import RxSwift
 import CODomain
+import COManager
 
 final class ProfileUseCaseImpl: ProfileUseCase {
   
   let repository: ProfileRepository
+  let userService: UserService
   
-  init(repository: ProfileRepository) {
+  init(repository: ProfileRepository, userService: UserService = UserManager.shared) {
     self.repository = repository
+    self.userService = userService
   }
 }
 

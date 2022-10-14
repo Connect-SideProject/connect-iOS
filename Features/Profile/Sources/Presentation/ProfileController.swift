@@ -45,7 +45,8 @@ public final class ProfileController: UIViewController, ReactorKit.View {
           isSelectable: false,
           direction: .vertical
         )],
-        direction: .column)
+        direction: .column
+      )
     )
   )
   
@@ -82,7 +83,7 @@ public final class ProfileController: UIViewController, ReactorKit.View {
   }
   
   public func bind(reactor: Reactor) {
-    Observable.just(())
+    rx.viewWillAppear
       .map { _ in Reactor.Action.requestProfile }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)

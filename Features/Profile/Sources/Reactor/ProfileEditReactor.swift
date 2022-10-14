@@ -14,18 +14,28 @@ import CODomain
 import COManager
 
 public final class ProfileEditReactor: Reactor {
+  
+  public enum Route {
+    case back
+  }
+  
   public enum Action {
     /// 프로필 요청
     case viewDidLoad
+    
+    /// 프로필 수정 저장
+    case didTapSaveButton(ProfileEditParameter)
   }
   
   public enum Mutation {
     case setProfile(Profile)
+    case setRoute(Route?)
     case setMessage(MessageType?)
   }
   
   public struct State {
     var profile: Profile?
+    var route: Route?
     var message: MessageType?
   }
   
@@ -44,6 +54,11 @@ public final class ProfileEditReactor: Reactor {
         .flatMap { profile -> Observable<Mutation> in
           return .just(.setProfile(profile))
         }
+    case let .didTapSaveButton(parameter):
+      print(parameter.toJSONString())
+      print(parameter.asDictionary())
+      
+      return .just(.setRoute(.back))
     }
   }
   
@@ -52,6 +67,8 @@ public final class ProfileEditReactor: Reactor {
     switch mutation {
     case let .setProfile(profile):
       newState.profile = profile
+    case let .setRoute(route):
+      newState.route = route
     case let .setMessage(message):
       newState.message = message
     }

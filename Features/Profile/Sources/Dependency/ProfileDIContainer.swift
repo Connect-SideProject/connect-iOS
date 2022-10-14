@@ -40,8 +40,7 @@ public final class ProfileDIContainer {
   
   func makeRepository() -> Repository {
     return ProfileRepositoryImpl(
-      apiService: apiService,
-      userService: userService
+      apiService: apiService
     )
   }
   
