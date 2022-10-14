@@ -7,9 +7,12 @@
 
 import Foundation
 
+import ReactorKit
+
 import CODomain
 import COExtensions
-import ReactorKit
+import CONetwork
+import COManager
 
 public final class SignUpReactor: Reactor, ErrorHandlerable {
   public enum Action {
@@ -36,16 +39,26 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   }
   
   private let useCase: SignUpUseCase
+  private let userService: UserService
   private let authType: AuthType
   private let accessToken: String
   
-  public init(useCase: SignUpUseCase, authType: AuthType, accessToken: String) {
+  public init(
+    useCase: SignUpUseCase,
+    userService: UserService = UserManager.shared,
+    authType: AuthType,
+    accessToken: String
+  ) {
     self.useCase = useCase
+    self.userService = userService
     self.authType = authType
     self.accessToken = accessToken
   }
   
   public func mutate(action: Action) -> Observable<Mutation> {
+    
+    let accessToken = accessToken
+    
     switch action {
     case let .searchAddress(query):
       return useCase.getRegionList(query: query)
@@ -69,7 +82,8 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
       
       return useCase.signUp(parameter: parameter, accessToken: accessToken)
         .debug()
-        .flatMap { profile -> Observable<Mutation> in
+        .flatMap { [weak self] profile -> Observable<Mutation> in
+          self?.userService.update(accessToken: accessToken, profile: profile)
           return .just(.setProfile(profile))
         }.catch(errorHandler)
     }
