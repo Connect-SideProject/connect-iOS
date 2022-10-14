@@ -13,7 +13,6 @@ public protocol UserService {
   var isExists: Bool { get }
   var accessToken: String { get }
   var profile: Profile? { get }
-  func update(accessToken: String)
-  func update(profile: Profile)
+  func update(accessToken: String?, profile: Profile?)
   func remove()
 }

@@ -69,6 +69,17 @@ public final class ApiManager: ApiService {
         
         let base = try? JSONDecoder().decode(Base<T>.self, from: data)
         print("====================Response====================")
+        do {
+          let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers)
+          let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+          
+          if let jsonString = String(data: jsonData, encoding: .utf8) {
+            print("Json: \(jsonString)")
+          }
+        } catch let error {
+          print("Error: \(error.localizedDescription)")
+        }
+        
         print("Data: \(String(describing: base))")
         print("================================================")
         // 에러코드 존재하면 서버에러 발생으로 판단.
