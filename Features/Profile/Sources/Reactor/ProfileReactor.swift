@@ -65,7 +65,6 @@ public final class ProfileReactor: Reactor {
     switch action {
     case .requestProfile:
       return profileUseCase.getProfile()
-        .debug()
         .flatMap { profile -> Observable<Mutation> in
           
           typealias Items = (ProfileSubtitle, String)
@@ -75,7 +74,7 @@ public final class ProfileReactor: Reactor {
             (.location, profile.region?.description ?? ""),
             (.interestings, profile.interestings.map { $0.description }.reduce("") { $0 + $1 } ),
             (.portfolio, profile.portfolioURL ?? ""),
-            (.career, profile.career?.description ?? "")
+            (.career, profile.career?.rawValue ?? "")
           ]
           
           // 뷰에서 보여지는 최종 형태로 변환.

@@ -53,7 +53,14 @@ extension SceneDelegate: ProfileControllerDelegate {
     )
     
     if let profileEditController = container.makeController() as? ProfileEditController {
+      profileEditController.delegate = self
       controller.pushViewController(profileEditController, animated: true)
     }
+  }
+}
+
+extension SceneDelegate: ProfileEditDelegate {
+  func routeToBack() {
+    controller.popViewController(animated: true)
   }
 }
