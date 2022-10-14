@@ -22,14 +22,12 @@ public struct SampleData {
         authType: authType,
         nickname: "시원",
         roles: [.developer],
-        region: .init(code: "SEO", name: "SUNGNAM"),
-        interestings: [.health],
+        region: .init(code: 1150000000, name: "서울 강서구"),
+        interestings: ["FINANCE"],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
         career: .junior,
-        skills: ["Swift", "RxSwift"],
-        isPushOn: true,
-        isLocationExpose: true
+        skills: ["Swift", "RxSwift"]
       )
       return makeData(dictionary: profile.asDictionary()!)
     case .signUp:
@@ -37,8 +35,8 @@ public struct SampleData {
         authType: .kakao,
         nickname: "시원",
         roles: [.developer],
-        region: .init(code: "SEO", name: "SUNGNAM"),
-        interestings: [.health],
+        region: .init(code: 1150000000, name: "서울 강서구"),
+        interestings: ["FINANCE"],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
         career: .junior,
@@ -49,14 +47,12 @@ public struct SampleData {
       let profile: Profile = .init(
         nickname: "시원",
         roles: [.developer],
-        region: .init(code: "32321321", name: "경기 성남시"),
-        interestings: [.health],
+        region: .init(code: 1150000000, name: "서울 강서구"),
+        interestings: ["FINANCE"],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
         career: .junior,
-        skills: ["iOS", "Figma", "Zeplin", "Excel"],
-        isPushOn: true,
-        isLocationExpose: true
+        skills: ["iOS", "Figma", "Zeplin", "Excel"]
       )
       return makeData(dictionary: profile.asDictionary()!)
     case .updateProfile(let profile):

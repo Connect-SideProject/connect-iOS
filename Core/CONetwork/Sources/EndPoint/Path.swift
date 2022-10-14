@@ -29,7 +29,7 @@ public enum Path {
     case .serchPlace:
       return "/v2/local/search/address.json"
     case .userProfile:
-      return ""
+      return "/api/member/myPage/detail"
     case .updateProfile:
       return ""
     }
