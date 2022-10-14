@@ -30,18 +30,15 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   private let periodContainerView = DescriptionContainerView(
     type: .custom("경력기간", CheckBoxContainerView(
-        titles: [Career.aspirant.description, Career.junior.description, Career.senior.description],
-        eventType: .radio
+      titles: [Career.aspirant.description, Career.junior.description, Career.senior.description],
+      eventType: .radio
       )
     )
   )
   
   private let interestsContainerView = DescriptionContainerView(
     type: .custom("관심분야", RoundSelectionButtonView(
-      titles: [Interestring.finance.description,
-               Interestring.fashion.description,
-               Interestring.entertainment.description,
-               Interestring.health.description]
+      titles: ["금융", "패션", "엔터테인먼트", "헬스케어"]
       )
     )
   )
@@ -238,18 +235,27 @@ extension SignUpController {
     let nickname = nicknameContainerView.textField.text ?? ""
     
     guard let period = periodContainerView.customView?.casting(type: CheckBoxContainerView.self),
-          let checkedItems = period.checkedItems else { return }
+          let carrer: Career = .init(
+            rawValue: period.checkedItems?[safe: 0]?.title ?? ""
+          ) else { return }
 
-    let interestings: [Interestring] = interestsContainerView.customView?.casting(type: RoundSelectionButtonView.self).selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
+    let interestings: [String] = interestsContainerView.customView?.casting(
+      type: RoundSelectionButtonView.self
+    ).selectedItems.compactMap { $0 } ?? []
     
-    guard let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") else { return }
-    let roles: [Role] = jobContainerView.customView?.casting(type: RoundSelectionButtonView.self).selectedItems.compactMap { Role(rawValue: $0) } ?? []
+    let roles: [Role] = jobContainerView.customView?.casting(
+      type: RoundSelectionButtonView.self
+    ).selectedItems.compactMap { Role(rawValue: $0) } ?? []
     
     let portfolioURL = portfolioContainerView.textField.text
     
-    let skills: [String] = skillContainerView.customView?.casting(type: CastableContainerView.self).selectedItems.flatMap { $0 } ?? []
+    let skills: [String] = skillContainerView.customView?.casting(
+      type: CastableContainerView.self
+    ).selectedItems.flatMap { $0 } ?? []
     
-    let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.compactMap { Terms(rawValue: $0.title) } ?? []
+    let terms: [Terms] = termsCheckBoxContainerView
+      .checkedItems?
+      .compactMap { Terms(rawValue: $0.title) } ?? []
     
     let parameter: SignUpParameter = .init(
       nickname: nickname,

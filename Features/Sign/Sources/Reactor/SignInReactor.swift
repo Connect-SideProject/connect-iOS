@@ -10,6 +10,7 @@ import Foundation
 import CODomain
 import COExtensions
 import COManager
+import CONetwork
 import ReactorKit
 
 public enum SignInRoute {
@@ -23,17 +24,11 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
   }
   
   public enum Mutation {
-    case setAuthType(AuthType?)
-    case setAccessToken(String?)
-    case setProfile(Profile?)
     case setRoute(SignInRoute)
     case setError(COError?)
   }
   
   public struct State {
-    var authType: AuthType?
-    var accessToken: String?
-    var profile: Profile?
     var route: SignInRoute?
     var error: COError?
   }
@@ -85,12 +80,6 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
     var newState = state
     
     switch mutation {
-    case let .setAuthType(authType):
-      newState.authType = authType
-    case let .setAccessToken(accessToken):
-      newState.accessToken = accessToken
-    case let .setProfile(profile):
-      newState.profile = profile
     case let .setRoute(route):
       newState.route = route
     case let .setError(error):
@@ -105,8 +94,8 @@ private extension SignInReactor {
   func signInProcess(authType: AuthType, accessToken: String) -> Observable<Mutation> {
     return useCase.signIn(authType: authType, accessToken: accessToken)
       .flatMap { [weak self] profile -> Observable<Mutation> in
-        self?.userService.update(accessToken: accessToken)
-        return .just(.setProfile(profile))
+        self?.userService.update(accessToken: accessToken, profile: profile)
+        return .just(.setRoute(.home))
       }.catch(errorHandler)
   }
 }
