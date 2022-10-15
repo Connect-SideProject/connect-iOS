@@ -24,10 +24,11 @@ public extension UserDefaults {
   }
 
   func set<T: Encodable>(object: T, forKey: UserDefaultsKeys) {
-    if let data = try? NSKeyedArchiver.archivedData(withRootObject: object, requiringSecureCoding: false) {
+    do {
+      let data = try NSKeyedArchiver.archivedData(withRootObject: object, requiringSecureCoding: false)
       set(data, forKey: forKey.rawValue)
-    } else {
-      print("Failed Save Object")
+    } catch let error {
+      print("UserDefaults set object: \(error.localizedDescription)")
     }
   }
 
