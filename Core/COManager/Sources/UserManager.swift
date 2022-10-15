@@ -29,12 +29,15 @@ public final class UserManager: UserService {
   
   private init() {}
   
-  public func update(accessToken: String) {
-    UserDefaults.standard.set(accessToken, forKey: .accessToken)
-  }
+  public func update(accessToken: String?, profile: Profile?) {
   
-  public func update(profile: Profile) {
-    UserDefaults.standard.set(object: profile, forKey: .profile)
+    if let accessToken = accessToken {
+      UserDefaults.standard.set(accessToken, forKey: .accessToken)
+    }
+  
+    if let profile = profile {
+      UserDefaults.standard.set(object: profile, forKey: .profile)
+    }
   }
   
   public func remove() {

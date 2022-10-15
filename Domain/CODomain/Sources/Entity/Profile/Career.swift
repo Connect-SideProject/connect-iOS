@@ -25,11 +25,11 @@ public enum Career: String, Codable, CustomStringConvertible {
   
   public init?(rawValue: String) {
     switch rawValue {
-    case "지망생":
+    case "ASPIRANT":
       self = .aspirant
-    case "주니어":
+    case "JUNIOR":
       self = .junior
-    case "시니어":
+    case "SENIOR":
       self = .senior
     default:
       return nil
@@ -61,6 +61,21 @@ public enum Career: String, Codable, CustomStringConvertible {
       try container.encode("JUNIOR")
     case .senior:
       try container.encode("SENIOR")
+    }
+  }
+}
+
+extension Career {
+  static func convertType(value: String) -> Self? {
+    switch value {
+    case Career.aspirant.rawValue:
+      return .aspirant
+    case Career.junior.rawValue:
+      return .junior
+    case Career.senior.rawValue:
+      return .senior
+    default:
+      return nil
     }
   }
 }

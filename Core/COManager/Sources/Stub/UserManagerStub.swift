@@ -16,12 +16,14 @@ public final class UserManagerStub: UserService {
   
   public private(set) var accessToken: String = ""
   
-  public func update(accessToken: String) {
-    self.accessToken = accessToken
-  }
-  
-  public func update(profile: Profile) {
-    self.profile = profile
+  public func update(accessToken: String?, profile: Profile?) {
+    if let accessToken = accessToken {
+      self.accessToken = accessToken
+    }
+    
+    if let profile = profile {
+      self.profile = profile
+    }
   }
   
   public func remove() {
