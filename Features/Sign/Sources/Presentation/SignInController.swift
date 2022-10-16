@@ -14,6 +14,7 @@ import PinLayout
 import ReactorKit
 import Then
 import KakaoSDKCommon
+import COCommonUI
 
 public protocol SignInDelegate: AnyObject {
   func routeToSignUp(authType: AuthType, accessToken: String)
@@ -74,7 +75,15 @@ public final class SignInController: UIViewController, ReactorKit.View {
         default:
           break
         }
-        
+      }.disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.error }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] error in
+        CommonAlert.shared
+          .setMessage(.message(error.localizedDescription))
+          .show(viewController: self)
       }.disposed(by: disposeBag)
   }
 }

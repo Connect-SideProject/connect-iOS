@@ -36,8 +36,8 @@ public final class CommonAlert: UIAlertController {
   public var confirmHandler: () -> Void = {}
   public var cancelHandler: () -> Void = {}
   
-  convenience init(
-    title: String = "",
+  private convenience init(
+    title: String = "오류",
     message: String = "",
     preferredStyle: UIAlertController.Style = .alert,
     extra: String
@@ -88,7 +88,7 @@ public final class CommonAlert: UIAlertController {
   
   /// 3. Alert 노출.
   @discardableResult
-  public func show() -> Self {
+  public func show(viewController: UIViewController? = nil) -> Self {
     
     if actions.isEmpty {
       let action: UIAlertAction = .init(
@@ -101,8 +101,12 @@ public final class CommonAlert: UIAlertController {
     }
     
     DispatchQueue.main.async {
-      let viewController = UIApplication.getTopViewController()
-      viewController?.present(self, animated: true)
+      if let viewController = viewController {
+        viewController.present(self, animated: true)
+      } else {
+        let viewController = UIApplication.getTopViewController()
+        viewController?.present(self, animated: true)
+      }
     }
     
     return self
