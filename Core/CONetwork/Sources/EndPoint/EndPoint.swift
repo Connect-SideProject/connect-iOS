@@ -13,7 +13,7 @@ import COManager
 
 public enum HTTPMethod {
   case get, post, put, delete
-  
+
   var string: String {
     switch self {
     case .get:
@@ -65,9 +65,9 @@ public extension EndPoint {
     }
     return common
   }
-  
+
   var url: URL? {
-    
+
     var components = URLComponents()
     components.scheme = baseURL.scheme
     components.host = baseURL.host
@@ -83,11 +83,11 @@ public extension EndPoint {
     
     return components.url
   }
-  
+
   var parameter: [String: Any]? {
     return path.parameter
   }
-  
+
   var method: HTTPMethod {
     switch path {
     case .signUp, .userProfile, .updateProfile:
