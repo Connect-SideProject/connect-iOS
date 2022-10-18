@@ -243,9 +243,9 @@ extension SignUpController {
       type: RoundSelectionButtonView.self
     ).selectedItems.compactMap { $0 } ?? []
     
-    let roles: [Role] = jobContainerView.customView?.casting(
+    let roles: [RoleType] = jobContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
-    ).selectedItems.compactMap { Role(rawValue: $0) } ?? []
+    ).selectedItems.compactMap { RoleType(rawValue: $0) } ?? []
     
     let portfolioURL = portfolioContainerView.textField.text
     
