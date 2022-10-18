@@ -21,9 +21,9 @@ public struct SampleData {
       let profile: Profile = .init(
         authType: authType,
         nickname: "시원",
-        roles: [.developer],
+        roles: [.init(type: .developer)],
         region: .init(code: 1150000000, name: "서울 강서구"),
-        interestings: ["FINANCE"],
+        interestings: [.init(code: "FINANCE", name: "금융")],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
         career: .junior,
@@ -34,9 +34,9 @@ public struct SampleData {
       let profile: Profile = .init(
         authType: .kakao,
         nickname: "시원",
-        roles: [.developer],
+        roles: [.init(type: .developer)],
         region: .init(code: 1150000000, name: "서울 강서구"),
-        interestings: ["FINANCE"],
+        interestings: [.init(code: "FINANCE", name: "금융")],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
         career: .junior,
@@ -46,9 +46,9 @@ public struct SampleData {
     case .userProfile:
       let profile: Profile = .init(
         nickname: "시원",
-        roles: [.developer],
+        roles: [.init(type: .developer)],
         region: .init(code: 1150000000, name: "서울 강서구"),
-        interestings: ["FINANCE"],
+        interestings: [.init(code: "FINANCE", name: "금융")],
         profileURL: "https://avatars.githubusercontent.com/u/24970070",
         portfolioURL: "https://portfolio.com",
         career: .junior,
@@ -65,10 +65,26 @@ public struct SampleData {
 
 public extension SampleData {
   func makeData(dictionary: [String: Any]) -> Data {
-    return try! JSONSerialization.data(withJSONObject: dictionary, options: [.fragmentsAllowed])
-    }
+    return try! JSONSerialization.data(
+      withJSONObject: [
+        "result": "SUCCESS",
+        "message": "",
+        "data": dictionary,
+        "error_code": ""
+      ],
+      options: [.fragmentsAllowed]
+    )
+  }
   
   func makeData(dictionary: [[String: Any]]) -> Data {
-    return try! JSONSerialization.data(withJSONObject: dictionary, options: [.fragmentsAllowed])
+    return try! JSONSerialization.data(
+      withJSONObject: [
+        "result": "SUCCESS",
+        "message": "",
+        "data": dictionary,
+        "error_code": ""
+      ],
+      options: [.fragmentsAllowed]
+    )
     }
 }

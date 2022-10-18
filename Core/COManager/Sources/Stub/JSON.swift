@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct JSON {
+public struct JSON {
   
-  static let roleSkills = """
+  public static let roleSkills = """
   {
     \"result\" : \"SUCCESS\",
     \"data\" : [
@@ -308,7 +308,7 @@ struct JSON {
   }
   """
   
-  static let profile = """
+  public static let profile = """
 {
   \"result\" : \"SUCCESS\",
   \"data\" : {
@@ -318,11 +318,29 @@ struct JSON {
     },
     \"career\" : \"JUNIOR\",
     \"interesting\" : [
-      \"FINANCE\"
+      {
+        \"code_cd\": \"FINANCE\",
+        \"code_nm\": \"금융\"
+      },
+      {
+        \"code_cd\": \"FATION\",
+        \"code_nm\": \"패션\"
+      },
+      {
+        \"code_cd\": \"ENTERTAIN\",
+        \"code_nm\": \"예능\"
+      },
+      {
+        \"code_cd\": \"HEALTH\",
+        \"code_nm\": \"건강\"
+      }
     ],
     \"nickname\" : \"Naveruser\",
     \"role\" : [
-      \"DEV\"
+       {
+         \"code_cd\": \"DEV\",
+         \"code_nm\": \"개발자\"
+       }
     ],
     \"profile_url\" : \"https://ssl.pstatic.net/static/pwe/address/img_profile.png\",
     \"skills\" : [
@@ -330,7 +348,9 @@ struct JSON {
     ],
     \"terms\" : null,
     \"auth_type\" : \"NAVER\",
-    \"portfolio_url\" : \"\"
+    \"portfolio_url\" : \"\",
+    \"push_yn\": \"N\",
+    \"active_open_yn\": \"N\"
   },
   \"message\" : null,
   \"error_code\" : null
