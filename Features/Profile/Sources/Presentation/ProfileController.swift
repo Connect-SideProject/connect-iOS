@@ -15,7 +15,7 @@ import COCommonUI
 import CODomain
 import COExtensions
 
-public protocol ProfileControllerDelegate: AnyObject {
+public protocol ProfileDelegate: AnyObject {
   func routeToEditProfile()
 }
 
@@ -41,7 +41,7 @@ public final class ProfileController: UIViewController, ReactorKit.View {
       "보유 스킬",
       CastableContainerView(
         views: [RoundSelectionButtonView(
-          titles: reactor?.currentState.profile?.skills.map { $0 } ?? [""],
+          titles: [],
           isSelectable: false,
           direction: .vertical
         )],
@@ -52,7 +52,7 @@ public final class ProfileController: UIViewController, ReactorKit.View {
   
   private let flexContainer = UIView()
   
-  public weak var delegate: ProfileControllerDelegate?
+  public weak var delegate: ProfileDelegate?
   
   public var disposeBag: DisposeBag = .init()
   
@@ -67,6 +67,8 @@ public final class ProfileController: UIViewController, ReactorKit.View {
       .layout()
     
     flexContainer.flex.layout()
+    
+    navigationController?.setNavigationBarHidden(true, animated: false)
   }
   
   public override func viewDidLoad() {
@@ -98,15 +100,22 @@ public final class ProfileController: UIViewController, ReactorKit.View {
           userName: profile.nickname,
           roles: profile.roles
         )
+        
+        if let containerView = self?.skillContainerView.customView as? CastableContainerView {
+          let _ = containerView.views.map {
+            if let selectedButtonView = $0 as? RoundSelectionButtonView {
+              selectedButtonView.updateTitles(profile.skills)
+            }
+          }
+        }
+        
       }.disposed(by: disposeBag)
     
     reactor.state
       .compactMap { $0.profileViewItems }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] items in
-        
         self?.defineProfileListViews(items: items)
-        
       }.disposed(by: disposeBag)
     
     reactor.state

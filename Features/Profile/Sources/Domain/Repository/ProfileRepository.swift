@@ -11,7 +11,7 @@ import Foundation
 import RxSwift
 import CODomain
 
-protocol ProfileRepository {
+public protocol ProfileRepository {
   func userProfile() -> Observable<Profile>
-  func updateProfile(_ profile: Profile) -> Observable<Profile>
+  func updateProfile(parameter: ProfileEditParameter) -> Observable<Profile>
 }
