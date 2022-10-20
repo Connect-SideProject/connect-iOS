@@ -14,6 +14,8 @@ import COExtensions
 
 public final class ImagePickerManager: NSObject {
   
+  public static let shared: ImagePickerManager = ImagePickerManager()
+  
   private lazy var picker = UIImagePickerController().then {
     $0.delegate = self
   }
