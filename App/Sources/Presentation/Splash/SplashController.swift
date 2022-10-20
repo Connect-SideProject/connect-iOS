@@ -7,9 +7,14 @@
 
 import UIKit
 
-import CONetwork
+import FlexLayout
+import PinLayout
 import ReactorKit
 import RxCocoa
+import Then
+
+import COExtensions
+import CONetwork
 
 protocol SplashDelegate: AnyObject {
   func didFinishSplashLoading()
@@ -18,14 +23,34 @@ protocol SplashDelegate: AnyObject {
 /// 스플래쉬.
 final class SplashController: UIViewController, ReactorKit.View {
   
+  lazy var indicatorView = UIActivityIndicatorView(style: .large).then {
+    $0.color = .black
+    $0.startAnimating()
+  }
+  
+  private let flexContainer = UIView()
+  
   weak var delegate: SplashDelegate?
   
   var disposeBag = DisposeBag()
   
+  public override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    
+    flexContainer.pin
+      .width(of: view)
+      .height(of: view)
+      .top()
+      .left()
+      .layout()
+    
+    flexContainer.flex.layout()
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    view.backgroundColor = .white
+    configureUI()
   }
   
   func bind(reactor: SplashReactor) {
@@ -45,5 +70,21 @@ final class SplashController: UIViewController, ReactorKit.View {
       .bind { [weak self] _ in
         self?.delegate?.didFinishSplashLoading()
       }.disposed(by: disposeBag)
+  }
+}
+
+extension SplashController {
+  
+  private func configureUI() {
+    view.backgroundColor = .white
+    
+    view.addSubview(flexContainer)
+    
+    flexContainer.flex
+      .alignItems(.center)
+      .define { flex in
+        flex.addItem(indicatorView)
+          .marginTop(view.bounds.height / 2 - 17.5)
+      }
   }
 }
