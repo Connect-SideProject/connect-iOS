@@ -12,6 +12,7 @@ import ReactorKit
 import RxCocoa
 import CODomain
 import COCommonUI
+import COManager
 
 /// Profile
 enum ProfileSubtitle: String, CustomStringConvertible {
@@ -55,16 +56,22 @@ public final class ProfileReactor: Reactor {
   
   public var initialState: State = .init()
   
-  private let profileUseCase: ProfileUseCase
+  private let userService: UserService
   
-  public init(profileUseCase: ProfileUseCase) {
-    self.profileUseCase = profileUseCase
+  public init(userService: UserService) {
+    self.userService = userService
   }
   
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .requestProfile:
-      return profileUseCase.getProfile()
+      
+      guard let profile = userService.profile else {
+        return .just(.setMessage(.message("프로필 정보 없음.")))
+      }
+      
+      return Observable.just(profile)
+        .debug()
         .flatMap { profile -> Observable<Mutation> in
           
           typealias Items = (ProfileSubtitle, String)
@@ -72,9 +79,9 @@ public final class ProfileReactor: Reactor {
           // 타입을 활용하여 타이틀과 해당 내용 표시를 위해 처리.
           let items: [Items] = [
             (.location, profile.region?.description ?? ""),
-            (.interestings, profile.interestings.map { $0.description }.reduce("") { $0 + $1 } ),
+            (.interestings, profile.interestings.map { $0.description }.toStringWithComma),
             (.portfolio, profile.portfolioURL ?? ""),
-            (.career, profile.career?.rawValue ?? "")
+            (.career, profile.career?.description ?? "")
           ]
           
           // 뷰에서 보여지는 최종 형태로 변환.

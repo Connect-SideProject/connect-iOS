@@ -28,9 +28,9 @@ extension ProfileRepositoryImpl {
     )
   }
   
-  func updateProfile(_ profile: Profile) -> Observable<Profile> {
+  func updateProfile(parameter: ProfileEditParameter) -> Observable<Profile> {
     return apiService.request(
-      endPoint: .init(path: .updateProfile(profile))
+      endPoint: .init(path: .updateProfile(parameter))
     )
   }
 }
