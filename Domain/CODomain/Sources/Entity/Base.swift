@@ -33,7 +33,7 @@ public struct Base<T>: Decodable where T: Decodable {
   /// 응답 결과.
   public let data: T?
   /// 에러 코드 (디버깅).
-  public let errorCode: Int?
+  public let errorCode: String?
 
   public init(from decoder: Decoder) throws {
     let container =  try decoder.container(keyedBy: CodingKeys.self)
@@ -41,7 +41,7 @@ public struct Base<T>: Decodable where T: Decodable {
     self.status =    try container.decodeIfPresent(ResponseStatus.self, forKey: .status) ?? .failed
     self.message =   try container.decodeIfPresent(String.self, forKey: .message) ?? ""
     self.data =      try container.decodeIfPresent(T.self, forKey: .data)
-    self.errorCode = try container.decodeIfPresent(Int.self, forKey: .errorCode)
+    self.errorCode = try container.decodeIfPresent(String.self, forKey: .errorCode)
   }
 
   enum CodingKeys: String, CodingKey {
