@@ -32,5 +32,9 @@ public final class UserManagerStub: UserService {
   
   public init(isExists: Bool = true) {
     self.isExists = isExists
+    
+    let data = JSON.profile.data(using: .utf8)!
+    let profile = try? JSONDecoder().decode(Base<Profile>.self, from: data).data
+    self.profile = profile
   }
 }
