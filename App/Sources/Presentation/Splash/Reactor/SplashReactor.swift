@@ -30,8 +30,8 @@ public final class SplashReactor: Reactor, ErrorHandlerable {
   
   public var initialState: State = .init()
   
-  public let errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
-    return .just(.setError(error.asCOError))
+  public let errorHandler: (_ error: Error) -> Observable<Mutation> = { _ in
+    return .just(.setIsFinishRequests(true))
   }
   
   private let apiService: ApiService
