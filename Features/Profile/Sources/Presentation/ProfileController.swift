@@ -139,6 +139,7 @@ extension ProfileController {
     view.addSubview(flexContainer)
     
     flexContainer.flex
+      .maxHeight(view.bounds.height / 1.5)
       .define { flex in
         flex.addItem(profileView)
           .height(100)
