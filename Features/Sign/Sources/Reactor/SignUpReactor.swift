@@ -83,7 +83,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
       return useCase.signUp(parameter: parameter, accessToken: accessToken)
         .debug()
         .flatMap { [weak self] profile -> Observable<Mutation> in
-          self?.userService.update(accessToken: accessToken, profile: profile)
+          self?.userService.update(tokens: nil, profile: profile)
           return .just(.setProfile(profile))
         }.catch(errorHandler)
     }

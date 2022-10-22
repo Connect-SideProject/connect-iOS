@@ -37,7 +37,7 @@ extension SceneDelegate: SplashDelegate {
   func didFinishSplashLoading() {
     
     /// 로그인 상태 체크.
-    if UserManager.shared.accessToken.isEmpty {
+    if UserManager.shared.tokens.isEmpty {
       let container = SignInDIContainer(
         apiService: ApiManager.shared,
         userService: UserManager.shared
@@ -69,6 +69,7 @@ extension SceneDelegate: SignInDelegate {
       authType: authType,
       accessToken: accessToken
     )
+    
     let signUpController = container.makeController()
     signUpController.delegate = self
     controller.pushViewController(signUpController, animated: true)
