@@ -9,6 +9,9 @@ import Foundation
 
 public enum COError: Error, Equatable {
   
+  /// 토큰 만료.
+  case expiredToken
+  
   /// 로그인 진행시 회원가입 요청.
   case needSignUp
   
