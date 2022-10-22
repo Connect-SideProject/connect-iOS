@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
   var window: UIWindow?
   
-  var controller: UINavigationController!
+  private var navigationController: UINavigationController!
 
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
@@ -25,42 +25,38 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     let container = ProfileDIContainer(
       apiService: ApiManaerStub(),
-      userService: UserManagerStub(),
-      roleSkillsService: RoleSkillsManagerStub(isExists: true),
-      type: .base
+      userService: UserManagerStub()
     )
     
-    if let profileController = container.makeController() as? ProfileController {
-      profileController.delegate = self
-      controller = UINavigationController(
-        rootViewController: profileController
-      )
-    }
+    let controller = container.makeController()
+    controller.delegate = self
+    navigationController = UINavigationController(
+      rootViewController: controller
+    )
 
-    window?.rootViewController = controller
+    window?.rootViewController = navigationController
     window?.makeKeyAndVisible()
   }
 }
 
-extension SceneDelegate: ProfileControllerDelegate {
+extension SceneDelegate: ProfileDelegate {
   func routeToEditProfile() {
     
-    let container = ProfileDIContainer(
+    let container = ProfileEditDIContainer(
       apiService: ApiManaerStub(),
       userService: UserManagerStub(),
-      roleSkillsService: RoleSkillsManagerStub(isExists: true),
-      type: .edit
+      interestService: InterestManagerStub(isExists: true),
+      roleSkillsService: RoleSkillsManagerStub(isExists: true)
     )
     
-    if let profileEditController = container.makeController() as? ProfileEditController {
-      profileEditController.delegate = self
-      controller.pushViewController(profileEditController, animated: true)
-    }
+    let controller = container.makeController()
+    controller.delegate = self
+    navigationController.pushViewController(controller, animated: true)
   }
 }
 
 extension SceneDelegate: ProfileEditDelegate {
   func routeToBack() {
-    controller.popViewController(animated: true)
+    navigationController.popViewController(animated: true)
   }
 }
