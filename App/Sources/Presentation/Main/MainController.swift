@@ -108,7 +108,7 @@ extension MainController {
       coordinator.presenter,
       mapController,
       messageController,
-      profileController
+      profileNavigationController
     ]
     
     /// 홈 화면.
