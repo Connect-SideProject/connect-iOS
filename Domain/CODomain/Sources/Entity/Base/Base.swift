@@ -29,7 +29,7 @@ public struct Base<T>: Decodable where T: Decodable {
   /// 응답 상태 메시지.
   public let status: ResponseStatus
   /// 응답 메시지 내용.
-  public let message: String
+  public let message: String?
   /// 응답 결과.
   public let data: T?
   /// 에러 코드 (디버깅).
@@ -39,7 +39,7 @@ public struct Base<T>: Decodable where T: Decodable {
     let container =  try decoder.container(keyedBy: CodingKeys.self)
 
     self.status =    try container.decodeIfPresent(ResponseStatus.self, forKey: .status) ?? .failed
-    self.message =   try container.decodeIfPresent(String.self, forKey: .message) ?? ""
+    self.message =   try container.decodeIfPresent(String.self, forKey: .message)
     self.data =      try container.decodeIfPresent(T.self, forKey: .data)
     self.errorCode = try container.decodeIfPresent(String.self, forKey: .errorCode)
   }

@@ -263,6 +263,21 @@ public enum RoleType: String, Codable, Equatable, CustomStringConvertible {
     }
   }
   
+  public init?(description: String) {
+    switch description {
+    case "개발자":
+      self = .developer
+    case "디자이너":
+      self = .designer
+    case "기획자":
+      self = .planner
+    case "마케터":
+      self = .marketer
+    default:
+      return nil
+    }
+  }
+  
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer().decode(String.self)
     
@@ -411,7 +426,7 @@ public class Interest: NSObject, NSCoding, Codable {
 public extension Interest {
   convenience init(code: String = "", name: String = "") {
     self.init()
-    
+//    self.id = -1
     self.code = code
     self.name = name
   }

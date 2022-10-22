@@ -12,7 +12,7 @@ public struct ProfileEditParameter: Parameterable {
   let profileURL: String?
   let roles: [RoleType]
   var region: Region?
-  let interestings: [String]
+  public var interestings: [String]
   let portfolioURL: String?
   let career: String?
   let skills: [String]
@@ -33,7 +33,7 @@ public struct ProfileEditParameter: Parameterable {
     var container = encoder.container(keyedBy: CodingKeys.self)
     
     try container.encode(profileURL, forKey: .profileURL)
-    try container.encode(roles, forKey: .roles)
+    try container.encode(roles.map { $0.rawValue }, forKey: .roles)
     try container.encode(region, forKey: .region)
     try container.encode(interestings, forKey: .interestings)
     try container.encode(portfolioURL, forKey: .portfolioURL)
@@ -73,5 +73,9 @@ public extension ProfileEditParameter {
   
   mutating func updateRegion(_ region: Region) {
     self.region = region
+  }
+  
+  mutating func updateInterestings(_ interestings: [String]) {
+    self.interestings = interestings
   }
 }
