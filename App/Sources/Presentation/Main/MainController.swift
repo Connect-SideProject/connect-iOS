@@ -20,38 +20,24 @@ final class MainController: UITabBarController {
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    setViewContaollers()
-    setupTabBar()
-  }
 }
 
-extension MainController {
-  /// 탭바 메뉴당 화면 설정(추후 아이콘 등 설정).
-  private func setViewContaollers() {
+/// MainFlow DI
+class MainFlow: ViewControllerFlow {
     
-    /// 홈 화면.
-    let homeController = HomeController()
-    homeController.tabBarItem = .init(
-      title: "main.tabItem.home".localized(),
-      image: nil,
-      selectedImage: nil
-    )
+    func makeMainController() -> MainController {
+        return MainController(viewFlow: self)
+    }
+        
+    func makeHomeCoordinator() -> HomeCoordinator {
+        return HomeCoordinator(presenter: UINavigationController(rootViewController: makeHomeController()))
+    }
     
-    /// 지도 화면.
-    let mapController = MapController()
-    mapController.tabBarItem = .init(
-      title: "main.tabItem.map".localized(),
-      image: nil,
-      selectedImage: nil
-    )
+    func makeHomeController() -> HomeController {
+        return HomeController(reactor: HomeViewReactor())
+    }
     
-    /// 채팅 화면.
-    let messageController = MessaeController()
-    messageController.tabBarItem = .init(
-      title: "main.tabItem.message".localized(),
-      image: nil,
-      selectedImage: nil
-    )
+
     
     /// MY 화면.
     let profileDIContainer = ProfileDIContainer(
@@ -70,37 +56,87 @@ extension MainController {
       selectedImage: nil
     )
     
-    self.viewControllers = [
-      homeController,
-      mapController,
-      messageController,
-      profileNavigationController
-    ]
-  }
-  
-  /// 탭바 커스텀 설정.
-  private func setupTabBar() {
-    let appearance = UITabBarAppearance()
-    appearance.configureWithOpaqueBackground()
-    appearance.backgroundColor = .white
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
     
-    appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
-      .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-      .foregroundColor: UIColor.gray
-    ]
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setViewContaollers()
+        setupTabBar()
+    }
+}
+
+extension MainController {
+    /// 탭바 메뉴당 화면 설정(추후 아이콘 등 설정).
+    private func setViewContaollers() {
+        
+        /// 지도 화면.
+        let mapController = MapController()
+        mapController.tabBarItem = .init(
+            title: "main.tabItem.map".localized(),
+            image: nil,
+            selectedImage: nil
+        )
+        
+        /// 채팅 화면.
+        let messageController = MessaeController()
+        messageController.tabBarItem = .init(
+            title: "main.tabItem.message".localized(),
+            image: nil,
+            selectedImage: nil
+        )
+        
+        /// MY 화면.
+        let profileController = ProfileController()
+        profileController.tabBarItem = .init(
+            title: "main.tabItem.profile".localized(),
+            image: nil,
+            selectedImage: nil
+        )
+        
+        guard let coordinator = viewFlow?.makeHomeCoordinator() else { return }
+        
+        self.viewControllers = [
+            coordinator.presenter,
+            mapController,
+            messageController,
+            profileController
+        ]
+
+        /// 홈 화면.
+        coordinator.presenter
+            .tabBarItem = .init(
+                title: "main.tabItem.home".localized(),
+                image: nil,
+                selectedImage: nil
+            )
+    }
     
-    appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
-      .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-      .foregroundColor: UIColor.blue
-    ]
-    
-    self.tabBar.standardAppearance = appearance
-    self.tabBar.scrollEdgeAppearance = appearance
-    
-    self.tabBar.backgroundColor = .white
-    self.tabBar.layer.borderWidth = 1
-    self.tabBar.layer.borderColor = UIColor.white.cgColor
-  }
+    /// 탭바 커스텀 설정.
+    private func setupTabBar() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .white
+        
+        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 12, weight: .medium),
+            .foregroundColor: UIColor.gray
+        ]
+        
+        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 12, weight: .medium),
+            .foregroundColor: UIColor.blue
+        ]
+        
+        self.tabBar.standardAppearance = appearance
+        self.tabBar.scrollEdgeAppearance = appearance
+        
+        self.tabBar.backgroundColor = .white
+        self.tabBar.layer.borderWidth = 1
+        self.tabBar.layer.borderColor = UIColor.white.cgColor
+    }
 }
 
 extension MainController: ProfileDelegate {

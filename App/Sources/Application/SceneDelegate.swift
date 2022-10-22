@@ -18,6 +18,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
   
   var controller: UINavigationController!
+  
+  let flowDI = MainFlow()
 
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
@@ -51,7 +53,7 @@ extension SceneDelegate: SplashDelegate {
       )
     } else {
       controller = UINavigationController(
-        rootViewController: MainController()
+        rootViewController: flowDI.makeMainController()
       )
     }
     
@@ -78,6 +80,6 @@ extension SceneDelegate: SignInDelegate {
 
 extension SceneDelegate: SignUpDelegate {
   func routeToHome() {
-    controller.pushViewController(MainController(), animated: true)
+    controller.pushViewController(flowDI.makeMainController(), animated: true)
   }
 }
