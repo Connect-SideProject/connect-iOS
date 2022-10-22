@@ -97,6 +97,26 @@ public extension SignUpParameter {
     self.region = region
   }
   
+  func isNicknameEmpty() -> Bool {
+    return nickname.isEmpty
+  }
+  
+  func isCarrerNil() -> Bool {
+    return career == nil
+  }
+  
+  func isInterestingsEmpty() -> Bool {
+    return interestings.isEmpty
+  }
+  
+  func isRolesEmpty() -> Bool {
+    return roles.isEmpty
+  }
+  
+  func isSkillsEmpty() -> Bool {
+    return skills.isEmpty
+  }
+  
   func checkedTermsCount() -> Int {
     return terms.count
   }

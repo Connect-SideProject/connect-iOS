@@ -155,6 +155,21 @@ public final class SignUpController: UIViewController, ReactorKit.View {
       .bind { [weak self] _ in
         self?.delegate?.routeToHome()
       }.disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.error }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] error in
+        guard let self = self else { return }
+        switch error {
+        case let .message(_, message):
+          CommonAlert.shared.setMessage(.message(message))
+            .show(viewController: self)
+        default:
+          break
+        }
+        
+      }.disposed(by: disposeBag)
   }
   
   public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -234,10 +249,13 @@ extension SignUpController {
     
     let nickname = nicknameContainerView.textField.text ?? ""
     
-    guard let period = periodContainerView.customView?.casting(type: CheckBoxContainerView.self),
-          let carrer: Career = .init(
-            rawValue: period.checkedItems?[safe: 0]?.title ?? ""
-          ) else { return }
+    let period = periodContainerView.customView?.casting(
+      type: CheckBoxContainerView.self
+    ).checkedItems?.compactMap { $0 } ?? []
+    
+    let carrer: Career? = .init(
+      description: period[safe: 0]?.title ?? ""
+    )
 
     let interestings: [String] = interestsContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
@@ -245,7 +263,7 @@ extension SignUpController {
     
     let roles: [RoleType] = jobContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
-    ).selectedItems.compactMap { RoleType(rawValue: $0) } ?? []
+    ).selectedItems.compactMap { RoleType(description: $0) } ?? []
     
     let portfolioURL = portfolioContainerView.textField.text
     
@@ -259,11 +277,9 @@ extension SignUpController {
     
     let parameter: SignUpParameter = .init(
       nickname: nickname,
-      region: .init(),
       interestings: interestings,
       career: carrer,
       roles: roles,
-      profileURL: nil,
       portfolioURL: portfolioURL,
       skills: skills,
       terms: terms
