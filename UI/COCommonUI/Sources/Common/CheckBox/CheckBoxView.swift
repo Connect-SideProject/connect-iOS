@@ -27,7 +27,11 @@ public enum CheckBoxContainerEventType {
 /// 두개 이상의 CheckBox가 포함된 Container.
 public final class CheckBoxContainerView: UIView, CastableView {
   
-  public private(set) var checkedItems: [CheckBoxItem]?
+  public private(set) var checkedItems: [CheckBoxItem]? {
+    didSet {
+      print(oldValue)
+    }
+  }
   
   public var handler: ([CheckBoxItem]) -> Void = { _ in }
   
@@ -71,11 +75,16 @@ public final class CheckBoxContainerView: UIView, CastableView {
   }
   
   public func setSelectedItems(items: [String]) {
-    let _ = checkBoxViews.map {
+    let items = checkBoxViews.map {
       if items.contains($0.title) {
         $0.checkBoxButton.isSelected = true
+        return CheckBoxItem(title: $0.title, index: $0.checkBoxButton.tag)
       }
-    }
+      
+      return CheckBoxItem(title: "", index: -1)
+    }.filter { $0.index != -1 }
+    
+    checkedItems = items
   }
   
   /// 모든 CheckBox 체크 설정 및 해제.

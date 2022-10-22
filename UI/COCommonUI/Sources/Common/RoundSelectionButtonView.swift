@@ -31,7 +31,7 @@ public final class RoundSelectionButtonView: UIView, CastableView {
   public var handler: (String) -> Void = { _ in }
   
   private var dictionary: [String : Bool] = [:]
-  private let titles: [String]
+  private var titles: [String] = []
   private let isSelectable: Bool
   private let direction: UICollectionView.ScrollDirection
   
@@ -52,22 +52,19 @@ public final class RoundSelectionButtonView: UIView, CastableView {
     self.direction = direction
     super.init(frame: .zero)
     
-    // 입력된 title만큼 dictionary 초기화
-    let _ = titles.map {
-      if isSelectable {
-        self.dictionary[$0] = false
-      } else {
-        self.dictionary[$0] = true
-        // 선택 비활성화 시 선택된 아이템에 추가.
-        self.selectedItems.append($0)
-      }
-    }
-    
+
+    setDictionaryWithSelectedItems(titles: titles)
     configureUI()
   }
   
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+  
+  public func updateTitles(_ titles: [String]) {
+    self.titles = titles
+    setDictionaryWithSelectedItems(titles: titles)
+    collectionView.reloadData()
   }
   
   public func setSelectedItems(items: [String]) {
@@ -85,6 +82,22 @@ public final class RoundSelectionButtonView: UIView, CastableView {
 }
 
 extension RoundSelectionButtonView {
+  private func setDictionaryWithSelectedItems(titles: [String]) {
+    
+    self.dictionary = dictionary.filter { titles.contains($0.key) }
+    
+    // 입력된 title만큼 dictionary 초기화
+    let _ = titles.map {
+      if isSelectable {
+        self.dictionary[$0] = false
+      } else {
+        self.dictionary[$0] = true
+        // 선택 비활성화 시 선택된 아이템에 추가.
+        self.selectedItems.append($0)
+      }
+    }
+  }
+  
   private func configureUI() {
     collectionView.showsHorizontalScrollIndicator = false
     collectionView.showsVerticalScrollIndicator = false
@@ -111,7 +124,7 @@ extension RoundSelectionButtonView: UICollectionViewDataSource {
   
   public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
     if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "roundCell", for: indexPath) as? RoundCollectionViewCell {
-      let title = titles[indexPath.item]
+      let title = titles[safe: indexPath.item] ?? ""
       if let isSelected = dictionary[title] {
         cell.configure(title: title, isSelected: isSelected)
       }
@@ -141,8 +154,8 @@ extension RoundSelectionButtonView: UICollectionViewDelegateFlowLayout {
   }
   
   public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-    
-    let width = titles[indexPath.item].size(
+    let title = titles[safe: indexPath.item] ?? ""
+    let width = title.size(
       withAttributes: [
         .font : UIFont.systemFont(ofSize: 14, weight: .semibold)
       ]

@@ -119,7 +119,7 @@ public final class CastableContainerView: UIView, CastableView {
   
   public let flexContainer = UIView()
   
-  private let views: [CastableView]
+  public private(set) var views: [CastableView] = []
   private let direction: Flex.Direction
   
   public init(views: [CastableView], direction: Flex.Direction = .column) {
