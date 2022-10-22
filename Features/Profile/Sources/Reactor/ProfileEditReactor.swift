@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import UIKit
 
 import ReactorKit
 import RxCocoa
 import COCommonUI
 import CODomain
 import COManager
+import CONetwork
 
 public final class ProfileEditReactor: Reactor {
   
@@ -28,49 +30,109 @@ public final class ProfileEditReactor: Reactor {
   }
   
   public enum Mutation {
-    case setProfile(Profile)
+    case setInterestList([Interest])
+    case setRoleSkillsList([RoleSkills])
+    case setProfile(Profile?)
+    case setRegion(Region?)
     case setRoute(Route?)
-    case setMessage(MessageType?)
+    case setError(COError?)
   }
   
   public struct State {
+    var interestList: [Interest] = []
+    var roleSkillsList: [RoleSkills] = []
     var profile: Profile?
+    var region: Region?
     var route: Route?
-    var message: MessageType?
+    var error: COError?
   }
   
-  public var initialState: State = .init()
+  public var initialState: State
   
-  private let profileUseCase: ProfileUseCase
+  public var errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
+    return .just(.setError(error.asCOError))
+  }
   
-  public init(profileUseCase: ProfileUseCase) {
-    self.profileUseCase = profileUseCase
+  private let iamgeLoader: ImageLoader = .init()
+  
+  private let repository: ProfileRepository
+  private let userService: UserService
+  private let interestService: InterestService
+  private let roleSkillsService: RoleSkillsService
+  
+  public init(
+    repository: ProfileRepository,
+    userService: UserService,
+    interestService: InterestService,
+    roleSkillsService: RoleSkillsService
+  ) {
+    self.repository = repository
+    self.userService = userService
+    self.interestService = interestService
+    self.roleSkillsService = roleSkillsService
+    
+    self.initialState = .init(
+      region: userService.profile?.region
+    )
   }
   
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .viewDidLoad:
-      return profileUseCase.getProfile()
-        .flatMap { profile -> Observable<Mutation> in
-          return .just(.setProfile(profile))
+      let setInterestList: Observable<Mutation> = .just(.setInterestList(interestService.interestList))
+      let setRoleSkillsList: Observable<Mutation> = .just(.setRoleSkillsList(roleSkillsService.roleSkillsList))
+      let setProfile: Observable<Mutation> = .just(.setProfile(userService.profile))
+      return setInterestList
+        .concat(setRoleSkillsList)
+        .concat(setProfile)
+    
         }
     case let .didTapSaveButton(parameter):
-      print(parameter.toJSONString())
-      print(parameter.asDictionary())
+      var parameter = parameter
+      let codes = zip(
+        parameter.interestings.map { $0.description },
+        interestService.interestList
+      )
+      .enumerated()
+      .map { offset, element in
+        if interestService.interestList[offset].name == element.0 {
+          return interestService.interestList[offset].code
+        }
+        
+        return ""
+      }.filter { !$0.isEmpty }
       
-      return .just(.setRoute(.back))
+      parameter.updateInterestings(codes)
+      
+      return repository.updateProfile(parameter: parameter)
+        .flatMap { [weak self] profile -> Observable<Mutation> in
+          self?.userService.update(
+            tokens: nil,
+            profile: profile
+          )
+          
+          return .just(.setRoute(.back))
+        }.catch(errorHandler)
     }
   }
   
   public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
+    case let .setInterestList(interestList):
+      newState.interestList = interestList
+    case let .setRoleSkillsList(roleSkillsList):
+      newState.roleSkillsList = roleSkillsList
+    case let .setImageURL(imageURL):
+      newState.imageURL = imageURL
     case let .setProfile(profile):
       newState.profile = profile
+    case let .setRegion(region):
+      newState.region = region
     case let .setRoute(route):
       newState.route = route
-    case let .setMessage(message):
-      newState.message = message
+    case let .setError(error):
+      newState.error = error
     }
     
     return newState

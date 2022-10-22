@@ -87,8 +87,10 @@ public final class ProfileReactor: Reactor {
           // 뷰에서 보여지는 최종 형태로 변환.
           let profileViewItems: [ProfileViewItem] = items.map { (subtitle: $0.description, content: $1) }
           
-          return Observable.just(.setProfile(profile))
-            .concat(Observable.just(.setProfileViewItems(profileViewItems)))
+          let setProfile: Observable<Mutation> = Observable.just(.setProfile(profile))
+          let setProfileViewItems: Observable<Mutation> = Observable.just(.setProfileViewItems(profileViewItems))
+          
+          return setProfile.concat(setProfileViewItems)
         }.catch { _ in
           // 미로그인과 그외 에러 구분처리 필요.
           return .just(.setMessage(.needSignIn))
