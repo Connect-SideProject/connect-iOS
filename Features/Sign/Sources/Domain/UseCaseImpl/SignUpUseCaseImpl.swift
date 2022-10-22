@@ -15,14 +15,9 @@ import RxSwift
 public final class SignUpUseCaseImpl: NSObject, SignUpUseCase {
   
   private let repository: SignUpRepository
-  private let userService: UserService
   
-  public init(
-    repository: SignUpRepository,
-    userService: UserService = UserManager.shared
-  ) {
+  public init(repository: SignUpRepository) {
     self.repository = repository
-    self.userService = userService
     super.init()
   }
 }
@@ -32,7 +27,7 @@ extension SignUpUseCaseImpl {
     return repository.requestSearchAddress(query: query)
       .flatMapLatest { address -> Observable<[Region]> in
         return .just(address.documents.map {
-          Region(code: $0.address?.bCode ?? "", name: $0.address?.addressName ?? "")
+          Region(code: Int($0.address?.bCode ?? "") ?? 0, name: $0.address?.addressName ?? "")
         })
     }
   }

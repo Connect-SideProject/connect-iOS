@@ -26,7 +26,13 @@ public final class SignUpDIContainer: DIContainer {
   private let authType: AuthType
   private let accessToken: String
   
-  public init(apiService: ApiService, userService: UserService, roleSkillsService: RoleSkillsService, authType: AuthType, accessToken: String) {
+  public init(
+    apiService: ApiService,
+    userService: UserService,
+    roleSkillsService: RoleSkillsService,
+    authType: AuthType,
+    accessToken: String
+  ) {
     self.apiService = apiService
     self.userService = userService
     self.roleSkillsService = roleSkillsService
@@ -40,8 +46,7 @@ public final class SignUpDIContainer: DIContainer {
   
   public func makeUseCase() -> UserCase {
     return SignUpUseCaseImpl(
-      repository: makeRepository(),
-      userService: userService
+      repository: makeRepository()
     )
   }
   
