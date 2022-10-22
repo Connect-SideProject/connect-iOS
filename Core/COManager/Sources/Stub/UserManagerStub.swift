@@ -10,15 +10,16 @@ import Foundation
 import CODomain
 
 public final class UserManagerStub: UserService {
+  
   public private(set) var isExists: Bool
   
   public private(set) var profile: CODomain.Profile? = nil
   
-  public private(set) var accessToken: String = ""
+  public var tokens: Tokens = .init()
   
-  public func update(accessToken: String?, profile: Profile?) {
-    if let accessToken = accessToken {
-      self.accessToken = accessToken
+  public func update(tokens: Tokens?, profile: CODomain.Profile?) {
+    if let tokens = tokens {
+      self.tokens = tokens
     }
     
     if let profile = profile {
@@ -27,7 +28,7 @@ public final class UserManagerStub: UserService {
   }
   
   public func remove() {
-    self.accessToken = ""
+    self.tokens = .init()
   }
   
   public init(isExists: Bool = true) {

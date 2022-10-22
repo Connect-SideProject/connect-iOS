@@ -16,11 +16,15 @@ public final class UserManager: UserService {
   public static let shared: UserManager = UserManager()
   
   public var isExists: Bool {
-    return UserDefaults.standard.isExists(forKey: .accessToken)
+    return UserDefaults.standard.isExists(forKey: .accessToken) &&
+    UserDefaults.standard.isExists(forKey: .refreshToken)
   }
   
-  public var accessToken: String {
-    return UserDefaults.standard.string(forKey: .accessToken)
+  public var tokens: Tokens {
+    return .init(
+      access: UserDefaults.standard.string(forKey: .accessToken),
+      refresh: UserDefaults.standard.string(forKey: .refreshToken)
+    )
   }
   
   public var profile: Profile? {
@@ -29,10 +33,11 @@ public final class UserManager: UserService {
   
   private init() {}
   
-  public func update(accessToken: String?, profile: Profile?) {
+  public func update(tokens: Tokens?, profile: Profile?) {
   
-    if let accessToken = accessToken {
-      UserDefaults.standard.set(accessToken, forKey: .accessToken)
+    if let tokens = tokens {
+      UserDefaults.standard.set(tokens.access, forKey: .accessToken)
+      UserDefaults.standard.set(tokens.refresh, forKey: .refreshToken)
     }
   
     if let profile = profile {
@@ -42,6 +47,7 @@ public final class UserManager: UserService {
   
   public func remove() {
     UserDefaults.standard.remove(forKey: .accessToken)
+    UserDefaults.standard.remove(forKey: .refreshToken)
     UserDefaults.standard.remove(forKey: .profile)
   }
 }
