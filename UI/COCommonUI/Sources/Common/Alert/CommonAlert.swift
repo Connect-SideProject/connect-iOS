@@ -37,7 +37,7 @@ public final class CommonAlert: UIAlertController {
   public var cancelHandler: () -> Void = {}
   
   private convenience init(
-    title: String = "오류",
+    title: String = "",
     message: String = "",
     preferredStyle: UIAlertController.Style = .alert,
     extra: String
@@ -45,7 +45,14 @@ public final class CommonAlert: UIAlertController {
     self.init(title: title, message: message, preferredStyle: preferredStyle)
   }
   
-  /// 1. 메세지 설정.
+  /// 1. 타이틀 설정.
+  @discardableResult
+  public func setTitle(_ title: String) -> Self {
+    self.title = title
+    return self
+  }
+  
+  /// 2. 메세지 설정.
   @discardableResult
   public func setMessage(_ message: MessageType) -> Self {
     
@@ -59,7 +66,7 @@ public final class CommonAlert: UIAlertController {
     return self
   }
   
-  /// 2. 버튼 설정.
+  /// 3. 버튼 설정.
   @discardableResult
   public func appendButton(type: AlertButtonType) -> Self {
     
@@ -86,7 +93,7 @@ public final class CommonAlert: UIAlertController {
     return self
   }
   
-  /// 3. Alert 노출.
+  /// 4. Alert 노출.
   @discardableResult
   public func show(viewController: UIViewController? = nil) -> Self {
     
