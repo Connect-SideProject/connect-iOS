@@ -68,6 +68,27 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
         }
       
     case let .didTapSignUpButton(parameter):
+      
+      if parameter.isNicknameEmpty() {
+        return .just(.setError(COError.message(nil, "닉네임을 입력 해주세요.")))
+      }
+      
+      if parameter.isCarrerNil() {
+        return .just(.setError(COError.message(nil, "경력기간을 선택 해주세요.")))
+      }
+      
+      if parameter.isInterestingsEmpty() {
+        return .just(.setError(COError.message(nil, "관심분야를 최소 하나이상 선택 해주세요.")))
+      }
+      
+      if parameter.isRolesEmpty() {
+        return .just(.setError(COError.message(nil, "원하는 역할을 선택 해주세요.")))
+      }
+      
+      if parameter.isSkillsEmpty() {
+        return .just(.setError(COError.message(nil, "보유스킬을 최소 하나이상 선택 해주세요.")))
+      }
+      
       guard let region = currentState.region else {
         return .just(.setError(COError.message(nil, "지역을 검색 해주세요.")))
       }
