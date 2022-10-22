@@ -53,12 +53,16 @@ public final class ApiManaerStub: ApiService {
       let json = try JSONDecoder().decode(T.self, from: data)
       return .just(json)
     } catch let error {
-      print(error.localizedDescription)
+      print("[Decode Error]: \(error.localizedDescription)")
       return .error(COError.cannotDecodeJsonData)
     }
   }
   
   public func requestOutBound<T>(endPoint: EndPoint) -> RxSwift.Observable<T> where T : Decodable {
+    return .empty()
+  }
+  
+  public func upload<T>(endPoint: EndPoint) -> Observable<T> where T : Decodable {
     return .empty()
   }
 }

@@ -22,16 +22,21 @@ public final class ProfileEditReactor: Reactor {
   }
   
   public enum Action {
-    /// 프로필 요청
+    
+    /// 프로필 요청.
     case viewDidLoad
     
-    /// 프로필 수정 저장
+    /// 프로필 이미지 업로드 요청.
+    case requestUploadImage(Data?)
+    
+    /// 프로필 수정 저장.
     case didTapSaveButton(ProfileEditParameter)
   }
   
   public enum Mutation {
     case setInterestList([Interest])
     case setRoleSkillsList([RoleSkills])
+    case setImageURL(URL?)
     case setProfile(Profile?)
     case setRegion(Region?)
     case setRoute(Route?)
@@ -41,6 +46,7 @@ public final class ProfileEditReactor: Reactor {
   public struct State {
     var interestList: [Interest] = []
     var roleSkillsList: [RoleSkills] = []
+    var imageURL: URL?
     var profile: Profile?
     var region: Region?
     var route: Route?
@@ -86,7 +92,18 @@ public final class ProfileEditReactor: Reactor {
         .concat(setRoleSkillsList)
         .concat(setProfile)
     
+    case let .requestUploadImage(data):
+      
+      guard let data = data else {
+        return .just(.setError(.message("Error", "올바르지 않은 이미지입니다.")))
+      }
+      
+      return repository.uploadProfileImage(data: data)
+        .flatMap { imageURL -> Observable<Mutation> in
+          let imageURL = URL(string: imageURL)
+          return .just(.setImageURL(imageURL))
         }
+      
     case let .didTapSaveButton(parameter):
       var parameter = parameter
       let codes = zip(

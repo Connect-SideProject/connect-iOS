@@ -188,4 +188,122 @@ public final class ApiManager: ApiService {
       return Disposables.create(with: task.cancel)
     }
   }
+  
+  public func upload<T>(endPoint: EndPoint) -> Observable<T> where T : Decodable {
+    guard let url = endPoint.url else {
+      return .empty()
+    }
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = endPoint.method.string
+    
+    if case let .uploadProfileImage(data) = endPoint.path {
+      let boundary = generateBoundaryString()
+      let bodyData = createBody(
+        parameters: [:],
+        boundary: boundary,
+        data: data,
+        mimeType: "image/jpg",
+        filename: "custom_profile.png"
+      )
+      request.httpBody = bodyData
+    }
+    
+    if let header = endPoint.header {
+      let _ = header.map {
+        let key = $0.key
+        let value = $0.value
+        request.addValue(
+          value,
+          forHTTPHeaderField: key
+        )
+      }
+    }
+    print("====================Request====================")
+    print("Method: \(endPoint.method.string)")
+    print("Header: \(String(describing: endPoint.header))")
+    print("URL: \(url.absoluteString)")
+    print("Parameter: \(String(describing: endPoint.parameter?.format(options: [.prettyPrinted])))")
+    print("===============================================")
+    
+    return Observable<T>.create { observer in
+      let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        
+        guard let response = response as? HTTPURLResponse else { return }
+        
+        print("====================Response====================")
+        print("StatusCode: \(response.statusCode)")
+        
+        guard let data = data else {
+          observer.onError(COError.responseDataIsNil)
+          print("================================================")
+          return
+        }
+        
+        let base = try? JSONDecoder().decode(Base<T>.self, from: data)
+        print("Json: \(data.toJSONString())")
+        print("================================================")
+        
+        print("Data: \(String(describing: base))")
+        // 에러코드 존재하면 서버에러 발생으로 판단.
+        if let errorCode = base?.errorCode, let message = base?.message {
+          observer.onError(COError.message(errorCode, message))
+          return
+        }
+        
+        if let data = base?.data {
+          observer.onNext(data)
+          observer.on(.completed)
+          return
+        }
+        
+        observer.onError(COError.dataNotAllowed)
+        return
+      }
+      
+      task.resume()
+      
+      return Disposables.create(with: task.cancel)
+    }
+  }
+}
+
+extension ApiManager {
+  private func generateBoundaryString() -> String {
+    return "Boundary-\(UUID().uuidString)"
+  }
+  // MARK: 멀티파트 이미지 데이터로 변환
+  private func createBody(
+    parameters: [String: String],
+    boundary: String,
+    data: Data,
+    mimeType: String,
+    filename: String
+  ) -> Data {
+    let body = NSMutableData()
+    let imgDataKey = "profile"
+    let boundaryPrefix = "--\(boundary)\r\n"
+    
+    for (key, value) in parameters {
+      body.appendString(boundaryPrefix)
+      body.appendString("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n")
+      body.appendString("\(value)\r\n")
+    }
+    
+    body.appendString(boundaryPrefix)
+    body.appendString("Content-Disposition: form-data; name=\"\(imgDataKey)\"; filename=\"\(filename)\"\r\n")
+    body.appendString("Content-Type: \(mimeType)\r\n\r\n")
+    body.append(data)
+    body.appendString("\r\n")
+    body.appendString("—".appending(boundary.appending("—")))
+    
+    return body as Data
+  }
+}
+
+extension NSMutableData {
+  func appendString(_ string: String) {
+    let data = string.data(using: .utf8, allowLossyConversion: false)
+    append(data!)
+  }
 }
