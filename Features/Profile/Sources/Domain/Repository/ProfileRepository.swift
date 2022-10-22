@@ -12,6 +12,7 @@ import RxSwift
 import CODomain
 
 public protocol ProfileRepository {
+  func uploadProfileImage(data: Data) -> Observable<String>
   func userProfile() -> Observable<Profile>
   func updateProfile(parameter: ProfileEditParameter) -> Observable<Profile>
 }
