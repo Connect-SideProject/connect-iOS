@@ -10,8 +10,10 @@ import Foundation
 
 public enum UserDefaultsKeys: String {
   case accessToken
+  case refreshToken
   case profile
   case roleSkillsList
+  case interestList
 }
 
 public extension UserDefaults {
