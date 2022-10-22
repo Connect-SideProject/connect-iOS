@@ -56,21 +56,19 @@ extension MainController {
     /// MY 화면.
     let profileDIContainer = ProfileDIContainer(
       apiService: ApiManager.shared,
-      userService: UserManager.shared,
-      roleSkillsService: RoleSkillsManager.shared,
-      type: .base
+      userService: UserManager.shared
     )
-    if let profileController = profileDIContainer.makeController() as? ProfileController {
-      profileController.delegate = self
-      profileNavigationController = UINavigationController(
-        rootViewController: profileController
-      )
-      profileNavigationController.tabBarItem = .init(
-        title: "main.tabItem.profile".localized(),
-        image: nil,
-        selectedImage: nil
-      )
-    }
+    
+    let profileController = profileDIContainer.makeController()
+    profileController.delegate = self
+    profileNavigationController = UINavigationController(
+      rootViewController: profileController
+    )
+    profileNavigationController.tabBarItem = .init(
+      title: "main.tabItem.profile".localized(),
+      image: nil,
+      selectedImage: nil
+    )
     
     self.viewControllers = [
       homeController,
@@ -105,10 +103,23 @@ extension MainController {
   }
 }
 
-extension MainController: ProfileControllerDelegate {
+extension MainController: ProfileDelegate {
   func routeToEditProfile() {
+    let container = ProfileEditDIContainer(
+      apiService: ApiManager.shared,
+      userService: UserManager.shared,
+      interestService: InterestManager.shared,
+      roleSkillsService: RoleSkillsManager.shared
+    )
     
-    let viewController = UIViewController()
-    profileNavigationController.pushViewController(viewController, animated: true)
+    let controller = container.makeController()
+    controller.delegate = self
+    profileNavigationController.pushViewController(controller, animated: true)
+  }
+}
+
+extension MainController: ProfileEditDelegate {
+  func routeToBack() {
+    profileNavigationController.popViewController(animated: true)
   }
 }
