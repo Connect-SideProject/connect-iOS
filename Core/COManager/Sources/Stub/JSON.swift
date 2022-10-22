@@ -9,6 +9,33 @@ import Foundation
 
 public struct JSON {
   
+  public static let interests = """
+      \"result\" : \"SUCCESS\",
+      \"data\" : [
+        {
+          \"code_id\": 58,
+          \"code_cd\": \"FINANCE\",
+          \"code_nm\": \"금융\"
+        },
+        {
+          \"code_id\": 59,
+          \"code_cd\": \"FATION\",
+          \"code_nm\": \"패션\"
+        },
+        {
+          \"code_id\": 60,
+          \"code_cd\": \"ENTERTAIN\",
+          \"code_nm\": \"예능\"
+        },
+        {
+          \"code_id\": 61,
+          \"code_cd\": \"HEALTH\",
+          \"code_nm\": \"건강\"
+        }],
+      \"message\" : null,
+      \"error_code\" : null
+  """
+  
   public static let roleSkills = """
   {
     \"result\" : \"SUCCESS\",
