@@ -86,7 +86,7 @@ extension DescriptionContainerView {
     flexContainer.flex
       .define { flex in
         flex.addItem(descriptionLabel)
-          .marginBottom(4)
+          .marginBottom(10)
         
         if let customView = customView {
           
@@ -115,11 +115,11 @@ public final class CastableContainerView: UIView, CastableView {
   }
   
   public var handler: ([String]) -> Void = { _ in }
-  public var selectedItems: [String] = []
+  public private(set) var selectedItems: [[String]] = []
   
   public let flexContainer = UIView()
   
-  private let views: [CastableView]
+  public private(set) var views: [CastableView] = []
   private let direction: Flex.Direction
   
   public init(views: [CastableView], direction: Flex.Direction = .column) {
@@ -141,6 +141,18 @@ public final class CastableContainerView: UIView, CastableView {
     self.pin
       .width(of: self)
       .height(of: self)
+  }
+  
+  public func setSelectedItems(items: [String]) {
+    
+    views.forEach {
+      let roundSelectionButtonView = $0.casting(type: RoundSelectionButtonView.self)
+      roundSelectionButtonView.setSelectedItems(items: items)
+      
+      if roundSelectionButtonView.selectedItems.count > 0 {
+        self.selectedItems.append(roundSelectionButtonView.selectedItems)
+      }
+    }
   }
   
   public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -175,12 +187,12 @@ extension CastableContainerView {
   }
   
   private func bindEvent() {
-    let views = views.map { $0.casting(type: SelectionButtonView.self) }
+    let views = views.map { $0.casting(type: RoundSelectionButtonView.self) }
     
     let handler: (String) -> Void = { [weak self] _ in
-      let selectedItems = views.map { $0.selectedItems }.flatMap { $0 }
+      let selectedItems = views.map { $0.selectedItems }
       self?.selectedItems = selectedItems
-      self?.handler(selectedItems)
+      self?.handler(selectedItems.flatMap { $0 })
     }
     
     let _ = views.map { $0.handler = handler }

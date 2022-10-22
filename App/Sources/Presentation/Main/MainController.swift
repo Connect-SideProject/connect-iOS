@@ -8,17 +8,17 @@
 
 import UIKit
 
-/// 코디네이터 인터페이스
-protocol BaseCoordinator: AnyObject {
-    var presenter: UINavigationController {get set}
-    var childrenCoordinator: [BaseCoordinator] {get set}
-}
+import Profile
+import COManager
+import CONetwork
 
-/// ViewController Flow 인터페이스
-protocol ViewControllerFlow {
-    func makeMainController() -> MainController
-    func makeHomeCoordinator() -> HomeCoordinator
-    func makeHomeController() -> HomeController
+/// 하단 탭바가 포함된 화면 컨트롤러.
+final class MainController: UITabBarController {
+  
+  private var profileNavigationController: UINavigationController!
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
     
 }
 
@@ -39,16 +39,22 @@ class MainFlow: ViewControllerFlow {
     
 
     
-}
-
-/// 하단 탭바가 포함된 화면 컨트롤러.
-class MainController: UITabBarController {
-    var viewFlow: ViewControllerFlow?
+    /// MY 화면.
+    let profileDIContainer = ProfileDIContainer(
+      apiService: ApiManager.shared,
+      userService: UserManager.shared
+    )
     
-    init(viewFlow: ViewControllerFlow) {
-        self.viewFlow = viewFlow
-        super.init(nibName: nil, bundle: nil)
-    }
+    let profileController = profileDIContainer.makeController()
+    profileController.delegate = self
+    profileNavigationController = UINavigationController(
+      rootViewController: profileController
+    )
+    profileNavigationController.tabBarItem = .init(
+      title: "main.tabItem.profile".localized(),
+      image: nil,
+      selectedImage: nil
+    )
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -131,4 +137,25 @@ extension MainController {
         self.tabBar.layer.borderWidth = 1
         self.tabBar.layer.borderColor = UIColor.white.cgColor
     }
+}
+
+extension MainController: ProfileDelegate {
+  func routeToEditProfile() {
+    let container = ProfileEditDIContainer(
+      apiService: ApiManager.shared,
+      userService: UserManager.shared,
+      interestService: InterestManager.shared,
+      roleSkillsService: RoleSkillsManager.shared
+    )
+    
+    let controller = container.makeController()
+    controller.delegate = self
+    profileNavigationController.pushViewController(controller, animated: true)
+  }
+}
+
+extension MainController: ProfileEditDelegate {
+  func routeToBack() {
+    profileNavigationController.popViewController(animated: true)
+  }
 }

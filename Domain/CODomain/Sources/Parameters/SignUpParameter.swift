@@ -12,9 +12,9 @@ public struct SignUpParameter: Parameterable {
   var authType: AuthType?
   let nickname: String
   var region: Region?
-  let interestings: [Interestring]
+  let interestings: [String]
   let career: Career?
-  let roles: [Role]
+  let roles: [RoleType]
   let profileURL: String?
   let portfolioURL: String?
   let skills: [String]
@@ -25,9 +25,9 @@ public struct SignUpParameter: Parameterable {
     
     self.authType =     try container.decodeIfPresent(AuthType.self, forKey: .authType)
     self.nickname =     try container.decodeIfPresent(String.self, forKey: .nickname) ?? ""
-    self.roles =        try container.decodeIfPresent([Role].self, forKey: .roles) ?? []
+    self.roles =        try container.decodeIfPresent([RoleType].self, forKey: .roles) ?? []
     self.region =       try container.decodeIfPresent(Region.self, forKey: .region) ?? .init()
-    self.interestings = try container.decodeIfPresent([Interestring].self, forKey: .interestings) ?? []
+    self.interestings = try container.decodeIfPresent([String].self, forKey: .interestings) ?? []
     self.profileURL =   try container.decodeIfPresent(String.self, forKey: .profileURL)
     self.portfolioURL = try container.decodeIfPresent(String.self, forKey: .portfolioURL)
     self.career =       try container.decodeIfPresent(Career.self, forKey: .career)
@@ -55,7 +55,7 @@ public struct SignUpParameter: Parameterable {
     case nickname
     case roles = "role"
     case region
-    case interestings = "interestings"
+    case interestings = "interesting"
     case profileURL = "profile_url"
     case portfolioURL = "portfolio_url"
     case career
@@ -65,7 +65,18 @@ public struct SignUpParameter: Parameterable {
 }
 
 public extension SignUpParameter {
-  init(authType: AuthType? = nil, nickname: String, region: Region? = nil, interestings: [Interestring], career: Career?, roles: [Role], profileURL: String? = nil, portfolioURL: String? = nil, skills: [String], terms: [Terms]) {
+  init(
+    authType: AuthType? = nil,
+    nickname: String,
+    region: Region? = nil,
+    interestings: [String],
+    career: Career?,
+    roles: [RoleType],
+    profileURL: String? = nil,
+    portfolioURL: String? = nil,
+    skills: [String],
+    terms: [Terms]
+  ) {
     self.authType = authType
     self.nickname = nickname
     self.region = region

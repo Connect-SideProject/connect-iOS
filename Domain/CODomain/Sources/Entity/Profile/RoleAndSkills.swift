@@ -59,7 +59,12 @@ public class Skill: NSObject, NSCoding, Codable, Identifiable {
 }
 
 public extension Skill {
-  convenience init(id: Int = 0, code: String = "", name: String = "", isAddUser: String = "") {
+  convenience init(
+    id: Int = 0,
+    code: String = "",
+    name: String = "",
+    isAddUser: String = ""
+  ) {
     self.init()
     
     self.id = id
@@ -116,7 +121,12 @@ public class RoleSkills: NSObject, NSCoding, Codable, Identifiable {
 }
 
 public extension RoleSkills {
-  convenience init(id: Int = -1, roleCode: String = "", roleName: String = "", skills: [Skill] = []) {
+  convenience init(
+    id: Int = -1,
+    roleCode: String = "",
+    roleName: String = "",
+    skills: [Skill] = []
+  ) {
     self.init()
     
     self.id = id
