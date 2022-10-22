@@ -25,9 +25,8 @@ public final class ApiManager: ApiService {
     var request = URLRequest(url: url)
     request.httpMethod = endPoint.method.string
     
-    if let parameter = endPoint.parameter,
-       let jsonData = try? JSONSerialization.data(withJSONObject: parameter) {
-      request.httpBody = jsonData
+    if let parameter = endPoint.parameter?.toJSONData() {
+      request.httpBody = parameter
     }
     
     if let header = endPoint.header {
@@ -44,44 +43,60 @@ public final class ApiManager: ApiService {
     print("Method: \(endPoint.method.string)")
     print("Header: \(String(describing: endPoint.header))")
     print("URL: \(url.absoluteString)")
-    print("Parameter: \(String(describing: endPoint.parameter))")
+    print("Parameter: \(String(describing: endPoint.parameter?.format(options: [.prettyPrinted])))")
     print("===============================================")
     
     return Observable<T>.create { observer in
-      let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      
+      let configuration = URLSessionConfiguration.default
+      configuration.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
+      configuration.connectionProxyDictionary = [AnyHashable: Any]()
+      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = "172.31.47.70 "
+      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = 443
+
+      
+      let task = URLSession(configuration: configuration).dataTask(with: request) { data, response, error in
         
         guard let response = response as? HTTPURLResponse else { return }
         
         print("====================Response====================")
         print("StatusCode: \(response.statusCode)")
-        print("================================================")
+        
+        let headers = response.allHeaderFields.filter {
+          $0.key.description == "access-token" || $0.key.description == "refresh-token"
+        }
+        
+        if headers.count != 0 {
+          print("Header: \(headers)")
+          SessionHeader.shared.update(headers: headers)
+        }
         
         // 회원가입이 필요한 경우.
         if response.statusCode == 204 {
           observer.onError(COError.needSignUp)
+          print("================================================")
+          return
+        }
+        
+        // 토큰 유효시간 만료.
+        if response.statusCode == 401 {
+          observer.onError(COError.expiredToken)
+          print("================================================")
           return
         }
         
         guard let data = data else {
           observer.onError(COError.responseDataIsNil)
+          print("================================================")
           return
         }
         
         let base = try? JSONDecoder().decode(Base<T>.self, from: data)
-        print("====================Response====================")
-        do {
-          let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers)
-          let jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
-          
-          if let jsonString = String(data: jsonData, encoding: .utf8) {
-            print("Json: \(jsonString)")
-          }
-        } catch let error {
-          print("Error: \(error.localizedDescription)")
-        }
+        print("Json: \(data.toJSONString())")
+        print("================================================")
         
         print("Data: \(String(describing: base))")
-        print("================================================")
         // 에러코드 존재하면 서버에러 발생으로 판단.
         if let errorCode = base?.errorCode, let message = base?.message {
           observer.onError(COError.message(errorCode, message))

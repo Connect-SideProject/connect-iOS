@@ -54,12 +54,19 @@ public extension EndPoint {
     case let .signIn(authType, accessToken):
       let _ = ["access-token": accessToken,
                "auth-type": authType.description].map { common[$0.key] = $0.value }
+      
     case let .signUp(_, accessToken):
       let _ = ["access-token": accessToken].map { common[$0.key] = $0.value }
+      
     case .serchPlace:
       return ["Authorization": Auth.ThirdParty.kakao]
-    case .allSkills:
+      
+    case .interests, .skills:
       break
+    
+    case .uploadProfileImage:
+      return ["Content-Type": "multipart/form-data"]
+      
     default:
       let _ = [
         "access-token": tokens.access,
@@ -93,7 +100,7 @@ public extension EndPoint {
   
   var method: HTTPMethod {
     switch path {
-    case .signUp, .userProfile, .updateProfile:
+    case .signUp, .uploadProfileImage, .userProfile, .updateProfile:
       return .put
     case .signIn:
       return .post
