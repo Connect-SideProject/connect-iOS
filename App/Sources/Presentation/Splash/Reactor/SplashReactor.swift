@@ -15,7 +15,7 @@ import ReactorKit
 
 public final class SplashReactor: Reactor, ErrorHandlerable {
   public enum Action {
-    case requestRolesAndSkills
+    case requestNeedsData
   }
   
   public enum Mutation {
@@ -36,28 +36,47 @@ public final class SplashReactor: Reactor, ErrorHandlerable {
   
   private let apiService: ApiService
   private let roleSkillsService: RoleSkillsService
+  private let interestService: InterestService
   
   public init(
     apiService: ApiService = ApiManager.shared,
-    roleSkillsService: RoleSkillsService = RoleSkillsManager.shared
+    roleSkillsService: RoleSkillsService = RoleSkillsManager.shared,
+    interestService: InterestService = InterestManager.shared
   ) {
     self.apiService = apiService
     self.roleSkillsService = roleSkillsService
+    self.interestService = interestService
   }
   
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
-    case .requestRolesAndSkills:
+    case .requestNeedsData:
       
-      if roleSkillsService.isExists {
+      if roleSkillsService.isExists && interestService.isExists {
         return .just(.setIsFinishRequests(true))
       }
       
-      return apiService.request(endPoint: .init(path: .allSkills))
-        .flatMap { [weak self] (roleSkills: [RoleSkills]) -> Observable<Mutation> in
-            self?.roleSkillsService.update(roleSkills)
-            return .just(.setIsFinishRequests(true))
-        }.catch(errorHandler)
+      let updateRoleSkills = apiService.request(
+        endPoint: .init(path: .skills)
+      )
+      .flatMap { [weak self] (roleSkills: [RoleSkills]) -> Observable<Void> in
+          self?.roleSkillsService.update(roleSkills)
+          return .just(())
+      }
+      
+      let updateInterests = apiService.request(
+        endPoint: .init(path: .interests)
+      )
+      .flatMap { [weak self] (interests: [Interest]) -> Observable<Void> in
+        self?.interestService.update(interests)
+        return .just(())
+    }
+      
+      return Observable.combineLatest(
+        updateRoleSkills, updateInterests
+      ).flatMap { _ -> Observable<Mutation> in
+        return .just(.setIsFinishRequests(true))
+      }.catch(errorHandler)
     }
   }
   

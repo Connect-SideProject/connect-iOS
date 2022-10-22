@@ -58,7 +58,7 @@ final class SplashController: UIViewController, ReactorKit.View {
     /// 스킬리스트 요청
     Observable.just(())
       .delay(.milliseconds(300), scheduler: MainScheduler.instance)
-      .map { Reactor.Action.requestRolesAndSkills }
+      .map { Reactor.Action.requestNeedsData }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
