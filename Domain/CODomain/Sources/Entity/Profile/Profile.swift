@@ -380,12 +380,13 @@ public extension Region {
   }
 }
 
-public class Interest: NSObject, NSCoding, Codable {
+public class Interest: NSObject, NSCoding, Codable, Identifiable {
   
   public override var description: String {
     return name
   }
   
+  public var id: Int = 0
   public var code: String = ""
   public var name: String = ""
   
@@ -396,6 +397,7 @@ public class Interest: NSObject, NSCoding, Codable {
   required public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     
+    self.id =   try container.decodeIfPresent(Int.self, forKey: .id) ?? -1
     self.code = try container.decodeIfPresent(String.self, forKey: .code) ?? ""
     self.name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
   }
@@ -403,21 +405,25 @@ public class Interest: NSObject, NSCoding, Codable {
   public func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     
+    try container.encode(id, forKey: .id)
     try container.encode(code, forKey: .code)
     try container.encode(name, forKey: .name)
   }
   
   public required init?(coder: NSCoder) {
+    self.id =   coder.decodeInteger(forKey: CodingKeys.id.rawValue)
     self.code = coder.decodeObject(forKey: CodingKeys.code.rawValue) as? String ?? ""
     self.name = coder.decodeObject(forKey: CodingKeys.name.rawValue) as? String ?? ""
   }
   
   public func encode(with coder: NSCoder) {
+    coder.encode(id, forKey: CodingKeys.id.rawValue)
     coder.encode(code, forKey: CodingKeys.code.rawValue)
     coder.encode(name, forKey: CodingKeys.name.rawValue)
   }
   
   enum CodingKeys: String, CodingKey {
+    case id = "code_id"
     case code = "code_cd"
     case name = "code_nm"
   }
