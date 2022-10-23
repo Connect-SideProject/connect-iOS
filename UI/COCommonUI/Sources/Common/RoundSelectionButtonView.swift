@@ -75,10 +75,6 @@ public final class RoundSelectionButtonView: UIView, CastableView {
         self.selectedItems.append($0)
       }
   }
-  
-  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    endEditing(true)
-  }
 }
 
 extension RoundSelectionButtonView {
