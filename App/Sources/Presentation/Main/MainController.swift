@@ -9,6 +9,7 @@
 import UIKit
 
 import Profile
+import COCommonUI
 import COManager
 import CONetwork
 
@@ -44,7 +45,7 @@ class MainFlow: ViewControllerFlow {
 /// 하단 탭바가 포함된 화면 컨트롤러.
 final class MainController: UITabBarController {
   
-  private var profileNavigationController: UINavigationController!
+  private var profileNavigationController: CONavigationViewController!
   
   var viewFlow: ViewControllerFlow?
   
@@ -93,7 +94,7 @@ extension MainController {
     
     let profileController = profileDIContainer.makeController()
     profileController.delegate = self
-    profileNavigationController = UINavigationController(
+    profileNavigationController = CONavigationViewController(
       rootViewController: profileController
     )
     profileNavigationController.tabBarItem = .init(

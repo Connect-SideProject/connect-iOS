@@ -8,6 +8,7 @@
 
 import UIKit
 
+import COCommonUI
 import CODomain
 import COManager
 import CONetwork
@@ -17,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
   var window: UIWindow?
   
-  var controller: UINavigationController!
+  var controller: CONavigationViewController!
   
   let flowDI = MainFlow()
 
@@ -48,11 +49,11 @@ extension SceneDelegate: SplashDelegate {
       let signInController = container.makeController()
       signInController.delegate = self
       
-      controller = UINavigationController(
+      controller = CONavigationViewController(
         rootViewController: signInController
       )
     } else {
-      controller = UINavigationController(
+      controller = CONavigationViewController(
         rootViewController: flowDI.makeMainController()
       )
     }
@@ -67,6 +68,7 @@ extension SceneDelegate: SignInDelegate {
     let container = SignUpDIContainer(
       apiService: ApiManager.shared,
       userService: UserManager.shared,
+      interestService: InterestManager.shared,
       roleSkillsService: RoleSkillsManager.shared,
       authType: authType,
       accessToken: accessToken
