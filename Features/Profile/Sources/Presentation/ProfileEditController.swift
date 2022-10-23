@@ -97,6 +97,18 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     super.viewDidLoad()
     
     configureUI()
+    
+    let tapGesture = UITapGestureRecognizer(
+      target: self,
+      action: #selector(dismissKeyboards)
+    )
+    tapGesture.delegate = self
+    view.addGestureRecognizer(tapGesture)
+  }
+  
+  @objc func dismissKeyboards() {
+    locationContainerView.textField.resignFirstResponder()
+    portfolioContainerView.textField.resignFirstResponder()
   }
   
   public override func viewDidLayoutSubviews() {
@@ -314,5 +326,27 @@ extension ProfileEditController: ProfileViewDelegate {
     ImagePickerManager.shared.selectedImage { [weak reactor] image in
       reactor?.action.onNext(.requestUploadImage(image.pngData()))
     }
+  }
+}
+
+extension ProfileEditController: UIGestureRecognizerDelegate {
+  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+    
+    let gestureDisableViews = [
+      interestsContainerView.customView,
+      roleContainerView.customView,
+      skillContainerView.customView
+    ]
+    
+    let isGestureDisabled = gestureDisableViews
+      .compactMap { $0 }
+      .filter { touch.view?.isDescendant(of: $0) ?? false }
+      .count > 0
+    
+    if isGestureDisabled {
+      return false
+    }
+    
+    return true
   }
 }
