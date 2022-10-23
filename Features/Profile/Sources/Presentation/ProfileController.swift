@@ -140,20 +140,28 @@ extension ProfileController {
     
     flexContainer.flex
       .maxHeight(view.bounds.height / 1.5)
+      .justifyContent(.spaceBetween)
       .define { flex in
         flex.addItem(profileView)
           .height(100)
         
+        flex.addItem()
+          .height(10)
+        
         flex.addItem(buttonContainerView)
           .height(35)
-          .marginVertical(10)
           .marginHorizontal(20)
+        
+        flex.addItem()
+          .height(10)
         
         flex.addItem(listContainerView)
           .justifyContent(.spaceBetween)
           .height(120)
-          .marginVertical(10)
           .marginHorizontal(20)
+        
+        flex.addItem()
+          .height(10)
         
         flex.addItem(skillContainerView)
           .marginHorizontal(20)
