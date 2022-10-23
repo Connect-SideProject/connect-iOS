@@ -15,7 +15,7 @@ import Then
 final class ProfileListView: UIView {
   
   private lazy var titleLabel = UILabel().then {
-    $0.text = item.subtitle
+    $0.text = item.title
     $0.font = .systemFont(ofSize: 16, weight: .bold)
     $0.textColor = .black
   }
@@ -24,6 +24,7 @@ final class ProfileListView: UIView {
     $0.text = item.content
     $0.font = .systemFont(ofSize: 14, weight: .regular)
     $0.textColor = .black
+    $0.textAlignment = .right
   }
   
   private let flexContainer = UIView()
@@ -47,6 +48,11 @@ final class ProfileListView: UIView {
     flexContainer.pin.layout()
     flexContainer.flex.layout()
   }
+  
+  public func update(item: ProfileViewItem) {
+    titleLabel.text = item.title
+    subjectLabel.text = item.content
+  }
 }
 
 extension ProfileListView {
@@ -56,10 +62,12 @@ extension ProfileListView {
     
     flexContainer.flex
       .direction(.row)
-      .justifyContent(.spaceBetween)
       .define { flex in
         flex.addItem(titleLabel)
+          .maxWidth(100)
         flex.addItem(subjectLabel)
+          .grow(1)
+          .markDirty()
     }
   }
 }

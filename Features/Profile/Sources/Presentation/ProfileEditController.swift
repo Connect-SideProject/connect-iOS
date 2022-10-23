@@ -199,11 +199,13 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
       .compactMap { $0.error }
       .observe(on: MainScheduler.instance)
       .bind { error in
-        CommonAlert.shared.setMessage(.message(error.localizedDescription))
-          .show()
-          .confirmHandler = {
-            print("comfirm")
-          }
+        switch error {
+        case let .message(_, message):
+          CommonAlert.shared.setMessage(.message(message))
+            .show()
+        default:
+          break
+        }
       }.disposed(by: disposeBag)
   }
 }
@@ -255,9 +257,13 @@ private extension ProfileEditController {
     
     let portfolioURL = portfolioContainerView.textField.text
     
-    guard let carrer: String = Career(
-      rawValue: reactor?.currentState.profile?.career?.rawValue ?? ""
-    )?.rawValue else { return }
+    let period = periodContainerView.customView?.casting(
+      type: CheckBoxContainerView.self
+    ).checkedItems?.compactMap { $0 } ?? []
+    
+    let carrer: Career? = .init(
+      description: period[safe: 0]?.title ?? ""
+    )
     
     let skills: [String] = skillContainerView.customView?.casting(
       type: CastableContainerView.self
@@ -323,8 +329,9 @@ private extension ProfileEditController {
 
 extension ProfileEditController: ProfileViewDelegate {
   func didTapEditProfileButton() {
-    ImagePickerManager.shared.selectedImage { [weak reactor] image in
-      reactor?.action.onNext(.requestUploadImage(image.pngData()))
+    ImagePickerManager.shared.selectedImage { [weak self] image in
+      self?.profileView.profileImageView.setImage(image)
+      self?.reactor?.action.onNext(.requestUploadImage(image.pngData()))
     }
   }
 }

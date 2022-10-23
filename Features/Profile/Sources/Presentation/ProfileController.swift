@@ -114,8 +114,17 @@ public final class ProfileController: UIViewController, ReactorKit.View {
     reactor.state
       .compactMap { $0.profileViewItems }
       .observe(on: MainScheduler.instance)
+      .take(2)
       .bind { [weak self] items in
         self?.defineProfileListViews(items: items)
+      }.disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.profileViewItems }
+      .observe(on: MainScheduler.instance)
+      .skip(2)
+      .bind { [weak self] items in
+        self?.updateProfileListViews(items: items)
       }.disposed(by: disposeBag)
     
     reactor.state
@@ -159,12 +168,14 @@ extension ProfileController {
           .justifyContent(.spaceBetween)
           .height(120)
           .marginHorizontal(20)
+          .markDirty()
         
         flex.addItem()
           .height(10)
         
         flex.addItem(skillContainerView)
           .marginHorizontal(20)
+          .markDirty()
       }
   }
   
@@ -186,6 +197,15 @@ extension ProfileController {
     listContainerView.flex.define { flex in
       views.forEach {
         flex.addItem($0)
+      }
+    }
+  }
+  
+  private func updateProfileListViews(items: [ProfileViewItem]) {
+    
+    zip(listContainerView.subviews, items).forEach { view, item in
+      if let view = view as? ProfileListView {
+        view.update(item: item)
       }
     }
   }
