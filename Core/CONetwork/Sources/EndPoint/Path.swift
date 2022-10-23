@@ -17,6 +17,7 @@ public enum Path {
   case serchPlace(String)
   case userProfile
   case updateProfile(Codable)
+  case homeMenu
   
   public var string: String {
     switch self {
@@ -32,6 +33,8 @@ public enum Path {
       return ""
     case .updateProfile:
       return ""
+    case .homeMenu:
+        return "/api/study/home/menu"
     }
   }
   

@@ -20,7 +20,7 @@ let dependencies = Dependencies(
     ),
     .remote(
       url: "https://github.com/ReactiveX/RxSwift.git",
-      requirement: .exact("6.0.0")
+      requirement: .exact("6.5.0")
     ),
     .remote(
         url: "https://github.com/RxSwiftCommunity/RxDataSources",
