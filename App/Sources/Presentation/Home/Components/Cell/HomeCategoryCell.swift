@@ -31,7 +31,7 @@ final class HomeCategoryCell: UICollectionViewCell {
     
     
     private let containerView: UIView = {
-        $0.backgroundColor = UIColor.gray01
+        $0.backgroundColor = .clear
         $0.layer.cornerRadius = 2
         $0.clipsToBounds = true
 
@@ -63,16 +63,22 @@ final class HomeCategoryCell: UICollectionViewCell {
         }
         
         self.contentView.addSubview(containerView)
-        
+        self.containerView.backgroundColor = .clear
         
         containerView.snp.makeConstraints {
             $0.top.left.right.bottom.equalToSuperview()
         }
         
         menuTitleLabel.snp.makeConstraints {
-            $0.centerY.equalToSuperview()
-            $0.top.equalTo(containerView.snp.bottom).offset(6)
+            $0.centerX.equalTo(menuImageView)
+            $0.top.equalTo(menuImageView.snp.bottom).offset(6)
             $0.left.right.equalToSuperview()
+            $0.height.equalTo(17)
+        }
+        
+        menuImageView.snp.makeConstraints {
+            $0.width.height.equalTo(37)
+            $0.top.equalToSuperview()
         }
         
     }
@@ -88,15 +94,13 @@ extension HomeCategoryCell: ReactorKit.View {
     func bind(reactor: Reactor) {
         
         reactor.state
-            .map{ $0.menuType.getTitle() }
-            .distinctUntilChanged()
+            .map{ $0.menuType.menuTitle }
             .debug("Home Category Title")
             .bind(to: self.menuTitleLabel.rx.text)
             .disposed(by: disposeBag)
-        
+
         reactor.state
-            .map{ $0.menuType.getImage() }
-            .distinctUntilChanged()
+            .map { try $0.menuType.getMenuImage() }
             .debug("Home CateGory Image")
             .bind(to: self.menuImageView.rx.image)
             .disposed(by: disposeBag)

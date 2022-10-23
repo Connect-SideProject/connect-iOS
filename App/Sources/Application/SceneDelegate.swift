@@ -49,7 +49,7 @@ extension SceneDelegate: SplashDelegate {
       signInController.delegate = self
       
       controller = UINavigationController(
-        rootViewController: signInController
+        rootViewController: flowDI.makeHomeController()
       )
     } else {
       controller = UINavigationController(

@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import COManager
+import CONetwork
 
 /// 코디네이터 인터페이스
 protocol BaseCoordinator: AnyObject {
@@ -34,7 +36,7 @@ class MainFlow: ViewControllerFlow {
     }
     
     func makeHomeController() -> HomeController {
-        return HomeController(reactor: HomeViewReactor())
+        return HomeController(reactor: HomeViewReactor(homeApiService: ApiManager.shared))
     }
     
 
