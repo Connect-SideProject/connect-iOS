@@ -34,7 +34,7 @@ enum ProfileSubtitle: String, CustomStringConvertible {
   }
 }
 
-public typealias ProfileViewItem = (subtitle: String, content: String)
+public typealias ProfileViewItem = (title: String, content: String)
 
 public final class ProfileReactor: Reactor {
   public enum Action {

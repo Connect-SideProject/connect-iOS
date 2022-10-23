@@ -106,18 +106,20 @@ public final class ProfileEditReactor: Reactor {
       
     case let .didTapSaveButton(parameter):
       var parameter = parameter
-      let codes = zip(
-        parameter.interestings.map { $0.description },
-        interestService.interestList
-      )
-      .enumerated()
-      .map { offset, element in
-        if interestService.interestList[offset].name == element.0 {
-          return interestService.interestList[offset].code
+      
+      let codes = interestService.interestList
+        .enumerated()
+        .map { offset, element in
+          parameter.interestings.map {
+            if element.name == $0 {
+              return element.code
+            }
+            
+            return ""
+          }
+          .filter { !$0.isEmpty }
         }
-        
-        return ""
-      }.filter { !$0.isEmpty }
+        .flatMap { $0 }
       
       parameter.updateInterestings(codes)
       

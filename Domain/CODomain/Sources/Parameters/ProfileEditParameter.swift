@@ -14,7 +14,7 @@ public struct ProfileEditParameter: Parameterable {
   var region: Region?
   public var interestings: [String]
   let portfolioURL: String?
-  let career: String?
+  let career: Career?
   let skills: [String]
   
   public init(from decoder: Decoder) throws {
@@ -25,7 +25,7 @@ public struct ProfileEditParameter: Parameterable {
     self.region =       try container.decodeIfPresent(Region.self, forKey: .region) ?? .init()
     self.interestings = try container.decodeIfPresent([String].self, forKey: .interestings) ?? []
     self.portfolioURL = try container.decodeIfPresent(String.self, forKey: .portfolioURL)
-    self.career =       try container.decodeIfPresent(String.self, forKey: .career)
+    self.career =       try container.decodeIfPresent(Career.self, forKey: .career)
     self.skills =       try container.decodeIfPresent([String].self, forKey: .skills) ?? []
   }
   
@@ -59,7 +59,7 @@ public extension ProfileEditParameter {
     region: Region? = nil,
     interestings: [String],
     portfolioURL: String? = nil,
-    career: String? = nil,
+    career: Career? = nil,
     skills: [String]
   ) {
     self.profileURL = profileURL
