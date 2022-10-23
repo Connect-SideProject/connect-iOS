@@ -10,6 +10,7 @@ import Foundation
 public struct JSON {
   
   public static let interests = """
+  {
       \"result\" : \"SUCCESS\",
       \"data\" : [
         {
@@ -34,6 +35,7 @@ public struct JSON {
         }],
       \"message\" : null,
       \"error_code\" : null
+  }
   """
   
   public static let roleSkills = """
