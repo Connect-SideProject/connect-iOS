@@ -15,20 +15,30 @@ import CONetwork
 import COManager
 
 public final class SignUpReactor: Reactor, ErrorHandlerable {
+  
+  public enum Route {
+    case home
+  }
+  
   public enum Action {
+    case viewDidLoad
     case searchAddress(String)
     case didTapSignUpButton(SignUpParameter)
   }
   
   public enum Mutation {
+    case setInterestList([Interest])
+    case setRoleSkillsList([RoleSkills])
     case setRegion(Region?)
-    case setProfile(Profile?)
+    case setRoute(Route?)
     case setError(COError?)
   }
   
   public struct State {
+    var interestList: [Interest] = []
+    var roleSkillsList: [RoleSkills] = []
     var region: Region?
-    var profile: Profile?
+    var route: Route?
     var error: COError?
   }
   
@@ -40,17 +50,25 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   
   private let useCase: SignUpUseCase
   private let userService: UserService
+  private let interestService: InterestService
+  private let roleSkillsService: RoleSkillsService
+  
   private let authType: AuthType
   private let accessToken: String
   
   public init(
     useCase: SignUpUseCase,
-    userService: UserService = UserManager.shared,
+    userService: UserService,
+    interestService: InterestService,
+    roleSkillsService: RoleSkillsService,
     authType: AuthType,
     accessToken: String
   ) {
     self.useCase = useCase
     self.userService = userService
+    self.interestService = interestService
+    self.roleSkillsService = roleSkillsService
+    
     self.authType = authType
     self.accessToken = accessToken
   }
@@ -60,6 +78,12 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     let accessToken = accessToken
     
     switch action {
+    case .viewDidLoad:
+      let setInterestList: Observable<Mutation> = .just(.setInterestList(interestService.interestList))
+      let setRoleSkillsList: Observable<Mutation> = .just(.setRoleSkillsList(roleSkillsService.roleSkillsList))
+      return setInterestList
+        .concat(setRoleSkillsList)
+      
     case let .searchAddress(query):
       return useCase.getRegionList(query: query)
         .flatMap { regionList -> Observable<Mutation> in
@@ -105,7 +129,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
         .debug()
         .flatMap { [weak self] profile -> Observable<Mutation> in
           self?.userService.update(tokens: nil, profile: profile)
-          return .just(.setProfile(profile))
+          return .just(.setRoute(.home))
         }.catch(errorHandler)
     }
   }
@@ -114,10 +138,14 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     var newState = state
     
     switch mutation {
+    case let .setInterestList(interestList):
+      newState.interestList = interestList
+    case let .setRoleSkillsList(roleSkillsList):
+      newState.roleSkillsList = roleSkillsList
     case let .setRegion(region):
       newState.region = region
-    case let .setProfile(profile):
-      newState.profile = profile
+    case let .setRoute(route):
+      newState.route = route
     case let .setError(error):
       newState.error = error
     }

@@ -22,20 +22,25 @@ public final class SignUpDIContainer: DIContainer {
   
   private let apiService: ApiService
   private let userService: UserService
+  private let interestService: InterestService
   private let roleSkillsService: RoleSkillsService
+  
   private let authType: AuthType
   private let accessToken: String
   
   public init(
     apiService: ApiService,
     userService: UserService,
+    interestService: InterestService,
     roleSkillsService: RoleSkillsService,
     authType: AuthType,
     accessToken: String
   ) {
     self.apiService = apiService
     self.userService = userService
+    self.interestService = interestService
     self.roleSkillsService = roleSkillsService
+    
     self.authType = authType
     self.accessToken = accessToken
   }
@@ -53,13 +58,16 @@ public final class SignUpDIContainer: DIContainer {
   public func makeReactor() -> Reactor {
     return Reactor(
       useCase: makeUseCase(),
+      userService: userService,
+      interestService: interestService,
+      roleSkillsService: roleSkillsService,
       authType: authType,
       accessToken: accessToken
     )
   }
   
   public func makeController() -> ViewController {
-    let controller = SignUpController(roleSkillsService: roleSkillsService)
+    let controller = SignUpController()
     controller.reactor = makeReactor()
     return controller
   }

@@ -36,27 +36,19 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     )
   )
   
-  private let interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", RoundSelectionButtonView(
-      titles: ["금융", "패션", "엔터테인먼트", "헬스케어"]
-      )
-    )
+  private var interestTitles: [String] = []
+  private lazy var interestsContainerView = DescriptionContainerView(
+    type: .custom("관심분야", RoundSelectionButtonView(titles: interestTitles))
   )
   
-  private lazy var jobContainerView = DescriptionContainerView(
-    type: .custom("원하는 역할", RoundSelectionButtonView(
-      titles: roleSkillsService.roleSkillsList.map { $0.roleName })
-    )
+  private var roleTitles: [String] = []
+  private lazy var roleContainerView = DescriptionContainerView(
+    type: .custom("원하는 역할", RoundSelectionButtonView(titles: roleTitles))
   )
   
+  private var skillsViews: [CastableView] = []
   private lazy var skillContainerView = DescriptionContainerView(
-    type: .custom(
-      "보유 스킬",
-      CastableContainerView(
-        views: roleSkillsService.roleSkillsList
-          .map { RoundSelectionButtonView(titles: $0.skills.map { $0.name }, direction: .vertical) },
-        direction: .column)
-    )
+    type: .custom("보유 스킬", CastableContainerView(views: skillsViews))
   )
   
   private let portfolioContainerView = DescriptionContainerView(
@@ -98,17 +90,6 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   public var disposeBag = DisposeBag()
   
-  let roleSkillsService: RoleSkillsService
-  
-  init(roleSkillsService: RoleSkillsService) {
-    self.roleSkillsService = roleSkillsService
-    super.init(nibName: nil, bundle: nil)
-  }
-  
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-  
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     
@@ -136,9 +117,27 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     
     configureUI()
     bindEvent()
+    
+    let tapGesture = UITapGestureRecognizer(
+      target: self,
+      action: #selector(dismissKeyboards)
+    )
+    tapGesture.delegate = self
+    view.addGestureRecognizer(tapGesture)
+  }
+  
+  @objc func dismissKeyboards() {
+    nicknameContainerView.textField.resignFirstResponder()
+    locationContainerView.textField.resignFirstResponder()
+    portfolioContainerView.textField.resignFirstResponder()
   }
   
   public func bind(reactor: SignUpReactor) {
+    
+    Observable.just(())
+      .map { Reactor.Action.viewDidLoad }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
     
     locationContainerView.textField.rx.value
       .filter { !($0 ?? "").isEmpty }
@@ -150,10 +149,35 @@ public final class SignUpController: UIViewController, ReactorKit.View {
       .disposed(by: disposeBag)
     
     reactor.state
-      .compactMap { $0.profile }
+      .compactMap { $0.interestList }
+      .filter { !$0.isEmpty }
       .observe(on: MainScheduler.instance)
-      .bind { [weak self] _ in
-        self?.delegate?.routeToHome()
+      .bind { [weak self] interestList in
+        self?.interestTitles = interestList.map { $0.name }
+      }.disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.roleSkillsList }
+      .filter { !$0.isEmpty }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] roleSkillsList in
+        self?.roleTitles = roleSkillsList.map { $0.roleName }
+        self?.skillsViews = roleSkillsList.map {
+          RoundSelectionButtonView(
+            titles: $0.skills.map { $0.name },
+            direction: .vertical
+          )
+        }
+      }.disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.route }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] route in
+        switch route {
+        case .home:
+          self?.delegate?.routeToHome()
+        }
       }.disposed(by: disposeBag)
     
     reactor.state
@@ -170,11 +194,6 @@ public final class SignUpController: UIViewController, ReactorKit.View {
         }
         
       }.disposed(by: disposeBag)
-  }
-  
-  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    view.endEditing(true)
-    flexContainer.endEditing(true)
   }
 }
 
@@ -196,7 +215,7 @@ extension SignUpController {
          locationContainerView,
          periodContainerView,
          interestsContainerView,
-         jobContainerView,
+         roleContainerView,
          skillContainerView,
          portfolioContainerView
         ].forEach {
@@ -225,14 +244,14 @@ extension SignUpController {
   
   private func bindEvent() {
     
-    skillContainerView.customView?
-      .casting(type: CastableContainerView.self).handler = {
-        print($0)
+    skillContainerView.customView?.casting(
+      type: CastableContainerView.self
+    ).handler = {
+      print($0)
     }
     
     termsCheckBoxContainerView.handler = { [weak self] checkItems in
       print(checkItems)
-      
       if checkItems.count == 3 {
         self?.acceptAllCheckBoxView.setChecked(true)
       } else {
@@ -261,7 +280,7 @@ extension SignUpController {
       type: RoundSelectionButtonView.self
     ).selectedItems.compactMap { $0 } ?? []
     
-    let roles: [RoleType] = jobContainerView.customView?.casting(
+    let roles: [RoleType] = roleContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
     ).selectedItems.compactMap { RoleType(description: $0) } ?? []
     
@@ -286,5 +305,27 @@ extension SignUpController {
     )
     
     reactor?.action.onNext(.didTapSignUpButton(parameter))
+  }
+}
+
+extension SignUpController: UIGestureRecognizerDelegate {
+  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+    
+    let gestureDisableViews = [
+      interestsContainerView.customView,
+      roleContainerView.customView,
+      skillContainerView.customView
+    ]
+    
+    let isGestureDisabled = gestureDisableViews
+      .compactMap { $0 }
+      .filter { touch.view?.isDescendant(of: $0) ?? false }
+      .count > 0
+    
+    if isGestureDisabled {
+      return false
+    }
+    
+    return true
   }
 }

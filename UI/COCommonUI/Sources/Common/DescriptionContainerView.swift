@@ -71,10 +71,6 @@ public class DescriptionContainerView: UIView {
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
-  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    endEditing(true)
-  }
 }
 
 extension DescriptionContainerView {
@@ -153,10 +149,6 @@ public final class CastableContainerView: UIView, CastableView {
         self.selectedItems.append(roundSelectionButtonView.selectedItems)
       }
     }
-  }
-  
-  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    endEditing(true)
   }
 }
 
