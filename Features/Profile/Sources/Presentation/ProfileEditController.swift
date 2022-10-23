@@ -132,6 +132,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     
     reactor.state
       .compactMap { $0.interestList }
+      .filter { !$0.isEmpty }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] interestList in
         self?.interestTitles = interestList.map { $0.name }
@@ -139,6 +140,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     
     reactor.state
       .compactMap { $0.roleSkillsList }
+      .filter { !$0.isEmpty }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] roleSkillsList in
         self?.skillsViews = roleSkillsList.map {
