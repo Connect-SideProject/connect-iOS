@@ -52,7 +52,7 @@ public final class ApiManager: ApiService {
       configuration.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
       configuration.connectionProxyDictionary = [AnyHashable: Any]()
       configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = "172.31.47.70 "
+      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = "172.31.47.70"
       configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = 443
 
       
