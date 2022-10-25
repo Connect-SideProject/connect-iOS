@@ -96,12 +96,16 @@ extension HomeCategoryCell: ReactorKit.View {
         reactor.state
             .map{ $0.menuType.menuTitle }
             .debug("Home Category Title")
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
             .bind(to: self.menuTitleLabel.rx.text)
             .disposed(by: disposeBag)
 
         reactor.state
             .map { try $0.menuType.getMenuImage() }
             .debug("Home CateGory Image")
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
             .bind(to: self.menuImageView.rx.image)
             .disposed(by: disposeBag)
     }

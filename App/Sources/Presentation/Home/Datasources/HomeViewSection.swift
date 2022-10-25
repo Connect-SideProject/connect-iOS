@@ -15,6 +15,31 @@ enum HomeListType: String, Equatable {
     case homeStudyList
 }
 
+enum HomeReleaseSection {
+    case hotMenu([HomeRelaseSectionItem])
+}
+
+enum HomeRelaseSectionItem {
+    case hotList
+}
+
+extension HomeReleaseSection: SectionModelType {
+    
+    var items: [HomeRelaseSectionItem] {
+        switch self {
+        case let .hotMenu(items): return items
+        }
+    }
+    
+    init(original: HomeReleaseSection, items: [HomeRelaseSectionItem]) {
+        switch original {
+        case .hotMenu: self = .hotMenu(items)
+        }
+    }
+    
+}
+
+
 enum HomeViewSection {
     case field([HomeViewSectionItem])
     case homeSubMenu([HomeViewSectionItem])
