@@ -12,3 +12,11 @@ public extension Array {
     return indices ~= index ? self[index] : nil
   }
 }
+
+public extension Array where Element == String {
+  var toStringWithComma: String {
+    return self.enumerated().reduce("") { acc, item -> String in
+      return acc + ((item.offset != self.count - 1) ? "\(item.element), " : "\(item.element)")
+    }
+  }
+}

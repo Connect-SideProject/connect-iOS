@@ -18,7 +18,7 @@ public enum ProfileImageSize {
   public var value: CGSize {
     switch self {
     case .large:
-      return .init(width: 200, height: 200)
+      return .init(width: 120, height: 120)
     case .medium:
       return .init(width: 80, height: 80)
     case .small:
@@ -73,13 +73,16 @@ public final class ProfileImageView: UIView {
   }
   
   private func configureUI() {
+    backgroundColor = .black
     addSubview(flexContainerView)
     
     flexContainerView
       .flex
       .define { flex in
         flex.addItem(imageView)
-    }
+          .width(imageSize.value.width)
+          .height(imageSize.value.height)
+      }
   }
   
   /**
@@ -94,10 +97,13 @@ public final class ProfileImageView: UIView {
     do {
       let image = try await imageLoader.fetch(url: url)
       imageView.image = image
-      
     } catch let error {
       print(error)
       imageView.stopLoading()
     }
+  }
+  
+  public func setImage(_ image: UIImage) {
+    imageView.image = image
   }
 }
