@@ -33,6 +33,7 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
     enum Mutation {
         case setLoading(Bool)
         case setHomeMenuItem([HomeMenu])
+        case setReleaseItems(HomeReleaseSection)
         case setSubMenuItems(HomeViewSection)
         case setStudyListItems(HomeViewSection)
         case setHomeError(URLError?)
@@ -42,6 +43,7 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
         var isLoading: Bool
         var isError: URLError?
         var section: [HomeViewSection]
+        var releaseSection: [HomeReleaseSection]
     }
     
     init(homeApiService: ApiService) {
@@ -54,6 +56,9 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
                 .field([]),
                 .homeSubMenu([]),
                 .homeStudyList([])
+            ],
+            releaseSection: [
+                .hotMenu([])
             ]
         )
     }
@@ -117,6 +122,11 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
         case let .setHomeError(error):
             var newState = state
             newState.isError = error?.asURLError
+            
+            return newState
+            
+        case let.setReleaseItems(items):
+            var newState = state
             
             return newState
         }

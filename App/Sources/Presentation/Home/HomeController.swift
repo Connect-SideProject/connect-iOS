@@ -35,7 +35,7 @@ final class HomeController: UIViewController {
     }
     
     private let homeIndicatorView:UIActivityIndicatorView = UIActivityIndicatorView().then {
-        $0.backgroundColor = .gray
+        $0.backgroundColor = .clear
     }
     
     
@@ -55,8 +55,8 @@ final class HomeController: UIViewController {
         $0.backgroundColor = .clear
     }
     
-    
-    let dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
+    private let releaseDataSource: RxCollectionViewSectionedReloadDataSource<HomeReleaseSection>
+    private let dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
     
     
     private lazy var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then({ flowLayout in
@@ -72,6 +72,7 @@ final class HomeController: UIViewController {
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
         $0.backgroundColor = .white
+        $0.isScrollEnabled = false
     }
     
     private let releaseFlowLayout: UICollectionViewFlowLayout = UICollectionViewFlowLayout().then {
@@ -80,16 +81,43 @@ final class HomeController: UIViewController {
     
     private lazy var releaseCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: releaseFlowLayout).then {
         $0.backgroundColor = .gray01
+        $0.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
+        $0.register(HomeReleaseStudyListCell.self, forCellWithReuseIdentifier: "HomeReleaseStudyListCell")
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
+    }
+    
+    
+    private static func releaseSourceFactory() -> RxCollectionViewSectionedReloadDataSource<HomeReleaseSection> {
         
+        return .init(configureCell:  { dataSource, collectionView, indexPath, sectionItem in
+            switch sectionItem {
+            case .hotList:
+                guard let hotListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeReleaseStudyListCell", for: indexPath) as? HomeReleaseStudyListCell else { return UICollectionViewCell () }
+                
+                return hotListCell
+                
+            }
+        }, configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
+            switch kind {
+            case UICollectionView.elementKindSectionHeader:
+                switch dataSource[indexPath.section] {
+                case .hotMenu:
+                    guard let hotListHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView", for: indexPath) as? HomeUserPostHeaderView else { return UICollectionReusableView() }
+                    
+                    return hotListHeaderView
+                }
+            default:
+                return UICollectionReusableView()
+            }
+        })
         
     }
     
     
     private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
         return .init(
-            configureCell: { dataSoucre, collectionView, indexPath, sectionItem in
+            configureCell: { dataSource, collectionView, indexPath, sectionItem in
                 switch sectionItem {
                 case let .homeMenu(cellReactor):
                     
@@ -141,6 +169,7 @@ final class HomeController: UIViewController {
     
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
+        self.releaseDataSource = type(of: self).releaseSourceFactory()
         self.dataSource = type(of: self).dataSourcesFactory()
         super.init(nibName: nil, bundle: nil)
     }
@@ -172,23 +201,36 @@ final class HomeController: UIViewController {
     private func configure() {
         let tabbarHeight: CGFloat = tabBarController?.tabBar.frame.size.height ?? 0.0
         
-        [collectionView, floatingButton, homeIndicatorView, selectedLineView].forEach {
-            view.addSubview($0)
-        }
         self.view.bringSubviewToFront(self.homeIndicatorView)
+        self.view.addSubview(homeScrollView)
+        homeScrollView.addSubview(homeScrollContainerView)
+        
+        _ = [collectionView, floatingButton, homeIndicatorView, selectedLineView,releaseCollectionView].map {
+            homeScrollContainerView.addSubview($0)
+        }
+        
 
-
+        homeScrollView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        homeScrollContainerView.snp.makeConstraints {
+            $0.width.equalToSuperview()
+            $0.centerX.top.bottom.equalToSuperview()
+        }
         
         
         collectionView.snp.makeConstraints {
-            $0.top.bottom.left.right.equalToSuperview()
+            $0.top.left.right.equalToSuperview()
+            $0.height.equalTo(650)
         }
         
-//        releaseCollectionView.snp.makeConstraints {
-//            $0.left.right.equalToSuperview()
-//            $0.height.equalTo(318)
-//            $0.bottom.equalToSuperview().offset(-tabbarHeight)
-//        }
+        releaseCollectionView.snp.makeConstraints {
+            $0.left.right.equalToSuperview()
+            $0.top.equalTo(collectionView.snp.bottom)
+            $0.height.equalTo(318)
+            $0.bottom.equalToSuperview()
+        }
                 
         floatingButton.snp.makeConstraints {
             $0.right.equalToSuperview().offset(-20)
@@ -200,7 +242,7 @@ final class HomeController: UIViewController {
             $0.center.equalToSuperview()
             $0.width.height.equalTo(24)
         }
-        
+                
     }
     
 }
@@ -265,23 +307,38 @@ extension HomeController {
 extension HomeController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        switch self.dataSource[section] {
-        case .field:
-            return CGSize(width: collectionView.frame.size.width, height: 44)
-        default:
-            return .zero
+        
+        if collectionView == self.collectionView {
+            switch self.dataSource[section] {
+            case .field:
+                return CGSize(width: collectionView.frame.size.width, height: 44)
+            default:
+                return .zero
+            }
+        } else {
+            switch self.releaseDataSource[section] {
+            case .hotMenu:
+                return CGSize(width: collectionView.frame.size.width, height: 22)
+            }
         }
     }
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        switch self.dataSource[indexPath] {
-        case .homeMenu:
-            return CGSize(width: 66, height: 66)
-        case .homeStudyMenu:
-            return CGSize(width: 60, height: 40)
-        case .homeStudyList:
-            return CGSize(width: collectionView.frame.size.width - 40, height: 97)
+        if collectionView == self.collectionView {
+            switch self.dataSource[indexPath] {
+            case .homeMenu:
+                return CGSize(width: 66, height: 66)
+            case .homeStudyMenu:
+                return CGSize(width: 60, height: 40)
+            case .homeStudyList:
+                return CGSize(width: collectionView.frame.size.width - 40, height: 97)
+            }
+        } else {
+            switch self.releaseDataSource[indexPath] {
+            case .hotList:
+                return CGSize(width: 217, height: 227)
+            }
         }
     }
     
@@ -299,23 +356,36 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        switch self.dataSource[section] {
-        case .field:
-            return .zero
-        case .homeSubMenu:
-            return .zero
-        case .homeStudyList:
-            return 8
-            
+        if collectionView == self.collectionView {
+            switch self.dataSource[section] {
+            case .field:
+                return .zero
+            case .homeSubMenu:
+                return .zero
+            case .homeStudyList:
+                return 8
+            }
+        } else {
+            switch self.releaseDataSource[section] {
+            case .hotMenu:
+                return 20
+            }
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        switch self.dataSource[section] {
-        case .field:
-            return .zero
-        default:
-            return .zero
+        if collectionView == self.collectionView {
+            switch self.dataSource[section] {
+            case .field:
+                return .zero
+            default:
+                return .zero
+            }
+        } else {
+            switch self.releaseDataSource[section] {
+            case .hotMenu:
+                return 10
+            }
         }
     }
     
