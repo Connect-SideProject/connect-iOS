@@ -18,7 +18,6 @@ public enum Path {
   case serchPlace(String)
   case uploadProfileImage(Data)
   case userProfile
-  case updateProfile(Codable)
   case homeMenu
   case updateProfile(ProfileEditParameter)
   
@@ -34,10 +33,6 @@ public enum Path {
       return "/api/member/auth/signup"
     case .serchPlace:
       return "/v2/local/search/address.json"
-    case .userProfile:
-      return ""
-    case .updateProfile:
-      return ""
     case .homeMenu:
         return "/api/study/home/menu"
     case .uploadProfileImage:
