@@ -24,7 +24,7 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
     }
     
     public var errorHandler: (Error) -> Observable<Mutation> = { error in
-        return .just(.setHomeError(error.asURLError))
+        return .just(.setHomeError(error.asCOError))
     }
     
     private let homeApiService: ApiService
@@ -36,12 +36,12 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
         case setReleaseItems(HomeReleaseSection)
         case setSubMenuItems(HomeViewSection)
         case setStudyListItems(HomeViewSection)
-        case setHomeError(URLError?)
+        case setHomeError(COError?)
     }
     
     struct State {
         var isLoading: Bool
-        var isError: URLError?
+        var isError: COError?
         var section: [HomeViewSection]
         var releaseSection: [HomeReleaseSection]
     }
@@ -121,7 +121,7 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
             
         case let .setHomeError(error):
             var newState = state
-            newState.isError = error?.asURLError
+            newState.isError = error?.asCOError
             
             return newState
             
