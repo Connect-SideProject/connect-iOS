@@ -13,21 +13,23 @@ import Then
 public enum DescriptionType {
   // DescriptionLabel, View
   case textField(String, String?)
+  case textFieldWithAttributed(NSAttributedString, String?)
   case custom(String, CastableView)
+  case customWithAttributed(NSAttributedString, CastableView)
 }
 
 public class DescriptionContainerView: UIView {
   
   private let descriptionLabel = UILabel().then {
-    $0.font = .systemFont(ofSize: 16, weight: .bold)
+    $0.font = .subTitle01
     $0.textColor = .black
   }
   
   public let textField = UITextField().then {
-    $0.font = .systemFont(ofSize: 14, weight: .semibold)
-    $0.textColor = .black
+    $0.font = .subTitle02
+    $0.textColor = .gray03
     $0.leftViewMode = .always
-    $0.layer.borderColor = UIColor.black.cgColor
+    $0.layer.borderColor = UIColor.gray03.cgColor
     $0.layer.borderWidth = 1
     $0.layer.cornerRadius = 12
     $0.layer.masksToBounds = true
@@ -60,8 +62,14 @@ public class DescriptionContainerView: UIView {
     case let .textField(text, placeholder):
       descriptionLabel.text = text
       textField.placeholder = placeholder
+    case let .textFieldWithAttributed(attrbutedText, placeholder):
+      descriptionLabel.attributedText = attrbutedText
+      textField.placeholder = placeholder
     case let .custom(text, view):
       descriptionLabel.text = text
+      customView = view
+    case let .customWithAttributed(attrbutedText, view):
+      descriptionLabel.attributedText = attrbutedText
       customView = view
     }
     
@@ -94,7 +102,7 @@ extension DescriptionContainerView {
           }
         } else {
           flex.addItem(textField)
-            .height(36)
+            .height(44)
         }
       }
   }
@@ -155,7 +163,7 @@ public final class CastableContainerView: UIView, CastableView {
 extension CastableContainerView {
   private func configureUI() {
     
-    let height = CGFloat(36 * views.count)
+    let height = CGFloat(40 * views.count)
     
     backgroundColor = .clear
     

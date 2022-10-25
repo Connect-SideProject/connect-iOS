@@ -21,38 +21,79 @@ public protocol SignUpDelegate: AnyObject {
 public final class SignUpController: UIViewController, ReactorKit.View {
   
   private let nicknameContainerView = DescriptionContainerView(
-    type: .textField("닉네임", "닉네임을 입력하세요.")
+    type: .textFieldWithAttributed(
+      "닉네임 *".addAttributes(
+        [.foregroundColor : UIColor.red],
+        range: .init(location: 4, length: 1)
+      ),
+      "닉네임을 입력하세요."
+    )
   )
   
   private let locationContainerView = DescriptionContainerView(
-    type: .textField("활동지역", "활동지역을 검색해주세요.")
+    type: .textFieldWithAttributed(
+      "활동지역 *".addAttributes(
+        [.foregroundColor : UIColor.red],
+        range: .init(location: 5, length: 1)
+      ),
+      "활동지역을 검색해주세요."
+    )
   )
   
   private let periodContainerView = DescriptionContainerView(
-    type: .custom("경력기간", CheckBoxContainerView(
-      titles: [Career.aspirant.description, Career.junior.description, Career.senior.description],
-      eventType: .radio
+    type: .customWithAttributed(
+      "경력기간 *".addAttributes(
+        [.foregroundColor : UIColor.red],
+        range: .init(location: 5, length: 1)
+      ),
+      CheckBoxContainerView(
+        titles: [Career.aspirant.description, Career.junior.description, Career.senior.description],
+        eventType: .radio
       )
     )
   )
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", RoundSelectionButtonView(titles: interestTitles))
+    type: .customWithAttributed(
+      "관심분야 *".addAttributes(
+        [.foregroundColor : UIColor.red],
+        range: .init(location: 5, length: 1)
+      ),
+      RoundSelectionButtonView(titles: interestTitles)
+    )
   )
   
   private var roleTitles: [String] = []
   private lazy var roleContainerView = DescriptionContainerView(
-    type: .custom("원하는 역할", RoundSelectionButtonView(titles: roleTitles))
+    type: .customWithAttributed(
+      "원하는 역할 *".addAttributes(
+        [.foregroundColor : UIColor.red],
+        range: .init(location: 7, length: 1)
+      ),
+      RoundSelectionButtonView(titles: roleTitles)
+    )
   )
   
   private var skillsViews: [CastableView] = []
   private lazy var skillContainerView = DescriptionContainerView(
-    type: .custom("보유 스킬", CastableContainerView(views: skillsViews))
+    type: .customWithAttributed(
+      "보유 스킬 *".addAttributes(
+        [.foregroundColor : UIColor.red],
+        range: .init(location: 6, length: 1)
+      ),
+      CastableContainerView(views: skillsViews)
+    )
   )
   
   private let portfolioContainerView = DescriptionContainerView(
-    type: .textField("포트폴리오", "포트폴리오 URL을 입력 해주세요. (선택)")
+    type: .textFieldWithAttributed(
+      "포트폴리오 *".addAttributes(
+        [.foregroundColor : UIColor.red],
+        range: .init(location: 6, length: 1)
+      ),
+      "포트폴리오 URL을 입력 해주세요. (선택)"
+    )
   )
   
   private let upper14YearsOldCheckBoxView = CheckBoxSingleView(

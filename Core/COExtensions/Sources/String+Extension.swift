@@ -25,3 +25,20 @@ public extension String {
     return String(format: self.localized(comment: comment), argument)
   }
 }
+
+/// AttributedText
+public extension String {
+  func addAttributes(_ attributes: [NSAttributedString.Key : Any], range: NSRange? = nil) -> NSAttributedString {
+    let mutableString = NSMutableAttributedString(string: self)
+    
+    if let range = range {
+      mutableString.addAttributes(attributes, range: range)
+      return mutableString
+    } else {
+      return NSAttributedString(
+        string: self,
+        attributes: attributes
+      )
+    }
+  }
+}

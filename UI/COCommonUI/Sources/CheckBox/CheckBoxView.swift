@@ -27,11 +27,7 @@ public enum CheckBoxContainerEventType {
 /// 두개 이상의 CheckBox가 포함된 Container.
 public final class CheckBoxContainerView: UIView, CastableView {
   
-  public private(set) var checkedItems: [CheckBoxItem]? {
-    didSet {
-      print(oldValue)
-    }
-  }
+  public private(set) var checkedItems: [CheckBoxItem]?
   
   public var handler: ([CheckBoxItem]) -> Void = { _ in }
   
@@ -109,6 +105,7 @@ private extension CheckBoxContainerView {
     
     flexContainer.flex
       .direction(direction == .horizontal ? .row : .column)
+      .marginHorizontal(10)
       .define { flex in
         if direction == .vertical {
           flex.addItem()
@@ -117,7 +114,7 @@ private extension CheckBoxContainerView {
         
         checkBoxViews.forEach {
           flex.addItem($0)
-            .marginLeft(10)
+            .marginRight(30)
         }
     }
   }
@@ -241,11 +238,20 @@ private extension CheckBoxSingleView {
 fileprivate final class CheckBoxView: UIView {
 
   fileprivate lazy var checkBoxButton = UIButton(type: .custom).then {
-    let nomalImage = UIImage(systemName: "square")
-    let selectedImage = UIImage(systemName: "checkmark.square.fill")
+    $0.titleLabel?.font = .subTitle01
+    
+    var configuration = UIButton.Configuration.bordered()
+    configuration.imagePadding = 8
+    configuration.baseBackgroundColor = .clear
+    configuration.contentInsets = .init(top: 0, leading: -8, bottom: 0, trailing: 0)
+    $0.configuration = configuration
+    
+    let nomalImage = UIImage(named: "ic_radio_inactive")
+    let selectedImage = UIImage(named: "ic_radio_active")
     $0.setImage(nomalImage, for: .normal)
     $0.setImage(selectedImage, for: .selected)
-    $0.setTitleColor(.black, for: .normal)
+    $0.setTitleColor(UIColor.gray06, for: .normal)
+    $0.setTitleColor(UIColor.gray06, for: .selected)
     $0.addTarget(self, action: #selector(didTapCheckBox(_:)), for: .touchUpInside)
   }
   

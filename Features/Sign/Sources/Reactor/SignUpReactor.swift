@@ -121,9 +121,29 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
         return .just(.setError(COError.message(nil, "필수 항목을 모두 체크해주세요.")))
       }
       
+      let interestings = interestService.interestList
+        .enumerated()
+        .map { offset, element in
+          return parameter._interestings.filter {
+            element.name == $0
+          }.map { _ in element }
+        }
+        .flatMap { $0 }
+      
+      let roles = roleSkillsService.roleSkillsList
+        .enumerated()
+        .map { offset, element in
+          return parameter._roles.filter {
+            RoleType(description: element.roleName) == $0
+          }.map { Role(type: $0) }
+        }
+        .flatMap { $0 }
+      
       var parameter = parameter
       parameter.updateAuthType(authType)
       parameter.updateRegion(region)
+      parameter.updateInterestings(interestings)
+      parameter.updateRoles(roles)
       
       return useCase.signUp(parameter: parameter, accessToken: accessToken)
         .debug()
