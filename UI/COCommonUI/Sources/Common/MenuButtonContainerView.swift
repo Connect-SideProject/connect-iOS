@@ -23,7 +23,7 @@ fileprivate struct MenuButtonItem {
   }
 }
 
-enum MenuButtonType {
+public enum MenuButtonType {
   
   case appliedGroup, wroteGroup, bookmarkedGroup
   
@@ -48,7 +48,7 @@ enum MenuButtonType {
   }
 }
 
-final class MenuButtonContainerView: UIView {
+public final class MenuButtonContainerView: UIView {
   
   private let flexContainer = UIView()
   
@@ -56,9 +56,9 @@ final class MenuButtonContainerView: UIView {
   private var items: [MenuButtonItem] = []
   private let types: [MenuButtonType]
   
-  var handler: (Int) -> Void = { _ in }
+  public var handler: (Int) -> Void = { _ in }
   
-  init(types: [MenuButtonType]) {
+  public init(types: [MenuButtonType]) {
     self.types = types
     super.init(frame: .zero)
     
@@ -71,7 +71,7 @@ final class MenuButtonContainerView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
   
-  override func layoutSubviews() {
+  public override func layoutSubviews() {
     super.layoutSubviews()
     
     flexContainer.pin

@@ -8,6 +8,7 @@
 
 import UIKit
 
+import COCommonUI
 import CODomain
 import COManager
 import CONetwork
@@ -17,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
   var window: UIWindow?
   
-  var controller: UINavigationController!
+  var controller: CONavigationViewController!
   
   let flowDI = MainFlow()
 
@@ -39,7 +40,7 @@ extension SceneDelegate: SplashDelegate {
   func didFinishSplashLoading() {
     
     /// 로그인 상태 체크.
-    if UserManager.shared.accessToken.isEmpty {
+    if UserManager.shared.tokens.isEmpty {
       let container = SignInDIContainer(
         apiService: ApiManager.shared,
         userService: UserManager.shared
@@ -48,11 +49,11 @@ extension SceneDelegate: SplashDelegate {
       let signInController = container.makeController()
       signInController.delegate = self
       
-      controller = UINavigationController(
-        rootViewController: flowDI.makeHomeController()
+      controller = CONavigationViewController(
+        rootViewController: signInController
       )
     } else {
-      controller = UINavigationController(
+      controller = CONavigationViewController(
         rootViewController: flowDI.makeMainController()
       )
     }
@@ -67,10 +68,12 @@ extension SceneDelegate: SignInDelegate {
     let container = SignUpDIContainer(
       apiService: ApiManager.shared,
       userService: UserManager.shared,
+      interestService: InterestManager.shared,
       roleSkillsService: RoleSkillsManager.shared,
       authType: authType,
       accessToken: accessToken
     )
+    
     let signUpController = container.makeController()
     signUpController.delegate = self
     controller.pushViewController(signUpController, animated: true)

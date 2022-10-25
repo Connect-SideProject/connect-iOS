@@ -31,11 +31,11 @@ public enum HTTPMethod {
 public struct EndPoint {
   
   public let path: Path
-  private let accessToken: String
+  private let tokens: Tokens
   
   public init(path: Path, userService: UserService = UserManager.shared) {
     self.path = path
-    self.accessToken = userService.accessToken
+    self.tokens = userService.tokens
   }
 }
 
@@ -54,14 +54,24 @@ public extension EndPoint {
     case let .signIn(authType, accessToken):
       let _ = ["access-token": accessToken,
                "auth-type": authType.description].map { common[$0.key] = $0.value }
+      
     case let .signUp(_, accessToken):
       let _ = ["access-token": accessToken].map { common[$0.key] = $0.value }
+      
     case .serchPlace:
       return ["Authorization": Auth.ThirdParty.kakao]
-    case .allSkills:
+      
+    case .interests, .skills:
       break
+    
+    case .uploadProfileImage:
+      return ["Content-Type": "multipart/form-data"]
+      
     default:
-      let _ = ["access-token": accessToken].map { common[$0.key] = $0.value }
+      let _ = [
+        "access-token": tokens.access,
+        "refresh-token": tokens.refresh
+      ].map { common[$0.key] = $0.value }
     }
     return common
   }
@@ -90,7 +100,7 @@ public extension EndPoint {
 
   var method: HTTPMethod {
     switch path {
-    case .signUp, .userProfile, .updateProfile:
+    case .signUp, .uploadProfileImage, .userProfile, .updateProfile:
       return .put
     case .signIn:
       return .post

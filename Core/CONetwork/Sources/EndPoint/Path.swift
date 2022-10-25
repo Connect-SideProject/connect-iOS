@@ -11,18 +11,23 @@ import CODomain
 import COExtensions
 
 public enum Path {
-  case allSkills
+  case skills
+  case interests
   case signIn(AuthType, String)
   case signUp(SignUpParameter, String)
   case serchPlace(String)
+  case uploadProfileImage(Data)
   case userProfile
   case updateProfile(Codable)
   case homeMenu
+  case updateProfile(ProfileEditParameter)
   
   public var string: String {
     switch self {
-    case .allSkills:
+    case .skills:
       return "/api/member/code/roleAndSkill/all"
+    case .interests:
+      return "/api/member/code/interest/all"
     case .signIn:
       return "/api/member/auth/login"
     case .signUp:
@@ -35,6 +40,10 @@ public enum Path {
       return ""
     case .homeMenu:
         return "/api/study/home/menu"
+    case .uploadProfileImage:
+      return "/api/member/myPage/profile"
+    case .userProfile, .updateProfile:
+      return "/api/member/myPage/detail"
     }
   }
   
@@ -42,8 +51,8 @@ public enum Path {
     switch self {
     case let .signUp(parameter, _):
       return parameter.asDictionary()
-    case let .updateProfile(profile):
-      return profile.asDictionary()
+    case let .updateProfile(parameter):
+      return parameter.asDictionary()
     default:
       return nil
     }
