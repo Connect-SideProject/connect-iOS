@@ -45,7 +45,7 @@ class MainFlow: ViewControllerFlow {
 /// 하단 탭바가 포함된 화면 컨트롤러.
 final class MainController: UITabBarController {
   
-  private var profileNavigationController: UINavigationController!
+  private var profileNavigationController: CONavigationViewController!
   
   var viewFlow: ViewControllerFlow?
   
@@ -74,16 +74,16 @@ extension MainController {
     let mapController = MapController()
     mapController.tabBarItem = .init(
       title: "main.tabItem.map".localized(),
-      image: nil,
-      selectedImage: nil
+      image: .init(named: "ic_map_inactive"),
+      selectedImage: .init(named: "ic_map_active")
     )
     
     /// 채팅 화면.
     let messageController = MessaeController()
     messageController.tabBarItem = .init(
       title: "main.tabItem.message".localized(),
-      image: nil,
-      selectedImage: nil
+      image: .init(named: "ic_chat_inactive"),
+      selectedImage: .init(named: "ic_chat_active")
     )
     
     /// MY 화면.
@@ -94,13 +94,13 @@ extension MainController {
     
     let profileController = profileDIContainer.makeController()
     profileController.delegate = self
-    profileNavigationController = UINavigationController(
+    profileNavigationController = CONavigationViewController(
       rootViewController: profileController
     )
     profileNavigationController.tabBarItem = .init(
       title: "main.tabItem.profile".localized(),
-      image: nil,
-      selectedImage: nil
+      image: .init(named: "ic_my_inactive"),
+      selectedImage: .init(named: "ic_my_active")
     )
     
     guard let coordinator = viewFlow?.makeHomeCoordinator() else { return }
@@ -116,31 +116,29 @@ extension MainController {
     coordinator.presenter
       .tabBarItem = .init(
         title: "main.tabItem.home".localized(),
-        image: nil,
-        selectedImage: nil
+        image: .init(named: "ic_home_inactive"),
+        selectedImage: .init(named: "ic_home_active")
       )
   }
   
   /// 탭바 커스텀 설정.
   private func setupTabBar() {
     let appearance = UITabBarAppearance()
-    appearance.configureWithOpaqueBackground()
     appearance.backgroundColor = .white
-    
     appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
-      .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-      .foregroundColor: UIColor.gray
+      .font: UIFont.body03,
+      .foregroundColor: UIColor.gray03
     ]
     
     appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
-      .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-      .foregroundColor: UIColor.blue
+      .font: UIFont.body03,
+      .foregroundColor: UIColor.gray06
     ]
     
     self.tabBar.standardAppearance = appearance
     self.tabBar.scrollEdgeAppearance = appearance
     
-    self.tabBar.backgroundColor = .white
+    self.tabBar.tintColor = .gray06
     self.tabBar.layer.borderWidth = 1
     self.tabBar.layer.borderColor = UIColor.white.cgColor
   }

@@ -20,4 +20,5 @@ public extension UIFont {
   
   static let body01: UIFont = .init(name: "AppleSDGothicNeo-Regular", size: 16)!
   static let body02: UIFont = .init(name: "AppleSDGothicNeo-Regular", size: 14)!
+  static let body03: UIFont = .init(name: "AppleSDGothicNeo-Medium", size: 12)!
 }
