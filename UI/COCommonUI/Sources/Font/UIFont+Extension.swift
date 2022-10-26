@@ -14,6 +14,7 @@ public extension UIFont {
   static let headLine04: UIFont = .init(name: "AppleSDGothicNeo-Regular", size: 34)!
   static let headLine05: UIFont = .init(name: "AppleSDGothicNeo-Regular", size: 24)!
   static let headLine06: UIFont = .init(name: "AppleSDGothicNeo-Regular", size: 20)!
+  static let headLine07: UIFont = .init(name: "AppleSDGothicNeo-Medium", size: 16)!
   
   static let subTitle01: UIFont = .init(name: "AppleSDGothicNeo-Regular", size: 16)!
   static let subTitle02: UIFont = .init(name: "AppleSDGothicNeo-Medium", size: 14)!

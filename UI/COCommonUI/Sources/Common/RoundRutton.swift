@@ -14,16 +14,18 @@ public final class RoundRutton: UIButton {
     super.draw(rect)
     
     layer.borderWidth = 1
-    layer.borderColor = UIColor.lightGray.cgColor
+    layer.borderColor = borderColor?.cgColor
     
     layer.cornerRadius = cornerRadius
     layer.masksToBounds = true
   }
   
   private let cornerRadius: CGFloat
+  private let borderColor: UIColor?
   
-  public init(cornerRadius: CGFloat = 8) {
+  public init(cornerRadius: CGFloat = 8, borderColor: UIColor? = nil) {
     self.cornerRadius = cornerRadius
+    self.borderColor = borderColor
     super.init(frame: .zero)
   }
   

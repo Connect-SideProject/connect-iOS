@@ -20,6 +20,10 @@ public protocol SignUpDelegate: AnyObject {
 
 public final class SignUpController: UIViewController, ReactorKit.View {
   
+  enum Height {
+    static let scrollView: CGFloat = 700 + (UIDevice.current.hasNotch ? 0 : 240)
+  }
+  
   private let nicknameContainerView = DescriptionContainerView(
     type: .textFieldWithAttributed(
       "닉네임 *".addAttributes(
@@ -108,16 +112,19 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     titles: [Terms.service.description, Terms.privacy.description, Terms.location.description],
     direction: .vertical
   ).then {
-    $0.backgroundColor = .lightGray
-    $0.layer.cornerRadius = 12
+    $0.backgroundColor = .gray01
+    $0.layer.cornerRadius = 5
     $0.layer.masksToBounds = true
   }
   
-  private lazy var startButton = RoundRutton().then {
-    $0.setTitle("시작하기", for: .normal)
+  private lazy var startButton = RoundRutton(
+    cornerRadius: 5,
+    borderColor: .green05
+  ).then {
+    $0.setTitle("커넥트잇 시작하기", for: .normal)
     $0.setTitleColor(.white, for: .normal)
-    $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-    $0.backgroundColor = .lightGray
+    $0.titleLabel?.font = .headLine07
+    $0.backgroundColor = .green05
     $0.addTarget(self, action: #selector(didTapStartButton), for: .touchUpInside)
   }
   
@@ -140,14 +147,15 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     
     containerScrollView.contentSize = .init(
       width: view.bounds.size.width,
-      height: view.bounds.size.height + 660
+      height: view.bounds.size.height + Height.scrollView
     )
     
     flexContainer.pin
       .width(of: view)
-      .height(containerScrollView.contentSize.height)
-      .top(CGFloat(UIApplication.keyWindow?.safeAreaInsets.top ?? 0))
+      .height(view.bounds.size.height + Height.scrollView)
+      .top()
       .left().right()
+      .bottom(view.pin.safeArea)
       .layout()
     
     flexContainer.flex.layout()
@@ -273,13 +281,11 @@ extension SignUpController {
         
         flex.addItem(termsCheckBoxContainerView)
           .marginVertical(20)
-          .marginLeft(10)
           .marginBottom(20)
           .height(110)
         
         flex.addItem(startButton)
-          .marginHorizontal(20)
-          .height(50)
+          .height(41)
     }
   }
   
