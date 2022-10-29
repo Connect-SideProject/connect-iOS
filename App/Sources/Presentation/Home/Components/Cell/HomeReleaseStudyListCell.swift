@@ -8,12 +8,18 @@
 import UIKit
 import SnapKit
 import Then
+import ReactorKit
 
 
+/// 홈 Hot 게시글 셀
 final class HomeReleaseStudyListCell: UICollectionViewCell {
     
+    //MARK: Property
     
-    //MARK: Configure
+    typealias Reactor = HomeReleaseCellReactor
+    
+    var disposeBag: DisposeBag = DisposeBag()
+    
     private let releaseContainerView: UIView = UIView().then {
         $0.backgroundColor = .white
         $0.clipsToBounds = true
@@ -190,6 +196,18 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         
     }
     
+    
+}
+
+
+extension HomeReleaseStudyListCell: ReactorKit.View {
+    
+    
+    func bind(reactor: Reactor) {
+        
+        
+        
+    }
     
 }
 

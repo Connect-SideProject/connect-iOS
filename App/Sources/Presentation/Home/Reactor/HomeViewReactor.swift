@@ -33,7 +33,7 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
     enum Mutation {
         case setLoading(Bool)
         case setHomeMenuItem([HomeMenu])
-        case setReleaseItems(HomeReleaseSection)
+        case setReleaseItems([HomeHotList])
         case setSubMenuItems(HomeViewSection)
         case setStudyListItems(HomeViewSection)
         case setHomeError(COError?)
@@ -86,6 +86,7 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
                 createHomeMenuSection(),
                 setMenuItems,
                 setStudyListItems,
+                createHomeReleaseSection(),
                 endLoading
             ])
         }
@@ -127,7 +128,9 @@ final class HomeViewReactor: Reactor, ErrorHandlerable {
             
         case let.setReleaseItems(items):
             var newState = state
-            
+            guard let sectionIndex = self.getReleaseIndex(section: .hotMenu([])) else { return newState }
+            newState.releaseSection[sectionIndex] = homeReleaseSectionItem(item: items)
+            print("Release Response itme: \(items)")
             return newState
         }
         
@@ -148,6 +151,36 @@ private extension HomeViewReactor {
         return index
     }
     
+    func getReleaseIndex(section: HomeReleaseSection) -> Int? {
+        var index: Int? = nil
+        
+        for i in 0 ..< self.currentState.releaseSection.count {
+            if self.currentState.releaseSection[i].getSectionType() == section.getSectionType() {
+                index = i
+            }
+        }
+        return index
+    }
+    
+    private func createHomeReleaseSection() -> Observable<Mutation> {
+        let createReleaseResponse = homeApiService.request(endPoint: .init(path: .homeRelease)).flatMap { (data: [HomeHotList]) -> Observable<Mutation> in
+            return .just(.setReleaseItems(data))
+        }
+        
+        return createReleaseResponse
+    }
+    
+    private func homeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection {
+        var homeReleaseSectionItem: [HomeRelaseSectionItem] = []
+
+        for i in 0 ..< item.count {
+            homeReleaseSectionItem.append(.hotList(HomeReleaseCellReactor(releaseModel: item[i])))
+        }
+        
+        return HomeReleaseSection.hotMenu(homeReleaseSectionItem)
+
+    }
+    
     
     private func createHomeMenuSection() -> Observable<Mutation> {
         let createMenuResponse = homeApiService.request(endPoint: .init(path: .homeMenu))
@@ -157,7 +190,7 @@ private extension HomeViewReactor {
             }
         return createMenuResponse
     }
-    
+        
     private func homeMenuSectionItem(item: [HomeMenu]) -> HomeViewSection {
         var homeMenuSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
