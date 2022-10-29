@@ -216,7 +216,7 @@ public class Role: NSObject, NSCoding, Codable, Identifiable {
   }
   
   enum CodingKeys: String, CodingKey {
-    case id = "code_id"
+    case id = "sort_num"
     case type = "code_cd"
     case name = "code_nm"
   }
@@ -429,7 +429,7 @@ public class Interest: NSObject, NSCoding, Codable, Identifiable {
   }
   
   enum CodingKeys: String, CodingKey {
-    case id = "code_id"
+    case id = "sort_num"
     case code = "code_cd"
     case name = "code_nm"
   }

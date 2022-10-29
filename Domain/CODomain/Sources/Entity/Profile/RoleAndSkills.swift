@@ -51,7 +51,7 @@ public class Skill: NSObject, NSCoding, Codable, Identifiable {
   }
   
   enum CodingKeys: String, CodingKey {
-    case id = "code_id"
+    case id = "sort_num"
     case code = "code_cd"
     case name = "code_nm"
     case isAddUser = "add_user"
@@ -118,7 +118,7 @@ public class RoleSkills: NSObject, NSCoding, Codable, Identifiable {
   }
   
   enum CodingKeys: String, CodingKey {
-    case id = "code_id"
+    case id = "sort_num"
     case roleCode = "code_cd"
     case roleName = "code_nm"
     case skills = "codes"

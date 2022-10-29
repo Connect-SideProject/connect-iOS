@@ -105,7 +105,6 @@ private extension CheckBoxContainerView {
     
     flexContainer.flex
       .direction(direction == .horizontal ? .row : .column)
-      .marginHorizontal(10)
       .define { flex in
         if direction == .vertical {
           flex.addItem()
@@ -114,7 +113,12 @@ private extension CheckBoxContainerView {
         
         checkBoxViews.forEach {
           flex.addItem($0)
-            .marginRight(30)
+            .marginLeft(direction == .horizontal ? 0 : 10)
+        }
+        
+        if direction == .vertical {
+          flex.addItem()
+            .height(10)
         }
     }
   }
@@ -214,7 +218,6 @@ private extension CheckBoxSingleView {
       .direction(.row)
       .define { flex in
         flex.addItem(checkBoxView)
-          .marginLeft(10)
     }
   }
   
@@ -243,7 +246,6 @@ fileprivate final class CheckBoxView: UIView {
     var configuration = UIButton.Configuration.bordered()
     configuration.imagePadding = 8
     configuration.baseBackgroundColor = .clear
-    configuration.contentInsets = .init(top: 0, leading: -8, bottom: 0, trailing: 0)
     $0.configuration = configuration
     
     let nomalImage = UIImage(named: "ic_radio_inactive")
