@@ -93,7 +93,7 @@ public final class HomeController: UIViewController {
         return .init(configureCell:  { dataSource, collectionView, indexPath, sectionItem in
             switch sectionItem {
             case let .hotList(cellReactor):
-                guard let hotListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeReleaseStudyListCell", for: indexPath) as? HomeReleaseStudyListCell else { return UICollectionViewCell () }
+                guard let hotListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeReleaseStudyListCell", for: indexPath) as? HomeReleaseStudyListCell else { return UICollectionViewCell() }
                 
                 hotListCell.reactor = cellReactor
                 
@@ -211,7 +211,7 @@ public final class HomeController: UIViewController {
             homeScrollContainerView.addSubview($0)
         }
         
-
+        
         homeScrollView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -233,7 +233,7 @@ public final class HomeController: UIViewController {
             $0.height.equalTo(318)
             $0.bottom.equalToSuperview()
         }
-                
+        
         floatingButton.snp.makeConstraints {
             $0.right.equalToSuperview().offset(-20)
             $0.bottom.equalToSuperview().offset(-(tabbarHeight + 12))
@@ -244,7 +244,7 @@ public final class HomeController: UIViewController {
             $0.center.equalToSuperview()
             $0.width.height.equalTo(24)
         }
-                
+        
     }
     
 }
@@ -279,11 +279,21 @@ extension HomeController {
         self.collectionView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
+        self.releaseCollectionView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
+        
         reactor.state
             .map { $0.section }
             .debug("Section Item ")
             .observe(on: MainScheduler.instance)
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.releaseSection}
+            .debug("release Section Item")
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseCollectionView.rx.items(dataSource: self.releaseDataSource))
             .disposed(by: disposeBag)
         
         

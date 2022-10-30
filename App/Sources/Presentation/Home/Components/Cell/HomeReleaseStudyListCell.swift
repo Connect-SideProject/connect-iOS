@@ -205,7 +205,11 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
     
     func bind(reactor: Reactor) {
         
-        
+        reactor.state
+            .map { $0.releaseModel.releaseTitle }
+            .observe(on: MainScheduler.instance)
+            .bind(to: releaseTitleLabel.rx.text)
+            .disposed(by: disposeBag)
         
     }
     

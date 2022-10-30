@@ -16,7 +16,7 @@ public enum HomeListType: String, Equatable {
 }
 
 public enum HomeReleaseType: String, Equatable {
-    case hotMenu
+    case hotList
 }
 
 public enum HomeReleaseSection {
@@ -24,7 +24,7 @@ public enum HomeReleaseSection {
     
     func getSectionType() -> HomeReleaseType {
         switch self {
-        case .hotMenu: return .hotMenu
+        case .hotMenu: return .hotList
         }
     }
 }
