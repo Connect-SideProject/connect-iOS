@@ -195,7 +195,7 @@ public final class HomeController: UIViewController {
     }
     
     public override func viewWillLayoutSubviews() {
-        floatingButton.addShadow(color: UIColor.gray06.cgColor, offset: CGSize(width: 0, height: 1), radius: 5, opacity: 0.2)
+        floatingButton.addShadow(color: UIColor.hex3A3A3A.cgColor, offset: CGSize(width: 0, height: 1), radius: 5, opacity: 0.2)
         floatingButton.layer.cornerRadius = floatingButton.frame.height / 2.0
     }
     

@@ -104,8 +104,8 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
           return element.법정동명 == text ? offset : -1
         }
         .filter { $0 != -1 }
-        .map {
-          let address = addressService.addressList[$0]
+        .map { items -> Region in
+          let address = addressService.addressList[items]
           
           return Region(
             code: address.법정코드,

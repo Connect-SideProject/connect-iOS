@@ -52,8 +52,11 @@ extension SceneDelegate: SplashDelegate {
         rootViewController: signInController
       )
     } else {
+        let homeDIContainer = HomeDIContainer(
+            homeApiService: ApiManager.shared
+        )
       controller = CONavigationViewController(
-        rootViewController: flowDI.makeMainController()
+        rootViewController: homeDIContainer.makeHomeController()
       )
     }
     
