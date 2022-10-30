@@ -10,17 +10,17 @@ import CODomain
 
 
 
-final class HomeReleaseCellReactor: Reactor {
+public final class HomeReleaseCellReactor: Reactor {
     
     
-    typealias Action = NoAction
+    public typealias Action = NoAction
     
     
-    struct State {
+    public struct State {
         var releaseModel: HomeHotList
     }
     
-    let initialState: State
+    public let initialState: State
     
     init(releaseModel: HomeHotList) {
         defer { _ = self.state }

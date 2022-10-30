@@ -26,7 +26,5 @@ public struct HomeHotList: Codable {
         case releaseRecruitPart = "recruitmentParts"
         case releaseCreateAt = "creatDt"
         case releaseisEnd = "isEnd"
-        
     }
-    
 }

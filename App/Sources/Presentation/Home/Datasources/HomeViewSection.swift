@@ -9,17 +9,17 @@
 import RxDataSources
 
 
-enum HomeListType: String, Equatable {
+public enum HomeListType: String, Equatable {
     case homeMenu
     case homeStudyMenu
     case homeStudyList
 }
 
-enum HomeReleaseType: String, Equatable {
+public enum HomeReleaseType: String, Equatable {
     case hotMenu
 }
 
-enum HomeReleaseSection {
+public enum HomeReleaseSection {
     case hotMenu([HomeRelaseSectionItem])
     
     func getSectionType() -> HomeReleaseType {
@@ -29,19 +29,19 @@ enum HomeReleaseSection {
     }
 }
 
-enum HomeRelaseSectionItem {
+public enum HomeRelaseSectionItem {
     case hotList(HomeReleaseCellReactor)
 }
 
 extension HomeReleaseSection: SectionModelType {
     
-    var items: [HomeRelaseSectionItem] {
+    public var items: [HomeRelaseSectionItem] {
         switch self {
         case let .hotMenu(items): return items
         }
     }
     
-    init(original: HomeReleaseSection, items: [HomeRelaseSectionItem]) {
+    public init(original: HomeReleaseSection, items: [HomeRelaseSectionItem]) {
         switch original {
         case .hotMenu: self = .hotMenu(items)
         }
@@ -50,7 +50,7 @@ extension HomeReleaseSection: SectionModelType {
 }
 
 
-enum HomeViewSection {
+public enum HomeViewSection {
     case field([HomeViewSectionItem])
     case homeSubMenu([HomeViewSectionItem])
     case homeStudyList([HomeViewSectionItem])
@@ -66,7 +66,7 @@ enum HomeViewSection {
 
 extension HomeViewSection: SectionModelType {
     
-    var items: [HomeViewSectionItem] {
+    public var items: [HomeViewSectionItem] {
         switch self {
         case let .field(items): return items
         case let .homeSubMenu(items): return items
@@ -75,7 +75,7 @@ extension HomeViewSection: SectionModelType {
         
     }
     
-    init(original: HomeViewSection, items: [HomeViewSectionItem]) {
+    public init(original: HomeViewSection, items: [HomeViewSectionItem]) {
         switch original {
         case .field: self = .field(items)
         case .homeSubMenu: self = .homeSubMenu(items)
@@ -86,7 +86,7 @@ extension HomeViewSection: SectionModelType {
 }
 
 
-enum HomeViewSectionItem {
+public enum HomeViewSectionItem {
     case homeMenu(HomeMenuCellReactor)
     case homeStudyMenu(HomeStudyMenuReactor)
     case homeStudyList

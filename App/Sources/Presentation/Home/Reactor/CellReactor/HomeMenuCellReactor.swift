@@ -12,17 +12,17 @@ import UIKit
 import CODomain
 
 
-final class HomeMenuCellReactor: Reactor {
+public final class HomeMenuCellReactor: Reactor {
     
     
-    typealias Action = NoAction
+    public typealias Action = NoAction
     
     
-    struct State {
+    public struct State {
         var menuType: HomeMenu
     }
     
-    let initialState: State
+    public let initialState: State
     
     init(menuType: HomeMenu
     ) {

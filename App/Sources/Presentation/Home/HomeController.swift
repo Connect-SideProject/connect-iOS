@@ -19,13 +19,13 @@ import CODomain
 
 
 /// 홈 화면 컨트롤러.
-final class HomeController: UIViewController {
+public final class HomeController: UIViewController {
     
     //MARK: Property
     
-    typealias Reactor = HomeViewReactor
+    public typealias Reactor = HomeViewReactor
     
-    var disposeBag: DisposeBag = DisposeBag()
+    public var disposeBag: DisposeBag = DisposeBag()
     
     
     private let floatingButton: UIButton = UIButton().then {
@@ -185,7 +185,7 @@ final class HomeController: UIViewController {
     }
     
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
         self.navigationController?.setNavigationBarHidden(false, animated: true)
@@ -194,7 +194,7 @@ final class HomeController: UIViewController {
         configure()
     }
     
-    override func viewWillLayoutSubviews() {
+    public override func viewWillLayoutSubviews() {
         floatingButton.addShadow(color: UIColor.gray06.cgColor, offset: CGSize(width: 0, height: 1), radius: 5, opacity: 0.2)
         floatingButton.layer.cornerRadius = floatingButton.frame.height / 2.0
     }
@@ -253,7 +253,7 @@ final class HomeController: UIViewController {
 
 extension HomeController: ReactorKit.View {
     
-    func bind(reactor: Reactor) {
+    public func bind(reactor: Reactor) {
         self.rx.viewDidLoad
             .map { Reactor.Action.viewDidLoad }
             .bind(to: reactor.action)
@@ -308,7 +308,7 @@ extension HomeController {
 
 extension HomeController: UICollectionViewDelegateFlowLayout {
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         
         if collectionView == self.collectionView {
             switch self.dataSource[section] {
@@ -326,7 +326,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == self.collectionView {
             switch self.dataSource[indexPath] {
             case .homeMenu:
@@ -345,7 +345,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
         switch self.dataSource[section] {
         case .homeSubMenu:
             return CGSize(width: collectionView.frame.size.width, height: 1)
@@ -357,7 +357,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         if collectionView == self.collectionView {
             switch self.dataSource[section] {
             case .field:
@@ -375,7 +375,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         }
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         if collectionView == self.collectionView {
             switch self.dataSource[section] {
             case .field:
@@ -392,7 +392,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         switch self.dataSource[section] {
         case .field:
             return UIEdgeInsets(top: 25, left: 20, bottom: 0, right: 20)

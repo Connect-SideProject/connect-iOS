@@ -19,8 +19,8 @@ public struct HomeMenu: Codable {
     }
     
     public func getMenuImage() throws -> UIImage {
-        guard let Imageurl = URL(string: menuImage),
-              let imageData = try? Data(contentsOf: Imageurl) else { return UIImage() }
+        guard let imageurl = URL(string: menuImage),
+              let imageData = try? Data(contentsOf: imageurl) else { return UIImage() }
         return UIImage(data: imageData) ?? UIImage()
     }
     

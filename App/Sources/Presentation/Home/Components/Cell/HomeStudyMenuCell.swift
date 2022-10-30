@@ -25,14 +25,14 @@ enum HomeSubMenuType: String {
 }
 
 
-final class HomeStudyMenuReactor: Reactor {
+public final class HomeStudyMenuReactor: Reactor {
     
 
-    typealias Action = NoAction
+    public typealias Action = NoAction
     
-    var initialState: State
+    public var initialState: State
     
-    struct State {
+    public struct State {
         var menuType: HomeSubMenuType
     }
     

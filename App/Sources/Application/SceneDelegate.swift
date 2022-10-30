@@ -20,7 +20,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   var controller: CONavigationViewController!
   
-  let flowDI = MainFlow()
 
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
 
@@ -82,6 +81,9 @@ extension SceneDelegate: SignInDelegate {
 
 extension SceneDelegate: SignUpDelegate {
   func routeToHome() {
-    controller.pushViewController(flowDI.makeMainController(), animated: true)
+      let homeDIContainer = HomeDIContainer(
+          homeApiService: ApiManager.shared
+      )
+      controller.pushViewController(homeDIContainer.makeHomeController(), animated: true)
   }
 }
