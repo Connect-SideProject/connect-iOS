@@ -50,7 +50,7 @@ public final class HomeDIContainer: HomeDIConainer {
 
 
 public protocol HomeRepository {
-    func responseMenuImage() throws -> Observable<UIImage>
+    func responseMenuImage(image: HomeMenu) throws -> UIImage
     func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeMenuSectionItem(item: [HomeMenu]) -> HomeViewSection
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
@@ -67,13 +67,10 @@ final class HomeViewRepo: HomeRepository {
     }
     
     
-    func responseMenuImage() throws -> Observable<UIImage> {
-        return homeApiService.request(endPoint: .init(path: .homeMenu)).flatMap { (data: HomeMenu) -> Observable<UIImage>  in
-            guard let imageUrl = URL(string: data.menuImage),
-                  let imageData = try? Data(contentsOf: imageUrl) else { return .empty() }
-            
-            return .just(UIImage(data: imageData) ?? UIImage()).catchAndReturn(UIImage())
-        }
+    func responseMenuImage(image item: HomeMenu) throws -> UIImage {
+        guard let imageurl = URL(string: item.menuImage),
+              let imageData = try? Data(contentsOf: imageurl) else { return UIImage() }
+        return UIImage(data: imageData) ?? UIImage()
     }
     
     
@@ -99,7 +96,7 @@ final class HomeViewRepo: HomeRepository {
     func responseHomeMenuSectionItem(item: [HomeMenu]) -> HomeViewSection {
         var homeMenuSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
-            homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuType: item[i])))
+            homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuType: item[i], homeCellRepo: self)))
         }
         
         return HomeViewSection.field(homeMenuSectionItem)

@@ -107,7 +107,6 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
             newState.section[sectionIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
             
-//            homeMenuSectionItem(item: items)
             print("setHomeMenu Response Item: \(items)")
            
             return newState
