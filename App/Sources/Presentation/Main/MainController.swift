@@ -126,19 +126,19 @@ extension MainController {
     let appearance = UITabBarAppearance()
     appearance.backgroundColor = .white
     appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
-      .font: UIFont.body03,
-      .foregroundColor: UIColor.gray03
+      .font: UIFont.semiBold(size: 12),
+      .foregroundColor: UIColor.hexC6C6C6
     ]
     
     appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
-      .font: UIFont.body03,
-      .foregroundColor: UIColor.gray06
+      .font: UIFont.regular(size: 12),
+      .foregroundColor: UIColor.hex3A3A3A
     ]
     
     self.tabBar.standardAppearance = appearance
     self.tabBar.scrollEdgeAppearance = appearance
     
-    self.tabBar.tintColor = .gray06
+    self.tabBar.tintColor = .hexEDEDED
     self.tabBar.layer.borderWidth = 1
     self.tabBar.layer.borderColor = UIColor.white.cgColor
   }

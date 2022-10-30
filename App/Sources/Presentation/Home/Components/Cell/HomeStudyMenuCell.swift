@@ -61,7 +61,7 @@ final class HomeStudyMenuCell: UICollectionViewCell {
         $0.font = UIFont.boldSystemFont(ofSize: 16)
         $0.textAlignment = .center
         $0.numberOfLines = 1
-        $0.textColor = UIColor.gray04
+        $0.textColor = UIColor.hex8E8E8E
     }
     
     

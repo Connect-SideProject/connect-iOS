@@ -40,7 +40,7 @@ final class HomeController: UIViewController {
     
     
     private let selectedLineView: UIView = UIView().then {
-        $0.backgroundColor = UIColor.green04
+        $0.backgroundColor = UIColor.hex06C755
     }
     
     
@@ -80,7 +80,7 @@ final class HomeController: UIViewController {
     }
     
     private lazy var releaseCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: releaseFlowLayout).then {
-        $0.backgroundColor = .gray01
+        $0.backgroundColor = .hexF9F9F9
         $0.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
         $0.register(HomeReleaseStudyListCell.self, forCellWithReuseIdentifier: "HomeReleaseStudyListCell")
         $0.showsVerticalScrollIndicator = false
@@ -193,7 +193,7 @@ final class HomeController: UIViewController {
     }
     
     override func viewWillLayoutSubviews() {
-        floatingButton.addShadow(color: UIColor.gray06.cgColor, offset: CGSize(width: 0, height: 1), radius: 5, opacity: 0.2)
+        floatingButton.addShadow(color: UIColor.hex3A3A3A.cgColor, offset: CGSize(width: 0, height: 1), radius: 5, opacity: 0.2)
         floatingButton.layer.cornerRadius = floatingButton.frame.height / 2.0
     }
     

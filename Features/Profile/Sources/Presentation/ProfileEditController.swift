@@ -38,7 +38,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
         RoleType.designer.description,
         RoleType.planner.description,
         RoleType.marketer.description
-      ])
+      ]), nil
     )
   )
   
@@ -48,7 +48,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", RoundSelectionButtonView(titles: interestTitles)
+    type: .custom("관심분야", RoundSelectionButtonView(titles: interestTitles), nil
     )
   )
   
@@ -63,7 +63,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
         Career.junior.description,
         Career.senior.description
       ],
-      eventType: .radio)
+      eventType: .radio), nil
     )
   )
   
@@ -71,7 +71,8 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   private lazy var skillContainerView = DescriptionContainerView(
     type: .custom(
       "보유 스킬",
-      CastableContainerView(views: skillsViews)
+      CastableContainerView(views: skillsViews),
+      nil
     )
   )
   
