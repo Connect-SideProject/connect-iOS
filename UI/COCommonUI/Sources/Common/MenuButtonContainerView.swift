@@ -94,15 +94,12 @@ extension MenuButtonContainerView {
   
   private func setupButtons() {
     buttons = items.enumerated().map { offset, element -> RoundRutton in
-      let button = RoundRutton()
+      let button = RoundRutton(
+        cornerRadius: 5,
+        borderColor: .hexC6C6C6
+      )
       button.setTitle(element.title, for: .normal)
       button.setTitleColor(element.titleColor, for: .normal)
-      button.setImage(
-        element.image?
-          .withTintColor(.lightGray)
-          .withRenderingMode(.alwaysOriginal),
-        for: .normal
-      )
       button.titleLabel?.font = .systemFont(ofSize: 12, weight: .semibold)
       button.tag = offset
       button.addTarget(
@@ -125,7 +122,7 @@ extension MenuButtonContainerView {
       .define { flex in
         self.buttons.forEach {
           flex.addItem($0)
-            .shrink(1)
+            .grow(0.3)
         }
       }
   }

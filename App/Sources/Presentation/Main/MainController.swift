@@ -74,16 +74,16 @@ extension MainController {
     let mapController = MapController()
     mapController.tabBarItem = .init(
       title: "main.tabItem.map".localized(),
-      image: .init(named: "ic_map_inactive"),
-      selectedImage: .init(named: "ic_map_active")
+      image: .init(named: "ic_map_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_map_active")?.withRenderingMode(.alwaysOriginal)
     )
     
     /// 채팅 화면.
     let messageController = MessaeController()
     messageController.tabBarItem = .init(
       title: "main.tabItem.message".localized(),
-      image: .init(named: "ic_chat_inactive"),
-      selectedImage: .init(named: "ic_chat_active")
+      image: .init(named: "ic_chat_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_chat_active")?.withRenderingMode(.alwaysOriginal)
     )
     
     /// MY 화면.
@@ -99,8 +99,8 @@ extension MainController {
     )
     profileNavigationController.tabBarItem = .init(
       title: "main.tabItem.profile".localized(),
-      image: .init(named: "ic_my_inactive"),
-      selectedImage: .init(named: "ic_my_active")
+      image: .init(named: "ic_my_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_my_active")?.withRenderingMode(.alwaysOriginal)
     )
     
     guard let coordinator = viewFlow?.makeHomeCoordinator() else { return }
@@ -116,8 +116,8 @@ extension MainController {
     coordinator.presenter
       .tabBarItem = .init(
         title: "main.tabItem.home".localized(),
-        image: .init(named: "ic_home_inactive"),
-        selectedImage: .init(named: "ic_home_active")
+        image: .init(named: "ic_home_inactive")?.withRenderingMode(.alwaysOriginal),
+        selectedImage: .init(named: "ic_home_active")?.withRenderingMode(.alwaysOriginal)
       )
   }
   
@@ -149,6 +149,7 @@ extension MainController: ProfileDelegate {
     let container = ProfileEditDIContainer(
       apiService: ApiManager.shared,
       userService: UserManager.shared,
+      addressService: AddressManager.shared,
       interestService: InterestManager.shared,
       roleSkillsService: RoleSkillsManager.shared
     )

@@ -211,7 +211,7 @@ public final class SignUpController: UIViewController, ReactorKit.View {
             if let item = items[safe: selectedIndex] {
               let text = item.value.법정동명
               reactor?.action.onNext(.didEnteredAddress(text))
-              self?.locationContainerView.textField.text = text
+              self?.locationContainerView.textField.text = "서울 \(text)"
             }
           }
           self?.present(bottomSheet, animated: true)

@@ -111,9 +111,13 @@ private extension CheckBoxContainerView {
             .height(10)
         }
         
-        checkBoxViews.forEach {
-          flex.addItem($0)
-            .marginLeft(direction == .horizontal ? 0 : 10)
+        checkBoxViews.enumerated().forEach { offset, element in
+          if offset == 0 {
+            flex.addItem(element)
+          } else {
+            flex.addItem(element)
+              .marginLeft(10)
+          }
         }
         
         if direction == .vertical {
@@ -245,6 +249,7 @@ fileprivate final class CheckBoxView: UIView {
     
     var configuration = UIButton.Configuration.bordered()
     configuration.imagePadding = 8
+    configuration.contentInsets = .zero
     configuration.baseBackgroundColor = .clear
     $0.configuration = configuration
     
