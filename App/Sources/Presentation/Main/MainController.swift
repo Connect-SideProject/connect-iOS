@@ -24,7 +24,6 @@ final class MainController: UITabBarController {
   
   private var profileNavigationController: CONavigationViewController!
   
-  
   init() {
     super.init(nibName: nil, bundle: nil)
   }

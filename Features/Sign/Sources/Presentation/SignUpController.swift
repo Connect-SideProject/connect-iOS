@@ -15,7 +15,7 @@ import ReactorKit
 import RxCocoa
 
 public protocol SignUpDelegate: AnyObject {
-  func routeToHome()
+  func routeToMain()
 }
 
 public final class SignUpController: UIViewController, ReactorKit.View {
@@ -203,7 +203,7 @@ public final class SignUpController: UIViewController, ReactorKit.View {
       .bind { [weak self] route in
         switch route {
         case .home:
-          self?.delegate?.routeToHome()
+          self?.delegate?.routeToMain()
         case let .bottomSheet(items):
           let bottomSheet = BottomSheetController(
             type: .address(items)

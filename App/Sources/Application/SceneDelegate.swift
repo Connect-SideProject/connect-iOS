@@ -20,7 +20,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   var controller: CONavigationViewController!
   
-  
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     
     guard let scene = (scene as? UIWindowScene) else { return }
@@ -81,10 +80,7 @@ extension SceneDelegate: SignInDelegate {
 }
 
 extension SceneDelegate: SignUpDelegate {
-  func routeToHome() {
-    let homeDIContainer = HomeDIContainer(
-      homeApiService: ApiManager.shared
-    )
-    controller.pushViewController(homeDIContainer.makeHomeController(), animated: true)
+  func routeToMain() {
+    controller.pushViewController(MainController(), animated: true)
   }
 }

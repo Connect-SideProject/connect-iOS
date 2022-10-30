@@ -57,7 +57,7 @@ extension SceneDelegate: SignInDelegate {
 }
 
 extension SceneDelegate: SignUpDelegate {
-  func routeToHome() {
+  func routeToMain() {
     controller.pushViewController(UIViewController(), animated: true)
   }
 }
