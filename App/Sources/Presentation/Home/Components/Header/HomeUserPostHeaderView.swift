@@ -16,6 +16,7 @@ final class HomeUserPostHeaderView: UICollectionReusableView {
     private var titleLabel: UILabel = {
         $0.textColor = .black
         $0.numberOfLines = 1
+        $0.sizeToFit()
         $0.text = "실시간 HOT 게시글"
         $0.font = .boldSystemFont(ofSize: 20)
         
@@ -38,8 +39,10 @@ final class HomeUserPostHeaderView: UICollectionReusableView {
         addSubview(titleLabel)
         
         titleLabel.snp.makeConstraints {
-            $0.top.left.right.equalToSuperview()
-            $0.height.equalTo(50)
+            $0.top.equalToSuperview().inset(25)
+            $0.right.equalToSuperview()
+            $0.height.equalTo(22)
+            $0.left.equalToSuperview().inset(18)
         }
     }
 }
