@@ -15,14 +15,14 @@ import CONetwork
 import Sign
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
+  
   var window: UIWindow?
   
   var controller: CONavigationViewController!
   
-
+  
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-
+    
     guard let scene = (scene as? UIWindowScene) else { return }
     window = .init(windowScene: scene)
     
@@ -52,11 +52,8 @@ extension SceneDelegate: SplashDelegate {
         rootViewController: signInController
       )
     } else {
-        let homeDIContainer = HomeDIContainer(
-            homeApiService: ApiManager.shared
-        )
       controller = CONavigationViewController(
-        rootViewController: homeDIContainer.makeHomeController()
+        rootViewController: MainController()
       )
     }
     
@@ -85,9 +82,9 @@ extension SceneDelegate: SignInDelegate {
 
 extension SceneDelegate: SignUpDelegate {
   func routeToHome() {
-      let homeDIContainer = HomeDIContainer(
-          homeApiService: ApiManager.shared
-      )
-      controller.pushViewController(homeDIContainer.makeHomeController(), animated: true)
+    let homeDIContainer = HomeDIContainer(
+      homeApiService: ApiManager.shared
+    )
+    controller.pushViewController(homeDIContainer.makeHomeController(), animated: true)
   }
 }
