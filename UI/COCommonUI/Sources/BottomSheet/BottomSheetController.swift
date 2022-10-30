@@ -214,10 +214,13 @@ private extension BottomSheetController {
       let selectedIndex = self.items.enumerated()
         .map { offset, element in
           return element.isSelected ? offset : -1
-        }.filter { $0 != -1 }
-        .first!
+        }
+        .filter { $0 != -1 }
+        .first
       
-      self.confirmHandler(selectedIndex)
+      if let selectedIndex = selectedIndex {
+          self.confirmHandler(selectedIndex)
+      }
     }
   }
 }
