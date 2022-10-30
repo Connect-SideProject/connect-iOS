@@ -92,8 +92,10 @@ final class HomeController: UIViewController {
         
         return .init(configureCell:  { dataSource, collectionView, indexPath, sectionItem in
             switch sectionItem {
-            case .hotList:
+            case let .hotList(cellReactor):
                 guard let hotListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeReleaseStudyListCell", for: indexPath) as? HomeReleaseStudyListCell else { return UICollectionViewCell () }
+                
+                hotListCell.reactor = cellReactor
                 
                 return hotListCell
                 

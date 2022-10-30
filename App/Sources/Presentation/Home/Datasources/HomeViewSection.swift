@@ -15,12 +15,22 @@ enum HomeListType: String, Equatable {
     case homeStudyList
 }
 
+enum HomeReleaseType: String, Equatable {
+    case hotMenu
+}
+
 enum HomeReleaseSection {
     case hotMenu([HomeRelaseSectionItem])
+    
+    func getSectionType() -> HomeReleaseType {
+        switch self {
+        case .hotMenu: return .hotMenu
+        }
+    }
 }
 
 enum HomeRelaseSectionItem {
-    case hotList
+    case hotList(HomeReleaseCellReactor)
 }
 
 extension HomeReleaseSection: SectionModelType {

@@ -20,6 +20,7 @@ public enum Path {
   case userProfile
   case homeMenu
   case updateProfile(ProfileEditParameter)
+  case homeRelease
   
   public var string: String {
     switch self {
@@ -35,6 +36,8 @@ public enum Path {
       return "/v2/local/search/address.json"
     case .homeMenu:
         return "/api/study/home/menu"
+    case .homeRelease:
+        return "/api/study/hots"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:

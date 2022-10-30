@@ -110,8 +110,8 @@ public final class ProfileEditReactor: Reactor {
       let codes = interestService.interestList
         .enumerated()
         .map { offset, element in
-          parameter.interestings.map {
-            if element.name == $0 {
+          parameter.interestings.map { item -> String in
+            if element.name == item {
               return element.code
             }
             
