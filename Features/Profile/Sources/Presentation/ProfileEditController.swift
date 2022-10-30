@@ -35,26 +35,33 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     $0.delegate = self
   }
   
-  private let roleContainerView = DescriptionContainerView(
-    type: .custom("원하는 역할", RoundSelectionButtonView(
-      titles: [
-        RoleType.developer.description,
-        RoleType.designer.description,
-        RoleType.planner.description,
-        RoleType.marketer.description
-      ]), nil
+  private var roleTitles: [String] = []
+  private lazy var roleContainerView = DescriptionContainerView(
+    type: .custom(
+      "원하는 역할",
+      RoundSelectionButtonView(
+        titles: roleTitles
+      ),
+      nil
     )
   )
   
-  private lazy var locationContainerView = DescriptionContainerView(
-    type: .textField("활동지역", "활동지역을 선택 해주세요.")
-  ).then {
-    $0.textField.delegate = self
-  }
+  private lazy var addressContainerView = DescriptionContainerView(
+    type: .customWithAttributed(
+      "활동지역 *".setLastWord(color: .red),
+      CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
+      nil
+    )
+  )
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", RoundSelectionButtonView(titles: interestTitles), nil
+    type: .custom(
+      "관심분야",
+      RoundSelectionButtonView(
+        titles: interestTitles
+      ),
+      nil
     )
   )
   
@@ -63,13 +70,17 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   )
   
   private let periodContainerView = DescriptionContainerView(
-    type: .custom("경력기간", CheckBoxContainerView(
-      titles: [
-        Career.aspirant.description,
-        Career.junior.description,
-        Career.senior.description
-      ],
-      eventType: .radio), nil
+    type: .custom(
+      "경력기간",
+      CheckBoxContainerView(
+        titles: [
+          Career.aspirant.description,
+          Career.junior.description,
+          Career.senior.description
+        ],
+        eventType: .radio
+      ),
+      nil
     )
   )
   
@@ -107,17 +118,10 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     super.viewDidLoad()
     
     configureUI()
-    
-    let tapGesture = UITapGestureRecognizer(
-      target: self,
-      action: #selector(dismissKeyboards)
-    )
-    tapGesture.delegate = self
-    view.addGestureRecognizer(tapGesture)
+    bindEvent()
   }
   
   @objc func dismissKeyboards() {
-    locationContainerView.textField.resignFirstResponder()
     portfolioContainerView.textField.resignFirstResponder()
   }
   
@@ -165,6 +169,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
       .filter { !$0.isEmpty }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] roleSkillsList in
+        self?.roleTitles = roleSkillsList.map { $0.roleName }
         self?.skillsViews = roleSkillsList.map {
           RoundSelectionButtonView(
             titles: $0.skills.map { $0.name },
@@ -211,8 +216,11 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
           bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex in
             if let item = items[safe: selectedIndex] {
               let text = item.value.법정동명
-              reactor?.action.onNext(.didEnteredAddress(text))
-              self?.locationContainerView.textField.text = "서울 \(text)"
+              reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+              
+              if let button = self?.addressContainerView.customView as? CastableButton {
+                button.setTitle("서울 \(text)", for: .normal)
+              }
             }
           }
           self?.present(bottomSheet, animated: true)
@@ -248,9 +256,14 @@ private extension ProfileEditController {
         flex.addItem(profileView)
           .alignSelf(.center)
         
-        [roleContainerView,
-         locationContainerView,
-         interestsContainerView,
+        flex.addItem(roleContainerView)
+          .marginBottom(18)
+        
+        flex.addItem(addressContainerView)
+          .marginBottom(18)
+          .markDirty()
+        
+        [interestsContainerView,
          portfolioContainerView,
          periodContainerView,
          skillContainerView
@@ -261,6 +274,64 @@ private extension ProfileEditController {
         
         flex.addItem(saveButton)
           .height(41)
+    }
+  }
+  
+  func bindEvent() {
+    let tapGesture = UITapGestureRecognizer(
+      target: self,
+      action: #selector(dismissKeyboards)
+    )
+    tapGesture.delegate = self
+    view.addGestureRecognizer(tapGesture)
+    
+    if let castableButton = addressContainerView.customView as? CastableButton {
+      castableButton.handler = { [weak reactor] in
+        reactor?.action.onNext(.didTapAddressButton)
+      }
+    }
+  }
+  
+  func updateViews(profile: Profile) {
+    profileView.update(
+      url: .init(string: profile.profileURL ?? ""),
+      userName: profile.nickname,
+      roles: profile.roles
+    )
+    
+    if let role = roleContainerView.customView?.casting(
+      type: RoundSelectionButtonView.self
+    ) {
+      role.setSelectedItems(
+        items: profile.roles.map { $0.description }
+      )
+    }
+    
+    if let castableButton = addressContainerView.customView as? CastableButton {
+      if let address = profile.region?.description {
+        castableButton.setTitle(address, for: .normal)
+      }
+    }
+    
+    if let interests = interestsContainerView.customView?.casting(
+      type: RoundSelectionButtonView.self
+    ) {
+      interests.setSelectedItems(items: profile.interestings.map { $0.description })
+    }
+    
+    let portfolio = portfolioContainerView.textField
+    portfolio.text = profile.portfolioURL
+    
+    if let period = periodContainerView.customView?.casting(
+      type: CheckBoxContainerView.self
+    ) {
+      period.setSelectedItems(items: [profile.career?.description ?? ""])
+    }
+    
+    if let skills = skillContainerView.customView?.casting(
+      type: CastableContainerView.self
+    ) {
+      skills.setSelectedItems(items: profile.skills)
     }
   }
   
@@ -308,62 +379,11 @@ private extension ProfileEditController {
   }
 }
 
-private extension ProfileEditController {
-  func updateViews(profile: Profile) {
-    profileView.update(
-      url: .init(string: profile.profileURL ?? ""),
-      userName: profile.nickname,
-      roles: profile.roles
-    )
-    
-    if let role = roleContainerView.customView?.casting(
-      type: RoundSelectionButtonView.self
-    ) {
-      role.setSelectedItems(
-        items: profile.roles.map { $0.description }
-      )
-    }
-    
-    let location = locationContainerView.textField
-    location.text = profile.region?.description
-    
-    if let interests = interestsContainerView.customView?.casting(
-      type: RoundSelectionButtonView.self
-    ) {
-      interests.setSelectedItems(items: profile.interestings.map { $0.description })
-    }
-    
-    let portfolio = portfolioContainerView.textField
-    portfolio.text = profile.portfolioURL
-    
-    if let period = periodContainerView.customView?.casting(
-      type: CheckBoxContainerView.self
-    ) {
-      period.setSelectedItems(items: [profile.career?.description ?? ""])
-    }
-    
-    if let skills = skillContainerView.customView?.casting(
-      type: CastableContainerView.self
-    ) {
-      skills.setSelectedItems(items: profile.skills)
-    }
-  }
-}
-
 extension ProfileEditController: ProfileViewDelegate {
   func didTapEditProfileButton() {
     ImagePickerManager.shared.selectedImage { [weak self] image in
       self?.profileView.profileImageView.setImage(image)
       self?.reactor?.action.onNext(.requestUploadImage(image.pngData()))
-    }
-  }
-}
-
-extension ProfileEditController: UITextFieldDelegate {
-  public func textFieldDidBeginEditing(_ textField: UITextField) {
-    if textField == locationContainerView.textField {
-      textField.resignFirstResponder()
-      reactor?.action.onNext(.didTapAddressField)
     }
   }
 }

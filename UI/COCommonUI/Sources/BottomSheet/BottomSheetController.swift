@@ -41,7 +41,7 @@ public struct BottomSheetItem<T> where T: Decodable {
   }
 }
 
-extension BottomSheetItem {
+public extension BottomSheetItem {
   mutating func update(isSelected: Bool) {
     self.isSelected = isSelected
   }
@@ -249,7 +249,7 @@ extension BottomSheetController: UICollectionViewDelegateFlowLayout {
       return
     }
     
-    let _ = self.items.enumerated().map { offset, item in
+    let _ = self.items.indices.map { offset in
       items[offset].update(isSelected: false)
     }
     

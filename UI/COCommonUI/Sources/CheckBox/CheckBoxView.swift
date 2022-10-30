@@ -112,7 +112,7 @@ private extension CheckBoxContainerView {
         }
         
         checkBoxViews.enumerated().forEach { offset, element in
-          if offset == 0 {
+          if offset == 0, direction == .horizontal {
             flex.addItem(element)
           } else {
             flex.addItem(element)

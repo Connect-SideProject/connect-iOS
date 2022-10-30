@@ -24,12 +24,13 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   
   public enum Action {
     case viewDidLoad
-    case didTapAddressField
-    case didEnteredAddress(String)
+    case didTapAddressButton
+    case didSelectedLocation(Int)
     case didTapSignUpButton(SignUpParameter)
   }
   
   public enum Mutation {
+    case setAddressList([BottomSheetItem<법정주소>])
     case setInterestList([Interest])
     case setRoleSkillsList([RoleSkills])
     case setRegion(Region?)
@@ -38,6 +39,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   }
   
   public struct State {
+    var addressList: [BottomSheetItem<법정주소>] = []
     var interestList: [Interest] = []
     var roleSkillsList: [RoleSkills] = []
     var region: Region?
@@ -85,36 +87,40 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     
     switch action {
     case .viewDidLoad:
+      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressService.addressList.map { BottomSheetItem(value: $0) }))
       let setInterestList: Observable<Mutation> = .just(.setInterestList(interestService.interestList))
       let setRoleSkillsList: Observable<Mutation> = .just(.setRoleSkillsList(roleSkillsService.roleSkillsList))
-      return setInterestList
+      return setAddressList
+        .concat(setInterestList)
         .concat(setRoleSkillsList)
       
-    case .didTapAddressField:
-      return Observable.just(addressService.addressList)
+    case .didTapAddressButton:
+      return Observable.just(currentState.addressList)
         .flatMap { addressList -> Observable<Mutation> in
-          
-          let itemList: [BottomSheetItem<법정주소>] = addressList.map { BottomSheetItem<법정주소>(value: $0) }
-          return .just(.setRoute(.bottomSheet(itemList)))
+          return .just(.setRoute(.bottomSheet(addressList)))
         }
       
-    case let .didEnteredAddress(text):
-      let region = addressService.addressList.enumerated()
-        .map { offset, element in
-          return element.법정동명 == text ? offset : -1
-        }
-        .filter { $0 != -1 }
-        .map {
-          let address = addressService.addressList[$0]
-          
-          return Region(
-            code: address.법정코드,
-            name: address.법정동명
-          )
-        }
-        .first
-
+    case let .didSelectedLocation(index):
+      
+      guard let address = currentState.addressList[safe: index] else { return .empty() }
+      
+      let region = Region(
+        code: address.value.법정코드,
+        name: address.value.법정동명
+      )
+      
+      var addressList = currentState.addressList
+      
+      let _ = addressList.indices.map { offset in
+        addressList[offset].update(isSelected: false)
+      }
+      
+      addressList[index].update(isSelected: true)
+      
+      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressList))
+      
       return .just(.setRegion(region))
+        .concat(setAddressList)
       
     case let .didTapSignUpButton(parameter):
       
@@ -183,6 +189,8 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     var newState = state
     
     switch mutation {
+    case let .setAddressList(addressList):
+      newState.addressList = addressList
     case let .setInterestList(interestList):
       newState.interestList = interestList
     case let .setRoleSkillsList(roleSkillsList):

@@ -31,20 +31,23 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     )
   )
   
-  private lazy var locationContainerView = DescriptionContainerView(
-    type: .textFieldWithAttributed(
+  private lazy var addressContainerView = DescriptionContainerView(
+    type: .customWithAttributed(
       "활동지역 *".setLastWord(color: .red),
-      "활동지역을 선택 해주세요."
+      CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
+      nil
     )
-  ).then {
-    $0.textField.delegate = self
-  }
+  )
   
   private let periodContainerView = DescriptionContainerView(
     type: .customWithAttributed(
       "경력기간 *".setLastWord(color: .red),
       CheckBoxContainerView(
-        titles: [Career.aspirant.description, Career.junior.description, Career.senior.description],
+        titles: [
+          Career.aspirant.description,
+          Career.junior.description,
+          Career.senior.description
+        ],
         eventType: .radio
       ),
       nil
@@ -162,7 +165,6 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   @objc func dismissKeyboards() {
     nicknameContainerView.textField.resignFirstResponder()
-    locationContainerView.textField.resignFirstResponder()
     portfolioContainerView.textField.resignFirstResponder()
   }
   
@@ -210,8 +212,11 @@ public final class SignUpController: UIViewController, ReactorKit.View {
           bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex in
             if let item = items[safe: selectedIndex] {
               let text = item.value.법정동명
-              reactor?.action.onNext(.didEnteredAddress(text))
-              self?.locationContainerView.textField.text = "서울 \(text)"
+              reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+              
+              if let button = self?.addressContainerView.customView as? CastableButton {
+                button.setTitle("서울 \(text)", for: .normal)
+              }
             }
           }
           self?.present(bottomSheet, animated: true)
@@ -249,9 +254,14 @@ extension SignUpController {
       .marginHorizontal(20)
       .define { flex in
         
-        [nicknameContainerView,
-         locationContainerView,
-         periodContainerView,
+        flex.addItem(nicknameContainerView)
+          .marginBottom(18)
+        
+        flex.addItem(addressContainerView)
+          .marginBottom(18)
+          .markDirty()
+
+        [periodContainerView,
          interestsContainerView,
          roleContainerView,
          skillContainerView,
@@ -280,10 +290,9 @@ extension SignUpController {
   
   private func bindEvent() {
 
-    // TODO: 활동지역 버튼처리로 변경해야함.
-    if let castableButton = locationContainerView.customView as? CastableButton {
+    if let castableButton = addressContainerView.customView as? CastableButton {
       castableButton.handler = { [weak reactor] in
-        reactor?.action.onNext(.didTapAddressField)
+        reactor?.action.onNext(.didTapAddressButton)
       }
     }
     
@@ -341,15 +350,6 @@ extension SignUpController {
     )
     
     reactor?.action.onNext(.didTapSignUpButton(parameter))
-  }
-}
-
-extension SignUpController: UITextFieldDelegate {
-  public func textFieldDidBeginEditing(_ textField: UITextField) {
-    if textField == locationContainerView.textField {
-      textField.resignFirstResponder()
-      reactor?.action.onNext(.didTapAddressField)
-    }
   }
 }
 

@@ -33,11 +33,13 @@ public final class ProfileEditReactor: Reactor {
     /// 프로필 수정 저장.
     case didTapSaveButton(ProfileEditParameter)
     
-    case didTapAddressField
-    case didEnteredAddress(String)
+    /// 활동 지역 선택.
+    case didTapAddressButton
+    case didSelectedLocation(Int)
   }
   
   public enum Mutation {
+    case setAddressList([BottomSheetItem<법정주소>])
     case setInterestList([Interest])
     case setRoleSkillsList([RoleSkills])
     case setImageURL(URL?)
@@ -48,6 +50,7 @@ public final class ProfileEditReactor: Reactor {
   }
   
   public struct State {
+    var addressList: [BottomSheetItem<법정주소>] = []
     var interestList: [Interest] = []
     var roleSkillsList: [RoleSkills] = []
     var imageURL: URL?
@@ -84,7 +87,18 @@ public final class ProfileEditReactor: Reactor {
     self.interestService = interestService
     self.roleSkillsService = roleSkillsService
     
+    var addressList = addressService.addressList.map { BottomSheetItem<법정주소>(value: $0) }
+    let index = addressList.enumerated()
+      .map { offset, element in
+        return element.value.법정동명 == userService.profile?.region?.description ? offset : -1
+      }
+      .filter { $0 != -1 }
+      .reduce(0, +)
+    
+    addressList[index].update(isSelected: true)
+    
     self.initialState = .init(
+      addressList: addressList,
       region: userService.profile?.region
     )
   }
@@ -92,10 +106,13 @@ public final class ProfileEditReactor: Reactor {
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .viewDidLoad:
+      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressService.addressList.map { BottomSheetItem(value: $0) }))
       let setInterestList: Observable<Mutation> = .just(.setInterestList(interestService.interestList))
       let setRoleSkillsList: Observable<Mutation> = .just(.setRoleSkillsList(roleSkillsService.roleSkillsList))
       let setProfile: Observable<Mutation> = .just(.setProfile(userService.profile))
-      return setInterestList
+      
+      return setAddressList
+        .concat(setInterestList)
         .concat(setRoleSkillsList)
         .concat(setProfile)
     
@@ -111,31 +128,33 @@ public final class ProfileEditReactor: Reactor {
           return .just(.setImageURL(imageURL))
         }
       
-    case .didTapAddressField:
-      return Observable.just(addressService.addressList)
+    case .didTapAddressButton:
+      return Observable.just(currentState.addressList)
         .flatMap { addressList -> Observable<Mutation> in
-          
-          let itemList: [BottomSheetItem<법정주소>] = addressList.map { BottomSheetItem<법정주소>(value: $0) }
-          return .just(.setRoute(.bottomSheet(itemList)))
+          return .just(.setRoute(.bottomSheet(addressList)))
         }
       
-    case let .didEnteredAddress(text):
-      let region = addressService.addressList.enumerated()
-        .map { offset, element in
-          return element.법정동명 == text ? offset : -1
-        }
-        .filter { $0 != -1 }
-        .map {
-          let address = addressService.addressList[$0]
-          
-          return Region(
-            code: address.법정코드,
-            name: address.법정동명
-          )
-        }
-        .first
-
+    case let .didSelectedLocation(index):
+      
+      guard let address = currentState.addressList[safe: index] else { return .empty() }
+      
+      let region = Region(
+        code: address.value.법정코드,
+        name: address.value.법정동명
+      )
+      
+      var addressList = currentState.addressList
+      
+      let _ = addressList.indices.map { offset in
+        addressList[offset].update(isSelected: false)
+      }
+      
+      addressList[index].update(isSelected: true)
+      
+      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressList))
+      
       return .just(.setRegion(region))
+        .concat(setAddressList)
       
     case let .didTapSaveButton(parameter):
       var parameter = parameter
@@ -171,18 +190,27 @@ public final class ProfileEditReactor: Reactor {
   public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
+    case let .setAddressList(addressList):
+      newState.addressList = addressList
+      
     case let .setInterestList(interestList):
       newState.interestList = interestList
+      
     case let .setRoleSkillsList(roleSkillsList):
       newState.roleSkillsList = roleSkillsList
+      
     case let .setImageURL(imageURL):
       newState.imageURL = imageURL
+      
     case let .setProfile(profile):
       newState.profile = profile
+      
     case let .setRegion(region):
       newState.region = region
+      
     case let .setRoute(route):
       newState.route = route
+      
     case let .setError(error):
       newState.error = error
     }

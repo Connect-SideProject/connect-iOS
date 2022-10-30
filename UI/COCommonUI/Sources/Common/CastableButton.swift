@@ -42,7 +42,7 @@ private extension CastableButton {
       setTitle(title, for: .normal)
       setImage(UIImage(named: "ic_downward_arrow"), for: .normal)
       
-      titleLabel?.textAlignment = .left
+      contentHorizontalAlignment = .left
       
       semanticContentAttribute = UIApplication.shared
           .userInterfaceLayoutDirection == .rightToLeft ? .forceLeftToRight : .forceRightToLeft
