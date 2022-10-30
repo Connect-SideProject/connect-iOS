@@ -22,6 +22,7 @@ public final class SignUpDIContainer: DIContainer {
   
   private let apiService: ApiService
   private let userService: UserService
+  private let addressService: AddressService
   private let interestService: InterestService
   private let roleSkillsService: RoleSkillsService
   
@@ -31,6 +32,7 @@ public final class SignUpDIContainer: DIContainer {
   public init(
     apiService: ApiService,
     userService: UserService,
+    addressService: AddressService,
     interestService: InterestService,
     roleSkillsService: RoleSkillsService,
     authType: AuthType,
@@ -38,6 +40,7 @@ public final class SignUpDIContainer: DIContainer {
   ) {
     self.apiService = apiService
     self.userService = userService
+    self.addressService = addressService
     self.interestService = interestService
     self.roleSkillsService = roleSkillsService
     
@@ -59,6 +62,7 @@ public final class SignUpDIContainer: DIContainer {
     return Reactor(
       useCase: makeUseCase(),
       userService: userService,
+      addressService: addressService,
       interestService: interestService,
       roleSkillsService: roleSkillsService,
       authType: authType,

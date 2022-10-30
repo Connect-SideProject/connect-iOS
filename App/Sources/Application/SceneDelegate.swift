@@ -68,6 +68,7 @@ extension SceneDelegate: SignInDelegate {
     let container = SignUpDIContainer(
       apiService: ApiManager.shared,
       userService: UserManager.shared,
+      addressService: AddressManager.shared,
       interestService: InterestManager.shared,
       roleSkillsService: RoleSkillsManager.shared,
       authType: authType,

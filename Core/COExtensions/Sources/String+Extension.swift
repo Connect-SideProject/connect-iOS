@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// 다국어 처리.
 public extension String {
@@ -40,5 +41,15 @@ public extension String {
         attributes: attributes
       )
     }
+  }
+}
+
+/// AttributedText
+public extension String {
+  func setLastWord(color: UIColor) -> NSAttributedString {
+    return self.addAttributes(
+      [.foregroundColor : color],
+      range: .init(location: self.count - 1, length: 1)
+    )
   }
 }

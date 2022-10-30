@@ -26,76 +26,61 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   private let nicknameContainerView = DescriptionContainerView(
     type: .textFieldWithAttributed(
-      "닉네임 *".addAttributes(
-        [.foregroundColor : UIColor.red],
-        range: .init(location: 4, length: 1)
-      ),
+      "닉네임 *".setLastWord(color: .red),
       "닉네임을 입력하세요."
     )
   )
   
-  private let locationContainerView = DescriptionContainerView(
+  private lazy var locationContainerView = DescriptionContainerView(
     type: .textFieldWithAttributed(
-      "활동지역 *".addAttributes(
-        [.foregroundColor : UIColor.red],
-        range: .init(location: 5, length: 1)
-      ),
-      "활동지역을 검색해주세요."
+      "활동지역 *".setLastWord(color: .red),
+      "활동지역을 선택 해주세요."
     )
-  )
+  ).then {
+    $0.textField.delegate = self
+  }
   
   private let periodContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "경력기간 *".addAttributes(
-        [.foregroundColor : UIColor.red],
-        range: .init(location: 5, length: 1)
-      ),
+      "경력기간 *".setLastWord(color: .red),
       CheckBoxContainerView(
         titles: [Career.aspirant.description, Career.junior.description, Career.senior.description],
         eventType: .radio
-      )
+      ),
+      nil
     )
   )
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "관심분야 *".addAttributes(
-        [.foregroundColor : UIColor.red],
-        range: .init(location: 5, length: 1)
-      ),
-      RoundSelectionButtonView(titles: interestTitles)
+      "관심분야 *".setLastWord(color: .red),
+      RoundSelectionButtonView(titles: interestTitles),
+      "필수 3개를 선택해주세요"
     )
   )
   
   private var roleTitles: [String] = []
   private lazy var roleContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "원하는 역할 *".addAttributes(
-        [.foregroundColor : UIColor.red],
-        range: .init(location: 7, length: 1)
-      ),
-      RoundSelectionButtonView(titles: roleTitles)
+      "원하는 역할 *".setLastWord(color: .red),
+      RoundSelectionButtonView(titles: roleTitles),
+      nil
     )
   )
   
   private var skillsViews: [CastableView] = []
   private lazy var skillContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "보유 스킬 *".addAttributes(
-        [.foregroundColor : UIColor.red],
-        range: .init(location: 6, length: 1)
-      ),
-      CastableContainerView(views: skillsViews)
+      "보유 스킬 *".setLastWord(color: .red),
+      CastableContainerView(views: skillsViews),
+      nil
     )
   )
   
   private let portfolioContainerView = DescriptionContainerView(
     type: .textFieldWithAttributed(
-      "포트폴리오 *".addAttributes(
-        [.foregroundColor : UIColor.red],
-        range: .init(location: 6, length: 1)
-      ),
+      "포트폴리오 *".setLastWord(color: .red),
       "포트폴리오 URL을 입력 해주세요. (선택)"
     )
   )
@@ -112,19 +97,19 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     titles: [Terms.service.description, Terms.privacy.description, Terms.location.description],
     direction: .vertical
   ).then {
-    $0.backgroundColor = .gray01
+    $0.backgroundColor = .hexF9F9F9
     $0.layer.cornerRadius = 5
     $0.layer.masksToBounds = true
   }
   
   private lazy var startButton = RoundRutton(
     cornerRadius: 5,
-    borderColor: .green05
+    borderColor: .hex028236
   ).then {
     $0.setTitle("커넥트잇 시작하기", for: .normal)
     $0.setTitleColor(.white, for: .normal)
-    $0.titleLabel?.font = .headLine07
-    $0.backgroundColor = .green05
+    $0.titleLabel?.font = .medium(size: 16)
+    $0.backgroundColor = .hex028236
     $0.addTarget(self, action: #selector(didTapStartButton), for: .touchUpInside)
   }
   
@@ -188,15 +173,6 @@ public final class SignUpController: UIViewController, ReactorKit.View {
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
-    locationContainerView.textField.rx.value
-      .filter { !($0 ?? "").isEmpty }
-      .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
-      .debug()
-      .flatMap { query -> Observable<Reactor.Action> in
-        return .just(.searchAddress(query ?? ""))
-      }.bind(to: reactor.action)
-      .disposed(by: disposeBag)
-    
     reactor.state
       .compactMap { $0.interestList }
       .filter { !$0.isEmpty }
@@ -219,18 +195,31 @@ public final class SignUpController: UIViewController, ReactorKit.View {
         }
       }.disposed(by: disposeBag)
     
-    reactor.state
-      .compactMap { $0.route }
+    reactor.pulse(\.$route)
+      .compactMap { $0 }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] route in
         switch route {
         case .home:
           self?.delegate?.routeToHome()
+        case let .bottomSheet(items):
+          let bottomSheet = BottomSheetController(
+            type: .address(items)
+          )
+          bottomSheet.modalPresentationStyle = .overFullScreen
+          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex in
+            if let item = items[safe: selectedIndex] {
+              let text = item.value.법정동명
+              reactor?.action.onNext(.didEnteredAddress(text))
+              self?.locationContainerView.textField.text = text
+            }
+          }
+          self?.present(bottomSheet, animated: true)
         }
       }.disposed(by: disposeBag)
     
-    reactor.state
-      .compactMap { $0.error }
+    reactor.pulse(\.$error)
+      .compactMap { $0 }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] error in
         guard let self = self else { return }
@@ -290,15 +279,15 @@ extension SignUpController {
   }
   
   private func bindEvent() {
-    
-    skillContainerView.customView?.casting(
-      type: CastableContainerView.self
-    ).handler = {
-      print($0)
+
+    // TODO: 활동지역 버튼처리로 변경해야함.
+    if let castableButton = locationContainerView.customView as? CastableButton {
+      castableButton.handler = { [weak reactor] in
+        reactor?.action.onNext(.didTapAddressField)
+      }
     }
     
     termsCheckBoxContainerView.handler = { [weak self] checkItems in
-      print(checkItems)
       if checkItems.count == 3 {
         self?.acceptAllCheckBoxView.setChecked(true)
       } else {
@@ -352,6 +341,15 @@ extension SignUpController {
     )
     
     reactor?.action.onNext(.didTapSignUpButton(parameter))
+  }
+}
+
+extension SignUpController: UITextFieldDelegate {
+  public func textFieldDidBeginEditing(_ textField: UITextField) {
+    if textField == locationContainerView.textField {
+      textField.resignFirstResponder()
+      reactor?.action.onNext(.didTapAddressField)
+    }
   }
 }
 
