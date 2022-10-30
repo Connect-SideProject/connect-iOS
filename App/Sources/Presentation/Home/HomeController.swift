@@ -40,7 +40,7 @@ public final class HomeController: UIViewController {
     
     
     private let selectedLineView: UIView = UIView().then {
-        $0.backgroundColor = UIColor.green04
+        $0.backgroundColor = UIColor.hex06C755
     }
     
     
@@ -80,7 +80,7 @@ public final class HomeController: UIViewController {
     }
     
     private lazy var releaseCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: releaseFlowLayout).then {
-        $0.backgroundColor = .gray01
+        $0.backgroundColor = .hexF9F9F9
         $0.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
         $0.register(HomeReleaseStudyListCell.self, forCellWithReuseIdentifier: "HomeReleaseStudyListCell")
         $0.showsVerticalScrollIndicator = false

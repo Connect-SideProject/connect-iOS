@@ -9,6 +9,7 @@ import Foundation
 
 import ReactorKit
 
+import COCommonUI
 import CODomain
 import COExtensions
 import CONetwork
@@ -18,11 +19,13 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   
   public enum Route {
     case home
+    case bottomSheet([BottomSheetItem<법정주소>])
   }
   
   public enum Action {
     case viewDidLoad
-    case searchAddress(String)
+    case didTapAddressField
+    case didEnteredAddress(String)
     case didTapSignUpButton(SignUpParameter)
   }
   
@@ -38,8 +41,8 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     var interestList: [Interest] = []
     var roleSkillsList: [RoleSkills] = []
     var region: Region?
-    var route: Route?
-    var error: COError?
+    @Pulse var route: Route?
+    @Pulse var error: COError?
   }
   
   public var initialState: State = .init()
@@ -50,6 +53,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   
   private let useCase: SignUpUseCase
   private let userService: UserService
+  private let addressService: AddressService
   private let interestService: InterestService
   private let roleSkillsService: RoleSkillsService
   
@@ -59,6 +63,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   public init(
     useCase: SignUpUseCase,
     userService: UserService,
+    addressService: AddressService,
     interestService: InterestService,
     roleSkillsService: RoleSkillsService,
     authType: AuthType,
@@ -66,6 +71,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   ) {
     self.useCase = useCase
     self.userService = userService
+    self.addressService = addressService
     self.interestService = interestService
     self.roleSkillsService = roleSkillsService
     
@@ -84,12 +90,31 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
       return setInterestList
         .concat(setRoleSkillsList)
       
-    case let .searchAddress(query):
-      return useCase.getRegionList(query: query)
-        .flatMap { regionList -> Observable<Mutation> in
-          guard let resion = regionList.first else { return .empty() }
-          return .just(.setRegion(resion))
+    case .didTapAddressField:
+      return Observable.just(addressService.addressList)
+        .flatMap { addressList -> Observable<Mutation> in
+          
+          let itemList: [BottomSheetItem<법정주소>] = addressList.map { BottomSheetItem<법정주소>(value: $0) }
+          return .just(.setRoute(.bottomSheet(itemList)))
         }
+      
+    case let .didEnteredAddress(text):
+      let region = addressService.addressList.enumerated()
+        .map { offset, element in
+          return element.법정동명 == text ? offset : -1
+        }
+        .filter { $0 != -1 }
+        .map {
+          let address = addressService.addressList[$0]
+          
+          return Region(
+            code: address.법정코드,
+            name: address.법정동명
+          )
+        }
+        .first
+
+      return .just(.setRegion(region))
       
     case let .didTapSignUpButton(parameter):
       
@@ -114,7 +139,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
       }
       
       guard let region = currentState.region else {
-        return .just(.setError(COError.message(nil, "지역을 검색 해주세요.")))
+        return .just(.setError(COError.message(nil, "지역을 선택 해주세요.")))
       }
       
       guard parameter.checkedTermsCount() == 3 else {

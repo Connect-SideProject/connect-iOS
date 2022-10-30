@@ -172,8 +172,8 @@ extension RoundSelectionButtonView: UICollectionViewDelegateFlowLayout {
 final class RoundCollectionViewCell: UICollectionViewCell {
   
   private let titleLabel = UILabel().then {
-    $0.textColor = .gray06
-    $0.font = .body01
+    $0.textColor = .hex3A3A3A
+    $0.font = .light(size: 16)
     $0.textAlignment = .center
     $0.translatesAutoresizingMaskIntoConstraints = false
   }
@@ -201,10 +201,10 @@ final class RoundCollectionViewCell: UICollectionViewCell {
     titleLabel.text = title
     self.isSelected = isSelected
     
-    backgroundColor = isSelected ? .green04 : .white
-    titleLabel.textColor = isSelected ? .white : .gray06
+    backgroundColor = isSelected ? .hex06C755 : .white
+    titleLabel.textColor = isSelected ? .white : .hex3A3A3A
     
-    layer.borderColor = isSelected ? UIColor.green04.cgColor : UIColor.gray03.cgColor
+    layer.borderColor = isSelected ? UIColor.hex06C755.cgColor : UIColor.hexC6C6C6.cgColor
   }
 }
 

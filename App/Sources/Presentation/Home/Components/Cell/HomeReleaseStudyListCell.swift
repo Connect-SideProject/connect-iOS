@@ -24,12 +24,12 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         $0.backgroundColor = .white
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 13
-        $0.layer.borderColor = UIColor.gray02.cgColor
+        $0.layer.borderColor = UIColor.hexEDEDED.cgColor
         $0.layer.borderWidth = 1
     }
     
     private let releaseStateContainerView: UIView = UIView().then {
-        $0.backgroundColor = UIColor.green04
+        $0.backgroundColor = .hex06C755
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 2
     }
@@ -42,7 +42,7 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
     }
     
     private let releaseBookMarkCountLabel: UILabel = UILabel().then {
-        $0.textColor = .gray04
+        $0.textColor = .hex8E8E8E
         $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         $0.numberOfLines = 1
         $0.textAlignment = .left
@@ -86,13 +86,13 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
     }
     
     private let releaseMemberStateLabel: UILabel = UILabel().then {
-        $0.textColor = .gray04
+        $0.textColor = .hex8E8E8E
         $0.textAlignment = .left
         $0.font = UIFont.systemFont(ofSize: 12, weight: .regular)
     }
     
     private let releaseMangerConfirmView: UIView = UIView().then {
-        $0.backgroundColor = .gray06
+        $0.backgroundColor = .hex3A3A3A
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 5
     }

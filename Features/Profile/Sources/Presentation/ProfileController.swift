@@ -46,7 +46,8 @@ public final class ProfileController: UIViewController, ReactorKit.View {
           direction: .vertical
         )],
         direction: .column
-      )
+      ),
+      nil
     )
   )
   
@@ -81,6 +82,7 @@ public final class ProfileController: UIViewController, ReactorKit.View {
   public override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     
+    tabBarController?.tabBar.isHidden = false
     navigationController?.setNavigationBarHidden(true, animated: false)
   }
   
@@ -213,6 +215,7 @@ extension ProfileController {
 
 extension ProfileController: ProfileViewDelegate {
   func didTapEditProfileButton() {
+    tabBarController?.tabBar.isHidden = true
     delegate?.routeToEditProfile()
   }
 }

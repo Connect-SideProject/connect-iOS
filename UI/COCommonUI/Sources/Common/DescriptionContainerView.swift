@@ -14,22 +14,22 @@ public enum DescriptionType {
   // DescriptionLabel, View
   case textField(String, String?)
   case textFieldWithAttributed(NSAttributedString, String?)
-  case custom(String, CastableView)
-  case customWithAttributed(NSAttributedString, CastableView)
+  case custom(String, CastableView, String?)
+  case customWithAttributed(NSAttributedString, CastableView, String?)
 }
 
 public class DescriptionContainerView: UIView {
   
   private let descriptionLabel = UILabel().then {
-    $0.font = .subTitle01
+    $0.font = .regular(size: 16)
     $0.textColor = .black
   }
   
   public let textField = UITextField().then {
-    $0.font = .subTitle02
-    $0.textColor = .gray03
+    $0.font = .medium(size: 14)
+    $0.textColor = .black
     $0.leftViewMode = .always
-    $0.layer.borderColor = UIColor.gray03.cgColor
+    $0.layer.borderColor = UIColor.hexC6C6C6.cgColor
     $0.layer.borderWidth = 1
     $0.layer.cornerRadius = 12
     $0.layer.masksToBounds = true
@@ -41,6 +41,12 @@ public class DescriptionContainerView: UIView {
   
   public private(set) var customView: CastableView?
   public private(set) var customViews: [CastableView]?
+  
+  private let noticeTextLabel = UILabel().then {
+    $0.font = .regular(size: 12)
+    $0.textColor = .red
+    $0.numberOfLines = 1
+  }
   
   public let flexContainer = UIView()
   
@@ -65,12 +71,14 @@ public class DescriptionContainerView: UIView {
     case let .textFieldWithAttributed(attrbutedText, placeholder):
       descriptionLabel.attributedText = attrbutedText
       textField.placeholder = placeholder
-    case let .custom(text, view):
+    case let .custom(text, view, noticeText):
       descriptionLabel.text = text
       customView = view
-    case let .customWithAttributed(attrbutedText, view):
+      noticeTextLabel.text = noticeText
+    case let .customWithAttributed(attrbutedText, view, noticeText):
       descriptionLabel.attributedText = attrbutedText
       customView = view
+      noticeTextLabel.text = noticeText
     }
     
     configureUI()
@@ -103,6 +111,11 @@ extension DescriptionContainerView {
         } else {
           flex.addItem(textField)
             .height(44)
+        }
+        
+        if noticeTextLabel.text?.isEmpty == false {
+          flex.addItem(noticeTextLabel)
+            .marginVertical(8)
         }
       }
   }

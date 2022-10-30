@@ -19,7 +19,7 @@ final class HomeStudyListFooterView: UICollectionReusableView {
     
     private let studyMoreLabel: UILabel = UILabel().then {
         $0.text = "더보기"
-        $0.textColor = .gray04
+        $0.textColor = .hex8E8E8E
         $0.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         $0.textAlignment = .center
         $0.numberOfLines = 1

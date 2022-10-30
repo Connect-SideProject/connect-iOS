@@ -22,6 +22,10 @@ public protocol ProfileEditDelegate: AnyObject {
 
 public final class ProfileEditController: UIViewController, ReactorKit.View {
   
+  enum Height {
+    static let scrollView: CGFloat = 610 + (UIDevice.current.hasNotch ? 0 : 150)
+  }
+  
   public typealias Reactor = ProfileEditReactor
   
   private lazy var profileView = ProfileView(
@@ -32,23 +36,25 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   }
   
   private let roleContainerView = DescriptionContainerView(
-    type: .custom("원하는 역할", CheckBoxContainerView(
+    type: .custom("원하는 역할", RoundSelectionButtonView(
       titles: [
         RoleType.developer.description,
         RoleType.designer.description,
         RoleType.planner.description,
         RoleType.marketer.description
-      ])
+      ]), nil
     )
   )
   
-  private let locationContainerView = DescriptionContainerView(
-    type: .textField("활동지역", "활동지역을 검색해주세요.")
-  )
+  private lazy var locationContainerView = DescriptionContainerView(
+    type: .textField("활동지역", "활동지역을 선택 해주세요.")
+  ).then {
+    $0.textField.delegate = self
+  }
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", RoundSelectionButtonView(titles: interestTitles)
+    type: .custom("관심분야", RoundSelectionButtonView(titles: interestTitles), nil
     )
   )
   
@@ -63,7 +69,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
         Career.junior.description,
         Career.senior.description
       ],
-      eventType: .radio)
+      eventType: .radio), nil
     )
   )
   
@@ -71,15 +77,19 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   private lazy var skillContainerView = DescriptionContainerView(
     type: .custom(
       "보유 스킬",
-      CastableContainerView(views: skillsViews)
+      CastableContainerView(views: skillsViews),
+      nil
     )
   )
   
-  private lazy var saveButton = RoundRutton().then {
+  private lazy var saveButton = RoundRutton(
+    cornerRadius: 5,
+    borderColor: .hex028236
+  ).then {
     $0.setTitle("저장", for: .normal)
     $0.setTitleColor(.white, for: .normal)
-    $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-    $0.backgroundColor = .lightGray
+    $0.titleLabel?.font = .medium(size: 16)
+    $0.backgroundColor = .hex028236
     $0.addTarget(self, action: #selector(didTapSaveButton), for: .touchUpInside)
   }
   
@@ -120,7 +130,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     
     containerScrollView.contentSize = .init(
       width: view.bounds.size.width,
-      height: view.bounds.size.height + 560
+      height: view.bounds.size.height + Height.scrollView
     )
     
     flexContainer.pin
@@ -163,8 +173,8 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
         }
       }.disposed(by: disposeBag)
     
-    reactor.state
-      .compactMap { $0.profile }
+    reactor.pulse(\.$profile)
+      .compactMap { $0 }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] profile in
         self?.updateViews(profile: profile)
@@ -179,8 +189,8 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
         }
       }.disposed(by: disposeBag)
     
-    reactor.state
-      .compactMap { $0.route }
+    reactor.pulse(\.$route)
+      .compactMap { $0 }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] in
         switch $0 {
@@ -192,6 +202,20 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
           .confirmHandler = { [weak self] in
             self?.delegate?.routeToBack()
           }
+          
+        case let .bottomSheet(items):
+          let bottomSheet = BottomSheetController(
+            type: .address(items)
+          )
+          bottomSheet.modalPresentationStyle = .overFullScreen
+          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex in
+            if let item = items[safe: selectedIndex] {
+              let text = item.value.법정동명
+              reactor?.action.onNext(.didEnteredAddress(text))
+              self?.locationContainerView.textField.text = "서울 \(text)"
+            }
+          }
+          self?.present(bottomSheet, animated: true)
         }
       }.disposed(by: disposeBag)
     
@@ -236,7 +260,7 @@ private extension ProfileEditController {
         }
         
         flex.addItem(saveButton)
-          .height(50)
+          .height(41)
     }
   }
   
@@ -245,10 +269,9 @@ private extension ProfileEditController {
     let profileURL = ""
     
     let roles: [RoleType] = roleContainerView.customView?.casting(
-      type: CheckBoxContainerView.self
+      type: RoundSelectionButtonView.self
     )
-    .checkedItems?
-    .compactMap { RoleType(description: $0.title) } ?? []
+    .selectedItems.compactMap { RoleType(description: $0) } ?? []
     
     let interestings: [String] = interestsContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
@@ -294,7 +317,7 @@ private extension ProfileEditController {
     )
     
     if let role = roleContainerView.customView?.casting(
-      type: CheckBoxContainerView.self
+      type: RoundSelectionButtonView.self
     ) {
       role.setSelectedItems(
         items: profile.roles.map { $0.description }
@@ -332,6 +355,15 @@ extension ProfileEditController: ProfileViewDelegate {
     ImagePickerManager.shared.selectedImage { [weak self] image in
       self?.profileView.profileImageView.setImage(image)
       self?.reactor?.action.onNext(.requestUploadImage(image.pngData()))
+    }
+  }
+}
+
+extension ProfileEditController: UITextFieldDelegate {
+  public func textFieldDidBeginEditing(_ textField: UITextField) {
+    if textField == locationContainerView.textField {
+      textField.resignFirstResponder()
+      reactor?.action.onNext(.didTapAddressField)
     }
   }
 }

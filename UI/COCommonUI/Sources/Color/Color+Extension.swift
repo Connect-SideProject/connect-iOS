@@ -8,19 +8,21 @@
 import UIKit
 
 public extension UIColor {
-  static let green01: UIColor = .init(hex: "#EFFFF6")
-  static let green02: UIColor = .init(hex: "#D4F6E2")
-  static let green03: UIColor = .init(hex: "#97E0C5")
-  static let green04: UIColor = .init(hex: "#06C755")
-  static let green05: UIColor = .init(hex: "#05A647")
-  static let green06: UIColor = .init(hex: "#639200")
+  static let hexEFFFF6: UIColor = .init(hex: "#EFFFF6")
+  static let hexD4F6E2: UIColor = .init(hex: "#D4F6E2")
+  static let hex97E0C5: UIColor = .init(hex: "#97E0C5")
+  static let hex06C755: UIColor = .init(hex: "#06C755")
+  static let hex05A647: UIColor = .init(hex: "#05A647")
+  static let hex639200: UIColor = .init(hex: "#639200")
+  static let hex028236: UIColor = .init(hex: "#028236")
   
-  static let gray01: UIColor = .init(hex: "#F9F9F9")
-  static let gray02: UIColor = .init(hex: "#EDEDED")
-  static let gray03: UIColor = .init(hex: "#C6C6C6")
-  static let gray04: UIColor = .init(hex: "#8E8E8E")
-  static let gray05: UIColor = .init(hex: "#5B5B5B")
-  static let gray06: UIColor = .init(hex: "#3A3A3A")
+  static let hexF9F9F9: UIColor = .init(hex: "#F9F9F9")
+  static let hexEDEDED: UIColor = .init(hex: "#EDEDED")
+  static let hexC6C6C6: UIColor = .init(hex: "#C6C6C6")
+  static let hex8E8E8E: UIColor = .init(hex: "#8E8E8E")
+  static let hex5B5B5B: UIColor = .init(hex: "#5B5B5B")
+  static let hex3A3A3A: UIColor = .init(hex: "#3A3A3A")
+  static let hex141616: UIColor = .init(hex: "#141616")
 }
 
 public extension UIColor {
