@@ -45,6 +45,7 @@ extension SceneDelegate: ProfileDelegate {
     let container = ProfileEditDIContainer(
       apiService: ApiManaerStub(),
       userService: UserManagerStub(),
+      addressService: AddressManager.shared,
       interestService: InterestManagerStub(isExists: true),
       roleSkillsService: RoleSkillsManagerStub(isExists: true)
     )

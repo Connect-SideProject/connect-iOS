@@ -18,17 +18,20 @@ public final class ProfileEditDIContainer {
   
   private let apiService: ApiService
   private let userService: UserService
+  private let addressService: AddressService
   private let interestService: InterestService
   private let roleSkillsService: RoleSkillsService
   
   public init(
     apiService: ApiService,
     userService: UserService,
+    addressService: AddressService,
     interestService: InterestService,
     roleSkillsService: RoleSkillsService
   ) {
     self.apiService = apiService
     self.userService = userService
+    self.addressService = addressService
     self.interestService = interestService
     self.roleSkillsService = roleSkillsService
   }
@@ -44,6 +47,7 @@ public final class ProfileEditDIContainer {
       controller.reactor = .init(
         repository: makeRepository(),
         userService: userService,
+        addressService: addressService,
         interestService: interestService,
         roleSkillsService: roleSkillsService
       )

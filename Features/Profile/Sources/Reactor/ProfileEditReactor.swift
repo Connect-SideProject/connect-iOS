@@ -19,6 +19,7 @@ public final class ProfileEditReactor: Reactor {
   
   public enum Route {
     case back
+    case bottomSheet([BottomSheetItem<법정주소>])
   }
   
   public enum Action {
@@ -31,6 +32,9 @@ public final class ProfileEditReactor: Reactor {
     
     /// 프로필 수정 저장.
     case didTapSaveButton(ProfileEditParameter)
+    
+    case didTapAddressField
+    case didEnteredAddress(String)
   }
   
   public enum Mutation {
@@ -47,9 +51,9 @@ public final class ProfileEditReactor: Reactor {
     var interestList: [Interest] = []
     var roleSkillsList: [RoleSkills] = []
     var imageURL: URL?
-    var profile: Profile?
+    @Pulse var profile: Profile?
     var region: Region?
-    var route: Route?
+    @Pulse var route: Route?
     var error: COError?
   }
   
@@ -63,17 +67,20 @@ public final class ProfileEditReactor: Reactor {
   
   private let repository: ProfileRepository
   private let userService: UserService
+  private let addressService: AddressService
   private let interestService: InterestService
   private let roleSkillsService: RoleSkillsService
   
   public init(
     repository: ProfileRepository,
     userService: UserService,
+    addressService: AddressService,
     interestService: InterestService,
     roleSkillsService: RoleSkillsService
   ) {
     self.repository = repository
     self.userService = userService
+    self.addressService = addressService
     self.interestService = interestService
     self.roleSkillsService = roleSkillsService
     
@@ -103,6 +110,32 @@ public final class ProfileEditReactor: Reactor {
           let imageURL = URL(string: imageURL)
           return .just(.setImageURL(imageURL))
         }
+      
+    case .didTapAddressField:
+      return Observable.just(addressService.addressList)
+        .flatMap { addressList -> Observable<Mutation> in
+          
+          let itemList: [BottomSheetItem<법정주소>] = addressList.map { BottomSheetItem<법정주소>(value: $0) }
+          return .just(.setRoute(.bottomSheet(itemList)))
+        }
+      
+    case let .didEnteredAddress(text):
+      let region = addressService.addressList.enumerated()
+        .map { offset, element in
+          return element.법정동명 == text ? offset : -1
+        }
+        .filter { $0 != -1 }
+        .map {
+          let address = addressService.addressList[$0]
+          
+          return Region(
+            code: address.법정코드,
+            name: address.법정동명
+          )
+        }
+        .first
+
+      return .just(.setRegion(region))
       
     case let .didTapSaveButton(parameter):
       var parameter = parameter
