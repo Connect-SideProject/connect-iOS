@@ -111,9 +111,13 @@ private extension CheckBoxContainerView {
             .height(10)
         }
         
-        checkBoxViews.forEach {
-          flex.addItem($0)
-            .marginLeft(direction == .horizontal ? 0 : 10)
+        checkBoxViews.enumerated().forEach { offset, element in
+          if offset == 0, direction == .horizontal {
+            flex.addItem(element)
+          } else {
+            flex.addItem(element)
+              .marginLeft(10)
+          }
         }
         
         if direction == .vertical {
@@ -241,10 +245,11 @@ private extension CheckBoxSingleView {
 fileprivate final class CheckBoxView: UIView {
 
   fileprivate lazy var checkBoxButton = UIButton(type: .custom).then {
-    $0.titleLabel?.font = .subTitle01
+    $0.titleLabel?.font = .regular(size: 16)
     
     var configuration = UIButton.Configuration.bordered()
     configuration.imagePadding = 8
+    configuration.contentInsets = .zero
     configuration.baseBackgroundColor = .clear
     $0.configuration = configuration
     
@@ -252,8 +257,8 @@ fileprivate final class CheckBoxView: UIView {
     let selectedImage = UIImage(named: "ic_radio_active")
     $0.setImage(nomalImage, for: .normal)
     $0.setImage(selectedImage, for: .selected)
-    $0.setTitleColor(UIColor.gray06, for: .normal)
-    $0.setTitleColor(UIColor.gray06, for: .selected)
+    $0.setTitleColor(.hex3A3A3A, for: .normal)
+    $0.setTitleColor(.hex3A3A3A, for: .selected)
     $0.addTarget(self, action: #selector(didTapCheckBox(_:)), for: .touchUpInside)
   }
   

@@ -16,7 +16,7 @@ final class HomeSearchView: BaseView {
     
     //MARK: Property
     private let placeHolderLabel: UILabel = {
-        $0.textColor = UIColor.gray03
+        $0.textColor = .hexC6C6C6
         $0.numberOfLines = 1
         $0.text = "찾는 프로젝트 키워드를 검색해보세요."
         $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
@@ -45,7 +45,7 @@ final class HomeSearchView: BaseView {
     private func configure()  {
         self.clipsToBounds = true
         self.layer.cornerRadius = 12
-        self.backgroundColor = UIColor.gray01
+        self.backgroundColor = .hexF9F9F9
         
                 
         _ = [imageView,placeHolderLabel].map {

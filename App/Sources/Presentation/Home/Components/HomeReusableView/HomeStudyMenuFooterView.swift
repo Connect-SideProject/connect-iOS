@@ -15,7 +15,7 @@ final class HomeStudyMenuFooterView: UICollectionReusableView {
     
     //MARK: Property
     private let homeMenuLineView: UIView = UIView().then {
-        $0.backgroundColor = UIColor.gray02
+        $0.backgroundColor = .hexEDEDED
     }
     
     override init(frame: CGRect) {

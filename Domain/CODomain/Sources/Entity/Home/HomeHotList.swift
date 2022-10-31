@@ -13,6 +13,7 @@ public struct HomeHotList: Codable {
     public var releaseTitle: String
     public var releaseBookMark: Int
     public var releaseStudyInfo: String
+    public var releaseRecruitPart: [String]
     public var releaseCreateAt: String
     public var releaseisEnd: Bool
     
@@ -22,9 +23,8 @@ public struct HomeHotList: Codable {
         case releaseTitle = "studyTitle"
         case releaseBookMark = "bookmark"
         case releaseStudyInfo = "studyInfo"
+        case releaseRecruitPart = "recruitmentParts"
         case releaseCreateAt = "creatDt"
         case releaseisEnd = "isEnd"
-        
     }
-    
 }

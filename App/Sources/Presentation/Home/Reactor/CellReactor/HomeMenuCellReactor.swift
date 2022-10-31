@@ -12,22 +12,24 @@ import UIKit
 import CODomain
 
 
-final class HomeMenuCellReactor: Reactor {
+public final class HomeMenuCellReactor: Reactor {
     
     
-    typealias Action = NoAction
+    public typealias Action = NoAction
     
     
-    struct State {
+    public struct State {
         var menuType: HomeMenu
+        var homeCellRepo: HomeViewRepo
     }
     
-    let initialState: State
+    public let initialState: State
     
-    init(menuType: HomeMenu
+    init(menuType: HomeMenu,
+         homeCellRepo: HomeViewRepo
     ) {
         defer { _ = self.state }
-        self.initialState = State(menuType: menuType)
+        self.initialState = State(menuType: menuType, homeCellRepo: homeCellRepo)
         print("Menu Type : \(menuType)")
         
     }

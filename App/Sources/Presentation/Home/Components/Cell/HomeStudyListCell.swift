@@ -18,7 +18,7 @@ final class HomeStudyListCell: UICollectionViewCell {
         $0.backgroundColor = UIColor.white
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 13
-        $0.layer.borderColor = UIColor.gray02.cgColor
+        $0.layer.borderColor = UIColor.hexEDEDED.cgColor
         $0.layer.borderWidth = 1
     }
     
@@ -51,7 +51,7 @@ final class HomeStudyListCell: UICollectionViewCell {
     }
     
     private let studyMemberStateLabel: UILabel = UILabel().then {
-        $0.textColor = .gray04
+        $0.textColor = .hex8E8E8E
         $0.font = UIFont.systemFont(ofSize: 12, weight: .regular)
         $0.textAlignment = .left
     }

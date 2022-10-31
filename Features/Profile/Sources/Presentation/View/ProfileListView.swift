@@ -16,13 +16,13 @@ final class ProfileListView: UIView {
   
   private lazy var titleLabel = UILabel().then {
     $0.text = item.title
-    $0.font = .systemFont(ofSize: 16, weight: .bold)
+    $0.font = .regular(size: 16)
     $0.textColor = .black
   }
   
   private lazy var subjectLabel = UILabel().then {
     $0.text = item.content
-    $0.font = .systemFont(ofSize: 14, weight: .regular)
+    $0.font = .regular(size: 14)
     $0.textColor = .black
     $0.textAlignment = .right
   }

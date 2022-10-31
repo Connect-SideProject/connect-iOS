@@ -25,14 +25,14 @@ enum HomeSubMenuType: String {
 }
 
 
-final class HomeStudyMenuReactor: Reactor {
+public final class HomeStudyMenuReactor: Reactor {
     
 
-    typealias Action = NoAction
+    public typealias Action = NoAction
     
-    var initialState: State
+    public var initialState: State
     
-    struct State {
+    public struct State {
         var menuType: HomeSubMenuType
     }
     
@@ -61,7 +61,7 @@ final class HomeStudyMenuCell: UICollectionViewCell {
         $0.font = UIFont.boldSystemFont(ofSize: 16)
         $0.textAlignment = .center
         $0.numberOfLines = 1
-        $0.textColor = UIColor.gray04
+        $0.textColor = UIColor.hex8E8E8E
     }
     
     

@@ -9,6 +9,7 @@ import Foundation
 
 import ReactorKit
 
+import COCommonUI
 import CODomain
 import COExtensions
 import CONetwork
@@ -18,15 +19,18 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   
   public enum Route {
     case home
+    case bottomSheet([BottomSheetItem<법정주소>])
   }
   
   public enum Action {
     case viewDidLoad
-    case searchAddress(String)
+    case didTapAddressButton
+    case didSelectedLocation(Int)
     case didTapSignUpButton(SignUpParameter)
   }
   
   public enum Mutation {
+    case setAddressList([BottomSheetItem<법정주소>])
     case setInterestList([Interest])
     case setRoleSkillsList([RoleSkills])
     case setRegion(Region?)
@@ -35,11 +39,12 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   }
   
   public struct State {
+    var addressList: [BottomSheetItem<법정주소>] = []
     var interestList: [Interest] = []
     var roleSkillsList: [RoleSkills] = []
     var region: Region?
-    var route: Route?
-    var error: COError?
+    @Pulse var route: Route?
+    @Pulse var error: COError?
   }
   
   public var initialState: State = .init()
@@ -50,6 +55,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   
   private let useCase: SignUpUseCase
   private let userService: UserService
+  private let addressService: AddressService
   private let interestService: InterestService
   private let roleSkillsService: RoleSkillsService
   
@@ -59,6 +65,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   public init(
     useCase: SignUpUseCase,
     userService: UserService,
+    addressService: AddressService,
     interestService: InterestService,
     roleSkillsService: RoleSkillsService,
     authType: AuthType,
@@ -66,6 +73,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   ) {
     self.useCase = useCase
     self.userService = userService
+    self.addressService = addressService
     self.interestService = interestService
     self.roleSkillsService = roleSkillsService
     
@@ -79,17 +87,40 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     
     switch action {
     case .viewDidLoad:
+      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressService.addressList.map { BottomSheetItem(value: $0) }))
       let setInterestList: Observable<Mutation> = .just(.setInterestList(interestService.interestList))
       let setRoleSkillsList: Observable<Mutation> = .just(.setRoleSkillsList(roleSkillsService.roleSkillsList))
-      return setInterestList
+      return setAddressList
+        .concat(setInterestList)
         .concat(setRoleSkillsList)
       
-    case let .searchAddress(query):
-      return useCase.getRegionList(query: query)
-        .flatMap { regionList -> Observable<Mutation> in
-          guard let resion = regionList.first else { return .empty() }
-          return .just(.setRegion(resion))
+    case .didTapAddressButton:
+      return Observable.just(currentState.addressList)
+        .flatMap { addressList -> Observable<Mutation> in
+          return .just(.setRoute(.bottomSheet(addressList)))
         }
+      
+    case let .didSelectedLocation(index):
+      
+      guard let address = currentState.addressList[safe: index] else { return .empty() }
+      
+      let region = Region(
+        code: address.value.법정코드,
+        name: address.value.법정동명
+      )
+      
+      var addressList = currentState.addressList
+      
+      let _ = addressList.indices.map { offset in
+        addressList[offset].update(isSelected: false)
+      }
+      
+      addressList[index].update(isSelected: true)
+      
+      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressList))
+      
+      return .just(.setRegion(region))
+        .concat(setAddressList)
       
     case let .didTapSignUpButton(parameter):
       
@@ -114,7 +145,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
       }
       
       guard let region = currentState.region else {
-        return .just(.setError(COError.message(nil, "지역을 검색 해주세요.")))
+        return .just(.setError(COError.message(nil, "지역을 선택 해주세요.")))
       }
       
       guard parameter.checkedTermsCount() == 3 else {
@@ -158,6 +189,8 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     var newState = state
     
     switch mutation {
+    case let .setAddressList(addressList):
+      newState.addressList = addressList
     case let .setInterestList(interestList):
       newState.interestList = interestList
     case let .setRoleSkillsList(roleSkillsList):

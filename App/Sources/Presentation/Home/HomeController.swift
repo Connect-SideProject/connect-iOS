@@ -19,13 +19,13 @@ import CODomain
 
 
 /// 홈 화면 컨트롤러.
-final class HomeController: UIViewController {
+public final class HomeController: UIViewController {
     
     //MARK: Property
     
-    typealias Reactor = HomeViewReactor
+    public typealias Reactor = HomeViewReactor
     
-    var disposeBag: DisposeBag = DisposeBag()
+    public var disposeBag: DisposeBag = DisposeBag()
     
     
     private let floatingButton: UIButton = UIButton().then {
@@ -40,7 +40,7 @@ final class HomeController: UIViewController {
     
     
     private let selectedLineView: UIView = UIView().then {
-        $0.backgroundColor = UIColor.green04
+        $0.backgroundColor = UIColor.hex06C755
     }
     
     
@@ -80,7 +80,7 @@ final class HomeController: UIViewController {
     }
     
     private lazy var releaseCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: releaseFlowLayout).then {
-        $0.backgroundColor = .gray01
+        $0.backgroundColor = .hexF9F9F9
         $0.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
         $0.register(HomeReleaseStudyListCell.self, forCellWithReuseIdentifier: "HomeReleaseStudyListCell")
         $0.showsVerticalScrollIndicator = false
@@ -92,8 +92,10 @@ final class HomeController: UIViewController {
         
         return .init(configureCell:  { dataSource, collectionView, indexPath, sectionItem in
             switch sectionItem {
-            case .hotList:
-                guard let hotListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeReleaseStudyListCell", for: indexPath) as? HomeReleaseStudyListCell else { return UICollectionViewCell () }
+            case let .hotList(cellReactor):
+                guard let hotListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeReleaseStudyListCell", for: indexPath) as? HomeReleaseStudyListCell else { return UICollectionViewCell() }
+                
+                hotListCell.reactor = cellReactor
                 
                 return hotListCell
                 
@@ -183,17 +185,18 @@ final class HomeController: UIViewController {
     }
     
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
-        self.navigationController?.setNavigationBarHidden(false, animated: true)
-        self.navigationController?.setToolbarHidden(false, animated: true)
-        
+      
+        self.tabBarController?.navigationItem.hidesBackButton = true
+        self.tabBarController?.navigationController?.setNavigationBarHidden(false, animated: false)
+      
         configure()
     }
     
-    override func viewWillLayoutSubviews() {
-        floatingButton.addShadow(color: UIColor.gray06.cgColor, offset: CGSize(width: 0, height: 1), radius: 5, opacity: 0.2)
+    public override func viewWillLayoutSubviews() {
+        floatingButton.addShadow(color: UIColor.hex3A3A3A.cgColor, offset: CGSize(width: 0, height: 1), radius: 5, opacity: 0.2)
         floatingButton.layer.cornerRadius = floatingButton.frame.height / 2.0
     }
     
@@ -209,7 +212,7 @@ final class HomeController: UIViewController {
             homeScrollContainerView.addSubview($0)
         }
         
-
+        
         homeScrollView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
@@ -231,7 +234,7 @@ final class HomeController: UIViewController {
             $0.height.equalTo(318)
             $0.bottom.equalToSuperview()
         }
-                
+        
         floatingButton.snp.makeConstraints {
             $0.right.equalToSuperview().offset(-20)
             $0.bottom.equalToSuperview().offset(-(tabbarHeight + 12))
@@ -242,7 +245,7 @@ final class HomeController: UIViewController {
             $0.center.equalToSuperview()
             $0.width.height.equalTo(24)
         }
-                
+        
     }
     
 }
@@ -251,7 +254,7 @@ final class HomeController: UIViewController {
 
 extension HomeController: ReactorKit.View {
     
-    func bind(reactor: Reactor) {
+    public func bind(reactor: Reactor) {
         self.rx.viewDidLoad
             .map { Reactor.Action.viewDidLoad }
             .bind(to: reactor.action)
@@ -277,11 +280,21 @@ extension HomeController {
         self.collectionView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
+        self.releaseCollectionView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
+        
         reactor.state
             .map { $0.section }
             .debug("Section Item ")
             .observe(on: MainScheduler.instance)
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.releaseSection}
+            .debug("release Section Item")
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseCollectionView.rx.items(dataSource: self.releaseDataSource))
             .disposed(by: disposeBag)
         
         
@@ -306,7 +319,7 @@ extension HomeController {
 
 extension HomeController: UICollectionViewDelegateFlowLayout {
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         
         if collectionView == self.collectionView {
             switch self.dataSource[section] {
@@ -324,7 +337,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == self.collectionView {
             switch self.dataSource[indexPath] {
             case .homeMenu:
@@ -343,7 +356,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
         switch self.dataSource[section] {
         case .homeSubMenu:
             return CGSize(width: collectionView.frame.size.width, height: 1)
@@ -355,7 +368,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         if collectionView == self.collectionView {
             switch self.dataSource[section] {
             case .field:
@@ -373,7 +386,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         }
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         if collectionView == self.collectionView {
             switch self.dataSource[section] {
             case .field:
@@ -390,7 +403,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     }
     
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         switch self.dataSource[section] {
         case .field:
             return UIEdgeInsets(top: 25, left: 20, bottom: 0, right: 20)

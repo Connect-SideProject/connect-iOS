@@ -19,38 +19,12 @@ protocol BaseCoordinator: AnyObject {
   var childrenCoordinator: [BaseCoordinator] {get set}
 }
 
-/// ViewController Flow 인터페이스
-protocol ViewControllerFlow {
-  func makeMainController() -> MainController
-  func makeHomeCoordinator() -> HomeCoordinator
-  func makeHomeController() -> HomeController
-}
-
-/// MainFlow DI
-class MainFlow: ViewControllerFlow {
-  
-  func makeMainController() -> MainController {
-    return MainController(viewFlow: self)
-  }
-  
-  func makeHomeCoordinator() -> HomeCoordinator {
-    return HomeCoordinator(presenter: UINavigationController(rootViewController: makeHomeController()))
-  }
-  
-  func makeHomeController() -> HomeController {
-    return HomeController(reactor: HomeViewReactor(homeApiService: ApiManager.shared))
-  }
-}
-
 /// 하단 탭바가 포함된 화면 컨트롤러.
 final class MainController: UITabBarController {
   
   private var profileNavigationController: CONavigationViewController!
   
-  var viewFlow: ViewControllerFlow?
-  
-  init(viewFlow: ViewControllerFlow) {
-    self.viewFlow = viewFlow
+  init() {
     super.init(nibName: nil, bundle: nil)
   }
   
@@ -74,16 +48,28 @@ extension MainController {
     let mapController = MapController()
     mapController.tabBarItem = .init(
       title: "main.tabItem.map".localized(),
-      image: .init(named: "ic_map_inactive"),
-      selectedImage: .init(named: "ic_map_active")
+      image: .init(named: "ic_map_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_map_active")?.withRenderingMode(.alwaysOriginal)
+    )
+    
+    let homeDIContainer = HomeDIContainer(
+      homeApiService: ApiManager.shared
+    )
+    
+    /// 홈 화면
+    let homeController = homeDIContainer.makeHomeController()
+    homeController.tabBarItem = .init(
+      title: "main.tabItem.home".localized(),
+      image: .init(named: "ic_home_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_home_active")?.withRenderingMode(.alwaysOriginal)
     )
     
     /// 채팅 화면.
     let messageController = MessaeController()
     messageController.tabBarItem = .init(
       title: "main.tabItem.message".localized(),
-      image: .init(named: "ic_chat_inactive"),
-      selectedImage: .init(named: "ic_chat_active")
+      image: .init(named: "ic_chat_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_chat_active")?.withRenderingMode(.alwaysOriginal)
     )
     
     /// MY 화면.
@@ -99,26 +85,16 @@ extension MainController {
     )
     profileNavigationController.tabBarItem = .init(
       title: "main.tabItem.profile".localized(),
-      image: .init(named: "ic_my_inactive"),
-      selectedImage: .init(named: "ic_my_active")
+      image: .init(named: "ic_my_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_my_active")?.withRenderingMode(.alwaysOriginal)
     )
     
-    guard let coordinator = viewFlow?.makeHomeCoordinator() else { return }
-    
     self.viewControllers = [
-      coordinator.presenter,
+      homeController,
       mapController,
       messageController,
       profileNavigationController
     ]
-    
-    /// 홈 화면.
-    coordinator.presenter
-      .tabBarItem = .init(
-        title: "main.tabItem.home".localized(),
-        image: .init(named: "ic_home_inactive"),
-        selectedImage: .init(named: "ic_home_active")
-      )
   }
   
   /// 탭바 커스텀 설정.
@@ -126,19 +102,19 @@ extension MainController {
     let appearance = UITabBarAppearance()
     appearance.backgroundColor = .white
     appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
-      .font: UIFont.body03,
-      .foregroundColor: UIColor.gray03
+      .font: UIFont.semiBold(size: 12),
+      .foregroundColor: UIColor.hexC6C6C6
     ]
     
     appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
-      .font: UIFont.body03,
-      .foregroundColor: UIColor.gray06
+      .font: UIFont.regular(size: 12),
+      .foregroundColor: UIColor.hex3A3A3A
     ]
     
     self.tabBar.standardAppearance = appearance
     self.tabBar.scrollEdgeAppearance = appearance
     
-    self.tabBar.tintColor = .gray06
+    self.tabBar.tintColor = .hexEDEDED
     self.tabBar.layer.borderWidth = 1
     self.tabBar.layer.borderColor = UIColor.white.cgColor
   }
@@ -149,6 +125,7 @@ extension MainController: ProfileDelegate {
     let container = ProfileEditDIContainer(
       apiService: ApiManager.shared,
       userService: UserManager.shared,
+      addressService: AddressManager.shared,
       interestService: InterestManager.shared,
       roleSkillsService: RoleSkillsManager.shared
     )

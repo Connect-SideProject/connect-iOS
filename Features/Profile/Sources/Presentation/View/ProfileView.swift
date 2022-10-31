@@ -23,12 +23,11 @@ public final class ProfileView: UIView {
   
   var userNameLabel = UILabel().then {
     $0.textColor = .black
-    $0.font = UIFont.systemFont(ofSize: 20, weight: .medium)
-  }
+    $0.font = .medium(size: 20)  }
   
   var userPositionLabel = UILabel().then {
-    $0.textColor = .gray
-    $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+    $0.textColor = .hexC6C6C6
+    $0.font = .regular(size: 14)
   }
   
   lazy var editButton = UIButton(type: .custom).then {
@@ -89,7 +88,7 @@ public final class ProfileView: UIView {
     }
     
     userNameLabel.text = userName
-    userPositionLabel.text = roles.count > 1 ? roles.map { $0.description }.reduce("") { $0 + "\($1), " } : roles.first?.description ?? ""
+    userPositionLabel.text = roles.map { $0.description }.toStringWithComma
   }
 }
 
@@ -130,6 +129,7 @@ private extension ProfileView {
           .define { flex in
             flex.addItem(userNameLabel)
             flex.addItem(userPositionLabel)
+              .grow(1)
           }
         
         if direction == .row {
