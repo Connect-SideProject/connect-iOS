@@ -174,8 +174,9 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
       .compactMap { $0.imageURL }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] imageURL in
+          guard let `self` = self else { return }
         Task {
-          await self?.profileView.profileImageView.setImage(url: imageURL)
+            await self.profileView.profileImageView.setImage(url: imageURL)
         }
       }.disposed(by: disposeBag)
     

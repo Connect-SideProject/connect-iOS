@@ -71,7 +71,7 @@ public final class CheckBoxContainerView: UIView, CastableView {
   }
   
   public func setSelectedItems(items: [String]) {
-    let items = checkBoxViews.map {
+      let items: [CheckBoxItem] = checkBoxViews.map {
       if items.contains($0.title) {
         $0.checkBoxButton.isSelected = true
         return CheckBoxItem(title: $0.title, index: $0.checkBoxButton.tag)

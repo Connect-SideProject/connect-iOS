@@ -35,7 +35,7 @@ class EmptyView: UIView {
     }
     
     private func configureUI() {
-//        self.isHidden = true
+        self.isHidden = true
         addSubview(emptyLabel)
     }
 }

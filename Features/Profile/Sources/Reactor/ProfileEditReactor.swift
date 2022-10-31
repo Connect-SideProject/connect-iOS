@@ -107,7 +107,7 @@ public final class ProfileEditReactor: Reactor {
     case let .didTapSaveButton(parameter):
       var parameter = parameter
       
-      let codes = interestService.interestList
+        let codes: [String] = interestService.interestList
         .enumerated()
         .map { offset, element in
           parameter.interestings.map {

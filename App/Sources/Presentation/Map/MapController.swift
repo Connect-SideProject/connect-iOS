@@ -184,7 +184,7 @@ class MapController: UIViewController, View {
             .subscribe(onNext: { [weak self] kakaoAddresses, isEmpty in
                 guard let `self` = self else { return }
                 let contentViewController = MapFloatingPanelViewController(kakaoAddressResults: kakaoAddresses)
-//                contentViewController.checkEmpty(isEmpty: isEmpty)
+                contentViewController.checkEmpty(isEmpty: isEmpty)
                 self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
             })
             .disposed(by: disposeBag)
