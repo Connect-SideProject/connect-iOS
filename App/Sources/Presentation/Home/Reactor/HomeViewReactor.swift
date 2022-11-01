@@ -83,14 +83,14 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                 .homeStudyList
             ])))
                         
-            return .concat([
+            return .concat(
                 startLoading,
                 homeRepository.responseHomeMenuItem(),
                 setMenuItems,
                 setStudyListItems,
                 homeRepository.responseHomeReleaseItem(),
                 endLoading
-            ])
+            )
         }
     }
     
@@ -107,8 +107,6 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
             newState.section[sectionIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
             
-            print("setHomeMenu Response Item: \(items)")
-           
             return newState
         case let .setSubMenuItems(items):
             var newState = state
@@ -133,7 +131,6 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             var newState = state
             guard let sectionIndex = self.getReleaseIndex(section: .hotMenu([])) else { return newState }
             newState.releaseSection[sectionIndex] = homeRepository.responseHomeReleaseSectionItem(item: items)
-            print("Release Response itme: \(items)")
             return newState
         }
         

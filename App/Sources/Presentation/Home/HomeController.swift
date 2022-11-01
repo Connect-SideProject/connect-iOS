@@ -78,6 +78,10 @@ public final class HomeController: UIViewController {
     
     private let releaseFlowLayout: UICollectionViewFlowLayout = UICollectionViewFlowLayout().then {
         $0.scrollDirection = .horizontal
+        $0.minimumLineSpacing = .zero
+        $0.minimumInteritemSpacing = 10
+        $0.itemSize = CGSize(width: 217, height: 227)
+        
     }
     
     private lazy var releaseCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: releaseFlowLayout).then {
@@ -86,6 +90,7 @@ public final class HomeController: UIViewController {
         $0.register(HomeReleaseStudyListCell.self, forCellWithReuseIdentifier: "HomeReleaseStudyListCell")
         $0.showsVerticalScrollIndicator = false
         $0.isScrollEnabled = true
+        $0.contentInsetAdjustmentBehavior = .never
         $0.showsHorizontalScrollIndicator = false
     }
     
@@ -326,7 +331,6 @@ extension HomeController {
 extension HomeController: UICollectionViewDelegateFlowLayout {
     
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        
         if collectionView == self.collectionView {
             switch self.dataSource[section] {
             case .field:
@@ -337,7 +341,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         } else {
             switch self.releaseDataSource[section] {
             case .hotMenu:
-                return CGSize(width: collectionView.frame.size.width, height: 22)
+                return CGSize(width: releaseCollectionView.bounds.size.width, height: 22)
             }
         }
     }
@@ -356,7 +360,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         } else {
             switch self.releaseDataSource[indexPath] {
             case .hotList:
-                return CGSize(width: 217, height: 227)
+                return CGSize(width: 218, height: 227)
             }
         }
     }
@@ -387,7 +391,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         } else {
             switch self.releaseDataSource[section] {
             case .hotMenu:
-                return 20
+                return 10
             }
         }
     }
@@ -410,13 +414,20 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
     
     
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        switch self.dataSource[section] {
-        case .field:
-            return UIEdgeInsets(top: 25, left: 20, bottom: 0, right: 20)
-        case .homeSubMenu:
-            return UIEdgeInsets(top: 25, left: 0, bottom: 0, right: 0)
-        case .homeStudyList:
-            return UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+        if collectionView == self.collectionView {
+            switch self.dataSource[section] {
+            case .field:
+                return UIEdgeInsets(top: 25, left: 20, bottom: 0, right: 20)
+            case .homeSubMenu:
+                return UIEdgeInsets(top: 25, left: 0, bottom: 0, right: 0)
+            case .homeStudyList:
+                return UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+            }
+        } else {
+            switch self.releaseDataSource[section] {
+            case .hotMenu:
+                return UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 20)
+            }
         }
     }
     
