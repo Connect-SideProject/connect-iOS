@@ -69,19 +69,12 @@ public final class ApiManager: ApiService {
         
         if headers.count != 0 {
           print("Header: \(headers)")
-          SessionHeader.shared.update(headers: headers)
+          SessionManager.shared.update(headers: headers)
         }
         
         // 회원가입이 필요한 경우.
         if response.statusCode == 204 {
           observer.onError(COError.needSignUp)
-          print("================================================")
-          return
-        }
-        
-        // 토큰 유효시간 만료.
-        if response.statusCode == 401 {
-          observer.onError(COError.expiredToken)
           print("================================================")
           return
         }
@@ -97,6 +90,13 @@ public final class ApiManager: ApiService {
         print("================================================")
         
         print("Data: \(String(describing: base))")
+        print("================================================")
+        // 토큰 유효시간 만료.
+        if let errorCode = base?.errorCode, response.statusCode == 401 {
+          SessionManager.shared.process(errorCode: errorCode)
+          return
+        }
+        
         // 에러코드 존재하면 서버에러 발생으로 판단.
         if let errorCode = base?.errorCode, let message = base?.message {
           observer.onError(COError.message(errorCode, message))
