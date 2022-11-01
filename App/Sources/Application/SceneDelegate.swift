@@ -30,7 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     controller.delegate = self
     
 //    window?.rootViewController = controller
-      window?.rootViewController = MainController(viewFlow: flowDI)
+      window?.rootViewController = MainController()
     window?.makeKeyAndVisible()
   }
 }

@@ -12,6 +12,7 @@ import CODomain
 import FloatingPanel
 import SnapKit
 import ReactorKit
+import Then
 
 enum FloatingType { // 어떤 데이터를 담은 플로팅파넬을 띄어줄지
     case who // Select customView
@@ -26,14 +27,23 @@ class MapFloatingPanelViewController: UIViewController {
     
     private var kakaoAddressResults: [KakaoMapAddress] = [] 
     
-    private lazy var connectCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-//        layout.itemSize = CGSize(width: (view.frame.width - 20 - 15 - 15) / 2, height: 292 - 30)
-        layout.scrollDirection = .vertical
-        layout.sectionInset = UIEdgeInsets(top: 25, left: 15, bottom: 10, right: 15)
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        return collectionView
-    }()
+    private lazy var connectCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewCompositionalLayout(sectionProvider: { [weak self] _, _ -> NSCollectionLayoutSection? in
+        guard let `self` = self else { return nil }
+        return type(of: self).createConnectCollectionViewSection()
+    })).then {
+        $0.alwaysBounceHorizontal = true
+        $0.alwaysBounceVertical = false
+    }
+    
+//    private lazy var connectCollectionView: UICollectionView = {
+//        let layout = UICollectionViewFlowLayout()
+////        layout.itemSize = CGSize(width: (view.frame.width - 20 - 15 - 15) / 2, height: 292 - 30)
+//        layout.scrollDirection = .horizontal
+//        layout.sectionInset = UIEdgeInsets(top: 25, left: 15, bottom: 10, right: 15)
+//        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+//        collectionView.isPagingEnabled = true
+//        return collectionView
+//    }()
     
     private lazy var emptyView = EmptyView()
     
@@ -61,7 +71,8 @@ class MapFloatingPanelViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         connectCollectionView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.top.left.right.equalToSuperview()
+            make.height.equalToSuperview().multipliedBy(0.48)
 //            make.edges.equalTo(view.safeAreaLayoutGuide)
         }
         
@@ -72,6 +83,15 @@ class MapFloatingPanelViewController: UIViewController {
     }
     
     //MARK: -Configure
+    private static func createConnectCollectionViewSection() -> NSCollectionLayoutSection? {
+        let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1)))
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(2/3), heightDimension: .fractionalHeight(1)), subitem: item, count: 1)
+        group.contentInsets = NSDirectionalEdgeInsets(top: 30, leading: 10, bottom: 60, trailing: 10)
+        let section = NSCollectionLayoutSection(group: group)
+        section.orthogonalScrollingBehavior = .groupPaging
+        return section
+    }
+    
     private func configureUI() {
         view.backgroundColor = .systemBackground
         _ = [connectCollectionView, emptyView].map{ view.addSubview($0) }
@@ -116,6 +136,7 @@ extension MapFloatingPanelViewController: UICollectionViewDataSource {
             case .who:
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: WhoCollectionViewCell.identifier, for: indexPath) as? WhoCollectionViewCell ?? WhoCollectionViewCell()
                 cell.configureUI(with: "")
+            print("who 되나되나되ㅏ")
                 cell.delegate = self
                 return cell
             case .study:
@@ -148,7 +169,8 @@ extension MapFloatingPanelViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         switch floatingType {
         case .study, .who:
-            return CGSize(width: (view.frame.width - 20 - 15 - 15) / 2, height: 292 - 30)
+            return CGSize(width: collectionView.frame.width / 4 * 3, height: collectionView.frame.height / 5 * 2)
+//            return CGSize(width: (view.frame.width - 20 - 15 - 15) / 2, height: 292 - 30)
         case .searchResult:
             return CGSize(width: collectionView.frame.width, height: 60)
         }
@@ -156,7 +178,7 @@ extension MapFloatingPanelViewController: UICollectionViewDelegateFlowLayout {
 }
 
 extension MapFloatingPanelViewController:  WhoCollectionViewCellDelegate {
-    func didTappedProfileButton() {
+    func didTappedChattingButton() {
         print("didTappedProfileButton")
         let vc = AnonymousProfileController(anonymousProfileModel: ["서울특별시 마포구 서교동", "금융, 엔터테인먼트, 뷰티/패션", "지망생"])
         vc.title = "프로필"

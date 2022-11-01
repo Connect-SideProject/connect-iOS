@@ -48,9 +48,12 @@ class MapController: UIViewController, View {
         // Define corner radius and background color
         appearance.cornerRadius = 20
         appearance.backgroundColor = .clear
-
+        
         // Set the new appearance
         fpc.surfaceView.appearance = appearance
+        fpc.surfaceView.grabberHandle.isHidden = true // FloatingPanel Grabber hidden true
+//        fpc.surfaceView.isUserInteractionEnabled = false // FloatingPanel Scroll enabled false
+        
         return fpc
     }()
     
@@ -256,7 +259,7 @@ extension MapController: ConnectMapDataFuctionality {
                 marker.touchHandler = { [weak self] _ in // 이 부분에 마커, 커스텀뷰에 따라 분기처리해주면 될듯
                     guard let `self` = self else { return false }
                     self.moveCameraUpdate(mapView: mapView, mapCoordinate: mapCoordinate)
-                    let contentViewController = MapFloatingPanelViewController(floatingType: .study)
+                    let contentViewController = MapFloatingPanelViewController(floatingType: .who)
                     self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
                     return true
                 }
@@ -296,7 +299,7 @@ extension MapController: ConnectMapDataFuctionality {
                 guInfoWindow.touchHandler = { [weak self] _ in // 이 부분에 마커, 커스텀뷰에 따라 분기처리해주면 될듯
                     guard let `self` = self else { return false }
                     self.moveCameraUpdate(mapView: mapView, mapCoordinate: mapCoordinate)
-                    let contentViewController = MapFloatingPanelViewController(floatingType: .who)
+                    let contentViewController = MapFloatingPanelViewController(floatingType: .study)
                     self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
                     return false
                 }

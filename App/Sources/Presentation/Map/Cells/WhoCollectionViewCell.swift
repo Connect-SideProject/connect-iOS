@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 
 protocol WhoCollectionViewCellDelegate: AnyObject {
-    func didTappedProfileButton()
+    func didTappedChattingButton()
 }
 
 class WhoCollectionViewCell: UICollectionViewCell {
@@ -42,17 +42,17 @@ class WhoCollectionViewCell: UICollectionViewCell {
         return $0
     }(UIButton())
     
-    private let profileButton: UIButton = {
-        $0.setTitle("프로필", for: .normal)
-        $0.setTitleColor(UIColor.purple, for: .normal)
-        $0.backgroundColor = .white
-        $0.clipsToBounds = true
-        $0.layer.borderWidth = 1
-        $0.layer.borderColor = UIColor.purple.cgColor
-        $0.layer.cornerRadius = 10
-        $0.titleLabel?.font = .systemFont(ofSize: 13)
-        return $0
-    }(UIButton())
+//    private let profileButton: UIButton = {
+//        $0.setTitle("프로필", for: .normal)
+//        $0.setTitleColor(UIColor.purple, for: .normal)
+//        $0.backgroundColor = .white
+//        $0.clipsToBounds = true
+//        $0.layer.borderWidth = 1
+//        $0.layer.borderColor = UIColor.purple.cgColor
+//        $0.layer.cornerRadius = 10
+//        $0.titleLabel?.font = .systemFont(ofSize: 13)
+//        return $0
+//    }(UIButton())
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -70,9 +70,9 @@ class WhoCollectionViewCell: UICollectionViewCell {
         chattingButton.setTitle(nil, for: .normal)
         chattingButton.backgroundColor = nil
         chattingButton.layer.borderWidth = 0
-        profileButton.setTitle(nil, for: .normal)
-        profileButton.backgroundColor = nil
-        profileButton.layer.borderWidth = 0
+//        profileButton.setTitle(nil, for: .normal)
+//        profileButton.backgroundColor = nil
+//        profileButton.layer.borderWidth = 0
     }
     
     override func layoutSubviews() {
@@ -93,26 +93,26 @@ class WhoCollectionViewCell: UICollectionViewCell {
             make.top.equalTo(profileImageView.snp.bottom).offset(5)
             make.left.equalToSuperview().offset(5)
             make.bottom.equalToSuperview().offset(-5)
-            make.width.equalTo((contentView.frame.width - 15) / 2)
+            make.right.equalToSuperview().offset(-5)
         }
         
-        profileButton.snp.makeConstraints { make in
-            make.centerY.equalTo(chattingButton.snp.centerY)
-            make.right.bottom.equalToSuperview().offset(-5)
-            make.left.equalTo(chattingButton.snp.right).offset(5)
-            make.width.equalTo((contentView.frame.width - 15) / 2)
-        }
+//        profileButton.snp.makeConstraints { make in
+//            make.centerY.equalTo(chattingButton.snp.centerY)
+//            make.right.bottom.equalToSuperview().offset(-5)
+//            make.left.equalTo(chattingButton.snp.right).offset(5)
+//            make.width.equalTo((contentView.frame.width - 15) / 2)
+//        }
     }
     
     private func configureUI() {
         contentView.layer.cornerRadius = 10
         contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.black.cgColor
+        contentView.layer.borderColor = UIColor.lightGray.cgColor
         contentView.clipsToBounds = true
         contentView.backgroundColor = .systemBackground
-        [nameLabel, profileImageView, chattingButton, profileButton].forEach{contentView.addSubview($0)}
+        [nameLabel, profileImageView, chattingButton].forEach{contentView.addSubview($0)}
         
-        profileButton.addTarget(self, action: #selector(didTappedProfileButton), for: .touchUpInside)
+//        profileButton.addTarget(self, action: #selector(didTappedProfileButton), for: .touchUpInside)
     }
     
     public func configureUI(with model: String) {
@@ -123,12 +123,12 @@ class WhoCollectionViewCell: UICollectionViewCell {
         chattingButton.backgroundColor = .purple
         chattingButton.layer.borderWidth = 1
         chattingButton.layer.borderColor = UIColor.purple.cgColor
-        profileButton.setTitle("프로필", for: .normal)
-        profileButton.backgroundColor = .white
-        profileButton.layer.borderWidth = 1
+//        profileButton.setTitle("프로필", for: .normal)
+//        profileButton.backgroundColor = .white
+//        profileButton.layer.borderWidth = 1
     }
     
-    @objc private func didTappedProfileButton() {
-        delegate?.didTappedProfileButton()
+    @objc private func didTappedChattingButton() {
+        delegate?.didTappedChattingButton()
     }
 }
