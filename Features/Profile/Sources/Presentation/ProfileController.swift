@@ -17,6 +17,7 @@ import COExtensions
 
 public protocol ProfileDelegate: AnyObject {
   func routeToEditProfile()
+  func routeToSingIn()
 }
 
 /// MY 화면 컨트롤러.
@@ -50,6 +51,28 @@ public final class ProfileController: UIViewController, ReactorKit.View {
       nil
     )
   )
+  
+  private lazy var logoutButton = RoundRutton(
+    cornerRadius: 5,
+    borderColor: .hexC6C6C6
+  ).then {
+    $0.setTitle("로그아웃", for: .normal)
+    $0.setTitleColor(.white, for: .normal)
+    $0.titleLabel?.font = .medium(size: 16)
+    $0.backgroundColor = .hexC6C6C6
+    $0.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+  }
+  
+  private lazy var signOutButton = RoundRutton(
+    cornerRadius: 5,
+    borderColor: .white
+  ).then {
+    $0.setTitle("회원탈퇴", for: .normal)
+    $0.setTitleColor(.red, for: .normal)
+    $0.titleLabel?.font = .regular(size: 14)
+    $0.backgroundColor = .white
+    $0.addTarget(self, action: #selector(didTapSignOutButton), for: .touchUpInside)
+  }
   
   private let flexContainer = UIView()
   
@@ -124,9 +147,18 @@ public final class ProfileController: UIViewController, ReactorKit.View {
     reactor.state
       .compactMap { $0.profileViewItems }
       .observe(on: MainScheduler.instance)
-      .skip(2)
       .bind { [weak self] items in
         self?.updateProfileListViews(items: items)
+      }.disposed(by: disposeBag)
+    
+    reactor.pulse(\.$route)
+      .compactMap { $0 }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] route in
+        switch route {
+        case .routeToSignIn:
+          self?.delegate?.routeToSingIn()
+        }
       }.disposed(by: disposeBag)
     
     reactor.state
@@ -150,7 +182,6 @@ extension ProfileController {
     view.addSubview(flexContainer)
     
     flexContainer.flex
-      .maxHeight(view.bounds.height / 1.5)
       .justifyContent(.spaceBetween)
       .define { flex in
         flex.addItem(profileView)
@@ -178,6 +209,23 @@ extension ProfileController {
         flex.addItem(skillContainerView)
           .marginHorizontal(20)
           .markDirty()
+        
+        flex.addItem(logoutButton)
+          .margin(20)
+          .height(40)
+        
+        flex.addItem()
+          .direction(.row)
+          .define { flex in
+            flex.addItem()
+              .grow(1)
+            flex.addItem(signOutButton)
+              .margin(20)
+              .shrink(1)
+          }
+        
+        flex.addItem()
+          .grow(1)
       }
   }
   
@@ -210,6 +258,14 @@ extension ProfileController {
         view.update(item: item)
       }
     }
+  }
+  
+  @objc private func didTapLogoutButton() {
+    reactor?.action.onNext(.requestLogout)
+  }
+  
+  @objc private func didTapSignOutButton() {
+    reactor?.action.onNext(.requestSignOut)
   }
 }
 

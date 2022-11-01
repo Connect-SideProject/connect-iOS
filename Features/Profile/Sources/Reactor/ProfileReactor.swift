@@ -10,9 +10,11 @@ import Foundation
 
 import ReactorKit
 import RxCocoa
-import CODomain
 import COCommonUI
+import CODomain
+import COExtensions
 import COManager
+import CONetwork
 
 /// Profile
 enum ProfileSubtitle: String, CustomStringConvertible {
@@ -36,29 +38,49 @@ enum ProfileSubtitle: String, CustomStringConvertible {
 
 public typealias ProfileViewItem = (title: String, content: String)
 
-public final class ProfileReactor: Reactor {
+public final class ProfileReactor: Reactor, ErrorHandlerable {
+  
+  public enum Route {
+    case routeToSignIn
+  }
+  
   public enum Action {
     /// 프로필 요청
     case requestProfile
+    
+    /// 로그아웃 요청
+    case requestLogout
+    
+    /// 회원탈퇴 요청
+    case requestSignOut
   }
   
   public enum Mutation {
     case setProfile(Profile)
     case setProfileViewItems([ProfileViewItem])
+    case setRoute(Route?)
     case setMessage(MessageType?)
   }
   
   public struct State {
     var profile: Profile?
     var profileViewItems: [ProfileViewItem]?
+    @Pulse var route: Route?
     var message: MessageType?
   }
   
   public var initialState: State = .init()
   
+  public lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { [weak self] error in
+    self?.userService.remove()
+    return .just(.setMessage(.message(error.localizedDescription)))
+  }
+  
+  private let apiService: ApiService
   private let userService: UserService
   
-  public init(userService: UserService) {
+  public init(apiService: ApiService, userService: UserService) {
+    self.apiService = apiService
     self.userService = userService
   }
   
@@ -85,7 +107,7 @@ public final class ProfileReactor: Reactor {
           ]
           
           // 뷰에서 보여지는 최종 형태로 변환.
-          let profileViewItems: [ProfileViewItem] = items.map { (subtitle: $0.description, content: $1) }
+          let profileViewItems: [ProfileViewItem] = items.map { (title: $0.description, content: $1) }
           
           let setProfile: Observable<Mutation> = Observable.just(.setProfile(profile))
           let setProfileViewItems: Observable<Mutation> = Observable.just(.setProfileViewItems(profileViewItems))
@@ -95,6 +117,20 @@ public final class ProfileReactor: Reactor {
           // 미로그인과 그외 에러 구분처리 필요.
           return .just(.setMessage(.needSignIn))
         }
+      
+    case .requestLogout:
+      return apiService.request(endPoint: .init(path: .logout))
+        .flatMap { [weak self] (data: EmptyResponse) -> Observable<Mutation> in
+          self?.userService.remove()
+          return .just(.setRoute(.routeToSignIn))
+        }
+      
+    case .requestSignOut:
+      return apiService.request(endPoint: .init(path: .signOut))
+        .flatMap { [weak self] (data: EmptyResponse) -> Observable<Mutation> in
+          self?.userService.remove()
+          return .just(.setRoute(.routeToSignIn))
+        }.catch(errorHandler)
     }
   }
   
@@ -105,6 +141,8 @@ public final class ProfileReactor: Reactor {
       newState.profile = profile
     case let .setProfileViewItems(profileViewItems):
       newState.profileViewItems = profileViewItems
+    case let .setRoute(route):
+      newState.route = route
     case let .setMessage(message):
       newState.message = message
     }
