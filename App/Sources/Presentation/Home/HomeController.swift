@@ -202,14 +202,13 @@ public final class HomeController: UIViewController {
     
     
     private func configure() {
-        let tabbarHeight: CGFloat = tabBarController?.tabBar.frame.size.height ?? 0.0
         
         self.view.bringSubviewToFront(self.homeIndicatorView)
         self.view.addSubview(homeScrollView)
         self.view.addSubview(homeNavgaionBar)
         homeScrollView.addSubview(homeScrollContainerView)
         
-        _ = [collectionView, floatingButton, homeIndicatorView, selectedLineView,releaseCollectionView].map {
+        _ = [collectionView, homeIndicatorView, selectedLineView,releaseCollectionView, floatingButton].map {
             homeScrollContainerView.addSubview($0)
         }
         
@@ -244,7 +243,7 @@ public final class HomeController: UIViewController {
         
         floatingButton.snp.makeConstraints {
             $0.right.equalToSuperview().offset(-20)
-            $0.bottom.equalToSuperview().offset(-(tabbarHeight + 12))
+            $0.bottom.equalToSuperview().offset(-12)
             $0.width.height.equalTo(75)
         }
         
