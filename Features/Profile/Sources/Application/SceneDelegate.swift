@@ -54,6 +54,10 @@ extension SceneDelegate: ProfileDelegate {
     controller.delegate = self
     navigationController.pushViewController(controller, animated: true)
   }
+  
+  func routeToSingIn() {
+    
+  }
 }
 
 extension SceneDelegate: ProfileEditDelegate {

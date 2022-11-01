@@ -21,7 +21,7 @@ public protocol SignUpDelegate: AnyObject {
 public final class SignUpController: UIViewController, ReactorKit.View {
   
   enum Height {
-    static let scrollView: CGFloat = 700 + (UIDevice.current.hasNotch ? 0 : 240)
+    static let scrollView: CGFloat = 720 + (UIDevice.current.hasNotch ? 0 : 240)
   }
   
   private let nicknameContainerView = DescriptionContainerView(
@@ -35,7 +35,7 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     type: .customWithAttributed(
       "활동지역 *".setLastWord(color: .red),
       CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
-      nil
+      "마이>설정 에서 공개여부를 선택할 수 있어요."
     )
   )
   

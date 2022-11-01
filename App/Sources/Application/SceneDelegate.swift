@@ -25,6 +25,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let scene = (scene as? UIWindowScene) else { return }
     window = .init(windowScene: scene)
     
+    routeToSplash()
+    
+    NotificationCenter.default.add(
+      observer: self,
+      selector: #selector(routeToSplash),
+      type: .routeToSignIn
+    )
+  }
+}
+
+extension SceneDelegate {
+  @objc func routeToSplash() {
     let controller = SplashController()
     controller.reactor = .init()
     controller.delegate = self

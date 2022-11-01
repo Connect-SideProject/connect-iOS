@@ -134,6 +134,10 @@ extension MainController: ProfileDelegate {
     controller.delegate = self
     profileNavigationController.pushViewController(controller, animated: true)
   }
+  
+  func routeToSingIn() {
+    NotificationCenter.default.post(type: .expiredSession)
+  }
 }
 
 extension MainController: ProfileEditDelegate {
