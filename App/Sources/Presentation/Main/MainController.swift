@@ -64,9 +64,8 @@ extension MainController {
       selectedImage: .init(named: "ic_home_active")?.withRenderingMode(.alwaysOriginal)
     )
     
-    /// 채팅 화면.
-    let messageController = MessaeController()
-    messageController.tabBarItem = .init(
+    let chatListController = ChatListController(reactor: .init())
+      chatListController.tabBarItem = .init(
       title: "main.tabItem.message".localized(),
       image: .init(named: "ic_chat_inactive")?.withRenderingMode(.alwaysOriginal),
       selectedImage: .init(named: "ic_chat_active")?.withRenderingMode(.alwaysOriginal)
