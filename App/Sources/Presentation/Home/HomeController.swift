@@ -38,6 +38,7 @@ public final class HomeController: UIViewController {
         $0.backgroundColor = .clear
     }
     
+    private let homeNavgaionBar: HomeNavigationBarView = HomeNavigationBarView()
     
     private let selectedLineView: UIView = UIView().then {
         $0.backgroundColor = UIColor.hex06C755
@@ -84,6 +85,7 @@ public final class HomeController: UIViewController {
         $0.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
         $0.register(HomeReleaseStudyListCell.self, forCellWithReuseIdentifier: "HomeReleaseStudyListCell")
         $0.showsVerticalScrollIndicator = false
+        $0.isScrollEnabled = true
         $0.showsHorizontalScrollIndicator = false
     }
     
@@ -96,7 +98,6 @@ public final class HomeController: UIViewController {
                 guard let hotListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeReleaseStudyListCell", for: indexPath) as? HomeReleaseStudyListCell else { return UICollectionViewCell() }
                 
                 hotListCell.reactor = cellReactor
-                
                 return hotListCell
                 
             }
@@ -189,8 +190,7 @@ public final class HomeController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = .white
       
-        self.tabBarController?.navigationItem.hidesBackButton = true
-        self.tabBarController?.navigationController?.setNavigationBarHidden(false, animated: false)
+        self.navigationController?.setNavigationBarHidden(false, animated: false)
       
         configure()
     }
@@ -206,15 +206,22 @@ public final class HomeController: UIViewController {
         
         self.view.bringSubviewToFront(self.homeIndicatorView)
         self.view.addSubview(homeScrollView)
+        self.view.addSubview(homeNavgaionBar)
         homeScrollView.addSubview(homeScrollContainerView)
         
         _ = [collectionView, floatingButton, homeIndicatorView, selectedLineView,releaseCollectionView].map {
             homeScrollContainerView.addSubview($0)
         }
         
+        homeNavgaionBar.snp.makeConstraints {
+            $0.top.equalTo(self.view.safeAreaLayoutGuide.snp.topMargin)
+            $0.left.right.equalToSuperview()
+            $0.height.equalTo(47)
+        }
         
         homeScrollView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.equalTo(homeNavgaionBar.snp.bottom)
+            $0.left.right.bottom.equalToSuperview()
         }
         
         homeScrollContainerView.snp.makeConstraints {
