@@ -15,7 +15,7 @@ import ReactorKit
 final class ChatListController: ChatBaseController<ChatListController.Reactor> {
     private let tableView = UITableView()
     
-    override func defineLayout() {
+    override func setupContainer() {
         
     }
     

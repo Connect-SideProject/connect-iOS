@@ -11,15 +11,16 @@ import RxSwift
 import ReactorKit
 import RxRelay
 
-private protocol CodeBaseType {
+private protocol FlexLayoutType {
     func setup()
-    func defineLayout()
+    func setupContainer()
     func setAttrs()
+    func layout()
 }
 
-extension CodeBaseType {
+extension FlexLayoutType {
     func setup() {
-        self.defineLayout()
+        self.setupContainer()
         self.setAttrs()
     }
 }
@@ -29,8 +30,11 @@ private protocol RxBaseType {
     func clearBag()
 }
 
-class ChatBaseController<T: ReactorKit.Reactor>: UIViewController, CodeBaseType, ReactorKit.View, RxBaseType {
+class ChatBaseController<T: ReactorKit.Reactor>: UIViewController, FlexLayoutType, ReactorKit.View, RxBaseType {
     typealias Reactor = T
+    
+    let rootContainer = UIView()
+    
     var reload = PublishRelay<Void>()
     var disposeBag: DisposeBag = .init()
     
@@ -49,8 +53,16 @@ class ChatBaseController<T: ReactorKit.Reactor>: UIViewController, CodeBaseType,
         super.init(coder: coder)
     }
     
-    func defineLayout() { }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.layout()
+    }
+    
+    func setupContainer() {
+        self.view.addSubview(self.rootContainer)
+    }
     func setAttrs() { }
+    func layout() { }
     func bind(reactor: T) { }
     func clearBag() {
         self.disposeBag = .init()
