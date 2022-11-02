@@ -91,7 +91,7 @@ extension MainController {
     self.viewControllers = [
       homeController,
       mapController,
-      messageController,
+      chatListController,
       profileNavigationController
     ]
   }
