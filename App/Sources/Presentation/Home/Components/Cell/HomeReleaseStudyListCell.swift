@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Then
 import ReactorKit
+import RxCocoa
 
 
 /// 홈 Hot 게시글 셀
@@ -57,12 +58,6 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         $0.image = UIImage(named: "home_studylist_bookmark")
     }
     
-    private lazy var releaseBookMarkStackView: UIStackView = UIStackView().then {
-        $0.axis = .horizontal
-        $0.spacing = 5
-        $0.addArrangedSubview(releaseBookMarkContainerView)
-        $0.addArrangedSubview(releaseBookMarkCountLabel)
-    }
     
     private let releaseTitleLabel: UILabel = UILabel().then {
         $0.textColor = .black
@@ -75,7 +70,8 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
     private let releaseSubTitleLabel: UILabel = UILabel().then {
         $0.textColor = .black
         $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        $0.numberOfLines = 4
+        $0.numberOfLines = 0
+        $0.sizeToFit()
         $0.textAlignment = .left
         $0.lineBreakMode = .byTruncatingTail
     }
@@ -92,14 +88,15 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
     }
     
     private let releaseMangerConfirmView: UIView = UIView().then {
-        $0.backgroundColor = .hex3A3A3A
+        $0.backgroundColor = .hex028236
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 5
     }
     
     private let releaseMangerConfirmTitleLabel: UILabel = UILabel().then {
         $0.textColor = .white
-        $0.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        $0.font = .boldSystemFont(ofSize: 16)
+        $0.text = "담당자와 채팅하기"
         $0.textAlignment = .center
     }
     
@@ -126,10 +123,13 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         self.contentView.addSubview(releaseContainerView)
         
         releaseStateContainerView.addSubview(releaseStateLabel)
-        releaseBookMarkContainerView.addSubview(releaseBookMarkImageView)
         releaseMangerConfirmView.addSubview(releaseMangerConfirmTitleLabel)
         
-        _ = [releaseTitleLabel,releaseSubTitleLabel,releaseBookMarkStackView, releaseStateContainerView, releaseMemberStateLabel, releaseMemberStateImageView,releaseMangerConfirmView ].map {
+        _ = [releaseBookMarkCountLabel, releaseBookMarkImageView].map {
+            self.releaseBookMarkContainerView.addSubview($0)
+        }
+        
+        _ = [releaseTitleLabel,releaseSubTitleLabel,releaseBookMarkContainerView, releaseStateContainerView, releaseMemberStateLabel, releaseMemberStateImageView,releaseMangerConfirmView ].map {
             self.releaseContainerView.addSubview($0)
         }
         
@@ -145,17 +145,24 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         }
         
         releaseStateLabel.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.edges.equalToSuperview().inset(3)
+        }
+        
+        releaseBookMarkContainerView.snp.makeConstraints {
+            $0.right.equalToSuperview().offset(-20)
+            $0.top.equalTo(15)
+            $0.height.equalTo(20)
         }
         
         releaseBookMarkImageView.snp.makeConstraints {
             $0.width.height.equalTo(20)
+            $0.top.right.equalToSuperview()
         }
         
-        releaseBookMarkStackView.snp.makeConstraints {
-            $0.right.equalToSuperview().offset(-20)
-            $0.top.equalTo(releaseStateContainerView)
-            $0.centerY.equalToSuperview()
+        releaseBookMarkCountLabel.snp.makeConstraints {
+            $0.height.equalTo(17)
+            $0.right.equalTo(releaseBookMarkImageView.snp.left).offset(-5)
+            $0.centerY.equalTo(releaseBookMarkImageView)
         }
         
         releaseTitleLabel.snp.makeConstraints {
@@ -168,11 +175,10 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
             $0.top.equalTo(releaseTitleLabel.snp.bottom).offset(6)
             $0.left.equalTo(releaseTitleLabel)
             $0.right.equalToSuperview().offset(-16)
-            $0.centerY.equalToSuperview()
         }
         
         releaseMemberStateImageView.snp.makeConstraints {
-            $0.top.equalTo(releaseSubTitleLabel.snp.bottom).offset(10)
+            $0.bottom.equalTo(releaseMangerConfirmView.snp.top).offset(-18)
             $0.left.equalTo(releaseSubTitleLabel)
             $0.width.height.equalTo(16)
         }
@@ -210,6 +216,35 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
             .observe(on: MainScheduler.instance)
             .bind(to: releaseTitleLabel.rx.text)
             .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.releaseModel.releaseisEnd }
+            .do(onNext:{ _ in
+                self.releaseStateLabel.text = "모집중"
+            }).map { _ in UIColor.hex05A647 }
+            .bind(to: self.releaseStateContainerView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.releaseModel.releaseisEnd == false }
+            .do(onNext:{ _ in
+                self.releaseStateLabel.text = "모집완료"
+            }).map { _ in UIColor.hex8E8E8E }
+            .bind(to: self.releaseStateContainerView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .map { String($0.releaseModel.releaseBookMark) }
+            .bind(to: self.releaseBookMarkCountLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.releaseModel.releaseStudyInfo }
+            .bind(to: self.releaseSubTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        
         
     }
     
