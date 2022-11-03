@@ -84,9 +84,16 @@ public final class HomeController: UIViewController {
         
     }
     
+    private let releaseHeaderTitleLabel: UILabel = UILabel().then {
+        $0.textColor = .black
+        $0.numberOfLines = 1
+        $0.sizeToFit()
+        $0.text = "실시간 HOT 게시글"
+        $0.font = .boldSystemFont(ofSize: 20)
+    }
+    
     private lazy var releaseCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: releaseFlowLayout).then {
         $0.backgroundColor = .hexF9F9F9
-        $0.register(HomeUserPostHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView")
         $0.register(HomeReleaseStudyListCell.self, forCellWithReuseIdentifier: "HomeReleaseStudyListCell")
         $0.showsVerticalScrollIndicator = false
         $0.isScrollEnabled = true
@@ -106,20 +113,7 @@ public final class HomeController: UIViewController {
                 return hotListCell
                 
             }
-        }, configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
-            switch kind {
-            case UICollectionView.elementKindSectionHeader:
-                switch dataSource[indexPath.section] {
-                case .hotMenu:
-                    guard let hotListHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeUserPostHeaderView", for: indexPath) as? HomeUserPostHeaderView else { return UICollectionReusableView() }
-                    
-                    return hotListHeaderView
-                }
-            default:
-                return UICollectionReusableView()
-            }
         })
-        
     }
     
     
@@ -212,6 +206,7 @@ public final class HomeController: UIViewController {
         self.view.addSubview(homeScrollView)
         self.view.addSubview(homeNavgaionBar)
         homeScrollView.addSubview(homeScrollContainerView)
+        self.view.addSubview(releaseHeaderTitleLabel)
         
         _ = [collectionView, homeIndicatorView, selectedLineView,releaseCollectionView, floatingButton].map {
             homeScrollContainerView.addSubview($0)
@@ -255,6 +250,13 @@ public final class HomeController: UIViewController {
         homeIndicatorView.snp.makeConstraints {
             $0.center.equalToSuperview()
             $0.width.height.equalTo(24)
+        }
+        
+        releaseHeaderTitleLabel.snp.makeConstraints {
+            $0.top.equalTo(releaseCollectionView.snp.top).offset(25)
+            $0.right.equalToSuperview()
+            $0.height.equalTo(22)
+            $0.left.equalToSuperview().inset(18)
         }
         
     }
@@ -331,18 +333,11 @@ extension HomeController {
 extension HomeController: UICollectionViewDelegateFlowLayout {
     
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        if collectionView == self.collectionView {
-            switch self.dataSource[section] {
-            case .field:
-                return CGSize(width: collectionView.frame.size.width, height: 44)
-            default:
-                return .zero
-            }
-        } else {
-            switch self.releaseDataSource[section] {
-            case .hotMenu:
-                return CGSize(width: releaseCollectionView.bounds.size.width, height: 22)
-            }
+        switch self.dataSource[section] {
+        case .field:
+            return CGSize(width: collectionView.frame.size.width, height: 44)
+        default:
+            return .zero
         }
     }
     
