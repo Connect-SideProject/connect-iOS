@@ -11,14 +11,15 @@ import UIKit
 import RxSwift
 import RxDataSources
 import ReactorKit
+import PinLayout
 import FlexLayout
 import COExtensions
 
-final class ChatListController: ChatBaseController<ChatListController.Reactor> {
+public final class ChatListController: ChatBaseController<ChatListController.Reactor> {
     
     private let tableView = UITableView()
     
-    override func setupContainer() {
+    public override func setupContainer() {
         super.setupContainer()
         
         self.rootContainer.flex.define { [weak self] in
@@ -28,27 +29,27 @@ final class ChatListController: ChatBaseController<ChatListController.Reactor> {
         }
     }
     
-    override func setAttrs() {
+    public override func setAttrs() {
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.rootContainer.backgroundColor = .yellow
         self.tableView.backgroundColor = .blue
     }
     
-    override func layout() {
+    public override func layout() {
         self.rootContainer.pin.all()
         let safe = UIApplication.keyWindow?.safeAreaInsets
         self.rootContainer.flex.margin(safe ?? self.view.safeAreaInsets).layout()
     }
     
-    override func bind(reactor: Reactor) {
+    public override func bind(reactor: Reactor) {
         
     }
 }
 
 extension ChatListController {
-    final class Reactor: ReactorKit.Reactor {
-        var initialState: State = .init()
-        enum Action { }
-        struct State { }
+    final public class Reactor: ReactorKit.Reactor {
+        public var initialState: State = .init()
+        public enum Action { }
+        public struct State { }
     }
 }
