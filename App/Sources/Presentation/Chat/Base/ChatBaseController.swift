@@ -40,13 +40,17 @@ class ChatBaseController<T: ReactorKit.Reactor>: UIViewController, FlexLayoutTyp
     
     init(reactor: T? = nil) {
         super.init(nibName: nil, bundle: nil)
-        self.setup()
-        self.reactor = reactor
+        DispatchQueue.main.async {
+            self.setup()
+            self.reactor = reactor
+        }
     }
     
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
-        self.setup()
+        DispatchQueue.main.async {
+            self.setup()
+        }
     }
 
     required init?(coder: NSCoder) {
