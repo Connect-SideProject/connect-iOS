@@ -9,6 +9,7 @@
 import UIKit
 
 import Profile
+import Chat
 import COCommonUI
 import COManager
 import CONetwork
@@ -64,9 +65,8 @@ extension MainController {
       selectedImage: .init(named: "ic_home_active")?.withRenderingMode(.alwaysOriginal)
     )
     
-    /// 채팅 화면.
-    let messageController = MessaeController()
-    messageController.tabBarItem = .init(
+    let chatListController = ChatListDIContainer().makeVC()
+      chatListController.tabBarItem = .init(
       title: "main.tabItem.message".localized(),
       image: .init(named: "ic_chat_inactive")?.withRenderingMode(.alwaysOriginal),
       selectedImage: .init(named: "ic_chat_active")?.withRenderingMode(.alwaysOriginal)
@@ -92,7 +92,7 @@ extension MainController {
     self.viewControllers = [
       homeController,
       mapController,
-      messageController,
+      chatListController,
       profileNavigationController
     ]
   }
