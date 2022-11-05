@@ -10,25 +10,7 @@ import UIKit
 import RxSwift
 import ReactorKit
 import RxRelay
-
-private protocol FlexLayoutType {
-    func setup()
-    func setupContainer()
-    func setAttrs()
-    func layout()
-}
-
-extension FlexLayoutType {
-    func setup() {
-        self.setupContainer()
-        self.setAttrs()
-    }
-}
-
-private protocol RxBaseType {
-    var disposeBag: DisposeBag { get set }
-    func clearBag()
-}
+import COCommonUI
 
 public class ChatBaseController<T: ReactorKit.Reactor>: UIViewController, FlexLayoutType, ReactorKit.View, RxBaseType {
     public typealias Reactor = T
