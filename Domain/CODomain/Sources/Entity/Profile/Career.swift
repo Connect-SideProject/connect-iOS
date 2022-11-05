@@ -36,6 +36,19 @@ public enum Career: String, Codable, CustomStringConvertible {
     }
   }
   
+  public init?(description: String) {
+    switch description {
+    case "지망생":
+      self = .aspirant
+    case "주니어":
+      self = .junior
+    case "시니어":
+      self = .senior
+    default:
+      return nil
+    }
+  }
+  
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer().decode(String.self)
     

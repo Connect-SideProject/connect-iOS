@@ -9,35 +9,68 @@
 import UIKit
 
 import Profile
+import Chat
+import COCommonUI
 import COManager
 import CONetwork
+
+/// 코디네이터 인터페이스
+protocol BaseCoordinator: AnyObject {
+  var presenter: UINavigationController {get set}
+  var childrenCoordinator: [BaseCoordinator] {get set}
+}
 
 /// 하단 탭바가 포함된 화면 컨트롤러.
 final class MainController: UITabBarController {
   
-  private var profileNavigationController: UINavigationController!
+  private var profileNavigationController: CONavigationViewController!
+  
+  init() {
+    super.init(nibName: nil, bundle: nil)
+  }
+  
+  required init?(coder: NSCoder) {
+    super.init(coder: coder)
+  }
   
   override func viewDidLoad() {
     super.viewDidLoad()
     
+    setViewContaollers()
+    setupTabBar()
+  }
 }
 
-/// MainFlow DI
-class MainFlow: ViewControllerFlow {
+extension MainController {
+  /// 탭바 메뉴당 화면 설정(추후 아이콘 등 설정).
+  private func setViewContaollers() {
     
-    func makeMainController() -> MainController {
-        return MainController(viewFlow: self)
-    }
-        
-    func makeHomeCoordinator() -> HomeCoordinator {
-        return HomeCoordinator(presenter: UINavigationController(rootViewController: makeHomeController()))
-    }
+    /// 지도 화면.
+    let mapController = MapController()
+    mapController.tabBarItem = .init(
+      title: "main.tabItem.map".localized(),
+      image: .init(named: "ic_map_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_map_active")?.withRenderingMode(.alwaysOriginal)
+    )
     
-    func makeHomeController() -> HomeController {
-        return HomeController(reactor: HomeViewReactor())
-    }
+    let homeDIContainer = HomeDIContainer(
+      homeApiService: ApiManager.shared
+    )
     
-
+    /// 홈 화면
+    let homeController = homeDIContainer.makeHomeController()
+    homeController.tabBarItem = .init(
+      title: "main.tabItem.home".localized(),
+      image: .init(named: "ic_home_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_home_active")?.withRenderingMode(.alwaysOriginal)
+    )
+    
+    let chatListController = ChatListDIContainer().makeVC()
+      chatListController.tabBarItem = .init(
+      title: "main.tabItem.message".localized(),
+      image: .init(named: "ic_chat_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_chat_active")?.withRenderingMode(.alwaysOriginal)
+    )
     
     /// MY 화면.
     let profileDIContainer = ProfileDIContainer(
@@ -47,96 +80,44 @@ class MainFlow: ViewControllerFlow {
     
     let profileController = profileDIContainer.makeController()
     profileController.delegate = self
-    profileNavigationController = UINavigationController(
+    profileNavigationController = CONavigationViewController(
       rootViewController: profileController
     )
     profileNavigationController.tabBarItem = .init(
       title: "main.tabItem.profile".localized(),
-      image: nil,
-      selectedImage: nil
+      image: .init(named: "ic_my_inactive")?.withRenderingMode(.alwaysOriginal),
+      selectedImage: .init(named: "ic_my_active")?.withRenderingMode(.alwaysOriginal)
     )
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
+    self.viewControllers = [
+      homeController,
+      mapController,
+      chatListController,
+      profileNavigationController
+    ]
+  }
+  
+  /// 탭바 커스텀 설정.
+  private func setupTabBar() {
+    let appearance = UITabBarAppearance()
+    appearance.backgroundColor = .white
+    appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+      .font: UIFont.semiBold(size: 12),
+      .foregroundColor: UIColor.hexC6C6C6
+    ]
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        setViewContaollers()
-        setupTabBar()
-    }
-}
-
-extension MainController {
-    /// 탭바 메뉴당 화면 설정(추후 아이콘 등 설정).
-    private func setViewContaollers() {
-        
-        /// 지도 화면.
-        let mapController = MapController()
-        mapController.tabBarItem = .init(
-            title: "main.tabItem.map".localized(),
-            image: nil,
-            selectedImage: nil
-        )
-        
-        /// 채팅 화면.
-        let messageController = MessaeController()
-        messageController.tabBarItem = .init(
-            title: "main.tabItem.message".localized(),
-            image: nil,
-            selectedImage: nil
-        )
-        
-        /// MY 화면.
-        let profileController = ProfileController()
-        profileController.tabBarItem = .init(
-            title: "main.tabItem.profile".localized(),
-            image: nil,
-            selectedImage: nil
-        )
-        
-        guard let coordinator = viewFlow?.makeHomeCoordinator() else { return }
-        
-        self.viewControllers = [
-            coordinator.presenter,
-            mapController,
-            messageController,
-            profileController
-        ]
-
-        /// 홈 화면.
-        coordinator.presenter
-            .tabBarItem = .init(
-                title: "main.tabItem.home".localized(),
-                image: nil,
-                selectedImage: nil
-            )
-    }
+    appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+      .font: UIFont.regular(size: 12),
+      .foregroundColor: UIColor.hex3A3A3A
+    ]
     
-    /// 탭바 커스텀 설정.
-    private func setupTabBar() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .white
-        
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-            .foregroundColor: UIColor.gray
-        ]
-        
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-            .foregroundColor: UIColor.blue
-        ]
-        
-        self.tabBar.standardAppearance = appearance
-        self.tabBar.scrollEdgeAppearance = appearance
-        
-        self.tabBar.backgroundColor = .white
-        self.tabBar.layer.borderWidth = 1
-        self.tabBar.layer.borderColor = UIColor.white.cgColor
-    }
+    self.tabBar.standardAppearance = appearance
+    self.tabBar.scrollEdgeAppearance = appearance
+    
+    self.tabBar.tintColor = .hexEDEDED
+    self.tabBar.layer.borderWidth = 1
+    self.tabBar.layer.borderColor = UIColor.white.cgColor
+  }
 }
 
 extension MainController: ProfileDelegate {
@@ -144,6 +125,7 @@ extension MainController: ProfileDelegate {
     let container = ProfileEditDIContainer(
       apiService: ApiManager.shared,
       userService: UserManager.shared,
+      addressService: AddressManager.shared,
       interestService: InterestManager.shared,
       roleSkillsService: RoleSkillsManager.shared
     )
@@ -151,6 +133,10 @@ extension MainController: ProfileDelegate {
     let controller = container.makeController()
     controller.delegate = self
     profileNavigationController.pushViewController(controller, animated: true)
+  }
+  
+  func routeToSingIn() {
+    NotificationCenter.default.post(type: .expiredSession)
   }
 }
 

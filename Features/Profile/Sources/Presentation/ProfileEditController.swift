@@ -22,6 +22,10 @@ public protocol ProfileEditDelegate: AnyObject {
 
 public final class ProfileEditController: UIViewController, ReactorKit.View {
   
+  enum Height {
+    static let scrollView: CGFloat = 610 + (UIDevice.current.hasNotch ? 0 : 150)
+  }
+  
   public typealias Reactor = ProfileEditReactor
   
   private lazy var profileView = ProfileView(
@@ -31,24 +35,33 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     $0.delegate = self
   }
   
-  private let roleContainerView = DescriptionContainerView(
-    type: .custom("원하는 역할", CheckBoxContainerView(
-      titles: [
-        RoleType.developer.description,
-        RoleType.designer.description,
-        RoleType.planner.description,
-        RoleType.marketer.description
-      ])
+  private var roleTitles: [String] = []
+  private lazy var roleContainerView = DescriptionContainerView(
+    type: .custom(
+      "원하는 역할",
+      RoundSelectionButtonView(
+        titles: roleTitles
+      ),
+      nil
     )
   )
   
-  private let locationContainerView = DescriptionContainerView(
-    type: .textField("활동지역", "활동지역을 검색해주세요.")
+  private lazy var addressContainerView = DescriptionContainerView(
+    type: .customWithAttributed(
+      "활동지역 *".setLastWord(color: .red),
+      CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
+      nil
+    )
   )
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", RoundSelectionButtonView(titles: interestTitles)
+    type: .custom(
+      "관심분야",
+      RoundSelectionButtonView(
+        titles: interestTitles
+      ),
+      nil
     )
   )
   
@@ -57,13 +70,17 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   )
   
   private let periodContainerView = DescriptionContainerView(
-    type: .custom("경력기간", CheckBoxContainerView(
-      titles: [
-        Career.aspirant.description,
-        Career.junior.description,
-        Career.senior.description
-      ],
-      eventType: .radio)
+    type: .custom(
+      "경력기간",
+      CheckBoxContainerView(
+        titles: [
+          Career.aspirant.description,
+          Career.junior.description,
+          Career.senior.description
+        ],
+        eventType: .radio
+      ),
+      nil
     )
   )
   
@@ -71,15 +88,19 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   private lazy var skillContainerView = DescriptionContainerView(
     type: .custom(
       "보유 스킬",
-      CastableContainerView(views: skillsViews)
+      CastableContainerView(views: skillsViews),
+      nil
     )
   )
   
-  private lazy var saveButton = RoundRutton().then {
+  private lazy var saveButton = RoundRutton(
+    cornerRadius: 5,
+    borderColor: .hex028236
+  ).then {
     $0.setTitle("저장", for: .normal)
     $0.setTitleColor(.white, for: .normal)
-    $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-    $0.backgroundColor = .lightGray
+    $0.titleLabel?.font = .medium(size: 16)
+    $0.backgroundColor = .hex028236
     $0.addTarget(self, action: #selector(didTapSaveButton), for: .touchUpInside)
   }
   
@@ -97,6 +118,11 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     super.viewDidLoad()
     
     configureUI()
+    bindEvent()
+  }
+  
+  @objc func dismissKeyboards() {
+    portfolioContainerView.textField.resignFirstResponder()
   }
   
   public override func viewDidLayoutSubviews() {
@@ -108,7 +134,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     
     containerScrollView.contentSize = .init(
       width: view.bounds.size.width,
-      height: view.bounds.size.height + 560
+      height: view.bounds.size.height + Height.scrollView
     )
     
     flexContainer.pin
@@ -132,6 +158,7 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     
     reactor.state
       .compactMap { $0.interestList }
+      .filter { !$0.isEmpty }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] interestList in
         self?.interestTitles = interestList.map { $0.name }
@@ -139,8 +166,10 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     
     reactor.state
       .compactMap { $0.roleSkillsList }
+      .filter { !$0.isEmpty }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] roleSkillsList in
+        self?.roleTitles = roleSkillsList.map { $0.roleName }
         self?.skillsViews = roleSkillsList.map {
           RoundSelectionButtonView(
             titles: $0.skills.map { $0.name },
@@ -149,8 +178,8 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
         }
       }.disposed(by: disposeBag)
     
-    reactor.state
-      .compactMap { $0.profile }
+    reactor.pulse(\.$profile)
+      .compactMap { $0 }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] profile in
         self?.updateViews(profile: profile)
@@ -160,13 +189,14 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
       .compactMap { $0.imageURL }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] imageURL in
+          guard let `self` = self else { return }
         Task {
-          await self?.profileView.profileImageView.setImage(url: imageURL)
+            await self.profileView.profileImageView.setImage(url: imageURL)
         }
       }.disposed(by: disposeBag)
     
-    reactor.state
-      .compactMap { $0.route }
+    reactor.pulse(\.$route)
+      .compactMap { $0 }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] in
         switch $0 {
@@ -178,6 +208,23 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
           .confirmHandler = { [weak self] in
             self?.delegate?.routeToBack()
           }
+          
+        case let .bottomSheet(items):
+          let bottomSheet = BottomSheetController(
+            type: .address(items)
+          )
+          bottomSheet.modalPresentationStyle = .overFullScreen
+          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex in
+            if let item = items[safe: selectedIndex] {
+              let text = item.value.법정동명
+              reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+              
+              if let button = self?.addressContainerView.customView as? CastableButton {
+                button.setTitle("서울 \(text)", for: .normal)
+              }
+            }
+          }
+          self?.present(bottomSheet, animated: true)
         }
       }.disposed(by: disposeBag)
     
@@ -185,11 +232,13 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
       .compactMap { $0.error }
       .observe(on: MainScheduler.instance)
       .bind { error in
-        CommonAlert.shared.setMessage(.message(error.localizedDescription))
-          .show()
-          .confirmHandler = {
-            print("comfirm")
-          }
+        switch error {
+        case let .message(_, message):
+          CommonAlert.shared.setMessage(.message(message))
+            .show()
+        default:
+          break
+        }
       }.disposed(by: disposeBag)
   }
 }
@@ -208,9 +257,14 @@ private extension ProfileEditController {
         flex.addItem(profileView)
           .alignSelf(.center)
         
-        [roleContainerView,
-         locationContainerView,
-         interestsContainerView,
+        flex.addItem(roleContainerView)
+          .marginBottom(18)
+        
+        flex.addItem(addressContainerView)
+          .marginBottom(18)
+          .markDirty()
+        
+        [interestsContainerView,
          portfolioContainerView,
          periodContainerView,
          skillContainerView
@@ -220,52 +274,25 @@ private extension ProfileEditController {
         }
         
         flex.addItem(saveButton)
-          .height(50)
+          .height(41)
     }
   }
   
-  @objc func didTapSaveButton() {
-    
-    let profileURL = ""
-    
-    let roles: [RoleType] = roleContainerView.customView?.casting(
-      type: CheckBoxContainerView.self
+  func bindEvent() {
+    let tapGesture = UITapGestureRecognizer(
+      target: self,
+      action: #selector(dismissKeyboards)
     )
-    .checkedItems?
-    .compactMap { RoleType(description: $0.title) } ?? []
+    tapGesture.delegate = self
+    view.addGestureRecognizer(tapGesture)
     
-    let interestings: [String] = interestsContainerView.customView?.casting(
-      type: RoundSelectionButtonView.self
-    )
-    .selectedItems ?? []
-    
-    let portfolioURL = portfolioContainerView.textField.text
-    
-    guard let carrer: String = Career(
-      rawValue: reactor?.currentState.profile?.career?.rawValue ?? ""
-    )?.rawValue else { return }
-    
-    let skills: [String] = skillContainerView.customView?.casting(
-      type: CastableContainerView.self
-    )
-    .selectedItems
-    .flatMap { $0 } ?? []
-    
-    let parameter: ProfileEditParameter = .init(
-      profileURL: profileURL,
-      roles: roles,
-      region: reactor?.currentState.region,
-      interestings: interestings,
-      portfolioURL: portfolioURL,
-      career: carrer,
-      skills: skills
-    )
-    
-    reactor?.action.onNext(.didTapSaveButton(parameter))
+    if let castableButton = addressContainerView.customView as? CastableButton {
+      castableButton.handler = { [weak reactor] in
+        reactor?.action.onNext(.didTapAddressButton)
+      }
+    }
   }
-}
-
-private extension ProfileEditController {
+  
   func updateViews(profile: Profile) {
     profileView.update(
       url: .init(string: profile.profileURL ?? ""),
@@ -274,15 +301,18 @@ private extension ProfileEditController {
     )
     
     if let role = roleContainerView.customView?.casting(
-      type: CheckBoxContainerView.self
+      type: RoundSelectionButtonView.self
     ) {
       role.setSelectedItems(
         items: profile.roles.map { $0.description }
       )
     }
     
-    let location = locationContainerView.textField
-    location.text = profile.region?.description
+    if let castableButton = addressContainerView.customView as? CastableButton {
+      if let address = profile.region?.description {
+        castableButton.setTitle(address, for: .normal)
+      }
+    }
     
     if let interests = interestsContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
@@ -305,12 +335,78 @@ private extension ProfileEditController {
       skills.setSelectedItems(items: profile.skills)
     }
   }
+  
+  @objc func didTapSaveButton() {
+    
+    let profileURL = ""
+    
+    let roles: [RoleType] = roleContainerView.customView?.casting(
+      type: RoundSelectionButtonView.self
+    )
+    .selectedItems.compactMap { RoleType(description: $0) } ?? []
+    
+    let interestings: [String] = interestsContainerView.customView?.casting(
+      type: RoundSelectionButtonView.self
+    )
+    .selectedItems ?? []
+    
+    let portfolioURL = portfolioContainerView.textField.text
+    
+    let period = periodContainerView.customView?.casting(
+      type: CheckBoxContainerView.self
+    ).checkedItems?.compactMap { $0 } ?? []
+    
+    let carrer: Career? = .init(
+      description: period[safe: 0]?.title ?? ""
+    )
+    
+    let skills: [String] = skillContainerView.customView?.casting(
+      type: CastableContainerView.self
+    )
+    .selectedItems
+    .flatMap { $0 } ?? []
+    
+    let parameter: ProfileEditParameter = .init(
+      profileURL: profileURL,
+      roles: roles,
+      region: reactor?.currentState.region,
+      interestings: interestings,
+      portfolioURL: portfolioURL,
+      career: carrer,
+      skills: skills
+    )
+    
+    reactor?.action.onNext(.didTapSaveButton(parameter))
+  }
 }
 
 extension ProfileEditController: ProfileViewDelegate {
   func didTapEditProfileButton() {
-    ImagePickerManager.shared.selectedImage { [weak reactor] image in
-      reactor?.action.onNext(.requestUploadImage(image.pngData()))
+    ImagePickerManager.shared.selectedImage { [weak self] image in
+      self?.profileView.profileImageView.setImage(image)
+      self?.reactor?.action.onNext(.requestUploadImage(image.pngData()))
     }
+  }
+}
+
+extension ProfileEditController: UIGestureRecognizerDelegate {
+  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+    
+    let gestureDisableViews = [
+      interestsContainerView.customView,
+      roleContainerView.customView,
+      skillContainerView.customView
+    ]
+    
+    let isGestureDisabled = gestureDisableViews
+      .compactMap { $0 }
+      .filter { touch.view?.isDescendant(of: $0) ?? false }
+      .count > 0
+    
+    if isGestureDisabled {
+      return false
+    }
+    
+    return true
   }
 }

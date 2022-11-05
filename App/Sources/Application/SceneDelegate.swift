@@ -8,24 +8,35 @@
 
 import UIKit
 
+import COCommonUI
 import CODomain
 import COManager
 import CONetwork
 import Sign
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
+  
   var window: UIWindow?
   
-  var controller: UINavigationController!
+  var controller: CONavigationViewController!
   
-  let flowDI = MainFlow()
-
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-
+    
     guard let scene = (scene as? UIWindowScene) else { return }
     window = .init(windowScene: scene)
     
+    routeToSplash()
+    
+    NotificationCenter.default.add(
+      observer: self,
+      selector: #selector(routeToSplash),
+      type: .routeToSignIn
+    )
+  }
+}
+
+extension SceneDelegate {
+  @objc func routeToSplash() {
     let controller = SplashController()
     controller.reactor = .init()
     controller.delegate = self
@@ -48,12 +59,12 @@ extension SceneDelegate: SplashDelegate {
       let signInController = container.makeController()
       signInController.delegate = self
       
-      controller = UINavigationController(
+      controller = CONavigationViewController(
         rootViewController: signInController
       )
     } else {
-      controller = UINavigationController(
-        rootViewController: flowDI.makeMainController()
+      controller = CONavigationViewController(
+        rootViewController: MainController()
       )
     }
     
@@ -67,6 +78,8 @@ extension SceneDelegate: SignInDelegate {
     let container = SignUpDIContainer(
       apiService: ApiManager.shared,
       userService: UserManager.shared,
+      addressService: AddressManager.shared,
+      interestService: InterestManager.shared,
       roleSkillsService: RoleSkillsManager.shared,
       authType: authType,
       accessToken: accessToken
@@ -79,7 +92,7 @@ extension SceneDelegate: SignInDelegate {
 }
 
 extension SceneDelegate: SignUpDelegate {
-  func routeToHome() {
-    controller.pushViewController(flowDI.makeMainController(), animated: true)
+  func routeToMain() {
+    controller.pushViewController(MainController(), animated: true)
   }
 }

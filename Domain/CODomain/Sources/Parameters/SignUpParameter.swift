@@ -12,28 +12,15 @@ public struct SignUpParameter: Parameterable {
   var authType: AuthType?
   let nickname: String
   var region: Region?
-  let interestings: [String]
+  public let _interestings: [String]
+  var interestings: [Interest] = []
   let career: Career?
-  let roles: [RoleType]
+  public let _roles: [RoleType]
+  var roles: [Role] = []
   let profileURL: String?
   let portfolioURL: String?
   let skills: [String]
   let terms: [Terms]
-  
-  public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    
-    self.authType =     try container.decodeIfPresent(AuthType.self, forKey: .authType)
-    self.nickname =     try container.decodeIfPresent(String.self, forKey: .nickname) ?? ""
-    self.roles =        try container.decodeIfPresent([RoleType].self, forKey: .roles) ?? []
-    self.region =       try container.decodeIfPresent(Region.self, forKey: .region) ?? .init()
-    self.interestings = try container.decodeIfPresent([String].self, forKey: .interestings) ?? []
-    self.profileURL =   try container.decodeIfPresent(String.self, forKey: .profileURL)
-    self.portfolioURL = try container.decodeIfPresent(String.self, forKey: .portfolioURL)
-    self.career =       try container.decodeIfPresent(Career.self, forKey: .career)
-    self.skills =       try container.decodeIfPresent([String].self, forKey: .skills) ?? []
-    self.terms =        try container.decodeIfPresent([Terms].self, forKey: .terms) ?? []
-  }
   
   public func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
@@ -80,9 +67,9 @@ public extension SignUpParameter {
     self.authType = authType
     self.nickname = nickname
     self.region = region
-    self.interestings = interestings
+    self._interestings = interestings
     self.career = career
-    self.roles = roles
+    self._roles = roles
     self.profileURL = profileURL
     self.portfolioURL = portfolioURL
     self.skills = skills
@@ -95,6 +82,34 @@ public extension SignUpParameter {
   
   mutating func updateRegion(_ region: Region) {
     self.region = region
+  }
+  
+  mutating func updateInterestings(_ interestings: [Interest]) {
+    self.interestings = interestings
+  }
+  
+  mutating func updateRoles(_ roles: [Role]) {
+    self.roles = roles
+  }
+  
+  func isNicknameEmpty() -> Bool {
+    return nickname.isEmpty
+  }
+  
+  func isCarrerNil() -> Bool {
+    return career == nil
+  }
+  
+  func isInterestingsEmpty() -> Bool {
+    return _interestings.isEmpty
+  }
+  
+  func isRolesEmpty() -> Bool {
+    return _roles.isEmpty
+  }
+  
+  func isSkillsEmpty() -> Bool {
+    return skills.isEmpty
   }
   
   func checkedTermsCount() -> Int {

@@ -44,6 +44,8 @@ extension SceneDelegate: SignInDelegate {
     let container = SignUpDIContainer(
       apiService: ApiManaerStub(),
       userService: UserManagerStub(),
+      addressService: AddressManager.shared,
+      interestService: InterestManagerStub(isExists: true),
       roleSkillsService: RoleSkillsManagerStub(isExists: true),
       authType: authType,
       accessToken: accessToken
@@ -55,7 +57,7 @@ extension SceneDelegate: SignInDelegate {
 }
 
 extension SceneDelegate: SignUpDelegate {
-  func routeToHome() {
+  func routeToMain() {
     controller.pushViewController(UIViewController(), animated: true)
   }
 }

@@ -18,7 +18,12 @@ public enum Path {
   case serchPlace(String)
   case uploadProfileImage(Data)
   case userProfile
+  case homeMenu
   case updateProfile(ProfileEditParameter)
+  case homeRelease
+  case refreshToken
+  case logout
+  case signOut
   
   public var string: String {
     switch self {
@@ -32,10 +37,20 @@ public enum Path {
       return "/api/member/auth/signup"
     case .serchPlace:
       return "/v2/local/search/address.json"
+    case .homeMenu:
+      return "/api/study/home/menu"
+    case .homeRelease:
+      return "/api/study/hots"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:
       return "/api/member/myPage/detail"
+    case .refreshToken:
+      return "/api/member/issue/token/refresh"
+    case .logout:
+      return "/api/member/auth/logout"
+    case .signOut:
+      return "/api/member/signOut"
     }
   }
   

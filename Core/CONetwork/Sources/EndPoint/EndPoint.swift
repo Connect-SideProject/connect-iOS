@@ -67,6 +67,9 @@ public extension EndPoint {
     case .uploadProfileImage:
       return ["Content-Type": "multipart/form-data"]
       
+    case .refreshToken:
+      return ["refresh-token": tokens.refresh]
+      
     default:
       let _ = [
         "access-token": tokens.access,
@@ -102,8 +105,10 @@ public extension EndPoint {
     switch path {
     case .signUp, .uploadProfileImage, .userProfile, .updateProfile:
       return .put
-    case .signIn:
+    case .refreshToken, .signIn, .logout:
       return .post
+    case .signOut:
+      return .delete
     default:
       return .get
     }

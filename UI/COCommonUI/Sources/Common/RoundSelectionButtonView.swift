@@ -75,10 +75,6 @@ public final class RoundSelectionButtonView: UIView, CastableView {
         self.selectedItems.append($0)
       }
   }
-  
-  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    endEditing(true)
-  }
 }
 
 extension RoundSelectionButtonView {
@@ -161,11 +157,11 @@ extension RoundSelectionButtonView: UICollectionViewDelegateFlowLayout {
       ]
     ).width + 20
     
-    return .init(width: width, height: 30)
+    return .init(width: width, height: 31)
   }
   
   public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-    return 8
+    return 12
   }
   
   public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
@@ -176,8 +172,8 @@ extension RoundSelectionButtonView: UICollectionViewDelegateFlowLayout {
 final class RoundCollectionViewCell: UICollectionViewCell {
   
   private let titleLabel = UILabel().then {
-    $0.textColor = .black
-    $0.font = .systemFont(ofSize: 14, weight: .semibold)
+    $0.textColor = .hex3A3A3A
+    $0.font = .light(size: 16)
     $0.textAlignment = .center
     $0.translatesAutoresizingMaskIntoConstraints = false
   }
@@ -185,10 +181,9 @@ final class RoundCollectionViewCell: UICollectionViewCell {
   override func draw(_ rect: CGRect) {
     super.draw(rect)
     
-    layer.borderColor = UIColor.black.cgColor
     layer.borderWidth = 1
     
-    layer.cornerRadius = 12
+    layer.cornerRadius = 15
     layer.masksToBounds = true
   }
   
@@ -206,8 +201,10 @@ final class RoundCollectionViewCell: UICollectionViewCell {
     titleLabel.text = title
     self.isSelected = isSelected
     
-    backgroundColor = isSelected ? .black : .white
-    titleLabel.textColor = isSelected ? .white : .black
+    backgroundColor = isSelected ? .hex06C755 : .white
+    titleLabel.textColor = isSelected ? .white : .hex3A3A3A
+    
+    layer.borderColor = isSelected ? UIColor.hex06C755.cgColor : UIColor.hexC6C6C6.cgColor
   }
 }
 

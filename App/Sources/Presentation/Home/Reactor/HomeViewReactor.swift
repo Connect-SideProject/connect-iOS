@@ -6,42 +6,66 @@
 //  Copyright © 2022 sideproj. All rights reserved.
 //
 
+import Foundation
+
 import ReactorKit
+import COExtensions
+import CONetwork
+import CODomain
 
 
 
-final class HomeViewReactor: Reactor {
+public final class HomeViewReactor: Reactor, ErrorHandlerable {
+        
+    public let initialState: State
     
-    let initialState: State
-    
-    enum Action {
+    public enum Action {
         case viewDidLoad
     }
     
-    enum Mutation {
+    public var errorHandler: (Error) -> Observable<Mutation> = { error in
+        return .just(.setHomeError(error.asCOError))
+    }
+    
+    private let homeRepository: HomeRepository
+    
+    
+    public enum Mutation {
         case setLoading(Bool)
+        case setHomeMenuItem([HomeMenu])
+        case setReleaseItems([HomeHotList])
         case setSubMenuItems(HomeViewSection)
         case setStudyListItems(HomeViewSection)
+        case setHomeError(COError?)
     }
     
-    struct State {
+    public struct State {
         var isLoading: Bool
+        var isError: COError?
         var section: [HomeViewSection]
+        var releaseSection: [HomeReleaseSection]
     }
     
-    init() {
+    init(homeRepository: HomeRepository) {
         defer { _ = self.state }
+        self.homeRepository = homeRepository
+        
+        
         self.initialState = State(
             isLoading: false,
+            isError: nil,
             section: [
                 .field([]),
                 .homeSubMenu([]),
                 .homeStudyList([])
+            ],
+            releaseSection: [
+                .hotMenu([])
             ]
         )
     }
     
-    func mutate(action: Action) -> Observable<Mutation> {
+    public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
             let startLoading = Observable<Mutation>.just(.setLoading(true))
@@ -52,6 +76,7 @@ final class HomeViewReactor: Reactor {
                 .homeStudyMenu(HomeStudyMenuReactor(menuType: .study))
             ])))
             
+            
             let setStudyListItems = Observable<Mutation>.just(.setStudyListItems(.homeStudyList([
                 .homeStudyList,
                 .homeStudyList,
@@ -59,19 +84,32 @@ final class HomeViewReactor: Reactor {
             ])))
                         
             return .concat([
-                startLoading,setMenuItems,setStudyListItems,endLoading
+                startLoading,
+                homeRepository.responseHomeMenuItem(),
+                setMenuItems,
+                setStudyListItems,
+                homeRepository.responseHomeReleaseItem(),
+                endLoading
             ])
         }
     }
     
-    func reduce(state: State, mutation: Mutation) -> State {
+    public func reduce(state: State, mutation: Mutation) -> State {
         switch mutation {
         case let .setLoading(isLoading):
             var newState = state
             newState.isLoading = isLoading
             
             return newState
-
+            
+        case let .setHomeMenuItem(items):
+            var newState = state
+            guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
+            newState.section[sectionIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
+            
+            print("setHomeMenu Response Item: \(items)")
+           
+            return newState
         case let .setSubMenuItems(items):
             var newState = state
             guard let sectionIndex = self.getIndex(section: .homeSubMenu([])) else { return newState }
@@ -83,6 +121,19 @@ final class HomeViewReactor: Reactor {
             guard let sectionIndex = self.getIndex(section: .homeStudyList([])) else { return newState }
             newState.section[sectionIndex] = items
             
+            return newState
+            
+        case let .setHomeError(error):
+            var newState = state
+            newState.isError = error?.asCOError
+            
+            return newState
+            
+        case let.setReleaseItems(items):
+            var newState = state
+            guard let sectionIndex = self.getReleaseIndex(section: .hotMenu([])) else { return newState }
+            newState.releaseSection[sectionIndex] = homeRepository.responseHomeReleaseSectionItem(item: items)
+            print("Release Response itme: \(items)")
             return newState
         }
         
@@ -102,5 +153,17 @@ private extension HomeViewReactor {
         }
         return index
     }
+    
+    func getReleaseIndex(section: HomeReleaseSection) -> Int? {
+        var index: Int? = nil
+        
+        for i in 0 ..< self.currentState.releaseSection.count {
+            if self.currentState.releaseSection[i].getSectionType() == section.getSectionType() {
+                index = i
+            }
+        }
+        return index
+    }
+    
 }
 

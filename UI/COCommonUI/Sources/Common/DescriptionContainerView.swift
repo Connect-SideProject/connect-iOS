@@ -13,21 +13,23 @@ import Then
 public enum DescriptionType {
   // DescriptionLabel, View
   case textField(String, String?)
-  case custom(String, CastableView)
+  case textFieldWithAttributed(NSAttributedString, String?)
+  case custom(String, CastableView, String?)
+  case customWithAttributed(NSAttributedString, CastableView, String?)
 }
 
 public class DescriptionContainerView: UIView {
   
   private let descriptionLabel = UILabel().then {
-    $0.font = .systemFont(ofSize: 16, weight: .bold)
+    $0.font = .regular(size: 16)
     $0.textColor = .black
   }
   
   public let textField = UITextField().then {
-    $0.font = .systemFont(ofSize: 14, weight: .semibold)
+    $0.font = .medium(size: 14)
     $0.textColor = .black
     $0.leftViewMode = .always
-    $0.layer.borderColor = UIColor.black.cgColor
+    $0.layer.borderColor = UIColor.hexC6C6C6.cgColor
     $0.layer.borderWidth = 1
     $0.layer.cornerRadius = 12
     $0.layer.masksToBounds = true
@@ -39,6 +41,12 @@ public class DescriptionContainerView: UIView {
   
   public private(set) var customView: CastableView?
   public private(set) var customViews: [CastableView]?
+  
+  private let noticeTextLabel = UILabel().then {
+    $0.font = .regular(size: 12)
+    $0.textColor = .red
+    $0.numberOfLines = 1
+  }
   
   public let flexContainer = UIView()
   
@@ -60,9 +68,17 @@ public class DescriptionContainerView: UIView {
     case let .textField(text, placeholder):
       descriptionLabel.text = text
       textField.placeholder = placeholder
-    case let .custom(text, view):
+    case let .textFieldWithAttributed(attrbutedText, placeholder):
+      descriptionLabel.attributedText = attrbutedText
+      textField.placeholder = placeholder
+    case let .custom(text, view, noticeText):
       descriptionLabel.text = text
       customView = view
+      noticeTextLabel.text = noticeText
+    case let .customWithAttributed(attrbutedText, view, noticeText):
+      descriptionLabel.attributedText = attrbutedText
+      customView = view
+      noticeTextLabel.text = noticeText
     }
     
     configureUI()
@@ -70,10 +86,6 @@ public class DescriptionContainerView: UIView {
   
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
-  }
-  
-  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    endEditing(true)
   }
 }
 
@@ -98,7 +110,12 @@ extension DescriptionContainerView {
           }
         } else {
           flex.addItem(textField)
-            .height(36)
+            .height(44)
+        }
+        
+        if noticeTextLabel.text?.isEmpty == false {
+          flex.addItem(noticeTextLabel)
+            .marginVertical(8)
         }
       }
   }
@@ -154,16 +171,12 @@ public final class CastableContainerView: UIView, CastableView {
       }
     }
   }
-  
-  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    endEditing(true)
-  }
 }
 
 extension CastableContainerView {
   private func configureUI() {
     
-    let height = CGFloat(36 * views.count)
+    let height = CGFloat(40 * views.count)
     
     backgroundColor = .clear
     

@@ -17,6 +17,7 @@ import COExtensions
 
 public protocol ProfileDelegate: AnyObject {
   func routeToEditProfile()
+  func routeToSingIn()
 }
 
 /// MY 화면 컨트롤러.
@@ -46,9 +47,32 @@ public final class ProfileController: UIViewController, ReactorKit.View {
           direction: .vertical
         )],
         direction: .column
-      )
+      ),
+      nil
     )
   )
+  
+  private lazy var logoutButton = RoundRutton(
+    cornerRadius: 5,
+    borderColor: .hexC6C6C6
+  ).then {
+    $0.setTitle("로그아웃", for: .normal)
+    $0.setTitleColor(.white, for: .normal)
+    $0.titleLabel?.font = .medium(size: 16)
+    $0.backgroundColor = .hexC6C6C6
+    $0.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+  }
+  
+  private lazy var signOutButton = RoundRutton(
+    cornerRadius: 5,
+    borderColor: .white
+  ).then {
+    $0.setTitle("회원탈퇴", for: .normal)
+    $0.setTitleColor(.red, for: .normal)
+    $0.titleLabel?.font = .regular(size: 14)
+    $0.backgroundColor = .white
+    $0.addTarget(self, action: #selector(didTapSignOutButton), for: .touchUpInside)
+  }
   
   private let flexContainer = UIView()
   
@@ -81,6 +105,7 @@ public final class ProfileController: UIViewController, ReactorKit.View {
   public override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     
+    tabBarController?.tabBar.isHidden = false
     navigationController?.setNavigationBarHidden(true, animated: false)
   }
   
@@ -114,8 +139,26 @@ public final class ProfileController: UIViewController, ReactorKit.View {
     reactor.state
       .compactMap { $0.profileViewItems }
       .observe(on: MainScheduler.instance)
+      .take(2)
       .bind { [weak self] items in
         self?.defineProfileListViews(items: items)
+      }.disposed(by: disposeBag)
+    
+    reactor.state
+      .compactMap { $0.profileViewItems }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] items in
+        self?.updateProfileListViews(items: items)
+      }.disposed(by: disposeBag)
+    
+    reactor.pulse(\.$route)
+      .compactMap { $0 }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] route in
+        switch route {
+        case .routeToSignIn:
+          self?.delegate?.routeToSingIn()
+        }
       }.disposed(by: disposeBag)
     
     reactor.state
@@ -139,24 +182,50 @@ extension ProfileController {
     view.addSubview(flexContainer)
     
     flexContainer.flex
-      .maxHeight(view.bounds.height / 1.5)
+      .justifyContent(.spaceBetween)
       .define { flex in
         flex.addItem(profileView)
           .height(100)
         
+        flex.addItem()
+          .height(10)
+        
         flex.addItem(buttonContainerView)
           .height(35)
-          .marginVertical(10)
           .marginHorizontal(20)
+        
+        flex.addItem()
+          .height(10)
         
         flex.addItem(listContainerView)
           .justifyContent(.spaceBetween)
           .height(120)
-          .marginVertical(10)
           .marginHorizontal(20)
+          .markDirty()
+        
+        flex.addItem()
+          .height(10)
         
         flex.addItem(skillContainerView)
           .marginHorizontal(20)
+          .markDirty()
+        
+        flex.addItem(logoutButton)
+          .margin(20)
+          .height(40)
+        
+        flex.addItem()
+          .direction(.row)
+          .define { flex in
+            flex.addItem()
+              .grow(1)
+            flex.addItem(signOutButton)
+              .margin(20)
+              .shrink(1)
+          }
+        
+        flex.addItem()
+          .grow(1)
       }
   }
   
@@ -181,10 +250,28 @@ extension ProfileController {
       }
     }
   }
+  
+  private func updateProfileListViews(items: [ProfileViewItem]) {
+    
+    zip(listContainerView.subviews, items).forEach { view, item in
+      if let view = view as? ProfileListView {
+        view.update(item: item)
+      }
+    }
+  }
+  
+  @objc private func didTapLogoutButton() {
+    reactor?.action.onNext(.requestLogout)
+  }
+  
+  @objc private func didTapSignOutButton() {
+    reactor?.action.onNext(.requestSignOut)
+  }
 }
 
 extension ProfileController: ProfileViewDelegate {
   func didTapEditProfileButton() {
+    tabBarController?.tabBar.isHidden = true
     delegate?.routeToEditProfile()
   }
 }
