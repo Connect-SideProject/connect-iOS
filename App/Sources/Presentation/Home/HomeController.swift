@@ -70,6 +70,7 @@ public final class HomeController: UIViewController {
         $0.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
         $0.register(HomeStudyMenuCell.self, forCellWithReuseIdentifier: "HomeStudyMenuCell")
         $0.register(HomeStudyListCell.self, forCellWithReuseIdentifier: "HomeStudyListCell")
+        $0.register(HomeStudyEmptyCell.self, forCellWithReuseIdentifier: "HomeStudyEmptyCell")
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
         $0.backgroundColor = .white
