@@ -82,8 +82,8 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   )
   
   private let portfolioContainerView = DescriptionContainerView(
-    type: .textFieldWithAttributed(
-      "포트폴리오 *".setLastWord(color: .red),
+    type: .textField(
+      "포트폴리오",
       "포트폴리오 URL을 입력 해주세요. (선택)"
     )
   )
