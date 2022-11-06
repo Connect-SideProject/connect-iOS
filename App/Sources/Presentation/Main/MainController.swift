@@ -136,7 +136,7 @@ extension MainController: ProfileDelegate {
   }
   
   func routeToSingIn() {
-    NotificationCenter.default.post(type: .expiredSession)
+    NotificationCenter.default.post(type: .routeToSignIn)
   }
 }
 
