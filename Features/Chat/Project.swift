@@ -14,6 +14,6 @@ let profile = Project.feature(
   products: [.framework(.static), .demoApp, .unitTests],
   dependencies: [
     .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
-    .project(target: "COExtensions", path: .relativeToRoot("Core/COExtensions"))
+    .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation"))
   ]
 )
