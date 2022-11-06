@@ -8,7 +8,6 @@
 import Foundation
 
 import RxSwift
-import COCommonUI
 import CODomain
 import COManager
 
@@ -41,11 +40,12 @@ final class SessionManager {
     userService.update(tokens: tokens, profile: nil)
   }
   
-  func process(errorCode: String) {
+  func process(errorCode: String, handler: () -> Void) {
     
     switch errorCode {
     case COError.expiredAccessToken:
       routeToSignIn()
+      handler()
     case COError.expiredRefreshToken:
       requestRefreshToken()
     default:
@@ -65,13 +65,5 @@ final class SessionManager {
   func routeToSignIn() {
     
     userService.remove()
-    
-    CommonAlert.shared.setMessage(
-      .message("세션이 만료되어 재 로그인이 필요합니다.")
-    )
-    .show()
-    .confirmHandler = {
-      NotificationCenter.default.post(type: .routeToSignIn)
-    }
   }
 }

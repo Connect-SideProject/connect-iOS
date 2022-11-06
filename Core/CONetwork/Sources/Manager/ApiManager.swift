@@ -9,6 +9,7 @@
 import Foundation
 
 import CODomain
+import COManager
 import RxSwift
 
 public final class ApiManager: ApiService {
@@ -93,7 +94,9 @@ public final class ApiManager: ApiService {
         print("================================================")
         // 토큰 유효시간 만료.
         if let errorCode = base?.errorCode, response.statusCode == 401 {
-          SessionManager.shared.process(errorCode: errorCode)
+          SessionManager.shared.process(errorCode: errorCode) {
+            NotificationCenter.default.post(type: .expiredToken)
+          }
           return
         }
         

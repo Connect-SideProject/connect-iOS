@@ -32,6 +32,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
       selector: #selector(routeToSplash),
       type: .routeToSignIn
     )
+    
+    NotificationCenter.default.add(
+      observer: self,
+      selector: #selector(expiredToken),
+      type: .expiredToken
+    )
   }
 }
 
@@ -43,6 +49,16 @@ extension SceneDelegate {
     
     window?.rootViewController = controller
     window?.makeKeyAndVisible()
+  }
+  
+  @objc func expiredToken() {
+    CommonAlert.shared.setMessage(
+      .message("세션이 만료되어 재 로그인이 필요합니다.")
+    )
+    .show()
+    .confirmHandler = { [weak self] in
+      self?.routeToSplash()
+    }
   }
 }
 
