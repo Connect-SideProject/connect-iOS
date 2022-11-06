@@ -9,10 +9,18 @@ import UIKit
 
 import FlexLayout
 
-public class TitleView: FlexLayoutView {
+public final class TitleView: FlexLayoutView {
     private let leftBtn = UIButton()
     private let titleLabel = UILabel()
-    private let rightBtns = [UIButton(), UIButton()]
+    private let rightInnerBtn = UIButton()
+    private let rightOuterBtn = UIButton()
+    private var rightBtns: [UIButton] {
+        [self.rightInnerBtn, self.rightOuterBtn]
+    }
+    
+    private var leftBtnAction: ButtonAction?
+    private var rightInnerBtnAction: ButtonAction?
+    private var rightOuterBtnAction: ButtonAction?
     
     public override func setupContainer() {
         super.setupContainer()
@@ -40,5 +48,48 @@ public class TitleView: FlexLayoutView {
                         .marginEnd(20)
                 }
             }
+    }
+}
+
+public extension TitleView {
+    typealias ButtonAction = (() -> Void)
+    
+    enum BtnType {
+        case back, pin, star, alert, search
+        
+        var image: UIImage? {
+            var img: UIImage?
+            switch self {
+            case .back: img = COCommonUIAsset.icTitleBack.image
+            case .pin: img = COCommonUIAsset.icTitlePin.image
+            case .star: img = COCommonUIAsset.icTitleStar.image
+            case .alert: img = COCommonUIAsset.icTitleAlert.image
+            case .search: img = COCommonUIAsset.icTitleSearch.image
+            }
+            return img
+        }
+    }
+}
+
+public extension TitleView {
+    @discardableResult func setLeftBtn(type: BtnType, action: ButtonAction? = nil) -> Self {
+        self.leftBtn.isHidden = false
+        self.leftBtn.setImage(type.image, for: .normal)
+        self.leftBtnAction = action
+        return self
+    }
+    
+    @discardableResult func setRightInnerBtn(type: BtnType, action: ButtonAction? = nil) -> Self {
+        self.rightInnerBtn.isHidden = false
+        self.rightInnerBtn.setImage(type.image, for: .normal)
+        self.rightInnerBtnAction = action
+        return self
+    }
+    
+    @discardableResult func setRightOuterBtn(type: BtnType, action: ButtonAction? = nil) -> Self {
+        self.rightOuterBtn.isHidden = false
+        self.rightOuterBtn.setImage(type.image, for: .normal)
+        self.rightOuterBtnAction = action
+        return self
     }
 }
