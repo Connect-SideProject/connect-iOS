@@ -95,7 +95,10 @@ public final class ApiManager: ApiService {
         // 토큰 유효시간 만료.
         if let errorCode = base?.errorCode, response.statusCode == 401 {
           SessionManager.shared.process(errorCode: errorCode) {
-            NotificationCenter.default.post(type: .expiredToken)
+            NotificationCenter.default.post(
+              type: .expiredToken,
+              userInfo: ["message": base?.message ?? ""]
+            )
           }
           return
         }

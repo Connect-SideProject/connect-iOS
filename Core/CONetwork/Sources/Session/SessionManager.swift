@@ -43,13 +43,11 @@ final class SessionManager {
   func process(errorCode: String, handler: () -> Void) {
     
     switch errorCode {
-    case COError.expiredAccessToken:
-      routeToSignIn()
-      handler()
     case COError.expiredRefreshToken:
       requestRefreshToken()
     default:
-      break
+      routeToSignIn()
+      handler()
     }
   }
   
