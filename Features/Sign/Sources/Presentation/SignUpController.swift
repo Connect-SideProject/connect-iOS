@@ -168,34 +168,18 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     portfolioContainerView.textField.resignFirstResponder()
   }
   
+  public func prefetch(interestList: [Interest], roleSkillsList: [RoleSkills]) {
+    interestTitles = interestList.map { $0.name }
+    roleTitles = roleSkillsList.map { $0.roleName }
+    skillsViews = roleSkillsList.map {
+      RoundSelectionButtonView(
+        titles: $0.skills.map { $0.name },
+        direction: .vertical
+      )
+    }
+  }
+  
   public func bind(reactor: SignUpReactor) {
-    
-    Observable.just(())
-      .map { Reactor.Action.viewDidLoad }
-      .bind(to: reactor.action)
-      .disposed(by: disposeBag)
-    
-    reactor.state
-      .compactMap { $0.interestList }
-      .filter { !$0.isEmpty }
-      .observe(on: MainScheduler.instance)
-      .bind { [weak self] interestList in
-        self?.interestTitles = interestList.map { $0.name }
-      }.disposed(by: disposeBag)
-    
-    reactor.state
-      .compactMap { $0.roleSkillsList }
-      .filter { !$0.isEmpty }
-      .observe(on: MainScheduler.instance)
-      .bind { [weak self] roleSkillsList in
-        self?.roleTitles = roleSkillsList.map { $0.roleName }
-        self?.skillsViews = roleSkillsList.map {
-          RoundSelectionButtonView(
-            titles: $0.skills.map { $0.name },
-            direction: .vertical
-          )
-        }
-      }.disposed(by: disposeBag)
     
     reactor.pulse(\.$route)
       .compactMap { $0 }
@@ -269,6 +253,7 @@ extension SignUpController {
         ].forEach {
           flex.addItem($0)
             .marginBottom(18)
+            .markDirty()
         }
         
         [upper14YearsOldCheckBoxView,
