@@ -8,6 +8,7 @@
 import Foundation
 
 public enum NotificationType: String {
+  case expiredToken
   case routeToSignIn
 }
 

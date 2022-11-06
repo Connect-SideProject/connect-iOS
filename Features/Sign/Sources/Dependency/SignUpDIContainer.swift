@@ -72,6 +72,10 @@ public final class SignUpDIContainer: DIContainer {
   
   public func makeController() -> ViewController {
     let controller = SignUpController()
+    controller.prefetch(
+      interestList: interestService.interestList,
+      roleSkillsList: roleSkillsService.roleSkillsList
+    )
     controller.reactor = makeReactor()
     return controller
   }
