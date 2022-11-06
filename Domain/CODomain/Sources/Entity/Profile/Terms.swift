@@ -8,7 +8,7 @@
 import Foundation
 
 public enum Terms: String, CustomStringConvertible, Codable {
-  case service = "SEVICE"
+  case service = "SERVICE"
   case location = "LOCATION"
   case privacy = "PRIVACY"
   
@@ -36,12 +36,27 @@ public enum Terms: String, CustomStringConvertible, Codable {
     }
   }
   
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer().decode(String.self)
+    
+    switch container {
+    case "SERVICE":
+      self = .service
+    case "LOCATION":
+      self = .location
+    case "PRIVACY":
+      self = .privacy
+    default:
+      fatalError("")
+    }
+  }
+  
   public func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
     
     switch self {
     case .service:
-      try container.encode("SEVICE")
+      try container.encode("SERVICE")
     case .location:
       try container.encode("LOCATION")
     case .privacy:

@@ -25,6 +25,19 @@ public enum Career: String, Codable, CustomStringConvertible {
   
   public init?(rawValue: String) {
     switch rawValue {
+    case "ASPIRANT":
+      self = .aspirant
+    case "JUNIOR":
+      self = .junior
+    case "SENIOR":
+      self = .senior
+    default:
+      return nil
+    }
+  }
+  
+  public init?(description: String) {
+    switch description {
     case "지망생":
       self = .aspirant
     case "주니어":
@@ -33,6 +46,21 @@ public enum Career: String, Codable, CustomStringConvertible {
       self = .senior
     default:
       return nil
+    }
+  }
+  
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer().decode(String.self)
+    
+    switch container {
+    case "ASPIRANT":
+      self = .aspirant
+    case "JUNIOR":
+      self = .junior
+    case "SENIOR":
+      self = .senior
+    default:
+      fatalError("")
     }
   }
   
@@ -46,6 +74,21 @@ public enum Career: String, Codable, CustomStringConvertible {
       try container.encode("JUNIOR")
     case .senior:
       try container.encode("SENIOR")
+    }
+  }
+}
+
+extension Career {
+  static func convertType(value: String) -> Self? {
+    switch value {
+    case Career.aspirant.rawValue:
+      return .aspirant
+    case Career.junior.rawValue:
+      return .junior
+    case Career.senior.rawValue:
+      return .senior
+    default:
+      return nil
     }
   }
 }

@@ -10,7 +10,7 @@
 "main.tabItem.home" = "홈";
 "main.tabItem.map" = "지도";
 "main.tabItem.message" = "채팅";
-"main.tabItem.profile" = "MY";
+"main.tabItem.profile" = "마이";
 
 // HomeController
 

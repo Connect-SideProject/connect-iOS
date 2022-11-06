@@ -23,7 +23,7 @@ fileprivate struct MenuButtonItem {
   }
 }
 
-enum MenuButtonType {
+public enum MenuButtonType {
   
   case appliedGroup, wroteGroup, bookmarkedGroup
   
@@ -48,7 +48,7 @@ enum MenuButtonType {
   }
 }
 
-final class MenuButtonContainerView: UIView {
+public final class MenuButtonContainerView: UIView {
   
   private let flexContainer = UIView()
   
@@ -56,9 +56,9 @@ final class MenuButtonContainerView: UIView {
   private var items: [MenuButtonItem] = []
   private let types: [MenuButtonType]
   
-  var handler: (Int) -> Void = { _ in }
+  public var handler: (Int) -> Void = { _ in }
   
-  init(types: [MenuButtonType]) {
+  public init(types: [MenuButtonType]) {
     self.types = types
     super.init(frame: .zero)
     
@@ -71,7 +71,7 @@ final class MenuButtonContainerView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
   
-  override func layoutSubviews() {
+  public override func layoutSubviews() {
     super.layoutSubviews()
     
     flexContainer.pin
@@ -94,15 +94,12 @@ extension MenuButtonContainerView {
   
   private func setupButtons() {
     buttons = items.enumerated().map { offset, element -> RoundRutton in
-      let button = RoundRutton()
+      let button = RoundRutton(
+        cornerRadius: 5,
+        borderColor: .hexC6C6C6
+      )
       button.setTitle(element.title, for: .normal)
       button.setTitleColor(element.titleColor, for: .normal)
-      button.setImage(
-        element.image?
-          .withTintColor(.lightGray)
-          .withRenderingMode(.alwaysOriginal),
-        for: .normal
-      )
       button.titleLabel?.font = .systemFont(ofSize: 12, weight: .semibold)
       button.tag = offset
       button.addTarget(
@@ -125,7 +122,7 @@ extension MenuButtonContainerView {
       .define { flex in
         self.buttons.forEach {
           flex.addItem($0)
-            .shrink(1)
+            .grow(0.3)
         }
       }
   }

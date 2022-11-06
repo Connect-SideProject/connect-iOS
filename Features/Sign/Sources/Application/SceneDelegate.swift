@@ -8,6 +8,7 @@
 
 import UIKit
 
+import CODomain
 import COManager
 import CONetwork
 
@@ -39,9 +40,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 }
 
 extension SceneDelegate: SignInDelegate {
-  func routeToSignUp() {
-    let signUpController = SignUpController()
-    signUpController.reactor = .init()
+  func routeToSignUp(authType: AuthType, accessToken: String) {
+    let container = SignUpDIContainer(
+      apiService: ApiManaerStub(),
+      userService: UserManagerStub(),
+      addressService: AddressManager.shared,
+      interestService: InterestManagerStub(isExists: true),
+      roleSkillsService: RoleSkillsManagerStub(isExists: true),
+      authType: authType,
+      accessToken: accessToken
+    )
+    let signUpController = container.makeController()
+    signUpController.delegate = self
     controller.pushViewController(signUpController, animated: true)
+  }
+}
+
+extension SceneDelegate: SignUpDelegate {
+  func routeToMain() {
+    controller.pushViewController(UIViewController(), animated: true)
   }
 }

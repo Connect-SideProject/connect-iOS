@@ -19,63 +19,52 @@ public final class SignInUseCaseImpl: NSObject, SignInUseCase {
   
   private let loginConnection = NaverThirdPartyLoginConnection.getSharedInstance()
   private let accessTokenSubject = PublishSubject<String>()
-  private let authorizationCodeSubject = PublishSubject<String>()
+  private let identityTokenSubject = PublishSubject<String>()
   
-  private let isStub: Bool
+  private let isStub: Bool = false
   
   private let repository: SignInRepository
-  private let userService: UserService
   
-  public init(
-    repository: SignInRepository,
-    userService: UserService = UserManager.shared
-  ) {
+  public init(repository: SignInRepository) {
     self.repository = repository
-    self.userService = userService
-    self.isStub = (userService is UserManagerStub)
     super.init()
-        
+    
     loginConnection?.delegate = self
   }
 }
 
 extension SignInUseCaseImpl {
-  public func signIn(authType: AuthType) -> Observable<CODomain.Profile> {
+  public func accessTokenFromThirdParty(authType: AuthType) -> Observable<String> {
     switch authType {
     case .kakao:
+      
+      if isStub {
+        return .just("accessToken")
+      }
+      
       if UserApi.isKakaoTalkLoginAvailable() {
         return repository.requestAccessTokenWithKakaoTalk()
-          .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
-            guard let self = self else { return .empty() }
-            return self.combine(accessToken, authType: .kakao)
-          }
+          .map { $0 }
       } else {
         return repository.requestAccessTokenWithKakaoAccount()
-          .debug()
-          .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
-            guard let self = self else { return .empty() }
-            return self.combine(accessToken, authType: .kakao)
-          }
+          .map { $0 }
       }
     case .naver:
       
       if isStub {
-        return combine("accessToken", authType: authType)
+        return .just("accessToken")
       }
       
       loginConnection?.requestThirdPartyLogin()
       
       return accessTokenSubject
         .asObservable()
-        .flatMap { [weak self] accessToken -> Observable<CODomain.Profile> in
-          guard let self = self else { return .empty() }
-          return self.combine(accessToken, authType: authType)
-        }.debug()
+        .map { $0 }
       
     case .apple:
       
       if isStub {
-        return combine("accessToken", authType: authType)
+        return .just("accessToken")
       }
       
       let appleIDProvider = ASAuthorizationAppleIDProvider()
@@ -87,29 +76,14 @@ extension SignInUseCaseImpl {
       authorizationController.presentationContextProvider = self
       authorizationController.performRequests()
       
-      return authorizationCodeSubject
+      return identityTokenSubject
         .asObservable()
-        .flatMap { [weak self] authorizationCode -> Observable<CODomain.Profile> in
-          guard let self = self else { return .empty() }
-          return self.combine(authorizationCode, authType: authType)
-        }.debug()
-    case .none:
-      return .empty()
+        .map { $0 }
     }
   }
   
-  private func combine(_ accessToken: String, authType: AuthType) -> Observable<CODomain.Profile> {
-    updateAccessToken(accessToken)
-    return fetchProfile(authType: authType)
-  }
-  
-  private func updateAccessToken(_ accessToken: String) {
-    userService.update(accessToken: accessToken)
-  }
-  
-  private func fetchProfile(authType: AuthType) -> Observable<CODomain.Profile> {
-    return repository.requestProfile(authType: authType)
-      .asObservable()
+  public func signIn(authType: AuthType, accessToken: String) -> Observable<CODomain.Profile> {
+    return repository.requestProfile(authType: authType, accessToken: accessToken).asObservable()
   }
 }
 
@@ -150,9 +124,9 @@ extension SignInUseCaseImpl: ASAuthorizationControllerDelegate {
   public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
     switch authorization.credential {
     case let appleIDCredential as ASAuthorizationAppleIDCredential:
-      if let code = appleIDCredential.authorizationCode,
-         let authorizationCode = String(data: code, encoding: .utf8) {
-        authorizationCodeSubject.onNext(authorizationCode)
+      if let identityToken = appleIDCredential.identityToken,
+         let token = String(data: identityToken, encoding: .utf8) {
+        identityTokenSubject.onNext(token)
       }
     default:
       break

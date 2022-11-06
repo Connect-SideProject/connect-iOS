@@ -32,12 +32,12 @@ public final class ApiManaerStub: ApiService {
     case .response(let statusCode) where statusCode != 200 :
       switch statusCode {
       case 204:
-        return .error(URLError(.needSignUp))
+        return .error(COError.needSignUp)
       default:
         break
       }
     case .error:
-      return .error(URLError(.unknown))
+      return .error(COError.unknown)
     default:
       break
     }
@@ -45,15 +45,24 @@ public final class ApiManaerStub: ApiService {
     let data = SampleData(
       path: endPoint.path
     ).create()
-    
-    if let data = try? JSONDecoder().decode(T.self, from: data) {
-      return .just(data)
+    print("====================Sample====================")
+    print(String(data: data, encoding: .utf8) ?? "")
+    print(T.Type.self)
+    print("====================Sample====================")
+    do {
+      let json = try JSONDecoder().decode(T.self, from: data)
+      return .just(json)
+    } catch let error {
+      print("[Decode Error]: \(error.localizedDescription)")
+      return .error(COError.cannotDecodeJsonData)
     }
-    
-    return .error(URLError(.cannotDecodeRawData))
   }
   
   public func requestOutBound<T>(endPoint: EndPoint) -> RxSwift.Observable<T> where T : Decodable {
+    return .empty()
+  }
+  
+  public func upload<T>(endPoint: EndPoint) -> Observable<T> where T : Decodable {
     return .empty()
   }
 }

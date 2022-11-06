@@ -7,19 +7,35 @@
 
 import Foundation
 
+import CODomain
+
 public final class UserManagerStub: UserService {
   
-  public private(set) var accessToken: String = ""
+  public private(set) var isExists: Bool
   
-  public func update(accessToken: String) {
-    self.accessToken = accessToken
+  public private(set) var profile: CODomain.Profile? = nil
+  
+  public var tokens: Tokens = .init()
+  
+  public func update(tokens: Tokens?, profile: CODomain.Profile?) {
+    if let tokens = tokens {
+      self.tokens = tokens
+    }
+    
+    if let profile = profile {
+      self.profile = profile
+    }
   }
   
   public func remove() {
-    self.accessToken = ""
+    self.tokens = .init()
   }
   
-  public init() {
+  public init(isExists: Bool = true) {
+    self.isExists = isExists
     
+    let data = JSON.profile.data(using: .utf8)!
+    let profile = try? JSONDecoder().decode(Base<Profile>.self, from: data).data
+    self.profile = profile
   }
 }

@@ -7,26 +7,29 @@
 
 import UIKit
 
+import FlexLayout
 import Then
 
 public enum DescriptionType {
   // DescriptionLabel, View
   case textField(String, String?)
-  case custom(String, UIView)
+  case textFieldWithAttributed(NSAttributedString, String?)
+  case custom(String, CastableView, String?)
+  case customWithAttributed(NSAttributedString, CastableView, String?)
 }
 
 public class DescriptionContainerView: UIView {
-
+  
   private let descriptionLabel = UILabel().then {
-    $0.font = .systemFont(ofSize: 16, weight: .bold)
+    $0.font = .regular(size: 16)
     $0.textColor = .black
   }
   
   public let textField = UITextField().then {
-    $0.font = .systemFont(ofSize: 14, weight: .semibold)
+    $0.font = .medium(size: 14)
     $0.textColor = .black
     $0.leftViewMode = .always
-    $0.layer.borderColor = UIColor.black.cgColor
+    $0.layer.borderColor = UIColor.hexC6C6C6.cgColor
     $0.layer.borderWidth = 1
     $0.layer.cornerRadius = 12
     $0.layer.masksToBounds = true
@@ -36,7 +39,14 @@ public class DescriptionContainerView: UIView {
     $0.leftView = view
   }
   
-  public private(set) var customView: UIView?
+  public private(set) var customView: CastableView?
+  public private(set) var customViews: [CastableView]?
+  
+  private let noticeTextLabel = UILabel().then {
+    $0.font = .regular(size: 12)
+    $0.textColor = .red
+    $0.numberOfLines = 1
+  }
   
   public let flexContainer = UIView()
   
@@ -58,9 +68,17 @@ public class DescriptionContainerView: UIView {
     case let .textField(text, placeholder):
       descriptionLabel.text = text
       textField.placeholder = placeholder
-    case let .custom(text, view):
+    case let .textFieldWithAttributed(attrbutedText, placeholder):
+      descriptionLabel.attributedText = attrbutedText
+      textField.placeholder = placeholder
+    case let .custom(text, view, noticeText):
       descriptionLabel.text = text
       customView = view
+      noticeTextLabel.text = noticeText
+    case let .customWithAttributed(attrbutedText, view, noticeText):
+      descriptionLabel.attributedText = attrbutedText
+      customView = view
+      noticeTextLabel.text = noticeText
     }
     
     configureUI()
@@ -80,14 +98,116 @@ extension DescriptionContainerView {
     flexContainer.flex
       .define { flex in
         flex.addItem(descriptionLabel)
-          .marginBottom(4)
+          .marginBottom(10)
+        
         if let customView = customView {
-          flex.addItem(customView)
-            .height(36)
+          
+          if let containerView = customView as? CastableContainerView {
+            flex.addItem(containerView)
+          } else {
+            flex.addItem(customView)
+              .height(36)
+          }
         } else {
           flex.addItem(textField)
-            .height(36)
+            .height(44)
         }
+        
+        if noticeTextLabel.text?.isEmpty == false {
+          flex.addItem(noticeTextLabel)
+            .marginVertical(8)
+        }
+      }
+  }
+}
+
+public final class CastableContainerView: UIView, CastableView {
+  
+  enum Height {
+    static let `default`: CGFloat = 30
+  }
+  
+  enum Margin {
+    static let `default`: CGFloat = 6
+  }
+  
+  public var handler: ([String]) -> Void = { _ in }
+  public private(set) var selectedItems: [[String]] = []
+  
+  public let flexContainer = UIView()
+  
+  public private(set) var views: [CastableView] = []
+  private let direction: Flex.Direction
+  
+  public init(views: [CastableView], direction: Flex.Direction = .column) {
+    self.views = views
+    self.direction = direction
+    super.init(frame: .zero)
+    
+    configureUI()
+    bindEvent()
+  }
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  public override func layoutSubviews() {
+    super.layoutSubviews()
+    
+    self.pin
+      .width(of: self)
+      .height(of: self)
+  }
+  
+  public func setSelectedItems(items: [String]) {
+    
+    views.forEach {
+      let roundSelectionButtonView = $0.casting(type: RoundSelectionButtonView.self)
+      roundSelectionButtonView.setSelectedItems(items: items)
+      
+      if roundSelectionButtonView.selectedItems.count > 0 {
+        self.selectedItems.append(roundSelectionButtonView.selectedItems)
+      }
     }
+  }
+}
+
+extension CastableContainerView {
+  private func configureUI() {
+    
+    let height = CGFloat(40 * views.count)
+    
+    backgroundColor = .clear
+    
+    addSubview(flexContainer)
+    
+    flexContainer.flex
+      .direction(direction)
+      .define { flex in
+        views.forEach {
+          if direction == .column || direction == .columnReverse {
+            flex.addItem($0)
+              .minHeight(height)
+              .marginBottom(Margin.default)
+          } else {
+            flex.addItem($0)
+              .height(Height.default)
+              .marginRight(Margin.default)
+          }
+        }
+      }
+  }
+  
+  private func bindEvent() {
+    let views = views.map { $0.casting(type: RoundSelectionButtonView.self) }
+    
+    let handler: (String) -> Void = { [weak self] _ in
+      let selectedItems = views.map { $0.selectedItems }
+      self?.selectedItems = selectedItems
+      self?.handler(selectedItems.flatMap { $0 })
+    }
+    
+    let _ = views.map { $0.handler = handler }
   }
 }

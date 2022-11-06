@@ -6,9 +6,11 @@
 //  Copyright © 2022 sideproj. All rights reserved.
 //
 
+import UIKit
+
+import CODomain
 import FloatingPanel
 import SnapKit
-import UIKit
 import ReactorKit
 
 enum FloatingType { // 어떤 데이터를 담은 플로팅파넬을 띄어줄지

@@ -8,11 +8,12 @@
 
 import Foundation
 
+import COAuth
 import COManager
 
 public enum HTTPMethod {
   case get, post, put, delete
-  
+
   var string: String {
     switch self {
     case .get:
@@ -30,11 +31,11 @@ public enum HTTPMethod {
 public struct EndPoint {
   
   public let path: Path
-  private let accessToken: String
+  private let tokens: Tokens
   
   public init(path: Path, userService: UserService = UserManager.shared) {
     self.path = path
-    self.accessToken = userService.accessToken
+    self.tokens = userService.tokens
   }
 }
 
@@ -48,21 +49,38 @@ public extension EndPoint {
   }
   
   var header: [String: String]? {
+    var common: [String: String] = ["Content-Type": "application/json"]
     switch path {
-    case let .signIn(authType):
-      return [
-        "access-token": accessToken,
-        "auth-type": authType.description
-      ]
+    case let .signIn(authType, accessToken):
+      let _ = ["access-token": accessToken,
+               "auth-type": authType.description].map { common[$0.key] = $0.value }
+      
+    case let .signUp(_, accessToken):
+      let _ = ["access-token": accessToken].map { common[$0.key] = $0.value }
+      
     case .serchPlace:
-      return ["Authorization": "KakaoAK ccd2be71137221d2c9eac97cee497f1a"]
-    default:
-      return ["Authorization": accessToken]
-    }
-  }
-  
-  var url: URL? {
+      return ["Authorization": Auth.ThirdParty.kakao]
+      
+    case .interests, .skills:
+      break
     
+    case .uploadProfileImage:
+      return ["Content-Type": "multipart/form-data"]
+      
+    case .refreshToken:
+      return ["refresh-token": tokens.refresh]
+      
+    default:
+      let _ = [
+        "access-token": tokens.access,
+        "refresh-token": tokens.refresh
+      ].map { common[$0.key] = $0.value }
+    }
+    return common
+  }
+
+  var url: URL? {
+
     var components = URLComponents()
     components.scheme = baseURL.scheme
     components.host = baseURL.host
@@ -78,17 +96,19 @@ public extension EndPoint {
     
     return components.url
   }
-  
+
   var parameter: [String: Any]? {
     return path.parameter
   }
-  
+
   var method: HTTPMethod {
     switch path {
-    case .userProfile, .updateProfile:
+    case .signUp, .uploadProfileImage, .userProfile, .updateProfile:
       return .put
-    case .signIn:
+    case .refreshToken, .signIn, .logout:
       return .post
+    case .signOut:
+      return .delete
     default:
       return .get
     }

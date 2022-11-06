@@ -8,6 +8,7 @@
 import Foundation
 
 public enum AuthType: Int, CustomStringConvertible, CaseIterable, Codable {
+  case kakao = 0, naver, apple
   
   public var description: String {
     switch self {
@@ -17,12 +18,8 @@ public enum AuthType: Int, CustomStringConvertible, CaseIterable, Codable {
       return "NAVER"
     case .apple:
       return "APPLE"
-    case .none:
-      return ""
     }
   }
-  
-  case kakao = 0, naver, apple, none
   
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer().decode(String.self)
@@ -35,7 +32,7 @@ public enum AuthType: Int, CustomStringConvertible, CaseIterable, Codable {
     case "APPLE":
       self = .apple
     default:
-      self = .none
+      fatalError("")
     }
   }
   
@@ -49,8 +46,21 @@ public enum AuthType: Int, CustomStringConvertible, CaseIterable, Codable {
       try container.encode("NAVER")
     case .apple:
       try container.encode("APPLE")
-    case .none:
-      try container.encode("")
     }
+  }
+}
+
+extension AuthType {
+  static func convertType(value: String) -> Self? {
+      switch value {
+      case AuthType.kakao.description:
+        return .kakao
+      case AuthType.naver.description:
+        return .naver
+      case AuthType.apple.description:
+        return .apple
+      default:
+        return nil
+      }
   }
 }

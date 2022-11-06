@@ -8,21 +8,37 @@
 
 import UIKit
 
+import COCommonUI
+import CODomain
+import COManager
 import CONetwork
 import Sign
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
+  
   var window: UIWindow?
   
-  var controller: UINavigationController!
-
+  var controller: CONavigationViewController!
+  
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-
+    
     guard let scene = (scene as? UIWindowScene) else { return }
     window = .init(windowScene: scene)
     
+    routeToSplash()
+    
+    NotificationCenter.default.add(
+      observer: self,
+      selector: #selector(routeToSplash),
+      type: .routeToSignIn
+    )
+  }
+}
+
+extension SceneDelegate {
+  @objc func routeToSplash() {
     let controller = SplashController()
+    controller.reactor = .init()
     controller.delegate = self
     
     window?.rootViewController = controller
@@ -34,7 +50,7 @@ extension SceneDelegate: SplashDelegate {
   func didFinishSplashLoading() {
     
     /// 로그인 상태 체크.
-    if UserManager.shared.accessToken.isEmpty {
+    if UserManager.shared.tokens.isEmpty {
       let container = SignInDIContainer(
         apiService: ApiManager.shared,
         userService: UserManager.shared
@@ -43,11 +59,11 @@ extension SceneDelegate: SplashDelegate {
       let signInController = container.makeController()
       signInController.delegate = self
       
-      controller = UINavigationController(
+      controller = CONavigationViewController(
         rootViewController: signInController
       )
     } else {
-      controller = UINavigationController(
+      controller = CONavigationViewController(
         rootViewController: MainController()
       )
     }
@@ -58,8 +74,25 @@ extension SceneDelegate: SplashDelegate {
 }
 
 extension SceneDelegate: SignInDelegate {
-  func routeToSignUp() {
-    let signUpController = SignUpController()
+  func routeToSignUp(authType: CODomain.AuthType, accessToken: String) {
+    let container = SignUpDIContainer(
+      apiService: ApiManager.shared,
+      userService: UserManager.shared,
+      addressService: AddressManager.shared,
+      interestService: InterestManager.shared,
+      roleSkillsService: RoleSkillsManager.shared,
+      authType: authType,
+      accessToken: accessToken
+    )
+    
+    let signUpController = container.makeController()
+    signUpController.delegate = self
     controller.pushViewController(signUpController, animated: true)
+  }
+}
+
+extension SceneDelegate: SignUpDelegate {
+  func routeToMain() {
+    controller.pushViewController(MainController(), animated: true)
   }
 }

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// 다국어 처리.
 public extension String {
@@ -23,5 +24,32 @@ public extension String {
   
   func localized(with argument: CVarArg = [], comment: String = "") -> String {
     return String(format: self.localized(comment: comment), argument)
+  }
+}
+
+/// AttributedText
+public extension String {
+  func addAttributes(_ attributes: [NSAttributedString.Key : Any], range: NSRange? = nil) -> NSAttributedString {
+    let mutableString = NSMutableAttributedString(string: self)
+    
+    if let range = range {
+      mutableString.addAttributes(attributes, range: range)
+      return mutableString
+    } else {
+      return NSAttributedString(
+        string: self,
+        attributes: attributes
+      )
+    }
+  }
+}
+
+/// AttributedText
+public extension String {
+  func setLastWord(color: UIColor) -> NSAttributedString {
+    return self.addAttributes(
+      [.foregroundColor : color],
+      range: .init(location: self.count - 1, length: 1)
+    )
   }
 }
