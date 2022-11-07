@@ -17,6 +17,9 @@ public final class TitleView: FlexLayoutView {
     private var rightBtns: [UIButton] {
         [self.rightInnerBtn, self.rightOuterBtn]
     }
+    private var allBtns: [UIButton] {
+        [self.leftBtn, self.rightInnerBtn, self.rightOuterBtn]
+    }
     
     private var leftBtnAction: ButtonAction?
     private var rightInnerBtnAction: ButtonAction?
@@ -54,6 +57,11 @@ public final class TitleView: FlexLayoutView {
         self.rootContainer.pin.all()
         self.rootContainer.flex.layout()
     }
+    
+    public override func setAttrs() {
+        self.titleLabel.font = .semiBold(size: 16)
+        self.allBtns.forEach { $0.isHidden = true }
+    }
 }
 
 public extension TitleView {
@@ -78,6 +86,11 @@ public extension TitleView {
 }
 
 public extension TitleView {
+    @discardableResult func set(title: String) -> Self {
+        self.titleLabel.text = title
+        return self
+    }
+    
     @discardableResult func setLeftBtn(type: BtnType, action: ButtonAction? = nil) -> Self {
         self.leftBtn.isHidden = false
         self.leftBtn.setImage(type.image, for: .normal)
