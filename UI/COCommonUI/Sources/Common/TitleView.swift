@@ -49,6 +49,11 @@ public final class TitleView: FlexLayoutView {
                 }
             }
     }
+    
+    public override func layout() {
+        self.rootContainer.pin.all()
+        self.rootContainer.flex.layout()
+    }
 }
 
 public extension TitleView {
