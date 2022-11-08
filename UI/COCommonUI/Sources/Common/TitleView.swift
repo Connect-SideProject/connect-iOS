@@ -39,7 +39,7 @@ public final class TitleView: FlexLayoutView {
                     .width(17).height(20)
                 
                 flex.addItem(self.titleLabel)
-                    .marginLeft(12)
+                    .marginLeft(20)
                     .maxWidth(60%)
                 
                 flex.addItem()
@@ -60,7 +60,8 @@ public final class TitleView: FlexLayoutView {
     
     public override func setAttrs() {
         self.titleLabel.font = .semiBold(size: 16)
-        self.allBtns.forEach { $0.isHidden = true }
+        self.titleLabel.textColor = .hex3A3A3A
+        self.allBtns.forEach { $0.flex.display(.none) }
     }
 }
 
@@ -92,21 +93,21 @@ public extension TitleView {
     }
     
     @discardableResult func setLeftBtn(type: BtnType, action: ButtonAction? = nil) -> Self {
-        self.leftBtn.isHidden = false
+        self.leftBtn.flex.display(.flex)
         self.leftBtn.setImage(type.image, for: .normal)
         self.leftBtnAction = action
         return self
     }
     
     @discardableResult func setRightInnerBtn(type: BtnType, action: ButtonAction? = nil) -> Self {
-        self.rightInnerBtn.isHidden = false
+        self.rightInnerBtn.flex.display(.flex)
         self.rightInnerBtn.setImage(type.image, for: .normal)
         self.rightInnerBtnAction = action
         return self
     }
     
     @discardableResult func setRightOuterBtn(type: BtnType, action: ButtonAction? = nil) -> Self {
-        self.rightOuterBtn.isHidden = false
+        self.rightOuterBtn.flex.display(.flex)
         self.rightOuterBtn.setImage(type.image, for: .normal)
         self.rightOuterBtnAction = action
         return self
