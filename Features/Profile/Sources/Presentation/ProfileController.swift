@@ -39,16 +39,17 @@ public final class ProfileController: UIViewController, ReactorKit.View {
   
   private lazy var skillContainerView = DescriptionContainerView(
     type: .custom(
-      "보유 스킬",
-      CastableContainerView(
-        views: [RoundSelectionButtonView(
-          titles: [],
-          isSelectable: false,
-          direction: .vertical
-        )],
-        direction: .column
-      ),
-      nil
+      .init(
+        title: "보유 스킬",
+        castableView: CastableContainerView(
+          views: [RoundSelectionButtonView(
+            titles: [],
+            isSelectable: false,
+            direction: .vertical
+          )],
+          direction: .column
+        )
+      )
     )
   )
   

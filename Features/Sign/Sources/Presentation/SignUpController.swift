@@ -26,65 +26,76 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   private let nicknameContainerView = DescriptionContainerView(
     type: .textFieldWithAttributed(
-      "닉네임 *".setLastWord(color: .red),
-      "닉네임을 입력하세요."
+      .init(
+        attributedTitle: "닉네임 *".setLastWord(color: .red),
+        placeholder: "닉네임을 입력하세요."
+      )
     )
   )
   
   private lazy var addressContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "활동지역 *".setLastWord(color: .red),
-      CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
-      "마이>설정 에서 공개여부를 선택할 수 있어요."
+      .init(
+        attributedTitle: "활동지역 *".setLastWord(color: .red),
+        castableView: CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
+        noticeText: "마이>설정 에서 공개여부를 선택할 수 있어요."
+      )
     )
   )
   
   private let periodContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "경력기간 *".setLastWord(color: .red),
-      CheckBoxContainerView(
-        titles: [
-          Career.aspirant.description,
-          Career.junior.description,
-          Career.senior.description
-        ],
-        eventType: .radio
-      ),
-      nil
+      .init(
+        attributedTitle: "경력기간 *".setLastWord(color: .red),
+        castableView: CheckBoxContainerView(
+          titles: [
+            Career.aspirant.description,
+            Career.junior.description,
+            Career.senior.description
+          ],
+          eventType: .radio
+        )
+      )
     )
   )
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "관심분야 *".setLastWord(color: .red),
-      RoundSelectionButtonView(titles: interestTitles),
-      "필수 3개를 선택해주세요"
+      .init(
+        attributedTitle: "관심분야 *".setLastWord(color: .red),
+        castableView: RoundSelectionButtonView(titles: interestTitles),
+        noticeText: "필수 3개를 선택해주세요"
+      )
     )
   )
   
   private var roleTitles: [String] = []
   private lazy var roleContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "원하는 역할 *".setLastWord(color: .red),
-      RoundSelectionButtonView(titles: roleTitles),
-      nil
+      .init(
+        attributedTitle: "원하는 역할 *".setLastWord(color: .red),
+        castableView: RoundSelectionButtonView(titles: roleTitles)
+      )
     )
   )
   
   private var skillsViews: [CastableView] = []
   private lazy var skillContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "보유 스킬 *".setLastWord(color: .red),
-      CastableContainerView(views: skillsViews),
-      nil
+      .init(
+        attributedTitle: "보유 스킬 *".setLastWord(color: .red),
+        castableView: CastableContainerView(views: skillsViews)
+      )
     )
   )
   
   private let portfolioContainerView = DescriptionContainerView(
     type: .textField(
-      "포트폴리오",
-      "포트폴리오 URL을 입력 해주세요. (선택)"
+      .init(
+        title: "포트폴리오",
+        placeholder: "포트폴리오 URL을 입력 해주세요. (선택)"
+      )
     )
   )
   

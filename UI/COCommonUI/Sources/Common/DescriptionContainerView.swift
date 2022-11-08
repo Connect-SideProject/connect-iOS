@@ -10,12 +10,37 @@ import UIKit
 import FlexLayout
 import Then
 
+public struct DescriptionItem {
+  
+  public let title: String
+  public let attributedTitle: NSAttributedString
+  
+  public let castableView: CastableView?
+  public let placeholder: String?
+  public let noticeText: String?
+  
+  public init(
+    title: String = "",
+    attributedTitle: NSAttributedString = .init(string: ""),
+    castableView: CastableView? = nil,
+    placeholder: String? = nil,
+    noticeText: String? = nil
+  ) {
+    self.title = title
+    self.attributedTitle = attributedTitle
+    self.castableView = castableView
+    self.placeholder = placeholder
+    self.noticeText = noticeText
+  }
+}
+
 public enum DescriptionType {
   // DescriptionLabel, View
-  case textField(String, String?)
-  case textFieldWithAttributed(NSAttributedString, String?)
-  case custom(String, CastableView, String?)
-  case customWithAttributed(NSAttributedString, CastableView, String?)
+  case textField(DescriptionItem)
+  case textFieldWithAttributed(DescriptionItem)
+  case textView(DescriptionItem)
+  case custom(DescriptionItem)
+  case customWithAttributed(DescriptionItem)
 }
 
 public class DescriptionContainerView: UIView {
@@ -37,6 +62,15 @@ public class DescriptionContainerView: UIView {
     let view = UIView()
     view.frame = .init(x: 0, y: 0, width: 8, height: 36)
     $0.leftView = view
+  }
+  
+  public let textView = UITextView().then {
+    $0.font = .medium(size: 14)
+    $0.textColor = .black
+    $0.layer.borderColor = UIColor.hexC6C6C6.cgColor
+    $0.layer.borderWidth = 1
+    $0.layer.cornerRadius = 12
+    $0.layer.masksToBounds = true
   }
   
   public private(set) var customView: CastableView?
@@ -65,20 +99,25 @@ public class DescriptionContainerView: UIView {
     super.init(frame: .zero)
     
     switch type {
-    case let .textField(text, placeholder):
-      descriptionLabel.text = text
-      textField.placeholder = placeholder
-    case let .textFieldWithAttributed(attrbutedText, placeholder):
-      descriptionLabel.attributedText = attrbutedText
-      textField.placeholder = placeholder
-    case let .custom(text, view, noticeText):
-      descriptionLabel.text = text
-      customView = view
-      noticeTextLabel.text = noticeText
-    case let .customWithAttributed(attrbutedText, view, noticeText):
-      descriptionLabel.attributedText = attrbutedText
-      customView = view
-      noticeTextLabel.text = noticeText
+    case let .textField(item):
+      descriptionLabel.text = item.title
+      textField.placeholder = item.placeholder
+      noticeTextLabel.text = item.noticeText
+    case let .textFieldWithAttributed(item):
+      descriptionLabel.attributedText = item.attributedTitle
+      textField.placeholder = item.placeholder
+    case let .textView(item):
+      descriptionLabel.text = item.title
+      textView.text = item.placeholder
+      noticeTextLabel.text = item.noticeText
+    case let .custom(item):
+      descriptionLabel.text = item.title
+      customView = item.castableView
+      noticeTextLabel.text = item.noticeText
+    case let .customWithAttributed(item):
+      descriptionLabel.attributedText = item.attributedTitle
+      customView = item.castableView
+      noticeTextLabel.text = item.noticeText
     }
     
     configureUI()

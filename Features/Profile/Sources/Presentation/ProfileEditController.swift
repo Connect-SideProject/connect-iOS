@@ -38,58 +38,68 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   private var roleTitles: [String] = []
   private lazy var roleContainerView = DescriptionContainerView(
     type: .custom(
-      "원하는 역할",
-      RoundSelectionButtonView(
-        titles: roleTitles
-      ),
-      nil
+      .init(
+        title: "원하는 역할",
+        castableView: RoundSelectionButtonView(
+          titles: roleTitles
+        )
+      )
     )
   )
   
   private lazy var addressContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "활동지역 *".setLastWord(color: .red),
-      CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
-      nil
+      .init(
+        attributedTitle: "활동지역 *".setLastWord(color: .red),
+        castableView: CastableButton(type: .downwordArrow("활동 지역을 선택해주세요."))
+      )
     )
   )
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
     type: .custom(
-      "관심분야",
-      RoundSelectionButtonView(
-        titles: interestTitles
-      ),
-      nil
+      .init(
+        title: "관심분야",
+        castableView: RoundSelectionButtonView(
+          titles: interestTitles
+        )
+      )
     )
   )
   
   private let portfolioContainerView = DescriptionContainerView(
-    type: .textField("포트폴리오", "포트폴리오 URL을 입력 해주세요. (선택)")
+    type: .textField(
+      .init(
+        title: "포트폴리오",
+        placeholder: "포트폴리오 URL을 입력 해주세요. (선택)"
+      )
+    )
   )
   
   private let periodContainerView = DescriptionContainerView(
     type: .custom(
-      "경력기간",
-      CheckBoxContainerView(
-        titles: [
-          Career.aspirant.description,
-          Career.junior.description,
-          Career.senior.description
-        ],
-        eventType: .radio
-      ),
-      nil
+      .init(
+        title: "경력기간",
+        castableView: CheckBoxContainerView(
+          titles: [
+            Career.aspirant.description,
+            Career.junior.description,
+            Career.senior.description
+          ],
+          eventType: .radio
+        )
+      )
     )
   )
   
   private var skillsViews: [CastableView] = []
   private lazy var skillContainerView = DescriptionContainerView(
     type: .custom(
-      "보유 스킬",
-      CastableContainerView(views: skillsViews),
-      nil
+      .init(
+        title: "보유 스킬",
+        castableView: CastableContainerView(views: skillsViews)
+      )
     )
   )
   
@@ -189,9 +199,9 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
       .compactMap { $0.imageURL }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] imageURL in
-          guard let `self` = self else { return }
+        guard let `self` = self else { return }
         Task {
-            await self.profileView.profileImageView.setImage(url: imageURL)
+          await self.profileView.profileImageView.setImage(url: imageURL)
         }
       }.disposed(by: disposeBag)
     
@@ -275,7 +285,7 @@ private extension ProfileEditController {
         
         flex.addItem(saveButton)
           .height(41)
-    }
+      }
   }
   
   func bindEvent() {
@@ -343,12 +353,12 @@ private extension ProfileEditController {
     let roles: [RoleType] = roleContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
     )
-    .selectedItems.compactMap { RoleType(description: $0) } ?? []
+      .selectedItems.compactMap { RoleType(description: $0) } ?? []
     
     let interestings: [String] = interestsContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
     )
-    .selectedItems ?? []
+      .selectedItems ?? []
     
     let portfolioURL = portfolioContainerView.textField.text
     
@@ -363,8 +373,8 @@ private extension ProfileEditController {
     let skills: [String] = skillContainerView.customView?.casting(
       type: CastableContainerView.self
     )
-    .selectedItems
-    .flatMap { $0 } ?? []
+      .selectedItems
+      .flatMap { $0 } ?? []
     
     let parameter: ProfileEditParameter = .init(
       profileURL: profileURL,
