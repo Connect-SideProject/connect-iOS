@@ -40,10 +40,6 @@ public final class HomeController: UIViewController {
     
     private let homeNavgaionBar: HomeNavigationBarView = HomeNavigationBarView()
     
-    private let selectedLineView: UIView = UIView().then {
-        $0.backgroundColor = UIColor.hex06C755
-    }
-    
     
     private let homeScrollView: UIScrollView = UIScrollView().then {
         $0.backgroundColor = .clear
@@ -209,7 +205,7 @@ public final class HomeController: UIViewController {
         homeScrollView.addSubview(homeScrollContainerView)
         self.view.addSubview(releaseHeaderTitleLabel)
         
-        _ = [collectionView, homeIndicatorView, selectedLineView,releaseCollectionView, floatingButton].map {
+        _ = [collectionView, homeIndicatorView,releaseCollectionView, floatingButton].map {
             homeScrollContainerView.addSubview($0)
         }
         
@@ -310,31 +306,7 @@ extension HomeController {
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseCollectionView.rx.items(dataSource: self.releaseDataSource))
             .disposed(by: disposeBag)
-        
-        
-        self.collectionView
-            .rx.itemSelected
-            .subscribe(onNext: { [unowned self] indexPath in
-                switch self.dataSource[indexPath] {
-                case .homeStudyMenu:
-                    guard let attributed = self.collectionView.layoutAttributesForItem(at: indexPath)?.frame else { return }
-                    let topSpacing = attributed.origin.y + attributed.height
-                    let leftSpacing = attributed.origin.x
-                    let widthSpacing = attributed.width
-                    UIView.animate(withDuration: 0.1, delay: 0, options: .curveEaseInOut, animations: {
-                        self.selectedLineView.snp.remakeConstraints {
-                            $0.top.equalToSuperview().offset(topSpacing)
-                            $0.left.equalToSuperview().offset(leftSpacing)
-                            $0.width.equalTo(widthSpacing)
-                            $0.height.equalTo(2)
-                        }
-                        self.view.layoutIfNeeded()
-                    })
-                default:
-                    break
-                }
-            }).disposed(by: disposeBag)
-        
+                
         
     }
 }

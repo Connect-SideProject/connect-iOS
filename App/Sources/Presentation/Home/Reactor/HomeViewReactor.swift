@@ -16,7 +16,7 @@ import CODomain
 
 enum HomeViewTransform: TransformType {
     enum Event {
-        case didSelectHomeMenu(isSelected: Bool)
+        case didSelectHomeMenu(type: HomeSubMenuType)
     }
     case none
 }
@@ -79,9 +79,9 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             let setMenuItems = Observable<Mutation>.just(.setSubMenuItems(.homeSubMenu([
-                .homeStudyMenu(HomeStudyMenuReactor(menuType: .all)),
-                .homeStudyMenu(HomeStudyMenuReactor(menuType: .project)),
-                .homeStudyMenu(HomeStudyMenuReactor(menuType: .study))
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .all, isSelected: true)),
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .project, isSelected: false)),
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .study, isSelected: false))
             ])))
             
             

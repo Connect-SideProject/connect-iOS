@@ -33,7 +33,7 @@ public final class HomeStudyMenuReactor: Reactor {
     public var initialState: State
     
     public enum Mutation {
-        case setSelected(Bool)
+        case setSelected(type: Bool)
     }
     
     public struct State {
@@ -41,10 +41,10 @@ public final class HomeStudyMenuReactor: Reactor {
         var isSelected: Bool
     }
     
-    init(menuType: HomeSubMenuType) {
+    init(menuType: HomeSubMenuType, isSelected: Bool) {
         defer { _ = self.state }
-        self.initialState = State(menuType: menuType, isSelected: false)
-        print("study Menu Type: \(menuType)")
+        self.initialState = State(menuType: menuType, isSelected: isSelected)
+        print("study Menu Type: \(menuType) or isSelected: \(isSelected)")
     }
     
     
@@ -53,6 +53,7 @@ public final class HomeStudyMenuReactor: Reactor {
         case let .setSelected(isSelected):
             var newState = state
             newState.isSelected = isSelected
+            print("isSelected : \(isSelected)")
             return newState
         }
     }
@@ -69,9 +70,12 @@ public final class HomeStudyMenuReactor: Reactor {
 
 private extension HomeStudyMenuReactor {
     func didSelectHomeMenu(from event: HomeViewTransform.Event) -> Observable<Mutation> {
+        
+        let state = self.currentState.menuType
+        
         switch event {
-        case let .didSelectHomeMenu(isSelected):
-            return .just(.setSelected(isSelected))
+        case let .didSelectHomeMenu(type):
+            return .just(.setSelected(type: state.getTitle() == type.getTitle()))
         }
     }
 }
@@ -97,6 +101,11 @@ final class HomeStudyMenuCell: UICollectionViewCell {
     }
     
     
+    private let selectedLineView: UIView = UIView().then {
+        $0.backgroundColor = UIColor.hex06C755
+    }
+    
+    
     //MARK: initalization
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -117,7 +126,9 @@ final class HomeStudyMenuCell: UICollectionViewCell {
     private func configure() {
         studyMenuContainerView.addSubview(studyMenuTitleLabel)
         
-        self.contentView.addSubview(studyMenuContainerView)
+        _ = [selectedLineView,studyMenuContainerView].map {
+            self.contentView.addSubview($0)
+        }
         
         
         studyMenuContainerView.snp.makeConstraints {
@@ -127,6 +138,12 @@ final class HomeStudyMenuCell: UICollectionViewCell {
         studyMenuTitleLabel.snp.makeConstraints {
             $0.center.equalToSuperview()
             $0.height.equalTo(19)
+        }
+        
+        selectedLineView.snp.makeConstraints {
+            $0.left.right.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(1)
+            $0.height.equalTo(2)
         }
     }
 
@@ -145,12 +162,24 @@ extension HomeStudyMenuCell: ReactorKit.View {
             .bind(to: studyMenuTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
-        
-        reactor.state.map { $0.menuType.getTitle() }
-            .filter{ $0 == "전체" }
-            .map { _ in UIColor.black }
+                
+        reactor.state.filter { $0.isSelected }
+            .map { _ in UIColor.hex3A3A3A }
             .bind(to: self.studyMenuTitleLabel.rx.textColor)
             .disposed(by: disposeBag)
+        
+        reactor.state.filter { $0.isSelected == false }
+            .map { _ in UIColor.hex8E8E8E }
+            .bind(to: self.studyMenuTitleLabel.rx.textColor)
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state.map { $0.isSelected }
+            .map { !$0 }
+            .distinctUntilChanged()
+            .bind(to: self.selectedLineView.rx.isHidden)
+            .disposed(by: self.disposeBag)
+            
         
     }
     
