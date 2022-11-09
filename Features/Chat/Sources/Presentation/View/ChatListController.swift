@@ -14,16 +14,20 @@ import ReactorKit
 import PinLayout
 import FlexLayout
 import COExtensions
+import COCommonUI
 
 public final class ChatListController: ChatBaseController<ChatListController.Reactor> {
     
     private let tableView = UITableView()
+    private let titleView = TitleView().set(title: "대화 목록")
     
     public override func setupContainer() {
         super.setupContainer()
         
         self.rootContainer.flex.define { [weak self] in
             guard let self = self else { return }
+            $0.addItem(self.titleView)
+                .height(50)
             $0.addItem(self.tableView)
                 .grow(1)
         }
