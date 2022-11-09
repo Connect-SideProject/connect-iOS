@@ -50,7 +50,7 @@ public final class HomeDIContainer: HomeDIConainer {
 
 
 public protocol HomeRepository {
-    func responseMenuImage(image: HomeMenu) throws -> UIImage
+    func responseMenuImage(image: HomeMenu) throws -> Data
     func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeMenuSectionItem(item: [HomeMenu]) -> HomeViewSection
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
@@ -67,10 +67,10 @@ final class HomeViewRepo: HomeRepository {
     }
     
     
-    func responseMenuImage(image item: HomeMenu) throws -> UIImage {
+    func responseMenuImage(image item: HomeMenu) throws -> Data {
         guard let imageurl = URL(string: item.menuImage),
-              let imageData = try? Data(contentsOf: imageurl) else { return UIImage() }
-        return UIImage(data: imageData) ?? UIImage()
+              let imageData = try? Data(contentsOf: imageurl) else { return Data() }
+        return UIImage(data: imageData)?.pngData() ?? Data()
     }
     
     

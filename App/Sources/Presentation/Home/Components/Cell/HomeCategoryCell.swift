@@ -39,7 +39,7 @@ final class HomeCategoryCell: UICollectionViewCell {
     }(UIView())
     
     private let menuImageView: UIImageView = {
-        $0.contentMode = .scaleToFill
+        $0.contentMode = .scaleAspectFit
         
         return $0
     }(UIImageView())
@@ -102,6 +102,7 @@ extension HomeCategoryCell: ReactorKit.View {
 
         reactor.state
             .map { try $0.homeCellRepo.responseMenuImage(image: $0.menuType) }
+            .map { UIImage(data: $0)}
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
             .bind(to: self.menuImageView.rx.image)
