@@ -84,6 +84,8 @@ public class DescriptionContainerView: UIView {
   
   public let flexContainer = UIView()
   
+  public var type: DescriptionType = .textField(.init())
+  
   public override func layoutSubviews() {
     super.layoutSubviews()
     
@@ -97,6 +99,7 @@ public class DescriptionContainerView: UIView {
   
   public init(type: DescriptionType) {
     super.init(frame: .zero)
+    self.type = type
     
     switch type {
     case let .textField(item):
@@ -148,8 +151,16 @@ extension DescriptionContainerView {
               .height(36)
           }
         } else {
-          flex.addItem(textField)
-            .height(44)
+          
+          if case .textField = type {
+            flex.addItem(textField)
+              .height(44)
+          }
+          
+          if case .textView = type {
+            flex.addItem(textView)
+              .height(155)
+          }
         }
         
         if noticeTextLabel.text?.isEmpty == false {

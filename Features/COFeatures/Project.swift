@@ -15,6 +15,7 @@ let features = Project.feature(
   dependencies: [
     .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
     .project(target: "Chat", path: .relativeToRoot("Features/Chat")),
+    .project(target: "Meeting", path: .relativeToRoot("Features/Meeting")),
     .project(target: "Profile", path: .relativeToRoot("Features/Profile"))
   ]
 )
