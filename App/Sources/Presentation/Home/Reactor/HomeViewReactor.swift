@@ -14,6 +14,14 @@ import CONetwork
 import CODomain
 
 
+enum HomeViewTransform: TransformType {
+    enum Event {
+        case didSelectHomeMenu(isSelected: Bool)
+    }
+    case none
+}
+
+
 
 public final class HomeViewReactor: Reactor, ErrorHandlerable {
         

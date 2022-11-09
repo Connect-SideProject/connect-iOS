@@ -24,7 +24,7 @@ enum HomeSubMenuType: String {
     }
 }
 
-
+//MARK: Transform 을 통해 selected State 상태 변경
 public final class HomeStudyMenuReactor: Reactor {
     
 
@@ -32,16 +32,48 @@ public final class HomeStudyMenuReactor: Reactor {
     
     public var initialState: State
     
+    public enum Mutation {
+        case setSelected(Bool)
+    }
+    
     public struct State {
         var menuType: HomeSubMenuType
+        var isSelected: Bool
     }
     
     init(menuType: HomeSubMenuType) {
         defer { _ = self.state }
-        self.initialState = State(menuType: menuType)
+        self.initialState = State(menuType: menuType, isSelected: false)
         print("study Menu Type: \(menuType)")
     }
     
+    
+    public func reduce(state: State, mutation: Mutation) -> State {
+        switch mutation {
+        case let .setSelected(isSelected):
+            var newState = state
+            newState.isSelected = isSelected
+            return newState
+        }
+    }
+    
+    public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let fromHomeMenuSelectMutation = HomeViewTransform.event.flatMap { [weak self] event in
+            self?.didSelectHomeMenu(from: event) ?? .empty()
+        }
+        return Observable.of(mutation, fromHomeMenuSelectMutation).merge()
+    }
+    
+}
+
+
+private extension HomeStudyMenuReactor {
+    func didSelectHomeMenu(from event: HomeViewTransform.Event) -> Observable<Mutation> {
+        switch event {
+        case let .didSelectHomeMenu(isSelected):
+            return .just(.setSelected(isSelected))
+        }
+    }
 }
 
 
