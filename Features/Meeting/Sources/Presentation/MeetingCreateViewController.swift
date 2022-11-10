@@ -14,6 +14,7 @@ import ReactorKit
 import RxCocoa
 import Then
 
+import COCommon
 import COCommonUI
 import COExtensions
 
@@ -132,6 +133,10 @@ public final class MeetingCreateViewController: UIViewController {
   
   public var disposeBag = DisposeBag()
   
+  deinit {
+    removeNotifications()
+  }
+  
   public override func viewDidLoad() {
     super.viewDidLoad()
     
@@ -201,6 +206,8 @@ private extension MeetingCreateViewController {
     )
     tapGesture.delegate = self
     view.addGestureRecognizer(tapGesture)
+    
+    registerNotifications()
   }
   
   @objc func dismissKeyboards() {
@@ -215,5 +222,11 @@ private extension MeetingCreateViewController {
 extension MeetingCreateViewController: UIGestureRecognizerDelegate {
   public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
     return true
+  }
+}
+
+extension MeetingCreateViewController: KeyboardResponder {
+  public var targetView: UIView {
+    commentContainerView.textField
   }
 }
