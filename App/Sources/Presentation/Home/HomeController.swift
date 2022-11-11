@@ -130,8 +130,9 @@ public final class HomeController: UIViewController {
                     studyMenuCell.reactor = cellReactor
                     return studyMenuCell
                     
-                case .homeStudyList:
+                case let .homeStudyList(cellReactor):
                     guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return UICollectionViewCell() }
+                    studyListCell.reactor = cellReactor
                     return studyListCell
                 }
             },configureSupplementaryView: { dataSource, collectionView, kind, indexPath in

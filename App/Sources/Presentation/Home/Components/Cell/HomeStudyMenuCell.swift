@@ -24,7 +24,6 @@ enum HomeSubMenuType: String {
     }
 }
 
-//MARK: Transform 을 통해 selected State 상태 변경
 public final class HomeStudyMenuReactor: Reactor {
     
 

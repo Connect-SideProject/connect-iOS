@@ -19,6 +19,7 @@ public enum Path {
   case uploadProfileImage(Data)
   case userProfile
   case homeMenu
+  case homeNews
   case updateProfile(ProfileEditParameter)
   case homeRelease
   
@@ -36,6 +37,8 @@ public enum Path {
       return "/v2/local/search/address.json"
     case .homeMenu:
         return "/api/study/home/menu"
+    case .homeNews:
+        return "/api/study/news"
     case .homeRelease:
         return "/api/study/hots"
     case .uploadProfileImage:

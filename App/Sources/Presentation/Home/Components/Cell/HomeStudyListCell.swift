@@ -8,12 +8,41 @@
 import UIKit
 import Then
 import SnapKit
+import ReactorKit
+import CODomain
+
+public final class HomeStudyListReactor: Reactor {
+
+    public typealias Action = NoAction
+
+    public struct State {
+        var studyNewsModel: HomeStudyNodeList
+    }
+    
+    public let initialState: State
+    
+    init(studyNewsModel: HomeStudyNodeList) {
+        defer { _ = self.state }
+        self.initialState = State(studyNewsModel: studyNewsModel)
+        print("News Study Model: \(studyNewsModel)")
+    }
+
+
+}
+
+
+
 
 
 
 final class HomeStudyListCell: UICollectionViewCell {
     
     //MARK: Property
+    
+    typealias Reactor = HomeStudyListReactor
+    
+    var disposeBag: DisposeBag = DisposeBag()
+    
     private let studyListContainerView: UIView = UIView().then {
         $0.backgroundColor = UIColor.white
         $0.clipsToBounds = true
@@ -156,5 +185,17 @@ final class HomeStudyListCell: UICollectionViewCell {
         
     }
     
+    
+}
+
+
+
+extension HomeStudyListCell: ReactorKit.View {
+    
+    func bind(reactor: Reactor) {
+        
+        
+        
+    }
     
 }

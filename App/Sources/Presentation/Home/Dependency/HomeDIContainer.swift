@@ -51,10 +51,12 @@ public final class HomeDIContainer: HomeDIConainer {
 
 public protocol HomeRepository {
     func responseMenuImage(image: HomeMenu) throws -> Data
-    func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
-    func responseHomeMenuSectionItem(item: [HomeMenu]) -> HomeViewSection
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
+    func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
+    func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
+    func responseHomeMenuSectionItem(item: [HomeMenu]) -> HomeViewSection
+    func responseHomeNewsSectionItem(item: [HomeStudyNodeList]) -> HomeViewSection
 }
 
 
@@ -83,6 +85,15 @@ final class HomeViewRepo: HomeRepository {
         return creteMenuResponse
     }
     
+    func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation> {
+        let createNewsResponse = homeApiService.request(endPoint: .init(path: .homeNews)).flatMap { (data: HomeStudyList) -> Observable<HomeViewReactor.Mutation> in
+            
+            return .just(.setHomeNewsItem(data))
+        }
+        
+        return createNewsResponse
+    }
+    
     
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation> {
         let createReleaseResponse = homeApiService.request(endPoint: .init(path: .homeRelease)).flatMap { (data: [HomeHotList]) -> Observable<HomeViewReactor.Mutation> in
@@ -101,6 +112,17 @@ final class HomeViewRepo: HomeRepository {
         
         return HomeViewSection.field(homeMenuSectionItem)
     }
+    
+    
+    func responseHomeNewsSectionItem(item: [HomeStudyNodeList]) -> HomeViewSection {
+        var homeNewsSectionItem: [HomeViewSectionItem] = []
+        for i in 0 ..< item.count {
+            homeNewsSectionItem.append(.homeStudyList(HomeStudyListReactor(studyNewsModel: item[i])))
+        }
+        
+        return HomeViewSection.homeStudyList(homeNewsSectionItem)
+    }
+    
     
     
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection {

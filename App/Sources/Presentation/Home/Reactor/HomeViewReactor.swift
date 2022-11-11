@@ -41,6 +41,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     public enum Mutation {
         case setLoading(Bool)
         case setHomeMenuItem([HomeMenu])
+        case setHomeNewsItem(HomeStudyList)
         case setReleaseItems([HomeHotList])
         case setSubMenuItems(HomeViewSection)
         case setStudyListItems(HomeViewSection)
@@ -85,11 +86,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             ])))
             
             
-            let setStudyListItems = Observable<Mutation>.just(.setStudyListItems(.homeStudyList([
-                .homeStudyList,
-                .homeStudyList,
-                .homeStudyList
-            ])))
+            let setStudyListItems = Observable<Mutation>.just(.setStudyListItems(.homeStudyList([])))
                         
             return .concat(
                 startLoading,
@@ -114,6 +111,12 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             var newState = state
             guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
             newState.section[sectionIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
+            
+            return newState
+        case let .setHomeNewsItem(items):
+            var newState = state
+            guard let sectionIndex = self.getIndex(section: .homeStudyList([])) else { return newState }
+            newState.section[sectionIndex] = homeRepository.responseHomeNewsSectionItem(item: items.study)
             
             return newState
         case let .setSubMenuItems(items):

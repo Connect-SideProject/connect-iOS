@@ -89,5 +89,5 @@ extension HomeViewSection: SectionModelType {
 public enum HomeViewSectionItem {
     case homeMenu(HomeMenuCellReactor)
     case homeStudyMenu(HomeStudyMenuReactor)
-    case homeStudyList
+    case homeStudyList(HomeStudyListReactor)
 }
