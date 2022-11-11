@@ -71,11 +71,12 @@ public final class HomeStudyMenuReactor: Reactor {
 private extension HomeStudyMenuReactor {
     func didSelectHomeMenu(from event: HomeViewTransform.Event) -> Observable<Mutation> {
         
-        let state = self.currentState.menuType
+        let state = self.currentState.menuType.rawValue
         
         switch event {
         case let .didSelectHomeMenu(type):
-            return .just(.setSelected(type: state.getTitle() == type.getTitle()))
+            print("didselct")
+            return .just(.setSelected(type: state == type.currentState.menuType.rawValue))
         }
     }
 }
@@ -126,7 +127,7 @@ final class HomeStudyMenuCell: UICollectionViewCell {
     private func configure() {
         studyMenuContainerView.addSubview(studyMenuTitleLabel)
         
-        _ = [selectedLineView,studyMenuContainerView].map {
+        _ = [studyMenuContainerView,selectedLineView].map {
             self.contentView.addSubview($0)
         }
         
@@ -142,7 +143,7 @@ final class HomeStudyMenuCell: UICollectionViewCell {
         
         selectedLineView.snp.makeConstraints {
             $0.left.right.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(1)
+            $0.bottom.equalToSuperview()
             $0.height.equalTo(2)
         }
     }

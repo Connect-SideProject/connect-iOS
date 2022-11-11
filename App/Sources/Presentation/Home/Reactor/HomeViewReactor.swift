@@ -14,9 +14,9 @@ import CONetwork
 import CODomain
 
 
-enum HomeViewTransform: TransformType {
+enum HomeViewTransform: TransformType, Equatable {
     enum Event {
-        case didSelectHomeMenu(type: HomeSubMenuType)
+        case didSelectHomeMenu(type: HomeStudyMenuReactor)
     }
     case none
 }

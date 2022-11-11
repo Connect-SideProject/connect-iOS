@@ -307,6 +307,16 @@ extension HomeController {
             .bind(to: self.releaseCollectionView.rx.items(dataSource: self.releaseDataSource))
             .disposed(by: disposeBag)
                 
+        collectionView.rx
+            .itemSelected
+            .subscribe(onNext: { indexPath in
+                switch self.dataSource[indexPath] {
+                case let .homeStudyMenu(reactor):
+                    HomeViewTransform.event.onNext(.didSelectHomeMenu(type: reactor))
+                default:
+                    break
+                }
+            }).disposed(by: disposeBag)
         
     }
 }
