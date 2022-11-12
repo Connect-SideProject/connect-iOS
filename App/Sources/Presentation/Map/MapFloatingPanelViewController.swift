@@ -27,7 +27,7 @@ class MapFloatingPanelViewController: UIViewController {
     
     private var kakaoAddressResults: [KakaoMapAddress] = [] 
     
-    private lazy var connectCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewCompositionalLayout(sectionProvider: { [weak self] _, _ -> NSCollectionLayoutSection? in
+    lazy var connectCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewCompositionalLayout(sectionProvider: { [weak self] _, _ -> NSCollectionLayoutSection? in
         guard let `self` = self else { return nil }
         return type(of: self).createConnectCollectionViewSection()
     })).then {
@@ -71,6 +71,7 @@ class MapFloatingPanelViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         connectCollectionView.snp.makeConstraints { make in
+//            make.edges.equalToSuperview()
             make.top.left.right.equalToSuperview()
             make.height.equalToSuperview().multipliedBy(0.48)
 //            make.edges.equalTo(view.safeAreaLayoutGuide)

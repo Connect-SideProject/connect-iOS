@@ -7,11 +7,11 @@
 //
 
 import SnapKit
+import Then
 import UIKit
 
 protocol StudyCollectionViewCellDelegate: AnyObject {
     func didTappedChattingButton()
-    func didTappedMoreButton()
 }
 
 class StudyCollectionViewCell: UICollectionViewCell {
@@ -24,28 +24,19 @@ class StudyCollectionViewCell: UICollectionViewCell {
 
     private let studyLikeView = StudyLikeView()
     
-    private let studyTitleLabel: UILabel = {
-       let label = UILabel()
-        label.font = .systemFont(ofSize: 20, weight: .bold)
-        label.numberOfLines = 1
-        label.textAlignment = .left
-        return label
-    }()
+    private let studyTitleLabel = UILabel().then {
+        $0.font = .systemFont(ofSize: 20, weight: .bold)
+        $0.numberOfLines = 1
+        $0.textAlignment = .left
+    }
     
-    private let studyDescriptionLabel: UILabel = {
-       let label = UILabel()
-        label.font = .systemFont(ofSize: 15, weight: .regular)
-        label.numberOfLines = 3
-        return label
-    }()
+    private let studyDescriptionLabel = UILabel().then {
+        $0.font = .systemFont(ofSize: 15, weight: .regular)
+        $0.numberOfLines = 3
+        $0.backgroundColor = .red
+    }
     
-    private let studyBookmarkButton: UIButton = {
-       let button = UIButton()
-        let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .bold)
-        let image = UIImage(systemName: "bookmark", withConfiguration: config)
-        button.setImage(image, for: .normal)
-        return button
-    }()
+    private let studyRecruitTypeView = StudyRecruitTypeView()
     
     private let chattingButton: UIButton = {
        let button = UIButton()
@@ -60,20 +51,27 @@ class StudyCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    private let moreButton: UIButton = {
-       let button = UIButton()
-        button.setTitle("더보기 >", for: .normal)
-        button.setTitleColor(UIColor.gray, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 12, weight: .regular)
-        button.titleLabel?.textAlignment = .center
-//        button.titleEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        button.layer.cornerRadius = 20
-        button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor.gray.cgColor
-        button.clipsToBounds = true
-        button.backgroundColor = .white
-        return button
-    }()
+    private let userImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFit
+        $0.image = UIImage(systemName: "person.fill")
+    }
+    
+//    private let 
+    
+//    private let moreButton: UIButton = {
+//       let button = UIButton()
+//        button.setTitle("더보기 >", for: .normal)
+//        button.setTitleColor(UIColor.gray, for: .normal)
+//        button.titleLabel?.font = .systemFont(ofSize: 12, weight: .regular)
+//        button.titleLabel?.textAlignment = .center
+////        button.titleEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+//        button.layer.cornerRadius = 20
+//        button.layer.borderWidth = 1
+//        button.layer.borderColor = UIColor.gray.cgColor
+//        button.clipsToBounds = true
+//        button.backgroundColor = .white
+//        return button
+//    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -106,16 +104,23 @@ class StudyCollectionViewCell: UICollectionViewCell {
 
         chattingButton.snp.makeConstraints { make in
             make.left.equalToSuperview().offset(20)
-            make.bottom.equalToSuperview().offset(-5)
+            make.bottom.equalTo(self.safeAreaLayoutGuide).offset(-10)
             make.height.equalTo(40)
             make.right.equalToSuperview().offset(-20)
+        }
+        
+        studyRecruitTypeView.snp.makeConstraints { make in
+            make.left.equalTo(chattingButton.snp.left)
+            make.right.equalTo(chattingButton.snp.right)
+            make.bottom.equalTo(chattingButton.snp.top).offset(-10)
+            make.height.equalTo(20)
         }
         
         studyDescriptionLabel.snp.makeConstraints { make in
             make.top.equalTo(studyTitleLabel.snp.bottom)
             make.left.equalTo(studyTitleLabel.snp.left)
             make.right.equalTo(studyTitleLabel.snp.right)
-            make.bottom.equalTo(chattingButton.snp.top)
+            make.bottom.equalTo(studyRecruitTypeView.snp.top)
         }
 
         
@@ -146,10 +151,6 @@ class StudyCollectionViewCell: UICollectionViewCell {
         delegate?.didTappedChattingButton()
     }
     
-    @objc private func didTappdMoreButton() {
-        delegate?.didTappedMoreButton()
-    }
-    
     // MARK: -Configure
     private func configureUI() {
         contentView.layer.cornerRadius = 10
@@ -157,16 +158,14 @@ class StudyCollectionViewCell: UICollectionViewCell {
         contentView.layer.borderColor = UIColor.lightGray.cgColor
         contentView.clipsToBounds = true
         contentView.backgroundColor = .systemBackground
-        [studyStatusView, studyLikeView, studyTitleLabel, studyDescriptionLabel, chattingButton].forEach{contentView.addSubview($0)}
+        [studyStatusView, studyLikeView, studyTitleLabel, studyDescriptionLabel, studyRecruitTypeView,  chattingButton].forEach{contentView.addSubview($0)}
         
         chattingButton.addTarget(self, action: #selector(didTappdChattingButton), for: .touchUpInside)
-        moreButton.addTarget(self, action: #selector(didTappdMoreButton), for: .touchUpInside)
+        studyRecruitTypeView.configureUI(recruitTypes: [RecruitType.developer, RecruitType.planner, RecruitType.designer])
     }
     
     public func configureUI(with model: String) {
         let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .bold)
-        let image = UIImage(systemName: "bookmark", withConfiguration: config)
-        studyBookmarkButton.setImage(image, for: .normal)
         chattingButton.setTitle("담당자와 채팅하기", for: .normal)
         chattingButton.backgroundColor = .green
         // MOCK DATA

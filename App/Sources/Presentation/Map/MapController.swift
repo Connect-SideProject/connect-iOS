@@ -52,8 +52,8 @@ class MapController: UIViewController, View {
         // Set the new appearance
         fpc.surfaceView.appearance = appearance
         fpc.surfaceView.grabberHandle.isHidden = true // FloatingPanel Grabber hidden true
-//        fpc.surfaceView.isUserInteractionEnabled = false // FloatingPanel Scroll enabled false
-        
+//        fpc.surfaceView.isUserInteractionEnabled = false // 아예 Fpc 안움직이게 함
+        fpc.panGestureRecognizer.isEnabled = false // FloatingPanel Scroll enabled false
         return fpc
     }()
     
@@ -77,8 +77,6 @@ class MapController: UIViewController, View {
         $0.autocorrectionType = .no
         $0.autocapitalizationType = .none
         $0.searchTextField.backgroundColor = .white
-//        $0.barTintColor = .white
-//        $0.searchTextField.layer.shadowColor = UIColor.white.cgColor
         return $0
     }(UISearchBar())
     
@@ -233,6 +231,7 @@ extension MapController: ConnectMapDataFuctionality {
             floatingPanelVC.delegate = self
             floatingPanelVC.addPanel(toParent: self)
             floatingPanelVC.set(contentViewController: contentViewController)
+            floatingPanelVC.track(scrollView: contentViewController.connectCollectionView)
             floatingPanelVC.show()
         }
     }

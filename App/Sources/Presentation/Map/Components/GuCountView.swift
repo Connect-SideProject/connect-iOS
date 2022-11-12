@@ -38,7 +38,7 @@ class GuCountView: UIButton {
     private func configureUI() {
         isUserInteractionEnabled = true
         layer.cornerRadius = 50
-        backgroundColor = .systemGray
+        backgroundColor = .darkGray
         setTitleColor(.white, for: .normal)
 //        titleLabel?.textColor = .white
         titleLabel?.textAlignment = .center

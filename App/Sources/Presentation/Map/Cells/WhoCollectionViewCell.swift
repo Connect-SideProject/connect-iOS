@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import Then
 
 protocol WhoCollectionViewCellDelegate: AnyObject {
     func didTappedChattingButton()
@@ -20,8 +21,8 @@ class WhoCollectionViewCell: UICollectionViewCell {
     weak var delegate: WhoCollectionViewCellDelegate?
     
     private let nameLabel: UnderlineLabel = {
-        $0.font = .systemFont(ofSize: 17, weight: .bold)
-        $0.highlightedTextColor = .black
+        $0.font = .systemFont(ofSize: 20, weight: .bold)
+        $0.numberOfLines = 1
         $0.textAlignment = .left
 //        $0.text = "익명의 커넥터"
         return $0
@@ -32,15 +33,16 @@ class WhoCollectionViewCell: UICollectionViewCell {
         return $0
     }(UIImageView())
     
-    private let chattingButton: UIButton = {
-        $0.setTitle("채팅하기", for: .normal)
+    private let chattingButton = UIButton().then {
+        $0.setTitle("담당자와 채팅하기", for: .normal)
         $0.setTitleColor(UIColor.white, for: .normal)
+        $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .regular)
+        $0.titleLabel?.textAlignment = .center
+//        button.titleEdgeInsets = UIEdgeInsets(top: 10, left: 5, bottom: 10, right: 5)
+        $0.backgroundColor = .green
         $0.layer.cornerRadius = 10
         $0.clipsToBounds = true
-        $0.backgroundColor = .purple
-        $0.titleLabel?.font = .systemFont(ofSize: 13)
-        return $0
-    }(UIButton())
+    }
     
 //    private let profileButton: UIButton = {
 //        $0.setTitle("프로필", for: .normal)
@@ -78,22 +80,23 @@ class WhoCollectionViewCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         nameLabel.snp.makeConstraints { make in
-            make.top.left.equalToSuperview().offset(5)
-            make.right.equalToSuperview().offset(-5)
-            make.height.equalTo(50)
+            make.top.equalToSuperview().offset(30)
+            make.left.equalToSuperview().offset(20)
+            make.right.equalToSuperview().offset(-20)
+            make.height.equalTo(20)
         }
         
-        profileImageView.snp.makeConstraints { make in
-            make.top.equalTo(nameLabel.snp.bottom).offset(5)
-            make.left.equalToSuperview().offset(5)
-            make.right.equalToSuperview().offset(-5)
-        }
+//        profileImageView.snp.makeConstraints { make in
+//            make.top.equalTo(nameLabel.snp.bottom).offset(5)
+//            make.left.equalToSuperview().offset(5)
+//            make.right.equalToSuperview().offset(-5)
+//        }
         
         chattingButton.snp.makeConstraints { make in
-            make.top.equalTo(profileImageView.snp.bottom).offset(5)
-            make.left.equalToSuperview().offset(5)
+            make.left.equalToSuperview().offset(20)
             make.bottom.equalToSuperview().offset(-5)
-            make.right.equalToSuperview().offset(-5)
+            make.height.equalTo(40)
+            make.right.equalToSuperview().offset(-20)
         }
         
 //        profileButton.snp.makeConstraints { make in
