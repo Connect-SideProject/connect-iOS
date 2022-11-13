@@ -13,7 +13,7 @@ import UIKit
 import CONetwork
 
 
-public final class HomeDIContainer: HomeDIConainer {
+public final class HomeDependencyContainer: HomeDIContainer {
 
     public typealias HomeReactor = HomeViewReactor
     public typealias HomeViewRepository = HomeRepository
@@ -31,16 +31,16 @@ public final class HomeDIContainer: HomeDIConainer {
     }
     
     
-    public func makeHomeReactor() -> HomeViewReactor {
-        return HomeViewReactor(homeRepository: makeHomeRepository())
+    public func makeReactor() -> HomeViewReactor {
+        return HomeViewReactor(homeRepository: makeRepository())
     }
     
-    public func makeHomeRepository() -> HomeViewRepository {
+    public func makeRepository() -> HomeViewRepository {
         return HomeViewRepo(homeApiService: homeApiService)
     }
     
-    public func makeHomeController() -> HomeController {
-        return HomeController(reactor: makeHomeReactor())
+    public func makeController() -> HomeController {
+        return HomeController(reactor: makeReactor())
     }
     
     

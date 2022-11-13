@@ -8,14 +8,14 @@
 import Foundation
 
 
-public protocol HomeDIConainer {
+public protocol HomeDIContainer {
     
     associatedtype HomeReactor
     associatedtype HomeViewRepository
     associatedtype HomeViewController
     
-    func makeHomeReactor() -> HomeReactor
-    func makeHomeRepository() -> HomeViewRepository
-    func makeHomeController() -> HomeViewController
+    func makeReactor() -> HomeReactor
+    func makeRepository() -> HomeViewRepository
+    func makeController() -> HomeViewController
     
 }

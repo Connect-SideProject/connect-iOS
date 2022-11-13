@@ -52,12 +52,12 @@ extension MainController {
       selectedImage: .init(named: "ic_map_active")?.withRenderingMode(.alwaysOriginal)
     )
     
-    let homeDIContainer = HomeDIContainer(
+    let homeDIContainer = HomeDependencyContainer(
       homeApiService: ApiManager.shared
     )
     
     /// 홈 화면
-    let homeController = homeDIContainer.makeHomeController()
+    let homeController = homeDIContainer.makeController()
     homeController.tabBarItem = .init(
       title: "main.tabItem.home".localized(),
       image: .init(named: "ic_home_inactive")?.withRenderingMode(.alwaysOriginal),

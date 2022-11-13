@@ -10,12 +10,18 @@ import UIKit
 import Then
 import SnapKit
 import RxDataSources
+import ReactorKit
+
 
 
 /// 프로젝트 리스트 화면 컨트롤러
 final class PostListController: UIViewController {
     
     //MARK: Property
+    
+    typealias Reactor = PostListReactor
+    
+    public var disposeBag: DisposeBag = DisposeBag()
     
     private let postListIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.backgroundColor = .clear
@@ -40,7 +46,8 @@ final class PostListController: UIViewController {
     
     
     
-    init() {
+    init(reactor: Reactor) {
+        defer { self.reactor = reactor }
         self.postDataSource = type(of: self).postSourceFactory()
         super.init(nibName: nil, bundle: nil)
     }
@@ -76,5 +83,19 @@ final class PostListController: UIViewController {
         
     }
     
+    
+}
+
+
+
+extension PostListController: ReactorKit.View {
+    
+    
+    func bind(reactor: Reactor) {
+        
+        
+        
+        
+    }
     
 }
