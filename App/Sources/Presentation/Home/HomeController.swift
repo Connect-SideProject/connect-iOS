@@ -200,13 +200,12 @@ public final class HomeController: UIViewController {
     
     private func configure() {
         
-        self.view.bringSubviewToFront(self.homeIndicatorView)
         self.view.addSubview(homeScrollView)
         self.view.addSubview(homeNavgaionBar)
         homeScrollView.addSubview(homeScrollContainerView)
         self.view.addSubview(releaseHeaderTitleLabel)
         
-        _ = [collectionView, homeIndicatorView,releaseCollectionView, floatingButton].map {
+        _ = [homeIndicatorView, collectionView ,releaseCollectionView, floatingButton].map {
             homeScrollContainerView.addSubview($0)
         }
         

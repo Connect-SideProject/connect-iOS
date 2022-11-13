@@ -7,16 +7,41 @@
 //
 
 import UIKit
+import Then
+import SnapKit
+import RxDataSources
+
 
 /// 프로젝트 리스트 화면 컨트롤러
-class PostListController: UIViewController {
-    
-    private let latestListController: UIViewController
+final class PostListController: UIViewController {
     
     //MARK: Property
     
-    init(latestListController: UIViewController) {
-        self.latestListController = latestListController
+    private let postListIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
+        $0.backgroundColor = .clear
+    }
+    
+    
+    private let postTableView: UITableView = UITableView().then {
+        $0.showsHorizontalScrollIndicator = false
+        $0.showsVerticalScrollIndicator = true
+        $0.backgroundColor = .white
+        $0.register(PostStduyListCell.self, forCellReuseIdentifier: "PostStduyListCell")
+    }
+    
+    private let postDataSource: RxTableViewSectionedReloadDataSource<PostSection>
+    
+    private static func postSourceFactory() -> RxTableViewSectionedReloadDataSource<PostSection> {
+        return .init(configureCell: { dataSource, tableView, indexPath, sectionItem in
+            guard let postListCell = tableView.dequeueReusableCell(withIdentifier: "PostStduyListCell", for: indexPath) as? PostStduyListCell else { return UITableViewCell() }
+            return postListCell
+        })
+    }
+    
+    
+    
+    init() {
+        self.postDataSource = type(of: self).postSourceFactory()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -24,47 +49,32 @@ class PostListController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    deinit {
-        print(#function)
-    }
     
+    //MARK: LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        configure()
     }
     
-    private func configure() {
-        addChild(latestListController)
-    }
+    //MARK: Configure
     
-    
-}
-
-
-
-// 프로젝트 리스트 화면 DI
-extension PostListController {
-    fileprivate func add(child childrenViewController: UIViewController) {
-        beginUpdate(child: childrenViewController)
-        view.addSubview(childrenViewController.view)
-        endAddChild(child: childrenViewController)
-    }
-    
-    fileprivate func remove(child childrenViewController: UIViewController) {
-        guard parent != nil else { return }
-        childrenViewController.beginAppearanceTransition(false, animated: false)
-        childrenViewController.willMove(toParent: nil)
-        childrenViewController.removeFromParent()
-        childrenViewController.endAppearanceTransition()
+    private func configure(){
+        
+        _ = [postListIndicatorView, postTableView].map {
+            self.view.addSubview($0)
+        }
+        
+        postListIndicatorView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(24)
+        }
+        
+        postTableView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         
     }
     
-    fileprivate func beginUpdate(child childrenViewController: UIViewController) {
-        childrenViewController.beginAppearanceTransition(true, animated: false)
-        self.addChild(childrenViewController)
-    }
     
-    fileprivate func endAddChild(child childrenViewController: UIViewController) {
-        childrenViewController.didMove(toParent: self)
-        childrenViewController.endAppearanceTransition()
-    }
 }
