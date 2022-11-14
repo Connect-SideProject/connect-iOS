@@ -28,12 +28,15 @@ class StudyCollectionViewCell: UICollectionViewCell {
         $0.font = .systemFont(ofSize: 20, weight: .bold)
         $0.numberOfLines = 1
         $0.textAlignment = .left
+        $0.textColor = .black
+        $0.backgroundColor = .white
     }
     
     private let studyDescriptionLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 15, weight: .regular)
         $0.numberOfLines = 3
-        $0.backgroundColor = .red
+        $0.textColor = .black
+        $0.backgroundColor = .white
     }
     
     private let studyRecruitTypeView = StudyRecruitTypeView()
@@ -50,28 +53,6 @@ class StudyCollectionViewCell: UICollectionViewCell {
         button.clipsToBounds = true
         return button
     }()
-    
-    private let userImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
-        $0.image = UIImage(systemName: "person.fill")
-    }
-    
-//    private let 
-    
-//    private let moreButton: UIButton = {
-//       let button = UIButton()
-//        button.setTitle("더보기 >", for: .normal)
-//        button.setTitleColor(UIColor.gray, for: .normal)
-//        button.titleLabel?.font = .systemFont(ofSize: 12, weight: .regular)
-//        button.titleLabel?.textAlignment = .center
-////        button.titleEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-//        button.layer.cornerRadius = 20
-//        button.layer.borderWidth = 1
-//        button.layer.borderColor = UIColor.gray.cgColor
-//        button.clipsToBounds = true
-//        button.backgroundColor = .white
-//        return button
-//    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)

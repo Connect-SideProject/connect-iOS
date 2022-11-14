@@ -32,7 +32,7 @@ class StudyRecruitTypeView: UIView {
     
     private let studyRecruitTypeLabel = UILabel().then {
         $0.textColor = .lightGray
-        $0.textAlignment = .left
+        $0.textAlignment = .left        
     }
     
     override init(frame: CGRect) {
@@ -48,6 +48,7 @@ class StudyRecruitTypeView: UIView {
         _ = [personImageView, studyRecruitTypeLabel].map{ addSubview($0) }
         personImageView.snp.makeConstraints { make in
             make.top.left.bottom.equalToSuperview()
+            make.width.equalTo(35)
         }
         
         studyRecruitTypeLabel.snp.makeConstraints { make in
@@ -58,7 +59,7 @@ class StudyRecruitTypeView: UIView {
     
     public func configureUI(recruitTypes: [RecruitType]) {
         let recruitTypesToString = recruitTypes.map{ $0.recruitName }
-        let text = recruitTypesToString.reduce("") { $1 + "|" + $0 }
+        let text = recruitTypesToString.joined(separator: "|")
         studyRecruitTypeLabel.text = text
     }
 }

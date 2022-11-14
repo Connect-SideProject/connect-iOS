@@ -95,6 +95,7 @@ class MapController: UIViewController, View {
         super.viewDidLoad()
         configureUI()
         exampleGetCurrentLocation()
+
 //        LocationManager.shared.setLocationManager()
 //        ApiManager.shared.request(endPoint: .init(path: .userProfile)).subscribe(onNext: { (data: KakaoMapAddress) in
 //

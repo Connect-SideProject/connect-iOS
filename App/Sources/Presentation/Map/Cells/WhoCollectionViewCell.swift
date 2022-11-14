@@ -20,18 +20,16 @@ class WhoCollectionViewCell: UICollectionViewCell {
     
     weak var delegate: WhoCollectionViewCellDelegate?
     
-    private let nameLabel: UnderlineLabel = {
+    private let nameLabel = UnderlineLabel().then {
         $0.font = .systemFont(ofSize: 20, weight: .bold)
         $0.numberOfLines = 1
         $0.textAlignment = .left
-//        $0.text = "익명의 커넥터"
-        return $0
-    }(UnderlineLabel())
+    }
     
-    private let profileImageView: UIImageView = {
-        $0.contentMode = .scaleAspectFit
-        return $0
-    }(UIImageView())
+    private let studySkillLabel = StudySkillLabel().then {
+        $0.numberOfLines = 0
+        $0.textAlignment = .left
+    }
     
     private let chattingButton = UIButton().then {
         $0.setTitle("담당자와 채팅하기", for: .normal)
@@ -43,18 +41,6 @@ class WhoCollectionViewCell: UICollectionViewCell {
         $0.layer.cornerRadius = 10
         $0.clipsToBounds = true
     }
-    
-//    private let profileButton: UIButton = {
-//        $0.setTitle("프로필", for: .normal)
-//        $0.setTitleColor(UIColor.purple, for: .normal)
-//        $0.backgroundColor = .white
-//        $0.clipsToBounds = true
-//        $0.layer.borderWidth = 1
-//        $0.layer.borderColor = UIColor.purple.cgColor
-//        $0.layer.cornerRadius = 10
-//        $0.titleLabel?.font = .systemFont(ofSize: 13)
-//        return $0
-//    }(UIButton())
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -68,13 +54,9 @@ class WhoCollectionViewCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         nameLabel.text = nil
-        profileImageView.image = nil
         chattingButton.setTitle(nil, for: .normal)
         chattingButton.backgroundColor = nil
         chattingButton.layer.borderWidth = 0
-//        profileButton.setTitle(nil, for: .normal)
-//        profileButton.backgroundColor = nil
-//        profileButton.layer.borderWidth = 0
     }
     
     override func layoutSubviews() {
@@ -86,12 +68,6 @@ class WhoCollectionViewCell: UICollectionViewCell {
             make.height.equalTo(20)
         }
         
-//        profileImageView.snp.makeConstraints { make in
-//            make.top.equalTo(nameLabel.snp.bottom).offset(5)
-//            make.left.equalToSuperview().offset(5)
-//            make.right.equalToSuperview().offset(-5)
-//        }
-        
         chattingButton.snp.makeConstraints { make in
             make.left.equalToSuperview().offset(20)
             make.bottom.equalToSuperview().offset(-5)
@@ -99,12 +75,12 @@ class WhoCollectionViewCell: UICollectionViewCell {
             make.right.equalToSuperview().offset(-20)
         }
         
-//        profileButton.snp.makeConstraints { make in
-//            make.centerY.equalTo(chattingButton.snp.centerY)
-//            make.right.bottom.equalToSuperview().offset(-5)
-//            make.left.equalTo(chattingButton.snp.right).offset(5)
-//            make.width.equalTo((contentView.frame.width - 15) / 2)
-//        }
+        studySkillLabel.snp.makeConstraints { make in
+            make.top.equalTo(nameLabel.snp.bottom)
+            make.left.right.equalTo(nameLabel)
+            make.bottom.equalTo(chattingButton.snp.top)
+        }
+        
     }
     
     private func configureUI() {
@@ -113,7 +89,7 @@ class WhoCollectionViewCell: UICollectionViewCell {
         contentView.layer.borderColor = UIColor.lightGray.cgColor
         contentView.clipsToBounds = true
         contentView.backgroundColor = .systemBackground
-        [nameLabel, profileImageView, chattingButton].forEach{contentView.addSubview($0)}
+        [nameLabel, chattingButton, studySkillLabel].forEach{contentView.addSubview($0)}
         
 //        profileButton.addTarget(self, action: #selector(didTappedProfileButton), for: .touchUpInside)
     }
@@ -121,14 +97,9 @@ class WhoCollectionViewCell: UICollectionViewCell {
     public func configureUI(with model: String) {
         // MOCK
         nameLabel.text = "익명의 커넥터"
-        profileImageView.image = UIImage(systemName: "heart.fill")
         chattingButton.setTitle("채팅하기", for: .normal)
-        chattingButton.backgroundColor = .purple
-        chattingButton.layer.borderWidth = 1
-        chattingButton.layer.borderColor = UIColor.purple.cgColor
-//        profileButton.setTitle("프로필", for: .normal)
-//        profileButton.backgroundColor = .white
-//        profileButton.layer.borderWidth = 1
+        chattingButton.backgroundColor = .green
+        studySkillLabel.configureUI(with: ["자바", "스위프트", "코틀린", "C언어", "C#", "C++", "파이썬"])
     }
     
     @objc private func didTappedChattingButton() {
