@@ -14,10 +14,10 @@ import CONetwork
 
 
 public final class HomeDependencyContainer: HomeDIContainer {
-
     public typealias HomeReactor = HomeViewReactor
     public typealias HomeViewRepository = HomeRepository
     public typealias HomeViewController = HomeController
+    public typealias ChildrenDependency = PostDependencyContainer
     
     private let homeApiService: ApiService
     
@@ -45,6 +45,19 @@ public final class HomeDependencyContainer: HomeDIContainer {
     
     
 
+}
+
+
+extension HomeDependencyContainer {
+    
+    public func makeChildrenDependency() -> PostDependencyContainer {
+        return PostDependencyContainer(postApiService: self.homeApiService)
+    }
+    
+    public func makeChildrenController() -> PostListController {
+        return makeChildrenDependency().makeController()
+    }
+    
 }
 
 

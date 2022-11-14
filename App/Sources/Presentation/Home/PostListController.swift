@@ -15,11 +15,11 @@ import ReactorKit
 
 
 /// 프로젝트 리스트 화면 컨트롤러
-final class PostListController: UIViewController {
+public final class PostListController: UIViewController {
     
     //MARK: Property
     
-    typealias Reactor = PostListReactor
+    public typealias Reactor = PostListReactor
     
     public var disposeBag: DisposeBag = DisposeBag()
     
@@ -58,7 +58,7 @@ final class PostListController: UIViewController {
     
     
     //MARK: LifeCycle
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         configure()
     }
@@ -91,7 +91,7 @@ final class PostListController: UIViewController {
 extension PostListController: ReactorKit.View {
     
     
-    func bind(reactor: Reactor) {
+    public func bind(reactor: Reactor) {
         
         
         

@@ -10,23 +10,23 @@ import ReactorKit
 import COExtensions
 import CONetwork
 
-final class PostListReactor: Reactor, ErrorHandlerable {
+public final class PostListReactor: Reactor, ErrorHandlerable {
     
-    enum Action {
+    public enum Action {
         case viewDidLoad
     }
     
-    struct State {
+    public struct State {
         var isLoading: Bool
         var isError: COError?
     }
     
-    enum Mutation {
+    public enum Mutation {
         case setLoading(Bool)
         case setPostError(COError?)
     }
     
-    var initialState: State
+    public var initialState: State
     
     
     public var errorHandler: (Error) -> Observable<Mutation> = { error in
@@ -39,7 +39,7 @@ final class PostListReactor: Reactor, ErrorHandlerable {
     }
     
     
-    func mutate(action: Action) -> Observable<Mutation> {
+    public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
             let startLoading = Observable<Mutation>.just(.setLoading(true))
@@ -50,7 +50,7 @@ final class PostListReactor: Reactor, ErrorHandlerable {
     }
     
     
-    func reduce(state: State, mutation: Mutation) -> State {
+    public func reduce(state: State, mutation: Mutation) -> State {
         switch mutation {
         case let .setLoading(isLoading):
             var newState = state

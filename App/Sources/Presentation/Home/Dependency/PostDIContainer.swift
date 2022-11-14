@@ -11,11 +11,11 @@ import CONetwork
 
 
 //MARK: Dependency
-final class PostDependencyContainer: HomeDIContainer {
+public final class PostDependencyContainer: HomeDIContainer {
 
-    typealias HomeReactor = PostListReactor
-    typealias HomeViewRepository = PostListRepository
-    typealias HomeViewController = PostListController
+    public typealias HomeReactor = PostListReactor
+    public typealias HomeViewRepository = PostListRepository
+    public typealias HomeViewController = PostListController
     
     private let postApiService: ApiService
     
@@ -24,15 +24,15 @@ final class PostDependencyContainer: HomeDIContainer {
     }
     
     
-    func makeReactor() -> PostListReactor {
+    public func makeReactor() -> PostListReactor {
         return PostListReactor()
     }
     
-    func makeRepository() -> PostListRepository {
+    public func makeRepository() -> PostListRepository {
         return PostListRepo(postApiService: postApiService)
     }
     
-    func makeController() -> PostListController {
+    public func makeController() -> PostListController {
         return PostListController(reactor: makeReactor())
     }
     

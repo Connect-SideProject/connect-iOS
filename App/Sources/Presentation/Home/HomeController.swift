@@ -34,6 +34,8 @@ public final class HomeController: UIViewController {
         $0.setImage(UIImage(named: "home_search_floating"), for: .normal)
     }
     
+    private let childrenDependency: HomeDependencyContainer = HomeDependencyContainer(homeApiService: ApiManager.shared)
+    
     private let homeIndicatorView:UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.backgroundColor = .clear
     }
@@ -285,6 +287,12 @@ extension HomeController: ReactorKit.View {
 }
 
 extension HomeController {
+    
+    private func childrenToCoordinator() {
+        self.navigationController?.pushViewController(self.childrenDependency.makeChildrenController(), animated: true)
+    }
+    
+    
     func bindCollectionView(reactor: Reactor) {
         
         self.collectionView.rx.setDelegate(self)
@@ -309,10 +317,15 @@ extension HomeController {
                 
         collectionView.rx
             .itemSelected
-            .subscribe(onNext: { indexPath in
+            .subscribe(onNext: { [weak self] indexPath in
+                guard let `self` = self else { return }
                 switch self.dataSource[indexPath] {
+                case .homeMenu:
+                    self.childrenToCoordinator()
                 case let .homeStudyMenu(reactor):
                     HomeViewTransform.event.onNext(.didSelectHomeMenu(type: reactor))
+                case .homeStudyList:
+                    self.childrenToCoordinator()
                 default:
                     break
                 }
