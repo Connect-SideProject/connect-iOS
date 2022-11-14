@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 
 /// 홈 카테고리 리스트 뷰
-final class HomeListHeaderView: UIView {
+final class HomeListHeaderView: BaseView {
     
     //MARK:
     private let allButton: UIButton = {
