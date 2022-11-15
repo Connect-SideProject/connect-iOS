@@ -71,8 +71,7 @@ public final class ProfileReactor: Reactor, ErrorHandlerable {
   
   public var initialState: State = .init()
   
-  public lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { [weak self] error in
-    self?.userService.remove()
+  public lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
     return .just(.setMessage(.message(error.localizedDescription)))
   }
   
