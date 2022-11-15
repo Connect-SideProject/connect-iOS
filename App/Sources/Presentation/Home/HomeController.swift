@@ -191,7 +191,7 @@ public final class HomeController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = .white
       
-        self.navigationController?.setNavigationBarHidden(false, animated: false)
+
       
         configure()
     }

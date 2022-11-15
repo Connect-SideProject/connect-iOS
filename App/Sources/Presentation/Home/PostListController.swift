@@ -69,6 +69,8 @@ public final class PostListController: UIViewController {
     //MARK: Configure
     private func configure(){
         
+        self.view.backgroundColor = .white
+        
         _ = [postListIndicatorView, postFilterHeaderView ,postTableView].map {
             self.view.addSubview($0)
         }

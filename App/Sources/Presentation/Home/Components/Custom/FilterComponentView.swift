@@ -53,8 +53,7 @@ final class FilterComponentView: BaseView {
         }
         
         arrImageView.snp.makeConstraints {
-            $0.top.bottom.equalToSuperview()
-            $0.width.height.equalTo(20)
+            $0.width.height.equalTo(14)
             $0.right.equalToSuperview().offset(-12)
             $0.centerY.equalToSuperview()
         }
