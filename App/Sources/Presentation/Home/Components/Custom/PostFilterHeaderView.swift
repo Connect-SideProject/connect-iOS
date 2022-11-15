@@ -48,87 +48,40 @@ final class PostFilterHeaderView: BaseView {
     private let onOffLineFilterView: UIView = UIView().then {
         $0.backgroundColor = .hexEDEDED
         $0.clipsToBounds = true
-        $0.layer.cornerRadius = 20
+        $0.layer.cornerRadius = 15
     }
-    
-    private let onOffLineFilterLabel: UILabel = UILabel().then {
-        $0.text = "전체"
-        $0.textColor = .hex3A3A3A
-        $0.font = .regular(size: 12)
-        $0.numberOfLines = 1
-        $0.textAlignment = .left
-        $0.sizeToFit()
-    }
-    
-    private let onOffLineArrowImageView: UIImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
-        $0.image = UIImage(named: "ic_downward_arrow")
-    }
-    
+
     private let studyTypeFilterView: UIView = UIView().then {
         $0.backgroundColor = .hexEDEDED
         $0.clipsToBounds = true
-        $0.layer.cornerRadius = 20
-    }
-    
-    private let studyTypeFilterLabel: UILabel = UILabel().then {
-        $0.textColor = .hex3A3A3A
-        $0.font = .regular(size: 12)
-        $0.text = "전체"
-        $0.numberOfLines = 1
-        $0.textAlignment = .left
-        $0.sizeToFit()
-    }
-    
-    private let studyTypeArrowImageView: UIImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
-        $0.image = UIImage(named: "ic_downward_arrow")
+        $0.layer.cornerRadius = 15
     }
     
     private let interestFieldFilterView: UIView = UIView().then {
         $0.backgroundColor = .hexEDEDED
         $0.clipsToBounds = true
-        $0.layer.cornerRadius = 20
-    }
-    
-    private let interestFieldFilterLabel: UILabel = UILabel().then {
-        $0.text = "전체"
-        $0.font = .regular(size: 12)
-        $0.numberOfLines = 1
-        $0.textAlignment = .left
-        $0.sizeToFit()
-        $0.textColor = .hex3A3A3A
-    }
-    
-    private let interestFieldArrowImageView: UIImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
-        $0.image = UIImage(named: "ic_downward_arrow")
+        $0.layer.cornerRadius = 15
     }
     
     private let alignmentFilterView: UIView = UIView().then {
         $0.clipsToBounds = true
-        $0.layer.cornerRadius = 20
+        $0.layer.cornerRadius = 15
         $0.backgroundColor = .hexEDEDED
     }
     
-    private let alignmentFilterLabel: UILabel = UILabel().then {
-        $0.text = "전체"
-        $0.font = .regular(size: 12)
-        $0.numberOfLines = 1
-        $0.textAlignment = .left
-        $0.sizeToFit()
-        $0.textColor = .hex3A3A3A
-    }
+    private let onOffLineFilterComponentView: FilterComponentView = FilterComponentView()
     
-    private let alignmentArrowImageView: UIImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
-        $0.image = UIImage(named: "ic_downward_arrow")
-    }
+    private let studyTypeFilterComponentView: FilterComponentView = FilterComponentView()
+    
+    private let interestFieldFilterComponentView: FilterComponentView = FilterComponentView()
+    
+    private let alignmentFilterComponentView: FilterComponentView = FilterComponentView()
     
     
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
         super.init(frame: .zero)
+        configure()
     }
     
     required init?(coder: NSCoder) {
@@ -138,43 +91,62 @@ final class PostFilterHeaderView: BaseView {
     
     //MARK: Configure
     private func configure() {
+        self.backgroundColor = .white
         
-        _ = [onOffLineFilterLabel ,onOffLineArrowImageView].map {
-            onOffLineFilterView.addSubview($0)
-        }
-        
-        _ = [studyTypeFilterLabel, studyTypeArrowImageView].map {
-            studyTypeFilterView.addSubview($0)
-        }
-        
-        _ = [interestFieldFilterLabel, interestFieldArrowImageView].map {
-            interestFieldFilterView.addSubview($0)
-        }
-        
-        _ = [alignmentFilterLabel, alignmentArrowImageView].map {
-            alignmentFilterView.addSubview($0)
-        }
+        onOffLineFilterView.addSubview(onOffLineFilterComponentView)
 
-        
+        studyTypeFilterView.addSubview(studyTypeFilterComponentView)
+
+        interestFieldFilterView.addSubview(interestFieldFilterComponentView)
+
+        alignmentFilterView.addSubview(alignmentFilterComponentView)
+
+
         _ = [onOffLineFilterView, studyTypeFilterView, interestFieldFilterView,alignmentFilterView].map {
             self.studyFilterStackView.addArrangedSubview($0)
         }
         
-        onOffLineFilterLabel.snp.makeConstraints {
-            $0.top.bottom.equalToSuperview().inset(7)
-            $0.right.equalTo(onOffLineArrowImageView.snp.left).offset(3)
-            $0.height.equalTo(14)
-        }
+        self.addSubview(studyFilterStackView)
         
-        onOffLineArrowImageView.snp.makeConstraints {
-            $0.top.bottom.equalToSuperview().inset(7)
-            $0.width.height.equalTo(20)
-            $0.right.equalToSuperview().offset(-12)
+        studyFilterStackView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(13)
+            $0.height.equalTo(28)
+            $0.left.equalToSuperview().offset(20)
             $0.centerY.equalToSuperview()
         }
         
+        onOffLineFilterView.snp.makeConstraints {
+            $0.width.equalTo(73)
+        }
+        
+        onOffLineFilterComponentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        studyTypeFilterView.snp.makeConstraints {
+            $0.width.equalTo(62)
+        }
+        
+        studyTypeFilterComponentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
         
         
+        interestFieldFilterView.snp.makeConstraints {
+            $0.width.equalTo(62)
+        }
+        
+        interestFieldFilterComponentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        alignmentFilterView.snp.makeConstraints {
+            $0.width.equalTo(73)
+        }
+        
+        alignmentFilterComponentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
         
         
     }

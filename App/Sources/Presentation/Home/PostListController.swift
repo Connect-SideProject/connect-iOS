@@ -27,11 +27,13 @@ public final class PostListController: UIViewController {
         $0.backgroundColor = .clear
     }
     
+    private let postFilterHeaderView: PostFilterHeaderView = PostFilterHeaderView(reactor: PostFilterReactor())
+    
     
     private let postTableView: UITableView = UITableView().then {
         $0.showsHorizontalScrollIndicator = false
         $0.showsVerticalScrollIndicator = true
-        $0.backgroundColor = .white
+        $0.backgroundColor = .hexEDEDED
         $0.register(PostStduyListCell.self, forCellReuseIdentifier: "PostStduyListCell")
     }
     
@@ -63,12 +65,18 @@ public final class PostListController: UIViewController {
         configure()
     }
     
-    //MARK: Configure
     
+    //MARK: Configure
     private func configure(){
         
-        _ = [postListIndicatorView, postTableView].map {
+        _ = [postListIndicatorView, postFilterHeaderView ,postTableView].map {
             self.view.addSubview($0)
+        }
+        
+        postFilterHeaderView.snp.makeConstraints {
+            $0.top.equalTo(self.view.safeAreaLayoutGuide.snp.top)
+            $0.left.right.equalToSuperview()
+            $0.height.equalTo(55)
         }
         
         postListIndicatorView.snp.makeConstraints {
@@ -77,7 +85,8 @@ public final class PostListController: UIViewController {
         }
         
         postTableView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.equalTo(postFilterHeaderView.snp.bottom)
+            $0.left.right.bottom.equalToSuperview()
         }
         
         

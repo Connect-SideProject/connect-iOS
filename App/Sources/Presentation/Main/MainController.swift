@@ -58,6 +58,7 @@ extension MainController {
     
     /// 홈 화면
     let homeController = homeDIContainer.makeController()
+    homeController.delegate = self
     homeController.tabBarItem = .init(
       title: "main.tabItem.home".localized(),
       image: .init(named: "ic_home_inactive")?.withRenderingMode(.alwaysOriginal),
@@ -140,4 +141,13 @@ extension MainController: ProfileEditDelegate {
   func routeToBack() {
     profileNavigationController.popViewController(animated: true)
   }
+}
+
+
+extension MainController: HomeCoordinatorDelegate {
+    func didTapToPostListCreate() {
+        let homeDependency = HomeDependencyContainer(homeApiService: ApiManager.shared)
+        let childrenCoordinator = homeDependency.makeChildrenController()
+        self.navigationController?.pushViewController(childrenCoordinator, animated: true)
+    }
 }

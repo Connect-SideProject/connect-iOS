@@ -25,6 +25,8 @@ public final class HomeController: UIViewController {
     
     public typealias Reactor = HomeViewReactor
     
+    public weak var delegate: HomeCoordinatorDelegate?
+    
     public var disposeBag: DisposeBag = DisposeBag()
     
     
@@ -288,11 +290,6 @@ extension HomeController: ReactorKit.View {
 
 extension HomeController {
     
-    private func childrenToCoordinator() {
-        self.navigationController?.pushViewController(self.childrenDependency.makeChildrenController(), animated: true)
-    }
-    
-    
     func bindCollectionView(reactor: Reactor) {
         
         self.collectionView.rx.setDelegate(self)
@@ -321,13 +318,11 @@ extension HomeController {
                 guard let `self` = self else { return }
                 switch self.dataSource[indexPath] {
                 case .homeMenu:
-                    self.childrenToCoordinator()
+                    self.delegate?.didTapToPostListCreate()
                 case let .homeStudyMenu(reactor):
                     HomeViewTransform.event.onNext(.didSelectHomeMenu(type: reactor))
                 case .homeStudyList:
-                    self.childrenToCoordinator()
-                default:
-                    break
+                    self.delegate?.didTapToPostListCreate()
                 }
             }).disposed(by: disposeBag)
         
