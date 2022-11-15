@@ -157,7 +157,6 @@ public final class HomeController: UIViewController {
                         return homeMenuUnderLineView
                     case .homeStudyList:
                         guard let homeStudyListView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView", for: indexPath) as? HomeStudyListFooterView else { return UICollectionReusableView() }
-                        
                         return homeStudyListView
                     default:
                         return UICollectionReusableView()
@@ -321,8 +320,8 @@ extension HomeController {
                     self.delegate?.didTapToPostListCreate()
                 case let .homeStudyMenu(reactor):
                     HomeViewTransform.event.onNext(.didSelectHomeMenu(type: reactor))
-                case .homeStudyList:
-                    self.delegate?.didTapToPostListCreate()
+                default:
+                    break
                 }
             }).disposed(by: disposeBag)
         
