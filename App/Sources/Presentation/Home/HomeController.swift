@@ -57,9 +57,57 @@ public final class HomeController: UIViewController {
     }
     
     private let releaseDataSource: RxCollectionViewSectionedReloadDataSource<HomeReleaseSection>
-    private let dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection>
     
-    
+    private lazy var dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection> = .init(
+        configureCell: { dataSource, collectionView, indexPath, sectionItem in
+            switch sectionItem {
+            case let .homeMenu(cellReactor):
+                
+                guard let menuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell else { return UICollectionViewCell() }
+                
+                menuCell.reactor = cellReactor
+                return menuCell
+                
+            case let .homeStudyMenu(cellReactor):
+                guard let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyMenuCell", for: indexPath) as? HomeStudyMenuCell else { return UICollectionViewCell() }
+                studyMenuCell.reactor = cellReactor
+                return studyMenuCell
+                
+            case let .homeStudyList(cellReactor):
+                guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return UICollectionViewCell() }
+                studyListCell.reactor = cellReactor
+                return studyListCell
+            }
+        },configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
+            switch kind {
+            case UICollectionView.elementKindSectionHeader:
+                switch dataSource[indexPath.section] {
+                case .field:
+                    guard let searchHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView", for: indexPath) as? HomeSearchResuableHeaderView else { return UICollectionReusableView() }
+                    return searchHeaderView
+                default:
+                    return UICollectionReusableView()
+                }
+            case UICollectionView.elementKindSectionFooter:
+                switch dataSource[indexPath.section] {
+                case .homeSubMenu:
+                    guard let homeMenuUnderLineView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView", for: indexPath) as? HomeStudyMenuFooterView else { return UICollectionReusableView() }
+                    
+                    return homeMenuUnderLineView
+                case .homeStudyList:
+                    guard let homeStudyListView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView", for: indexPath) as? HomeStudyListFooterView else { return UICollectionReusableView() }
+                    homeStudyListView.completion = {
+                        self.delegate?.didTapToPostListCreate()
+                    }
+                    return homeStudyListView
+                default:
+                    return UICollectionReusableView()
+                }
+            default:
+                return UICollectionReusableView()
+            }
+        })
+
     private lazy var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then({ flowLayout in
         flowLayout.minimumLineSpacing = .zero
         flowLayout.minimumInteritemSpacing = .zero
@@ -118,62 +166,15 @@ public final class HomeController: UIViewController {
     }
     
     
-    private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
-        return .init(
-            configureCell: { dataSource, collectionView, indexPath, sectionItem in
-                switch sectionItem {
-                case let .homeMenu(cellReactor):
-                    
-                    guard let menuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell else { return UICollectionViewCell() }
-                    
-                    menuCell.reactor = cellReactor
-                    return menuCell
-                    
-                case let .homeStudyMenu(cellReactor):
-                    guard let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyMenuCell", for: indexPath) as? HomeStudyMenuCell else { return UICollectionViewCell() }
-                    studyMenuCell.reactor = cellReactor
-                    return studyMenuCell
-                    
-                case let .homeStudyList(cellReactor):
-                    guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return UICollectionViewCell() }
-                    studyListCell.reactor = cellReactor
-                    return studyListCell
-                }
-            },configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
-                switch kind {
-                case UICollectionView.elementKindSectionHeader:
-                    switch dataSource[indexPath.section] {
-                    case .field:
-                        guard let searchHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView", for: indexPath) as? HomeSearchResuableHeaderView else { return UICollectionReusableView() }
-                        return searchHeaderView
-                    default:
-                        return UICollectionReusableView()
-                    }
-                case UICollectionView.elementKindSectionFooter:
-                    switch dataSource[indexPath.section] {
-                    case .homeSubMenu:
-                        guard let homeMenuUnderLineView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView", for: indexPath) as? HomeStudyMenuFooterView else { return UICollectionReusableView() }
-                        
-                        return homeMenuUnderLineView
-                    case .homeStudyList:
-                        guard let homeStudyListView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView", for: indexPath) as? HomeStudyListFooterView else { return UICollectionReusableView() }
-                        return homeStudyListView
-                    default:
-                        return UICollectionReusableView()
-                    }
-                default:
-                    return UICollectionReusableView()
-                }
-            }
-        )
-    }
+//    private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
+//
+//    }
     
     
     
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
         self.releaseDataSource = type(of: self).releaseSourceFactory()
-        self.dataSource = type(of: self).dataSourcesFactory()
         super.init(nibName: nil, bundle: nil)
     }
     

@@ -16,6 +16,10 @@ final class HomeStudyListFooterView: UICollectionReusableView {
     
     //MARK: Property
         
+    public var completion: (() -> Void)?
+    
+    private var disposeBag: DisposeBag = DisposeBag()
+    
     private let studyMoreButton: UIButton = UIButton(type: .custom).then {
         $0.setTitle("더보기", for: .normal)
         $0.setTitleColor(.hex8E8E8E, for: .normal)
@@ -47,6 +51,12 @@ final class HomeStudyListFooterView: UICollectionReusableView {
         studyMoreButton.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
+        
+        studyMoreButton.rx.tap
+            .withUnretained(self)
+            .subscribe { vc, _ in
+                vc.completion?()
+            }.disposed(by: disposeBag)
     }
     
     
