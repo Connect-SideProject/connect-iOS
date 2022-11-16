@@ -19,7 +19,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   
   public enum Route {
     case home
-    case bottomSheet([BottomSheetItem<법정주소>])
+    case bottomSheet([BottomSheetItem])
   }
   
   public enum Action {
@@ -29,7 +29,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   }
   
   public enum Mutation {
-    case setAddressList([BottomSheetItem<법정주소>])
+    case setAddressList([BottomSheetItem])
     case setInterestList([Interest])
     case setRoleSkillsList([RoleSkills])
     case setRegion(Region?)
@@ -38,7 +38,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   }
   
   public struct State {
-    var addressList: [BottomSheetItem<법정주소>] = []
+    var addressList: [BottomSheetItem] = []
     var interestList: [Interest] = []
     var roleSkillsList: [RoleSkills] = []
     var region: Region?
@@ -94,10 +94,11 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     case let .didSelectedLocation(index):
       
       guard let address = currentState.addressList[safe: index] else { return .empty() }
+      guard let value = addressService.addressList.filter({ $0.법정동명 == address.value }).first else { return .empty() }
       
       let region = Region(
-        code: address.value.법정코드,
-        name: address.value.법정동명
+        code: value.법정코드,
+        name: value.법정동명
       )
       
       var addressList = currentState.addressList

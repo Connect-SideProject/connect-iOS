@@ -21,22 +21,28 @@ public enum BottomSheetType: CustomStringConvertible {
       return "정렬"
     case .studyType:
       return "종류"
+    case .date:
+      return "날짜"
     case .address:
       return "활동지역"
+    case .interest:
+      return "관심분야"
     }
   }
   
   case onOffLine
   case aligment
   case studyType
-  case address([BottomSheetItem<법정주소>])
+  case date
+  case address([BottomSheetItem])
+  case interest([BottomSheetItem])
 }
 
-public struct BottomSheetItem<T> where T: Decodable {
-  public let value: T
+public struct BottomSheetItem {
+  public let value: String
   public var isSelected: Bool = false
   
-  public init(value: T) {
+  public init(value: String) {
     self.value = value
   }
 }
@@ -89,7 +95,7 @@ public final class BottomSheetController: UIViewController {
   private lazy var collectionViewLayout = UICollectionViewFlowLayout().then {
     
     switch type {
-    case .address:
+    case .address, .interest:
       $0.itemSize = .init(
         width: (view.bounds.width - 52) / 2,
         height: 42
@@ -113,9 +119,9 @@ public final class BottomSheetController: UIViewController {
   }
   
   private let type: BottomSheetType
-  private var items: [BottomSheetItem<법정주소>] = []
+  private var items: [BottomSheetItem] = []
   
-  public var confirmHandler: (Int) -> Void = { _ in }
+  public var confirmHandler: (Int, String) -> Void = { _, _ in }
   public var cancelHandler: () -> Void = {}
   
   public init(type: BottomSheetType) {
@@ -209,7 +215,7 @@ private extension BottomSheetController {
     dimView.backgroundColor = .clear
     
     dismiss(animated: true) { [weak self] in
-      guard let self  = self else { return }
+      guard let self = self else { return }
       
       let selectedIndex = self.items.enumerated()
         .map { offset, element in
@@ -219,7 +225,7 @@ private extension BottomSheetController {
         .first
       
       if let selectedIndex = selectedIndex {
-          self.confirmHandler(selectedIndex)
+        self.confirmHandler(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
       }
     }
   }
@@ -234,7 +240,7 @@ extension BottomSheetController: UICollectionViewDataSource {
     if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BottomSheetItemCell", for: indexPath) as? BottomSheetItemCell {
       let item = items[indexPath.item]
       
-      cell.setup(title: item.value.법정동명, isSelected: item.isSelected)
+      cell.setup(title: item.value, isSelected: item.isSelected)
       return cell
     }
     

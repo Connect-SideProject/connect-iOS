@@ -204,14 +204,11 @@ public final class SignUpController: UIViewController, ReactorKit.View {
             type: .address(items)
           )
           bottomSheet.modalPresentationStyle = .overFullScreen
-          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex in
-            if let item = items[safe: selectedIndex] {
-              let text = item.value.법정동명
-              reactor?.action.onNext(.didSelectedLocation(selectedIndex))
-              
-              if let button = self?.addressContainerView.customView as? CastableButton {
-                button.setTitle("서울 \(text)", for: .normal)
-              }
+          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex, text in
+            reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+            
+            if let button = self?.addressContainerView.customView as? CastableButton {
+              button.setTitle("서울 \(text)", for: .normal)
             }
           }
           self?.present(bottomSheet, animated: true)

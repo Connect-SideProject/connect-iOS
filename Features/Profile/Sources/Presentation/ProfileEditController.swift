@@ -224,14 +224,11 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
             type: .address(items)
           )
           bottomSheet.modalPresentationStyle = .overFullScreen
-          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex in
-            if let item = items[safe: selectedIndex] {
-              let text = item.value.법정동명
-              reactor?.action.onNext(.didSelectedLocation(selectedIndex))
-              
-              if let button = self?.addressContainerView.customView as? CastableButton {
-                button.setTitle("서울 \(text)", for: .normal)
-              }
+          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex, text in
+            reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+            
+            if let button = self?.addressContainerView.customView as? CastableButton {
+              button.setTitle("서울 \(text)", for: .normal)
             }
           }
           self?.present(bottomSheet, animated: true)
@@ -352,13 +349,11 @@ private extension ProfileEditController {
     
     let roles: [RoleType] = roleContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
-    )
-      .selectedItems.compactMap { RoleType(description: $0) } ?? []
+    ).selectedItems.compactMap { RoleType(description: $0) } ?? []
     
     let interestings: [String] = interestsContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
-    )
-      .selectedItems ?? []
+    ).selectedItems ?? []
     
     let portfolioURL = portfolioContainerView.textField.text
     
@@ -372,9 +367,7 @@ private extension ProfileEditController {
     
     let skills: [String] = skillContainerView.customView?.casting(
       type: CastableContainerView.self
-    )
-      .selectedItems
-      .flatMap { $0 } ?? []
+    ).selectedItems.flatMap { $0 } ?? []
     
     let parameter: ProfileEditParameter = .init(
       profileURL: profileURL,
