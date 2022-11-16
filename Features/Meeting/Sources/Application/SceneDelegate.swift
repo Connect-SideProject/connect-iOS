@@ -21,7 +21,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     guard let scene = (scene as? UIWindowScene) else { return }
     window = .init(windowScene: scene)
 
-    window?.rootViewController = MeetingCreateViewController()
+    let controller = MeetingCreateViewController()
+    controller.reactor = .init(
+      apiService: ApiManaerStub(),
+      userService: UserManagerStub(),
+      interestService: InterestManagerStub(isExists: true),
+      addressService: AddressManager.shared
+    )
+    window?.rootViewController = controller
     window?.makeKeyAndVisible()
   }
 }

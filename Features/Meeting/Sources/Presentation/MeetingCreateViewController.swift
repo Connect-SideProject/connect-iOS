@@ -18,13 +18,13 @@ import COCommon
 import COCommonUI
 import COExtensions
 
-public final class MeetingCreateViewController: UIViewController {
+public final class MeetingCreateViewController: UIViewController, ReactorKit.View {
   
   enum Height {
     static let scrollView: CGFloat = 160 + (UIDevice.current.hasNotch ? 0 : 150)
   }
   
-  private let meetingTypeContainerView = DescriptionContainerView(
+  private let typeContainerView = DescriptionContainerView(
     type: .custom(
       .init(
         title: "모임유형",
@@ -36,7 +36,7 @@ public final class MeetingCreateViewController: UIViewController {
     )
   )
   
-  private let meetingWayContainerView = DescriptionContainerView(
+  private let wayContainerView = DescriptionContainerView(
     type: .custom(
       .init(
         title: "진행방식",
@@ -48,7 +48,7 @@ public final class MeetingCreateViewController: UIViewController {
     )
   )
   
-  private lazy var meetingInterestContainerView = DescriptionContainerView(
+  private lazy var interestContainerView = DescriptionContainerView(
     type: .custom(
       .init(
         title: "분야",
@@ -57,7 +57,7 @@ public final class MeetingCreateViewController: UIViewController {
     )
   )
   
-  private lazy var meetingPeopleContainerView = DescriptionContainerView(
+  private lazy var peopleContainerView = DescriptionContainerView(
     type: .custom(
       .init(
         title: "모집인원",
@@ -66,7 +66,7 @@ public final class MeetingCreateViewController: UIViewController {
     )
   )
   
-  private lazy var meetingDateContainerView = DescriptionContainerView(
+  private lazy var dateContainerView = DescriptionContainerView(
     type: .custom(
       .init(
         title: "프로젝트 기간",
@@ -75,7 +75,7 @@ public final class MeetingCreateViewController: UIViewController {
     )
   )
   
-  private lazy var meetingLocationContainerView = DescriptionContainerView(
+  private lazy var locationContainerView = DescriptionContainerView(
     type: .custom(
       .init(
         title: "모임위치",
@@ -167,6 +167,32 @@ public final class MeetingCreateViewController: UIViewController {
     
     navigationController?.setNavigationBarHidden(false, animated: false)
   }
+  
+  public func bind(reactor: MeetingCreateReactor) {
+    
+    reactor.pulse(\.$route)
+      .compactMap { $0 }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] in
+        switch $0 {
+        case let .bottomSheet(type):
+          let bottomSheet = BottomSheetController(
+            type: type
+          )
+          bottomSheet.modalPresentationStyle = .overFullScreen
+          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex, text in
+            reactor?.action.onNext(.didTapLocationButton)
+              
+            if let button = self?.locationContainerView.customView as? CastableButton {
+              button.setTitle("서울 \(text)", for: .normal)
+            }
+          }
+          self?.present(bottomSheet, animated: true)
+        case .close:
+          self?.dismiss(animated: true)
+        }
+      }.disposed(by: disposeBag)
+  }
 }
 
 private extension MeetingCreateViewController {
@@ -178,14 +204,14 @@ private extension MeetingCreateViewController {
     view.addSubview(containerScrollView)
     
     flexContainer.flex
-      .marginHorizontal(20)
+      .paddingHorizontal(20)
       .define { flex in
         
-        [meetingTypeContainerView,
-         meetingWayContainerView,
-         meetingInterestContainerView,
-         meetingDateContainerView,
-         meetingLocationContainerView,
+        [typeContainerView,
+         wayContainerView,
+         interestContainerView,
+         dateContainerView,
+         locationContainerView,
          titleContainerView,
          contentContainerView,
          commentContainerView
@@ -200,6 +226,24 @@ private extension MeetingCreateViewController {
   }
   
   func bindEvent() {
+    if let interestButton = interestContainerView.customView as? CastableButton {
+      interestButton.handler = { [weak reactor] in
+        reactor?.action.onNext(.didTapInterestButton)
+      }
+    }
+    
+    if let dateButton = dateContainerView.customView as? CastableButton {
+      dateButton.handler = { [weak reactor] in
+        reactor?.action.onNext(.didTapDateButton)
+      }
+    }
+    
+    if let locationButton = locationContainerView.customView as? CastableButton {
+      locationButton.handler = { [weak reactor] in
+        reactor?.action.onNext(.didTapLocationButton)
+      }
+    }
+    
     let tapGesture = UITapGestureRecognizer(
       target: self,
       action: #selector(dismissKeyboards)
