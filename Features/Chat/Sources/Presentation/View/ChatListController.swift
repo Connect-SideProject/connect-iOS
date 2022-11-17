@@ -20,6 +20,11 @@ public final class ChatListController: ChatBaseController<ChatListController.Rea
     
     private let tableView = UITableView()
     private let titleView = TitleView().set(title: "대화 목록")
+    private var dataSource = RxTableViewSectionedReloadDataSource<SectionModel> { dataSource, tableView, indexPath, item in
+        let cell = tableView.dequeueReusableCell(withIdentifier: TableCell.reuseableIdentifier, for: indexPath) as! TableCell
+        cell.configure(with: dataSource[indexPath])
+        return cell
+    }
     
     public override func setupContainer() {
         super.setupContainer()
@@ -46,7 +51,10 @@ public final class ChatListController: ChatBaseController<ChatListController.Rea
     }
     
     public override func bind(reactor: Reactor) {
-        
+        reactor.pulse(\.$sectionModels).share()
+            .observe(on: MainScheduler.asyncInstance)
+            .bind(to: self.tableView.rx.items(dataSource: self.dataSource))
+            .disposed(by: self.disposeBag)
     }
 }
 
@@ -54,6 +62,8 @@ extension ChatListController {
     final public class Reactor: ReactorKit.Reactor {
         public var initialState: State = .init()
         public enum Action { }
-        public struct State { }
+        public struct State {
+            @Pulse var sectionModels = [SectionModel]()
+        }
     }
 }
