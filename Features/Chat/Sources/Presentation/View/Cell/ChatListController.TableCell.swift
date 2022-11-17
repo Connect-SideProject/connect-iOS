@@ -12,7 +12,7 @@ import FlexLayout
 import Differentiator
 
 extension ChatListController {
-    final private class TableCell: RxBaseTableCell<SectionModel.Item> {
+    final class TableCell: RxBaseTableCell<SectionModel.Item> {
         private let avatarView = UIImageView()
         private let nameLabel = UILabel()
         private let msgLabel = UILabel()
