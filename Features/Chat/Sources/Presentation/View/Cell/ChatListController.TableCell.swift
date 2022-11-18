@@ -49,6 +49,13 @@ extension ChatListController {
             self.rootContainer.pin.all()
             self.rootContainer.flex.layout()
         }
+        
+        override func configure(with item: ChatListController.SectionModel.Item) {
+            self.nameLabel.text = item.lastMsg
+            self.msgLabel.text = item.lastMsg
+            self.timeLabel.text = "4분전"
+            self.unreadCntLabel.text = "3"
+        }
     }
 }
 

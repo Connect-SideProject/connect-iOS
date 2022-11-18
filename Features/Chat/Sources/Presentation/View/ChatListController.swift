@@ -39,6 +39,7 @@ public final class ChatListController: ChatBaseController<ChatListController.Rea
     }
     
     public override func setAttrs() {
+        self.setTable()
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.rootContainer.backgroundColor = .yellow
         self.tableView.backgroundColor = .blue
@@ -55,6 +56,11 @@ public final class ChatListController: ChatBaseController<ChatListController.Rea
             .observe(on: MainScheduler.asyncInstance)
             .bind(to: self.tableView.rx.items(dataSource: self.dataSource))
             .disposed(by: self.disposeBag)
+    }
+    
+    private func setTable() {
+        self.tableView.register(TableCell.self, forCellReuseIdentifier: TableCell.reuseableIdentifier)
+        self.tableView.rowHeight = 80
     }
 }
 
