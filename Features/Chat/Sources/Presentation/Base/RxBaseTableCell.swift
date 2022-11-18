@@ -30,7 +30,14 @@ class RxBaseTableCell<SectionItem>: UITableViewCell, FlexLayoutType, RxDatasourc
         super.init(coder: coder)
     }
     
-    func setupContainer() { }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.layout()
+    }
+    
+    func setupContainer() {
+        self.contentView.addSubview(self.rootContainer)
+    }
     func layout() { }
     func setAttrs() { }
     func bind() { }
