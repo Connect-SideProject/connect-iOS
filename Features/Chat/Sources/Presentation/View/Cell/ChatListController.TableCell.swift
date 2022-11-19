@@ -24,24 +24,32 @@ extension ChatListController {
             
             self.rootContainer.flex
                 .direction(.row)
+                .alignItems(.center)
                 .define { [weak self] in
                     guard let self = self else { return }
                     $0.addItem(self.avatarView)
                         .width(64).height(64)
                         .marginLeft(25)
                     
-                    $0.addItem().direction(.column).define {
-                        $0.addItem(self.nameLabel)
-                        $0.addItem(self.msgLabel)
-                    }
-                    .marginLeft(16)
-                    
-                    $0.addItem().direction(.column).define {
-                        $0.addItem(self.timeLabel)
-                        $0.addItem(self.unreadCntLabel)
-                    }
-                    .marginLeft(16)
-                    .marginEnd(20)
+                    $0.addItem()
+                        .direction(.row)
+                        .alignItems(.stretch)
+                        .justifyContent(.spaceBetween)
+                        .define {
+                            $0.addItem().direction(.column).define {
+                                $0.addItem(self.nameLabel)
+                                $0.addItem(self.msgLabel)
+                            }
+                            
+                            $0.addItem().direction(.column).define {
+                                $0.addItem(self.timeLabel)
+                                $0.addItem(self.unreadCntLabel)
+                            }
+                            .marginLeft(18)
+                        }
+                        .marginLeft(16)
+                        .marginEnd(20)
+                        .grow(1)
                 }
         }
         
