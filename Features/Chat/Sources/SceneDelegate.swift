@@ -7,10 +7,6 @@
 
 import UIKit
 
-import CODomain
-import COManager
-import CONetwork
-
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
