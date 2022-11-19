@@ -60,7 +60,7 @@ public final class ChatListController: ChatBaseController<ChatListController.Rea
     
     private func setTable() {
         self.tableView.register(TableCell.self, forCellReuseIdentifier: TableCell.reuseableIdentifier)
-        self.tableView.rowHeight = 80
+        self.tableView.rowHeight = 92
     }
 }
 
