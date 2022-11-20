@@ -199,9 +199,9 @@ public final class SignUpController: UIViewController, ReactorKit.View {
         switch route {
         case .home:
           self?.delegate?.routeToMain()
-        case let .bottomSheet(items):
+        case let .bottomSheet(type):
           let bottomSheet = BottomSheetController(
-            type: .address(items)
+            type: type
           )
           bottomSheet.modalPresentationStyle = .overFullScreen
           bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex, text in

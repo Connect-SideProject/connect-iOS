@@ -19,7 +19,7 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   
   public enum Route {
     case home
-    case bottomSheet([BottomSheetItem])
+    case bottomSheet(BottomSheetType)
   }
   
   public enum Action {
@@ -86,10 +86,12 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     
     switch action {
     case .didTapAddressButton:
-      return Observable.just(currentState.addressList)
-        .flatMap { addressList -> Observable<Mutation> in
-          return .just(.setRoute(.bottomSheet(addressList)))
-        }
+      let addressList: [BottomSheetItem] = addressService.addressList.map {
+        .init(value: $0.법정동명)
+      }
+      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressList))
+      return .just(.setRoute(.bottomSheet(.address(addressList))))
+        .concat(setAddressList)
       
     case let .didSelectedLocation(index):
       
