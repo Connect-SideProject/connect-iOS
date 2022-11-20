@@ -26,4 +26,8 @@ public class PaddingLabel: UILabel {
         contentSize.width += insets.left + insets.right
         return contentSize
     }
+    
+    public override func sizeThatFits(_ size: CGSize) -> CGSize {
+        return self.intrinsicContentSize
+    }
 }

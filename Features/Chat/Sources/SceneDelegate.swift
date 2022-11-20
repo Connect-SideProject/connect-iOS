@@ -15,7 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         self.window = .init(windowScene: scene)
         
-        let chatListC = ChatListDIContainer().makeVC()
+        let chatListC = ChatDIContainer().makeChatRoomVC()
         
         let navC = UINavigationController(rootViewController: chatListC)
         self.window?.rootViewController = navC
