@@ -99,7 +99,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
       .init(
         title: "내용",
         placeholder: "ex 안녕하세요. 같이 안드로이드 앱 개발하실 개발자분을 구하고 있어요. 5월 런칭을 목표로하고 있습니다.",
-        noticeText: "최대 30자까지 입력가능해요"
+        noticeText: "최대 1000자까지 입력가능해요"
       )
     )
   )
