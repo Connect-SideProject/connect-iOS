@@ -13,9 +13,9 @@ let features = Project.feature(
   name: "COFeatures",
   products: [.framework(.dynamic)],
   dependencies: [
-    .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
-    .project(target: "Chat", path: .relativeToRoot("Features/Chat")),
-    .project(target: "Meeting", path: .relativeToRoot("Features/Meeting")),
-    .project(target: "Profile", path: .relativeToRoot("Features/Profile"))
+    .Project.Features.sign,
+    .Project.Features.chat,
+    .Project.Features.meeting,
+    .Project.Features.profile
   ]
 )
