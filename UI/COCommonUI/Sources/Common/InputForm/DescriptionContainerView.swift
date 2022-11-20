@@ -64,13 +64,14 @@ public class DescriptionContainerView: UIView {
     $0.leftView = view
   }
   
-  public let textView = UITextView().then {
+  public lazy var textView = UITextView().then {
     $0.font = .medium(size: 14)
-    $0.textColor = .black
+    $0.textColor = .hexC6C6C6
     $0.layer.borderColor = UIColor.hexC6C6C6.cgColor
     $0.layer.borderWidth = 1
     $0.layer.cornerRadius = 12
     $0.layer.masksToBounds = true
+    $0.delegate = self
   }
   
   public private(set) var customView: CastableView?
@@ -109,6 +110,7 @@ public class DescriptionContainerView: UIView {
     case let .textFieldWithAttributed(item):
       descriptionLabel.attributedText = item.attributedTitle
       textField.placeholder = item.placeholder
+      noticeTextLabel.text = item.noticeText
     case let .textView(item):
       descriptionLabel.text = item.title
       textView.text = item.placeholder
@@ -157,6 +159,11 @@ extension DescriptionContainerView {
               .height(44)
           }
           
+          if case .textFieldWithAttributed = type {
+            flex.addItem(textField)
+              .height(44)
+          }
+          
           if case .textView = type {
             flex.addItem(textView)
               .height(155)
@@ -168,6 +175,27 @@ extension DescriptionContainerView {
             .marginVertical(8)
         }
       }
+  }
+}
+
+extension DescriptionContainerView: UITextViewDelegate {
+  public func textViewDidBeginEditing(_ textView: UITextView) {
+    if case let .textView(item) = self.type {
+      if textView.text == item.placeholder {
+        textView.text = nil
+        textView.textColor = .black
+      }
+    }
+  }
+  
+  public func textViewDidEndEditing(_ textView: UITextView) {
+    if case let .textView(item) = self.type {
+      
+      if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+          textView.text = item.placeholder
+          textView.textColor = .hexC6C6C6
+      }
+    }
   }
 }
 
