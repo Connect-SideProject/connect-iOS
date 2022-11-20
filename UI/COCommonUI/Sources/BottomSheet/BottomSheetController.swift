@@ -11,6 +11,7 @@ import Then
 import SnapKit
 import CODomain
 import COManager
+import JTAppleCalendar
 
 public enum BottomSheetType: CustomStringConvertible {
   public var description: String {
@@ -22,7 +23,7 @@ public enum BottomSheetType: CustomStringConvertible {
     case .studyType:
       return "종류"
     case .date:
-      return "날짜"
+      return "진행기간"
     case .address:
       return "활동지역"
     case .interest:
@@ -55,6 +56,15 @@ public extension BottomSheetItem {
 
 public final class BottomSheetController: UIViewController {
   
+  private enum Height {
+    static let containerView: CGFloat = 490
+    static let defaultItem: CGFloat = 38
+    static let collectionItem: CGFloat = 42
+    static let calendarHeader: CGFloat = 50
+  }
+  
+  let f = DateFormatter()
+  
   private let dimView: UIView = UIView().then {
     $0.backgroundColor = .clear
   }
@@ -77,7 +87,7 @@ public final class BottomSheetController: UIViewController {
   private lazy var closeButton: UIButton = UIButton().then {
     $0.setImage(UIImage(named: "ic_close"), for: .normal)
     $0.contentMode = .scaleToFill
-    $0.addTarget(self, action: #selector(didTapCloseButotn), for: .touchUpInside)
+    $0.addTarget(self, action: #selector(didTapCloseButton), for: .touchUpInside)
   }
   
   private lazy var confirmButton: UIButton = UIButton().then {
@@ -89,7 +99,20 @@ public final class BottomSheetController: UIViewController {
     $0.layer.cornerRadius = 5
     $0.clipsToBounds = true
     
-    $0.addTarget(self, action: #selector(didTapConfirmButotn), for: .touchUpInside)
+    $0.addTarget(self, action: #selector(didTapConfirmButton), for: .touchUpInside)
+  }
+  
+  private lazy var calendar = JTACMonthView().then {
+    $0.scrollingMode = .stopAtEachCalendarFrame
+    $0.scrollDirection = .horizontal
+    $0.calendarDataSource = self
+    $0.calendarDelegate = self
+    $0.register(
+      CalendarHeaderView.self,
+      forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+      withReuseIdentifier: CalendarHeaderView.reuseIdentifier
+    )
+    $0.register(CalendarDateCell.self, forCellWithReuseIdentifier: CalendarDateCell.reuseIdentifier)
   }
   
   private lazy var collectionViewLayout = UICollectionViewFlowLayout().then {
@@ -98,12 +121,12 @@ public final class BottomSheetController: UIViewController {
     case .address, .interest:
       $0.itemSize = .init(
         width: (view.bounds.width - 52) / 2,
-        height: 42
+        height: Height.collectionItem
       )
     default:
       $0.itemSize = .init(
         width: view.bounds.width,
-        height: 38
+        height: Height.defaultItem
       )
     }
   }
@@ -129,7 +152,7 @@ public final class BottomSheetController: UIViewController {
     self.titleLabel.text = type.description
     
     switch type {
-    case let .address(items):
+    case let .address(items), let .interest(items):
       self.items = items
     default:
       break
@@ -146,6 +169,7 @@ public final class BottomSheetController: UIViewController {
     super.viewDidLoad()
     
     configureUI()
+    bindEvent()
   }
   
   public override func viewDidAppear(_ animated: Bool) {
@@ -165,7 +189,7 @@ private extension BottomSheetController {
     
     dimView.addSubview(containerView)
     
-    let _ = [titleLabel, closeButton, collectionView, confirmButton].map {
+    let _ = [titleLabel, closeButton, confirmButton].map {
       containerView.addSubview($0)
     }
     
@@ -185,11 +209,22 @@ private extension BottomSheetController {
       $0.width.height.equalTo(18)
     }
     
-    collectionView.snp.makeConstraints {
-      $0.top.equalTo(titleLabel.snp.bottom).offset(24)
-      $0.leading.equalToSuperview().offset(20)
-      $0.trailing.equalToSuperview().inset(20)
-      $0.bottom.equalTo(confirmButton.snp.top).offset(-13)
+    if case .date = type {
+      containerView.addSubview(calendar)
+      calendar.snp.makeConstraints {
+        $0.top.equalTo(titleLabel.snp.bottom).offset(24)
+        $0.leading.equalToSuperview().offset(20)
+        $0.trailing.equalToSuperview().inset(20)
+        $0.bottom.equalTo(confirmButton.snp.top).offset(-13)
+      }
+    } else {
+      containerView.addSubview(collectionView)
+      collectionView.snp.makeConstraints {
+        $0.top.equalTo(titleLabel.snp.bottom).offset(24)
+        $0.leading.equalToSuperview().offset(20)
+        $0.trailing.equalToSuperview().inset(20)
+        $0.bottom.equalTo(confirmButton.snp.top).offset(-13)
+      }
     }
     
     confirmButton.snp.makeConstraints {
@@ -201,33 +236,72 @@ private extension BottomSheetController {
     
     containerView.snp.makeConstraints {
       $0.bottom.left.right.equalToSuperview()
-      $0.height.equalTo(409)
+      $0.height.equalTo(Height.containerView)
     }
   }
   
-  @objc func didTapCloseButotn() {
+  func bindEvent() {
+    let tapGesture = UITapGestureRecognizer(
+      target: self,
+      action: #selector(didTapDimView)
+    )
+    tapGesture.delegate = self
+    dimView.addGestureRecognizer(tapGesture)
+  }
+  
+  @objc func didTapDimView() {
     dimView.backgroundColor = .clear
     
     dismiss(animated: true)
   }
   
-  @objc func didTapConfirmButotn() {
+  @objc func didTapCloseButton() {
+    dimView.backgroundColor = .clear
+    
+    dismiss(animated: true)
+  }
+  
+  @objc func didTapConfirmButton() {
+    
+    let selectedIndex = self.items.enumerated()
+      .map { offset, element in
+        return element.isSelected ? offset : -1
+      }
+      .filter { $0 != -1 }
+      .first
+    
+    guard let selectedIndex = selectedIndex else {
+      CommonAlert.shared
+        .setMessage(.message("\(type.description)를(을) 선택해주세요."))
+        .show()
+      return
+    }
+    
     dimView.backgroundColor = .clear
     
     dismiss(animated: true) { [weak self] in
       guard let self = self else { return }
-      
-      let selectedIndex = self.items.enumerated()
-        .map { offset, element in
-          return element.isSelected ? offset : -1
-        }
-        .filter { $0 != -1 }
-        .first
-      
-      if let selectedIndex = selectedIndex {
-        self.confirmHandler(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
-      }
+      self.confirmHandler(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
     }
+  }
+  
+  func configureCell(view: JTACDayCell?, cellState: CellState) {
+    guard let cell = view as? CalendarDateCell  else { return }
+    cell.setup(title: cellState.text)
+    handleCellTextColor(cell: cell, cellState: cellState)
+    handleCellSelected(cell: cell, cellState: cellState)
+  }
+  
+  func handleCellTextColor(cell: CalendarDateCell, cellState: CellState) {
+    if cellState.dateBelongsTo == .thisMonth {
+      cell.updateTextColor(state: .normal)
+    } else {
+      cell.updateTextColor(state: .notThisMonth)
+    }
+  }
+  
+  func handleCellSelected(cell: CalendarDateCell, cellState: CellState) {
+    cell.updateSelectedView(cellState: cellState)
   }
 }
 
@@ -270,5 +344,60 @@ extension BottomSheetController: UICollectionViewDelegateFlowLayout {
   
   public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
     return 8
+  }
+}
+
+extension BottomSheetController: UIGestureRecognizerDelegate {
+  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+    return touch.view == dimView
+  }
+}
+
+extension BottomSheetController: JTACMonthViewDataSource {
+  public func configureCalendar(_ calendar: JTAppleCalendar.JTACMonthView) -> JTAppleCalendar.ConfigurationParameters {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy MM dd"
+    
+    let startDate = Date()
+    let endDate = formatter.date(from: "2025 01 01")!
+    return ConfigurationParameters(startDate: startDate, endDate: endDate)
+  }
+}
+
+extension BottomSheetController: JTACMonthViewDelegate {
+  public func calendar(_ calendar: JTACMonthView, headerViewForDateRange range: (start: Date, end: Date), at indexPath: IndexPath) -> JTACMonthReusableView {
+    let formatter = DateFormatter()  // Declare this outside, to avoid instancing this heavy class multiple times.
+    formatter.dateFormat = "yyyy년 MM월"
+    formatter.locale = .init(identifier: "ko_kr")
+    
+    if let header = calendar.dequeueReusableJTAppleSupplementaryView(
+      withReuseIdentifier: CalendarHeaderView.reuseIdentifier,
+      for: indexPath
+    ) as? CalendarHeaderView {
+      header.setup(title: formatter.string(from: range.start))
+      return header
+    }
+    
+    return .init()
+  }
+  
+  public func calendar(_ calendar: JTAppleCalendar.JTACMonthView, willDisplay cell: JTAppleCalendar.JTACDayCell, forItemAt date: Date, cellState: JTAppleCalendar.CellState, indexPath: IndexPath) {
+    configureCell(view: cell, cellState: cellState)
+  }
+  
+  public func calendar(_ calendar: JTAppleCalendar.JTACMonthView, cellForItemAt date: Date, cellState: JTAppleCalendar.CellState, indexPath: IndexPath) -> JTAppleCalendar.JTACDayCell {
+    if let cell = calendar.dequeueReusableJTAppleCell(
+      withReuseIdentifier: CalendarDateCell.reuseIdentifier,
+      for: indexPath
+    ) as? CalendarDateCell {
+      self.calendar(calendar, willDisplay: cell, forItemAt: date, cellState: cellState, indexPath: indexPath)
+      return cell
+    }
+    
+    return .init()
+  }
+  
+  public func calendarSizeForMonths(_ calendar: JTACMonthView?) -> MonthSize? {
+    .init(defaultSize: Height.calendarHeader)
   }
 }

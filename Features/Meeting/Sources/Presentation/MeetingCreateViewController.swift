@@ -183,6 +183,10 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
           bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex, text in
             reactor?.action.onNext(.didTapLocationButton)
               
+            if let button = self?.interestContainerView.customView as? CastableButton {
+              button.setTitle(text, for: .normal)
+            }
+            
             if let button = self?.locationContainerView.customView as? CastableButton {
               button.setTitle("서울 \(text)", for: .normal)
             }

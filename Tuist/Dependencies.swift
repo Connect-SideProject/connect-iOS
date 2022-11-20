@@ -43,8 +43,8 @@ let dependencies = Dependencies(
         requirement: .upToNextMajor(from: "3.0.0")
     ),
     .remote(
-      url: "https://github.com/WenchaoD/FSCalendar.git",
-      requirement: .upToNextMajor(from: "2.8.3")
+      url: "https://github.com/patchthecode/JTAppleCalendar",
+      requirement: .upToNextMajor(from: "8.0.4")
     )
   ],
   platforms: [.iOS]

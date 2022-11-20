@@ -14,6 +14,6 @@ let thirdParty = Project.feature(
     .ThirdParty.UI.snapKit,
     .ThirdParty.UI.then,
     .ThirdParty.UI.floatingPanel,
-    .ThirdParty.UI.fsCalendar
+    .ThirdParty.UI.appleCalendar
   ]
 )

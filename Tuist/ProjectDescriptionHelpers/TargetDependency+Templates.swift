@@ -119,5 +119,5 @@ extension TargetDependency.ThirdParty.UI {
   public static let snapKit: TargetDependency = .external(name: "SnapKit")
   public static let then: TargetDependency = .external(name: "Then")
   public static let floatingPanel: TargetDependency = .external(name: "FloatingPanel")
-  public static let fsCalendar: TargetDependency = .external(name: "FSCalendar")
+  public static let appleCalendar: TargetDependency = .external(name: "JTAppleCalendar")
 }
