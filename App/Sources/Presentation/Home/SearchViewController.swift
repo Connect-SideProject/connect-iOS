@@ -7,8 +7,8 @@
 
 import UIKit
 import Then
-import SnapKit
 import ReactorKit
+import COCommonUI
 
 import RxDataSources
 
@@ -20,16 +20,20 @@ final class SearchViewController: UIViewController {
     
     //MARK: Property
     
-    private let searchTableView: UITableView = UITableView().then {
-        $0.showsHorizontalScrollIndicator = false
-        $0.showsVerticalScrollIndicator = true
-        $0.backgroundColor = .hexEDEDED
-        $0.register(SearchStudyListCell.self, forCellReuseIdentifier: "SearchStudyListCell")
+    private lazy var collectionViewLayout = LeftAlignedCollectionViewFlowLayout().then {
+        $0.scrollDirection = .horizontal
+        $0.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
     }
     
-    private lazy var searchDataSource: RxTableViewSectionedReloadDataSource<SearchSection> = .init(configureCell: { dataSource, tableView, indexPath, sectionItem in
-        guard let searchListCell = tableView.dequeueReusableCell(withIdentifier: "SearchStudyListCell", for: indexPath) as? SearchStudyListCell else { return UITableViewCell() }
-        return searchListCell
+    private lazy var keywordCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewLayout).then {
+        $0.register(SearchKeywordListCell.self, forCellWithReuseIdentifier: "SearchKeywordListCell")
+        $0.showsHorizontalScrollIndicator = false
+        $0.showsVerticalScrollIndicator = false
+        $0.backgroundColor = .white
+    }
+
+    private lazy var searchDataSource: RxCollectionViewSectionedReloadDataSource<SearchSection> = .init(configureCell: { datasource, collectionView, indexPath, sectionItem in
+        guard let searchKeywordCell = collectionView.dequeueReusableCell(withReuseIdentifier: "SearchKeywordListCell", for: indexPath) as? SearchKeywordListCell else { return UICollectionViewCell() }
     })
     
     
@@ -37,12 +41,15 @@ final class SearchViewController: UIViewController {
     //MARK: LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        configure()
     }
     
     //MARK: Configure
     private func configure() {
         
+        keywordCollectionView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
     }
     
     
