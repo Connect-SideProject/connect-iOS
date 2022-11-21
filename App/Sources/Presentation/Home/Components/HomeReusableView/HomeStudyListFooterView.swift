@@ -28,11 +28,6 @@ final class HomeStudyListFooterView: UICollectionReusableView {
         $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
     }
     
-    private let studyMoreImageView: UIImageView = UIImageView().then {
-        $0.contentMode = .scaleToFill
-        $0.image = UIImage(named: "home_studylist_more")
-        
-    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
