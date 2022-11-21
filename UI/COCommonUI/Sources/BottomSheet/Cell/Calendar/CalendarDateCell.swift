@@ -18,9 +18,7 @@ final class CalendarDateCell: JTACDayCell {
   
   static let reuseIdentifier: String = "CalendarDateCell"
   
-  private let selectedView = UIView().then {
-    $0.backgroundColor = .hex05A647
-  }
+  private let selectedView = CalendarSelectedView()
   
   private let dateLabel = UILabel().then {
     $0.font = .bold(size: 14)
@@ -54,27 +52,25 @@ final class CalendarDateCell: JTACDayCell {
   func updateSelectedView(cellState: CellState) {
     selectedView.isHidden = !cellState.isSelected
     
+    let selectedPosition = cellState.selectedPosition()
+    
     if cellState.dateBelongsTo == .thisMonth {
-      dateLabel.textColor = cellState.isSelected ? .white : .hex141616
+      switch selectedPosition {
+      case .left, .right, .full:
+        dateLabel.textColor = .white
+      default:
+        dateLabel.textColor = .hex141616
+      }
     } else {
-      dateLabel.textColor = cellState.isSelected ? .white : .hexC6C6C6
+      switch selectedPosition {
+      case .left, .right, .full:
+        dateLabel.textColor = .white
+      default:
+        dateLabel.textColor = .hexC6C6C6
+      }
     }
     
-    switch cellState.selectedPosition() {
-    case .left:
-      selectedView.layer.cornerRadius = 20
-      selectedView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMinXMinYCorner]
-    case .middle:
-      selectedView.layer.cornerRadius = 0
-      selectedView.layer.maskedCorners = []
-    case .right:
-      selectedView.layer.cornerRadius = 20
-      selectedView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner]
-    case .full:
-      selectedView.layer.cornerRadius = 20
-      selectedView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner]
-    default: break
-    }
+    selectedView.update(cellState: cellState)
   }
 }
 

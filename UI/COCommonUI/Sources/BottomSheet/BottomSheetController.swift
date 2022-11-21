@@ -10,6 +10,7 @@ import UIKit
 import Then
 import SnapKit
 import CODomain
+import COExtensions
 import COManager
 import JTAppleCalendar
 
@@ -54,6 +55,11 @@ public extension BottomSheetItem {
   }
 }
 
+public struct DateRange {
+  public var start: Date?
+  public var end: Date?
+}
+
 public final class BottomSheetController: UIViewController {
   
   private enum Height {
@@ -62,8 +68,6 @@ public final class BottomSheetController: UIViewController {
     static let collectionItem: CGFloat = 42
     static let calendarHeader: CGFloat = 50
   }
-  
-  let f = DateFormatter()
   
   private let dimView: UIView = UIView().then {
     $0.backgroundColor = .clear
@@ -103,6 +107,10 @@ public final class BottomSheetController: UIViewController {
   }
   
   private lazy var calendar = JTACMonthView().then {
+    $0.minimumLineSpacing = 0
+    $0.minimumInteritemSpacing = 0
+    $0.allowsRangedSelection = true
+    $0.allowsMultipleSelection = true
     $0.scrollingMode = .stopAtEachCalendarFrame
     $0.scrollDirection = .horizontal
     $0.calendarDataSource = self
@@ -130,6 +138,7 @@ public final class BottomSheetController: UIViewController {
       )
     }
   }
+  
   private lazy var collectionView = UICollectionView(
     frame: .zero,
     collectionViewLayout: collectionViewLayout
@@ -144,8 +153,12 @@ public final class BottomSheetController: UIViewController {
   private let type: BottomSheetType
   private var items: [BottomSheetItem] = []
   
+  private var dateRange: DateRange = .init()
+  
   public var confirmHandler: (Int, String) -> Void = { _, _ in }
   public var cancelHandler: () -> Void = {}
+  
+  public var dateHandler: (DateRange) -> Void = { _ in }
   
   public init(type: BottomSheetType) {
     self.type = type
@@ -263,45 +276,44 @@ private extension BottomSheetController {
   
   @objc func didTapConfirmButton() {
     
-    let selectedIndex = self.items.enumerated()
-      .map { offset, element in
-        return element.isSelected ? offset : -1
+    switch type {
+    case .date:
+      if (dateRange.start == nil || dateRange.end == nil) || (dateRange.start == dateRange.end) {
+        CommonAlert.shared
+          .setMessage(.message("\(type.description)를(을) 선택해주세요."))
+          .show()
+        return
       }
-      .filter { $0 != -1 }
-      .first
-    
-    guard let selectedIndex = selectedIndex else {
-      CommonAlert.shared
-        .setMessage(.message("\(type.description)를(을) 선택해주세요."))
-        .show()
-      return
+      
+      dimView.backgroundColor = .clear
+      
+      dismiss(animated: true) { [weak self] in
+        guard let self = self else { return }
+        self.dateHandler(self.dateRange)
+      }
+      
+    default:
+      let selectedIndex = self.items.enumerated()
+        .map { offset, element in
+          return element.isSelected ? offset : -1
+        }
+        .filter { $0 != -1 }
+        .first
+      
+      guard let selectedIndex = selectedIndex else {
+        CommonAlert.shared
+          .setMessage(.message("\(type.description)를(을) 선택해주세요."))
+          .show()
+        return
+      }
+      
+      dimView.backgroundColor = .clear
+      
+      dismiss(animated: true) { [weak self] in
+        guard let self = self else { return }
+        self.confirmHandler(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
+      }
     }
-    
-    dimView.backgroundColor = .clear
-    
-    dismiss(animated: true) { [weak self] in
-      guard let self = self else { return }
-      self.confirmHandler(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
-    }
-  }
-  
-  func configureCell(view: JTACDayCell?, cellState: CellState) {
-    guard let cell = view as? CalendarDateCell  else { return }
-    cell.setup(title: cellState.text)
-    handleCellTextColor(cell: cell, cellState: cellState)
-    handleCellSelected(cell: cell, cellState: cellState)
-  }
-  
-  func handleCellTextColor(cell: CalendarDateCell, cellState: CellState) {
-    if cellState.dateBelongsTo == .thisMonth {
-      cell.updateTextColor(state: .normal)
-    } else {
-      cell.updateTextColor(state: .notThisMonth)
-    }
-  }
-  
-  func handleCellSelected(cell: CalendarDateCell, cellState: CellState) {
-    cell.updateSelectedView(cellState: cellState)
   }
 }
 
@@ -353,28 +365,104 @@ extension BottomSheetController: UIGestureRecognizerDelegate {
   }
 }
 
+// MARK: JTAppleCalendar
+private extension BottomSheetController {
+  func configureCell(view: JTACDayCell?, cellState: CellState) {
+    guard let cell = view as? CalendarDateCell  else { return }
+    cell.setup(title: cellState.text)
+    handleCellTextColor(cell: cell, cellState: cellState)
+    handleCellSelected(cell: cell, cellState: cellState)
+  }
+  
+  func handleCellTextColor(cell: CalendarDateCell, cellState: CellState) {
+    if cellState.dateBelongsTo == .thisMonth {
+      cell.updateTextColor(state: .normal)
+    } else {
+      cell.updateTextColor(state: .notThisMonth)
+    }
+  }
+  
+  func handleCellSelected(cell: CalendarDateCell, cellState: CellState) {
+    cell.updateSelectedView(cellState: cellState)
+  }
+}
+
 extension BottomSheetController: JTACMonthViewDataSource {
   public func configureCalendar(_ calendar: JTAppleCalendar.JTACMonthView) -> JTAppleCalendar.ConfigurationParameters {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy MM dd"
-    
-    let startDate = Date()
-    let endDate = formatter.date(from: "2025 01 01")!
-    return ConfigurationParameters(startDate: startDate, endDate: endDate)
+    let today = Date().toDate()
+    let endDate = today.afterDate(year: 2).toDate()
+    return ConfigurationParameters(startDate: today, endDate: endDate)
   }
 }
 
 extension BottomSheetController: JTACMonthViewDelegate {
-  public func calendar(_ calendar: JTACMonthView, headerViewForDateRange range: (start: Date, end: Date), at indexPath: IndexPath) -> JTACMonthReusableView {
-    let formatter = DateFormatter()  // Declare this outside, to avoid instancing this heavy class multiple times.
-    formatter.dateFormat = "yyyy년 MM월"
-    formatter.locale = .init(identifier: "ko_kr")
+  public func calendar(_ calendar: JTACMonthView, didSelectDate date: Date, cell: JTACDayCell?, cellState: CellState, indexPath: IndexPath) {
     
+    if let startDate = dateRange.start, let endDate = dateRange.end {
+      if startDate.compare(date) == .orderedDescending {
+        dateRange.start = date
+      } else if endDate.compare(date) == .orderedAscending {
+        dateRange.end = date
+      }
+    } else {
+      dateRange.start = date
+      dateRange.end = date
+    }
+    
+    if let startDate = dateRange.start, let endDate = dateRange.end {
+      calendar.selectDates(
+        from: startDate,
+        to: endDate,
+        triggerSelectionDelegate: false,
+        keepSelectionIfMultiSelectionAllowed: true
+      )
+    }
+    
+    configureCell(view: cell, cellState: cellState)
+  }
+  
+  public func calendar(_ calendar: JTACMonthView, didDeselectDate date: Date, cell: JTACDayCell?, cellState: CellState, indexPath: IndexPath) {
+    
+    guard let startDate = dateRange.start,
+          let endDate = dateRange.end else { return }
+    
+    if startDate == date && endDate == date {
+      dateRange.start = nil
+      dateRange.end = nil
+    } else if dateRange.start == date {
+      dateRange.start = endDate
+    } else if dateRange.end == date {
+      dateRange.end = startDate
+    } else {
+      guard let startDay = Calendar.current.dateComponents([.day], from: startDate, to: date).day,
+            let endDay = Calendar.current.dateComponents([.day], from: date, to: endDate).day else { return }
+      if startDay < endDay {
+        dateRange.start = date
+      } else {
+        dateRange.end = date
+      }
+    }
+    
+    calendar.deselectAllDates(triggerSelectionDelegate: false)
+    
+    if let startDate = dateRange.start, let endDate = dateRange.end {
+      calendar.selectDates(
+        from: startDate,
+        to: endDate,
+        triggerSelectionDelegate: false,
+        keepSelectionIfMultiSelectionAllowed: true
+      )
+    }
+    
+    configureCell(view: cell, cellState: cellState)
+  }
+  
+  public func calendar(_ calendar: JTACMonthView, headerViewForDateRange range: (start: Date, end: Date), at indexPath: IndexPath) -> JTACMonthReusableView {
     if let header = calendar.dequeueReusableJTAppleSupplementaryView(
       withReuseIdentifier: CalendarHeaderView.reuseIdentifier,
       for: indexPath
     ) as? CalendarHeaderView {
-      header.setup(title: formatter.string(from: range.start))
+      header.setup(title: range.start.toFormattedString(dateFormat: "yyyy년 MM월"))
       return header
     }
     
@@ -398,6 +486,6 @@ extension BottomSheetController: JTACMonthViewDelegate {
   }
   
   public func calendarSizeForMonths(_ calendar: JTACMonthView?) -> MonthSize? {
-    .init(defaultSize: Height.calendarHeader)
+    return .init(defaultSize: Height.calendarHeader)
   }
 }
