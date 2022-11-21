@@ -11,7 +11,8 @@ import ProjectDescription
 let dependencies = Dependencies(
   carthage: [
     .github(path: "layoutBox/FlexLayout", requirement: .upToNext("1.3.24")),
-    .github(path: "scenee/FloatingPanel", requirement: .upToNext("2.5.3"))
+    .github(path: "scenee/FloatingPanel", requirement: .upToNext("2.5.3")),
+    .github(path: "RxSwiftCommunity/RxGesture", requirement: .upToNext("3.0"))
   ],
   swiftPackageManager: [
     .remote(

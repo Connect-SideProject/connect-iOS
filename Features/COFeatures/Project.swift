@@ -13,6 +13,7 @@ let features = Project.feature(
   name: "COFeatures",
   products: [.framework(.dynamic)],
   dependencies: [
+    .project(target: "Home", path: .relativeToRoot("Features/Home")),
     .project(target: "Sign", path: .relativeToRoot("Features/Sign")),
     .project(target: "Profile", path: .relativeToRoot("Features/Profile"))
   ]

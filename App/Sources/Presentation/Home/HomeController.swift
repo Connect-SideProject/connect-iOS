@@ -166,12 +166,6 @@ public final class HomeController: UIViewController {
     }
     
     
-//    private static func dataSourcesFactory() -> RxCollectionViewSectionedReloadDataSource<HomeViewSection> {
-//
-//    }
-    
-    
-    
     init(reactor: Reactor) {
         defer { self.reactor = reactor }
         self.releaseDataSource = type(of: self).releaseSourceFactory()
