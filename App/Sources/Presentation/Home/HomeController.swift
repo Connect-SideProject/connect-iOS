@@ -61,53 +61,56 @@ public final class HomeController: UIViewController {
     private lazy var dataSource: RxCollectionViewSectionedReloadDataSource<HomeViewSection> = .init(
         configureCell: { dataSource, collectionView, indexPath, sectionItem in
             switch sectionItem {
-            case let .homeMenu(cellReactor):
-                
-                guard let menuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell else { return UICollectionViewCell() }
-                
-                menuCell.reactor = cellReactor
-                return menuCell
-                
-            case let .homeStudyMenu(cellReactor):
-                guard let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyMenuCell", for: indexPath) as? HomeStudyMenuCell else { return UICollectionViewCell() }
-                studyMenuCell.reactor = cellReactor
-                return studyMenuCell
-                
-            case let .homeStudyList(cellReactor):
-                guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return UICollectionViewCell() }
-                studyListCell.reactor = cellReactor
-                return studyListCell
-            }
+    case let .homeMenu(cellReactor):
+        
+        guard let menuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell else { return UICollectionViewCell() }
+        
+        menuCell.reactor = cellReactor
+        return menuCell
+        
+    case let .homeStudyMenu(cellReactor):
+        guard let studyMenuCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyMenuCell", for: indexPath) as? HomeStudyMenuCell else { return UICollectionViewCell() }
+        studyMenuCell.reactor = cellReactor
+        return studyMenuCell
+        
+    case let .homeStudyList(cellReactor):
+        guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return UICollectionViewCell() }
+        studyListCell.reactor = cellReactor
+        return studyListCell
+    }
         },configureSupplementaryView: { dataSource, collectionView, kind, indexPath in
-            switch kind {
-            case UICollectionView.elementKindSectionHeader:
-                switch dataSource[indexPath.section] {
-                case .field:
-                    guard let searchHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView", for: indexPath) as? HomeSearchResuableHeaderView else { return UICollectionReusableView() }
-                    return searchHeaderView
-                default:
-                    return UICollectionReusableView()
-                }
-            case UICollectionView.elementKindSectionFooter:
-                switch dataSource[indexPath.section] {
-                case .homeSubMenu:
-                    guard let homeMenuUnderLineView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView", for: indexPath) as? HomeStudyMenuFooterView else { return UICollectionReusableView() }
-                    
-                    return homeMenuUnderLineView
-                case .homeStudyList:
-                    guard let homeStudyListView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView", for: indexPath) as? HomeStudyListFooterView else { return UICollectionReusableView() }
-                    homeStudyListView.completion = {
-                        self.delegate?.didTapToPostListCreate()
-                    }
-                    return homeStudyListView
-                default:
-                    return UICollectionReusableView()
-                }
-            default:
-                return UICollectionReusableView()
-            }
-        })
-
+        switch kind {
+    case UICollectionView.elementKindSectionHeader:
+        switch dataSource[indexPath.section] {
+    case .field:
+        guard let searchHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "HomeSearchResuableHeaderView", for: indexPath) as? HomeSearchResuableHeaderView else { return UICollectionReusableView() }
+        searchHeaderView.completion = {
+        self.delegate?.didTapToSearchCreate()
+    }
+        return searchHeaderView
+    default:
+        return UICollectionReusableView()
+    }
+    case UICollectionView.elementKindSectionFooter:
+        switch dataSource[indexPath.section] {
+    case .homeSubMenu:
+        guard let homeMenuUnderLineView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyMenuFooterView", for: indexPath) as? HomeStudyMenuFooterView else { return UICollectionReusableView() }
+        
+        return homeMenuUnderLineView
+    case .homeStudyList:
+        guard let homeStudyListView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView", for: indexPath) as? HomeStudyListFooterView else { return UICollectionReusableView() }
+        homeStudyListView.completion = {
+        self.delegate?.didTapToPostListCreate()
+    }
+        return homeStudyListView
+    default:
+        return UICollectionReusableView()
+    }
+    default:
+        return UICollectionReusableView()
+    }
+    })
+    
     private lazy var collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then({ flowLayout in
         flowLayout.minimumLineSpacing = .zero
         flowLayout.minimumInteritemSpacing = .zero
@@ -184,9 +187,9 @@ public final class HomeController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
-      
-
-      
+        
+        
+        
         configure()
     }
     
@@ -305,7 +308,7 @@ extension HomeController {
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseCollectionView.rx.items(dataSource: self.releaseDataSource))
             .disposed(by: disposeBag)
-                
+        
         collectionView.rx
             .itemSelected
             .subscribe(onNext: { [weak self] indexPath in
@@ -319,6 +322,9 @@ extension HomeController {
                     break
                 }
             }).disposed(by: disposeBag)
+        
+        
+        
         
     }
 }
