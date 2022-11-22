@@ -9,6 +9,10 @@ import UIKit
 import Then
 import SnapKit
 import ReactorKit
+import RxGesture
+import RxSwift
+import RxCocoa
+import COCommonUI
 
 final class PostFilterReactor: Reactor {
     
@@ -36,6 +40,8 @@ final class PostFilterReactor: Reactor {
 final class PostFilterHeaderView: BaseView {
     
     typealias Reactor = PostFilterReactor
+    
+    weak var delegate: PostCoordinatorDelegate?
     
     
     //MARK: Property
@@ -160,7 +166,13 @@ final class PostFilterHeaderView: BaseView {
 extension PostFilterHeaderView: ReactorKit.View {
     
     func bind(reactor: Reactor) {
-        
+        onOffLineFilterView
+            .rx.tapGesture()
+            .when(.recognized)
+            .throttle(.seconds(2), scheduler: MainScheduler.instance)
+            .bind { _ in
+                self.delegate?.didFilterSheetCreate(.onOffLine)
+            }.disposed(by: disposeBag)
     }
     
 }

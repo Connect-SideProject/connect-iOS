@@ -11,6 +11,7 @@ import Then
 import SnapKit
 import RxDataSources
 import ReactorKit
+import COCommonUI
 
 
 
@@ -69,6 +70,8 @@ public final class PostListController: UIViewController {
     //MARK: Configure
     private func configure(){
         
+        postFilterHeaderView.delegate = self
+        
         self.view.backgroundColor = .white
         
         _ = [postListIndicatorView, postFilterHeaderView ,postTableView].map {
@@ -107,6 +110,17 @@ extension PostListController: ReactorKit.View {
         
         
         
+    }
+    
+}
+
+    //MARK: Delegate
+extension PostListController: PostCoordinatorDelegate {
+    
+    public func didFilterSheetCreate(_ type: BottomSheetType) {
+        let bottomSheetController = BottomSheetController(type: type)
+        bottomSheetController.modalPresentationStyle = .overFullScreen
+        self.present(bottomSheetController, animated: true)
     }
     
 }
