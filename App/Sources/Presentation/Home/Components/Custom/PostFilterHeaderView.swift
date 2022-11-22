@@ -166,6 +166,7 @@ final class PostFilterHeaderView: BaseView {
 extension PostFilterHeaderView: ReactorKit.View {
     
     func bind(reactor: Reactor) {
+        
         onOffLineFilterView
             .rx.tapGesture()
             .when(.recognized)
@@ -173,6 +174,23 @@ extension PostFilterHeaderView: ReactorKit.View {
             .bind { _ in
                 self.delegate?.didFilterSheetCreate(.onOffLine)
             }.disposed(by: disposeBag)
+        
+        studyTypeFilterView
+            .rx.tapGesture()
+            .when(.recognized)
+            .throttle(.seconds(2), scheduler: MainScheduler.instance)
+            .bind { _ in
+                self.delegate?.didFilterSheetCreate(.studyType)
+            }.disposed(by: disposeBag)
+        
+        interestFieldFilterComponentView
+            .rx.tapGesture()
+            .when(.recognized)
+            .throttle(.seconds(2), scheduler: MainScheduler.instance)
+            .bind { _ in
+                self.delegate?.didFilterSheetCreate(.aligment)
+            }
+        
     }
     
 }

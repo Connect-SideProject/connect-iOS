@@ -244,7 +244,7 @@ public final class HomeController: UIViewController {
         
         homeIndicatorView.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.width.height.equalTo(24)
+            $0.width.height.equalTo(12)
         }
         
         releaseHeaderTitleLabel.snp.makeConstraints {

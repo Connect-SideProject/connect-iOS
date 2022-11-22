@@ -16,9 +16,13 @@ import RxDataSources
 
 
 /// 프로젝트 검색 화면 컨트롤러
-final class SearchViewController: UIViewController {
+public final class SearchViewController: UIViewController {
     
     //MARK: Property
+    
+    public typealias Reactor = SearchViewReactor
+    
+    public var disposeBag: DisposeBag = DisposeBag()
     
     private lazy var collectionViewLayout = LeftAlignedCollectionViewFlowLayout().then {
         $0.scrollDirection = .horizontal
@@ -37,9 +41,31 @@ final class SearchViewController: UIViewController {
     })
     
     
+    private lazy var keywordSearchController: UISearchController = UISearchController().then {
+        $0.obscuresBackgroundDuringPresentation = false
+        $0.searchBar.placeholder = "찾는 프로젝트 키워드를 검색해보세요."
+    }
     
+    private let keywordIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
+        $0.backgroundColor = .clear
+    }
+    
+    init(reactor: Reactor) {
+        defer { self.reactor = reactor }
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        debugPrint(#function)
+    }
+    
+
     //MARK: LifeCycle
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         configure()
     }
@@ -47,11 +73,37 @@ final class SearchViewController: UIViewController {
     //MARK: Configure
     private func configure() {
         
+        _ = [keywordIndicatorView,keywordCollectionView].map {
+            self.view.addSubview($0)
+        }
+        
         keywordCollectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
+        
+        keywordIndicatorView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(12)
+        }
+        
+        
+        self.navigationItem.searchController = keywordSearchController
+        
+        
     }
     
+    
+    
+}
+
+
+
+extension SearchViewController: ReactorKit.View {
+    
+    
+    public func bind(reactor: Reactor) {
+        
+    }
     
     
 }

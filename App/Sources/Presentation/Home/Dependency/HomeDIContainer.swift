@@ -12,7 +12,7 @@ import ReactorKit
 import UIKit
 import CONetwork
 
-
+//MARK: Dependency
 public final class HomeDependencyContainer: HomeDIContainer {
     public typealias HomeReactor = HomeViewReactor
     public typealias HomeViewRepository = HomeRepository
