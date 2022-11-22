@@ -9,7 +9,7 @@ import UIKit
 
 import RxSwift
 
-public class FlexLayoutView: UIView, FlexLayoutType, RxBaseType {
+open class FlexLayoutView: UIView, FlexLayoutType, RxBaseType {
     let rootContainer = UIView()
     public var disposeBag: DisposeBag = .init()
     
