@@ -16,6 +16,7 @@ import RxCocoa
 import CONetwork
 import COManager
 import CODomain
+import RxGesture
 
 
 /// 홈 화면 컨트롤러.

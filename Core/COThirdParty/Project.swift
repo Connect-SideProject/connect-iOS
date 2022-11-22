@@ -9,6 +9,7 @@ let thirdParty = Project.feature(
     .external(name: "RxCocoa"),
     .external(name: "RxDataSources"),
     .external(name: "ReactorKit"),
-    .external(name: "FloatingPanel")
+    .external(name: "FloatingPanel"),
+    .external(name: "RxGesture")
   ]
 )

@@ -11,17 +11,16 @@ import ProjectDescription
 let dependencies = Dependencies(
   carthage: [
     .github(path: "layoutBox/FlexLayout", requirement: .upToNext("1.3.24")),
-    .github(path: "scenee/FloatingPanel", requirement: .upToNext("2.5.3")),
-    .github(path: "RxSwiftCommunity/RxGesture", requirement: .upToNext("3.0"))
+    .github(path: "scenee/FloatingPanel", requirement: .upToNext("2.5.3"))
   ],
   swiftPackageManager: [
     .remote(
-      url: "https://github.com/kakao/kakao-ios-sdk",
-      requirement: .branch("master")
+        url: "https://github.com/RxSwiftCommunity/RxGesture.git",
+        requirement: .upToNextMinor(from: "4.0.3")
     ),
     .remote(
-      url: "https://github.com/ReactiveX/RxSwift.git",
-      requirement: .exact("6.5.0")
+      url: "https://github.com/kakao/kakao-ios-sdk",
+      requirement: .branch("master")
     ),
     .remote(
         url: "https://github.com/RxSwiftCommunity/RxDataSources",
@@ -29,7 +28,7 @@ let dependencies = Dependencies(
     ),
     .remote(
       url: "https://github.com/ReactorKit/ReactorKit.git",
-      requirement: .upToNextMajor(from: "3.0.0")
+      requirement: .upToNextMajor(from: "3.2.0")
     ),
     .remote(
       url: "https://github.com/SnapKit/SnapKit.git",
