@@ -7,27 +7,26 @@
 //
 
 import UIKit
-
+import Then
+import COCommonUI
 
 final class HomeSearchHeaderView: UICollectionReusableView {
     
     
     //MARK: Property
     
-    private let mainTitleLabel: UILabel = {
+    private let mainTitleLabel: UILabel = UILabel().then {
         $0.text = "어떤 프로젝트를 찾으시나요?"
         $0.font = .systemFont(ofSize: 16, weight: .medium)
         $0.textColor = .black
         $0.textAlignment = .left
-        
-        return $0
-    }(UILabel())
     
-    private let searchView: HomeSearchView = {
-        $0.layer.borderColor = .init(red: 187/255, green: 237/255, blue: 80/255, alpha: 1.0)
+    }
+    
+    private let searchView: HomeSearchView = HomeSearchView().then {
+        $0.layer.borderColor = UIColor.hexF9F9F9.cgColor
         $0.layer.borderWidth = 2
-        return $0
-    }(HomeSearchView(frame: .zero))
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)

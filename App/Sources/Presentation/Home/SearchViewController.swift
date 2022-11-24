@@ -41,16 +41,18 @@ public final class SearchViewController: UIViewController {
     })
     
     
-    private lazy var keywordSearchController: UISearchController = UISearchController().then {
+    private let keywordSearchBar: UISearchBar = UISearchBar().then {
         let attributed = NSAttributedString(string: "찾는 프로젝트 키워드를 검색해보세요.", attributes: [
             NSAttributedString.Key.font: UIFont.regular(size: 14),
             NSAttributedString.Key.foregroundColor: UIColor.hexC6C6C6
         ])
         
-        $0.obscuresBackgroundDuringPresentation = false
-        $0.searchBar.placeholder = "찾는 프로젝트 키워드를 검색해보세요."
-        $0.searchBar.searchTextField.attributedPlaceholder = attributed
+        $0.showsCancelButton = false
+        $0.searchTextField.attributedPlaceholder = attributed
+        $0.searchBarStyle = .minimal
     }
+    
+        
     
     private let keywordIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.backgroundColor = .clear
@@ -78,22 +80,28 @@ public final class SearchViewController: UIViewController {
     
     //MARK: Configure
     private func configure() {
-        
-        _ = [keywordIndicatorView,keywordCollectionView].map {
+        self.view.backgroundColor = .white
+        _ = [keywordIndicatorView,keywordSearchBar,keywordCollectionView].map {
             self.view.addSubview($0)
         }
+                
+        keywordSearchBar.snp.makeConstraints {
+            $0.top.equalTo(self.view.safeAreaLayoutGuide.snp.topMargin)
+            $0.left.equalToSuperview().offset(20)
+            $0.right.equalToSuperview().offset(-20)
+            $0.height.equalTo(44)
+        }
         
+                
         keywordCollectionView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.equalTo(keywordSearchBar.snp.bottom)
+            $0.left.right.bottom.equalToSuperview()
         }
         
         keywordIndicatorView.snp.makeConstraints {
             $0.center.equalToSuperview()
             $0.width.height.equalTo(12)
         }
-        
-        
-        self.navigationItem.searchController = keywordSearchController
         
         
     }
