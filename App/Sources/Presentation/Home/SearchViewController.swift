@@ -42,8 +42,14 @@ public final class SearchViewController: UIViewController {
     
     
     private lazy var keywordSearchController: UISearchController = UISearchController().then {
+        let attributed = NSAttributedString(string: "찾는 프로젝트 키워드를 검색해보세요.", attributes: [
+            NSAttributedString.Key.font: UIFont.regular(size: 14),
+            NSAttributedString.Key.foregroundColor: UIColor.hexC6C6C6
+        ])
+        
         $0.obscuresBackgroundDuringPresentation = false
         $0.searchBar.placeholder = "찾는 프로젝트 키워드를 검색해보세요."
+        $0.searchBar.searchTextField.attributedPlaceholder = attributed
     }
     
     private let keywordIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
