@@ -7,6 +7,8 @@
 
 import UIKit
 
+import PinLayout
+import FlexLayout
 import COCommonUI
 
 extension ChatRoomController {
@@ -16,6 +18,17 @@ extension ChatRoomController {
         
         override func setupContainer() {
             super.setupContainer()
+            
+            self.rootContainer.flex.direction(.row)
+                .alignItems(.center)
+                .define { [weak self] in
+                    guard let self = self else { return }
+                    $0.addItem(self.textField)
+                        .grow(1)
+                        .marginHorizontal(20)
+                        .height(44)
+                }
+                
         }
         
         override func layout() {
