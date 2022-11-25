@@ -31,7 +31,7 @@ public final class SearchDependencyContainer: HomeDIContainer {
     }
     
     public func makeRepository() -> HomeViewRepository {
-        return SearchViewRepo()
+        return SearchViewRepo(searchApiService: self.searchApiService)
     }
     
     public func makeController() -> SearchViewController {
@@ -44,12 +44,31 @@ public final class SearchDependencyContainer: HomeDIContainer {
 
 //MARK: Repository
 public protocol SearchViewRepository {
-    
+    func responseSearchKeywordsSectionItem(item: [String]) -> SearchSection
 }
 
 
 
 final class SearchViewRepo: SearchViewRepository {
+    
+    //TODO: 추후 All List Server 통신 할 수 있기에 추가
+    private let searchApiService: ApiService
+    
+    public init(searchApiService: ApiService) {
+        self.searchApiService = searchApiService
+    }
+    
+    
+    func responseSearchKeywordsSectionItem(item: [String]) -> SearchSection {
+        var searchRecentlyKeywrodItem: [SearchSectionItem] = []
+        
+        for i in 0 ..< item.count {
+            searchRecentlyKeywrodItem.append(.searchList)
+        }
+        
+        return SearchSection.search(searchRecentlyKeywrodItem)
+    }
+    
 
     
 }

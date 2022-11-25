@@ -85,6 +85,13 @@ public final class SearchViewController: UIViewController {
             self.view.addSubview($0)
         }
                 
+                
+        keywordCollectionView.snp.makeConstraints {
+            $0.top.equalTo(keywordSearchBar.snp.bottom)
+            $0.left.right.bottom.equalToSuperview()
+        }
+        
+        
         keywordSearchBar.snp.makeConstraints {
             $0.top.equalTo(self.view.safeAreaLayoutGuide.snp.topMargin)
             $0.left.equalToSuperview().offset(20)
@@ -92,11 +99,6 @@ public final class SearchViewController: UIViewController {
             $0.height.equalTo(44)
         }
         
-                
-        keywordCollectionView.snp.makeConstraints {
-            $0.top.equalTo(keywordSearchBar.snp.bottom)
-            $0.left.right.bottom.equalToSuperview()
-        }
         
         keywordIndicatorView.snp.makeConstraints {
             $0.center.equalToSuperview()
@@ -117,7 +119,35 @@ extension SearchViewController: ReactorKit.View {
     
     public func bind(reactor: Reactor) {
         
+        
+        self.keywordCollectionView.rx
+            .setDelegate(self)
+            .disposed(by: disposeBag)
+        
+        self.rx.viewDidLoad
+            .map { Reactor.Action.viewDidLoad}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .map { $0.isLoading }
+            .observe(on: MainScheduler.instance)
+            .bind(to: keywordIndicatorView.rx.isAnimating)
+            .disposed(by: disposeBag)
+        
+        
+        
+        
     }
+    
+    
+}
+
+
+
+extension SearchViewController: UICollectionViewDelegateFlowLayout {
+    
     
     
 }

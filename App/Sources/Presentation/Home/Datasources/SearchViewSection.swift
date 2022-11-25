@@ -8,24 +8,24 @@
 import Differentiator
 
 
-enum SearchSection {
+public enum SearchSection {
     case search([SearchSectionItem])
 }
 
-enum SearchSectionItem {
+public enum SearchSectionItem {
     case searchList
 }
 
 
 extension SearchSection: SectionModelType {
     
-    var items: [SearchSectionItem] {
+    public var items: [SearchSectionItem] {
         switch self {
         case let .search(items): return items
         }
     }
     
-    init(original: SearchSection, items: [SearchSectionItem]) {
+    public init(original: SearchSection, items: [SearchSectionItem]) {
         switch original {
         case .search: self = .search(items)
         }
