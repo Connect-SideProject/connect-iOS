@@ -15,7 +15,7 @@ import CONetwork
 public final class SearchDependencyContainer: HomeDIContainer {
     
     public typealias HomeReactor = SearchViewReactor
-    public typealias HomeViewRepository = SearchViewRepository
+    public typealias HomeViewRepository = SearchRepository
     public typealias HomeViewController = SearchViewController
     
     
@@ -27,7 +27,7 @@ public final class SearchDependencyContainer: HomeDIContainer {
     
     
     public func makeReactor() -> SearchViewReactor {
-        return SearchViewReactor()
+        return SearchViewReactor(searchRepository: makeRepository())
     }
     
     public func makeRepository() -> HomeViewRepository {
@@ -43,13 +43,13 @@ public final class SearchDependencyContainer: HomeDIContainer {
 
 
 //MARK: Repository
-public protocol SearchViewRepository {
+public protocol SearchRepository {
     func responseSearchKeywordsSectionItem(item: [String]) -> SearchSection
 }
 
 
 
-final class SearchViewRepo: SearchViewRepository {
+final class SearchViewRepo: SearchRepository {
     
     //TODO: 추후 All List Server 통신 할 수 있기에 추가
     private let searchApiService: ApiService
@@ -63,7 +63,7 @@ final class SearchViewRepo: SearchViewRepository {
         var searchRecentlyKeywrodItem: [SearchSectionItem] = []
         
         for i in 0 ..< item.count {
-            searchRecentlyKeywrodItem.append(.searchList)
+            searchRecentlyKeywrodItem.append(.searchList(SearchKeywordCellReactor(keywordItems: item[i])))
         }
         
         return SearchSection.search(searchRecentlyKeywrodItem)

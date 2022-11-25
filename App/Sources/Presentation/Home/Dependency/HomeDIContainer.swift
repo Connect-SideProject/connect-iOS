@@ -63,12 +63,12 @@ extension HomeDependencyContainer {
 
 
 public protocol HomeRepository {
-    func responseMenuImage(image: HomeMenu) throws -> Data
+    func responseMenuImage(image: HomeMenuList) throws -> Data
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
-    func responseHomeMenuSectionItem(item: [HomeMenu]) -> HomeViewSection
+    func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection
     func responseHomeNewsSectionItem(item: [HomeStudyNodeList]) -> HomeViewSection
 }
 
@@ -82,7 +82,7 @@ final class HomeViewRepo: HomeRepository {
     }
     
     
-    func responseMenuImage(image item: HomeMenu) throws -> Data {
+    func responseMenuImage(image item: HomeMenuList) throws -> Data {
         guard let imageurl = URL(string: item.menuImage),
               let imageData = try? Data(contentsOf: imageurl) else { return Data() }
         return UIImage(data: imageData)?.pngData() ?? Data()
@@ -90,7 +90,7 @@ final class HomeViewRepo: HomeRepository {
     
     
     func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation> {
-        let creteMenuResponse = homeApiService.request(endPoint: .init(path: .homeMenu)).flatMap { (data: [HomeMenu]) -> Observable<HomeViewReactor.Mutation> in
+        let creteMenuResponse = homeApiService.request(endPoint: .init(path: .homeMenu)).flatMap { (data: [HomeMenuList]) -> Observable<HomeViewReactor.Mutation> in
             
             return .just(.setHomeMenuItem(data))
         }
@@ -117,7 +117,7 @@ final class HomeViewRepo: HomeRepository {
         return createReleaseResponse
     }
     
-    func responseHomeMenuSectionItem(item: [HomeMenu]) -> HomeViewSection {
+    func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection {
         var homeMenuSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
             homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuType: item[i], homeCellRepo: self)))

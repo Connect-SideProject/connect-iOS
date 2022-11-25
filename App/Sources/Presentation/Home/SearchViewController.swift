@@ -35,10 +35,17 @@ public final class SearchViewController: UIViewController {
         $0.showsVerticalScrollIndicator = false
         $0.backgroundColor = .white
     }
-
+    
     private lazy var searchDataSource: RxCollectionViewSectionedReloadDataSource<SearchSection> = .init(configureCell: { datasource, collectionView, indexPath, sectionItem in
+        
+        switch sectionItem {
+        
+    case let .searchList(cellReactor):
         guard let searchKeywordCell = collectionView.dequeueReusableCell(withReuseIdentifier: "SearchKeywordListCell", for: indexPath) as? SearchKeywordListCell else { return UICollectionViewCell() }
-    })
+        searchKeywordCell.reactor = cellReactor
+    }
+        return UICollectionViewCell()
+})
     
     
     private let keywordSearchBar: UISearchBar = UISearchBar().then {
@@ -52,7 +59,7 @@ public final class SearchViewController: UIViewController {
         $0.searchBarStyle = .minimal
     }
     
-        
+    
     
     private let keywordIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.backgroundColor = .clear
@@ -71,7 +78,7 @@ public final class SearchViewController: UIViewController {
         debugPrint(#function)
     }
     
-
+    
     //MARK: LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,8 +91,8 @@ public final class SearchViewController: UIViewController {
         _ = [keywordIndicatorView,keywordSearchBar,keywordCollectionView].map {
             self.view.addSubview($0)
         }
-                
-                
+        
+        
         keywordCollectionView.snp.makeConstraints {
             $0.top.equalTo(keywordSearchBar.snp.bottom)
             $0.left.right.bottom.equalToSuperview()
@@ -136,6 +143,13 @@ extension SearchViewController: ReactorKit.View {
             .bind(to: keywordIndicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
         
+        
+        reactor.state
+            .map { $0.section }
+            .debug("Search Keywrod Section")
+            .observe(on: MainScheduler.instance)
+            .bind(to: keywordCollectionView.rx.items(dataSource: self.searchDataSource))
+            .disposed(by: disposeBag)
         
         
         

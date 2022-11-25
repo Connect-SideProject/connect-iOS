@@ -9,10 +9,19 @@ import UIKit
 import SnapKit
 import Then
 
+import RxSwift
+import RxCocoa
+import ReactorKit
+
 
 /// 검색 키워드 셀
 
 final class SearchKeywordListCell: UICollectionViewCell {
+    
+    
+    typealias Reactor = SearchKeywordCellReactor
+    
+    var disposeBag: DisposeBag = DisposeBag()
     
     private let keywordContainerView: UIView = UIView().then {
         $0.backgroundColor = .hexF9F9F9
@@ -73,4 +82,13 @@ final class SearchKeywordListCell: UICollectionViewCell {
     }
     
     
+}
+
+
+
+extension SearchKeywordListCell: ReactorKit.View {
+    
+    func bind(reactor: Reactor) {
+        
+    }
 }

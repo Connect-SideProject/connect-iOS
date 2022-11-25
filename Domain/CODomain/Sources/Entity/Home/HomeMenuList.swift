@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-public struct HomeMenu: Codable {
+public struct HomeMenuList: Codable {
     public var menuTitle: String
     public var menuImage: String
     

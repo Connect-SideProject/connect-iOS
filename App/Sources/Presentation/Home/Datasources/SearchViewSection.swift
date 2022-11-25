@@ -7,13 +7,24 @@
 
 import Differentiator
 
+public enum SearchKeywordType: String, Equatable {
+    case searchKeyword
+}
+
 
 public enum SearchSection {
     case search([SearchSectionItem])
+    
+    func getSectionType() -> SearchKeywordType {
+        switch self {
+        case .search: return .searchKeyword
+        }
+    }
 }
 
 public enum SearchSectionItem {
-    case searchList
+    case searchList(SearchKeywordCellReactor)
+    
 }
 
 

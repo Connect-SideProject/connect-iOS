@@ -40,11 +40,10 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     
     public enum Mutation {
         case setLoading(Bool)
-        case setHomeMenuItem([HomeMenu])
+        case setHomeMenuItem([HomeMenuList])
         case setHomeNewsItem(HomeStudyList)
         case setReleaseItems([HomeHotList])
         case setSubMenuItems(HomeViewSection)
-        case setStudyListItems(HomeViewSection)
         case setHomeError(COError?)
     }
     
@@ -86,13 +85,11 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             ])))
             
             
-            let setStudyListItems = Observable<Mutation>.just(.setStudyListItems(.homeStudyList([])))
                         
             return .concat(
                 startLoading,
                 homeRepository.responseHomeMenuItem(),
                 setMenuItems,
-                setStudyListItems,
                 homeRepository.responseHomeReleaseItem(),
                 endLoading
             )
@@ -109,27 +106,20 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             
         case let .setHomeMenuItem(items):
             var newState = state
-            guard let sectionIndex = self.getIndex(section: .field([])) else { return newState }
-            newState.section[sectionIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
+            let fieldSectionIndex = self.getIndex(section: .field([]))
+            newState.section[fieldSectionIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
             
             return newState
         case let .setHomeNewsItem(items):
             var newState = state
-            guard let sectionIndex = self.getIndex(section: .homeStudyList([])) else { return newState }
-            newState.section[sectionIndex] = homeRepository.responseHomeNewsSectionItem(item: items.study)
+            let studyListIndex = self.getIndex(section: .homeStudyList([]))
+            newState.section[studyListIndex] = homeRepository.responseHomeNewsSectionItem(item: items.study)
             
             return newState
         case let .setSubMenuItems(items):
             var newState = state
-            guard let sectionIndex = self.getIndex(section: .homeSubMenu([])) else { return newState }
-            newState.section[sectionIndex] = items
-            return newState
-            
-        case let .setStudyListItems(items):
-            var newState = state
-            guard let sectionIndex = self.getIndex(section: .homeStudyList([])) else { return newState }
-            newState.section[sectionIndex] = items
-            
+            let subMenuIndex = self.getIndex(section: .homeSubMenu([]))
+            newState.section[subMenuIndex] = items
             return newState
             
         case let .setHomeError(error):
@@ -140,8 +130,8 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             
         case let.setReleaseItems(items):
             var newState = state
-            guard let sectionIndex = self.getReleaseIndex(section: .hotMenu([])) else { return newState }
-            newState.releaseSection[sectionIndex] = homeRepository.responseHomeReleaseSectionItem(item: items)
+            let releaseIndex = self.getReleaseIndex(section: .hotMenu([]))
+            newState.releaseSection[releaseIndex] = homeRepository.responseHomeReleaseSectionItem(item: items)
             return newState
         }
         
@@ -151,8 +141,8 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
 
 
 private extension HomeViewReactor {
-    func getIndex(section: HomeViewSection) -> Int? {
-        var index: Int? = nil
+    func getIndex(section: HomeViewSection) -> Int {
+        var index: Int = 0
         
         for i in 0 ..< self.currentState.section.count {
             if self.currentState.section[i].getSectionType() == section.getSectionType() {
@@ -162,8 +152,8 @@ private extension HomeViewReactor {
         return index
     }
     
-    func getReleaseIndex(section: HomeReleaseSection) -> Int? {
-        var index: Int? = nil
+    func getReleaseIndex(section: HomeReleaseSection) -> Int {
+        var index: Int = 0
         
         for i in 0 ..< self.currentState.releaseSection.count {
             if self.currentState.releaseSection[i].getSectionType() == section.getSectionType() {
