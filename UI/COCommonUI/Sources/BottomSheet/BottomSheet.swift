@@ -1,5 +1,5 @@
 //
-//  BottomSheetController.swift
+//  BottomSheet.swift
 //  connect
 //
 //  Created by Kim dohyun on 2022/08/30.
@@ -40,27 +40,11 @@ public enum BottomSheetType: CustomStringConvertible {
   case interest([BottomSheetItem])
 }
 
-public struct BottomSheetItem {
-  public let value: String
-  public var isSelected: Bool = false
-  
-  public init(value: String) {
-    self.value = value
-  }
+public enum BottomSheetHandlerState {
+  case confirm(Int, String), date(DateRange), cancel
 }
 
-public extension BottomSheetItem {
-  mutating func update(isSelected: Bool) {
-    self.isSelected = isSelected
-  }
-}
-
-public struct DateRange {
-  public var start: Date?
-  public var end: Date?
-}
-
-public final class BottomSheetController: UIViewController {
+public final class BottomSheet: UIViewController {
   
   private enum Height {
     static let containerView: CGFloat = 490
@@ -155,10 +139,7 @@ public final class BottomSheetController: UIViewController {
   
   private var dateRange: DateRange = .init()
   
-  public var confirmHandler: (Int, String) -> Void = { _, _ in }
-  public var cancelHandler: () -> Void = {}
-  
-  public var dateHandler: (DateRange) -> Void = { _ in }
+  public var handler: ((BottomSheetHandlerState) -> Void) = { _ in }
   
   public init(type: BottomSheetType) {
     self.type = type
@@ -189,11 +170,20 @@ public final class BottomSheetController: UIViewController {
     super.viewDidAppear(animated)
     
     dimView.backgroundColor = .black.withAlphaComponent(0.5)
+  }
+  
+  @discardableResult
+  public func show() -> BottomSheet {
+    if let controller = UIApplication.getTopViewController() {
+      modalPresentationStyle = .overFullScreen
+      controller.present(self, animated: true)
+    }
     
+    return self
   }
 }
 
-private extension BottomSheetController {
+private extension BottomSheet {
   
   func configureUI() {
     
@@ -289,7 +279,7 @@ private extension BottomSheetController {
       
       dismiss(animated: true) { [weak self] in
         guard let self = self else { return }
-        self.dateHandler(self.dateRange)
+        self.handler(.date(self.dateRange))
       }
       
     default:
@@ -311,13 +301,15 @@ private extension BottomSheetController {
       
       dismiss(animated: true) { [weak self] in
         guard let self = self else { return }
-        self.confirmHandler(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
+        self.handler(
+          .confirm(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
+        )
       }
     }
   }
 }
 
-extension BottomSheetController: UICollectionViewDataSource {
+extension BottomSheet: UICollectionViewDataSource {
   public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return items.count
   }
@@ -334,7 +326,7 @@ extension BottomSheetController: UICollectionViewDataSource {
   }
 }
 
-extension BottomSheetController: UICollectionViewDelegateFlowLayout {
+extension BottomSheet: UICollectionViewDelegateFlowLayout {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     
     if items[indexPath.item].isSelected == true {
@@ -359,14 +351,14 @@ extension BottomSheetController: UICollectionViewDelegateFlowLayout {
   }
 }
 
-extension BottomSheetController: UIGestureRecognizerDelegate {
+extension BottomSheet: UIGestureRecognizerDelegate {
   public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
     return touch.view == dimView
   }
 }
 
 // MARK: JTAppleCalendar
-private extension BottomSheetController {
+private extension BottomSheet {
   func configureCell(view: JTACDayCell?, cellState: CellState) {
     guard let cell = view as? CalendarDateCell  else { return }
     cell.setup(title: cellState.text)
@@ -387,7 +379,7 @@ private extension BottomSheetController {
   }
 }
 
-extension BottomSheetController: JTACMonthViewDataSource {
+extension BottomSheet: JTACMonthViewDataSource {
   public func configureCalendar(_ calendar: JTAppleCalendar.JTACMonthView) -> JTAppleCalendar.ConfigurationParameters {
     let today = Date().toDate()
     let endDate = today.afterDate(year: 2).toDate()
@@ -395,7 +387,7 @@ extension BottomSheetController: JTACMonthViewDataSource {
   }
 }
 
-extension BottomSheetController: JTACMonthViewDelegate {
+extension BottomSheet: JTACMonthViewDelegate {
   public func calendar(_ calendar: JTACMonthView, didSelectDate date: Date, cell: JTACDayCell?, cellState: CellState, indexPath: IndexPath) {
     
     if let startDate = dateRange.start, let endDate = dateRange.end {

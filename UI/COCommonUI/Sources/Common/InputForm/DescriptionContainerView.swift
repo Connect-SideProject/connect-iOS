@@ -8,6 +8,8 @@
 import UIKit
 
 import FlexLayout
+import RxCocoa
+import RxSwift
 import Then
 
 public struct DescriptionItem {
@@ -64,7 +66,7 @@ public class DescriptionContainerView: UIView {
     $0.leftView = view
   }
   
-  public lazy var textView = UITextView().then {
+  private lazy var textView = UITextView().then {
     $0.font = .medium(size: 14)
     $0.textColor = .hexC6C6C6
     $0.layer.borderColor = UIColor.hexC6C6C6.cgColor
@@ -74,8 +76,8 @@ public class DescriptionContainerView: UIView {
     $0.delegate = self
   }
   
-  public private(set) var customView: CastableView?
-  public private(set) var customViews: [CastableView]?
+  private var customView: CastableView?
+  private var customViews: [CastableView]?
   
   private let noticeTextLabel = UILabel().then {
     $0.font = .regular(size: 12)
@@ -83,9 +85,13 @@ public class DescriptionContainerView: UIView {
     $0.numberOfLines = 1
   }
   
-  public let flexContainer = UIView()
+  private let flexContainer = UIView()
   
-  public var type: DescriptionType = .textField(.init())
+  private var type: DescriptionType = .textField(.init())
+  
+  private var disposeBag = DisposeBag()
+  public var uiBindingRelay = PublishRelay<String>()
+  public var buttonHandlerRelay = PublishRelay<Void>()
   
   public override func layoutSubviews() {
     super.layoutSubviews()
@@ -126,6 +132,7 @@ public class DescriptionContainerView: UIView {
     }
     
     configureUI()
+    bindEvent()
   }
   
   required init?(coder: NSCoder) {
@@ -133,8 +140,8 @@ public class DescriptionContainerView: UIView {
   }
 }
 
-extension DescriptionContainerView {
-  private func configureUI() {
+private extension DescriptionContainerView {
+  func configureUI() {
     backgroundColor = .white
     
     addSubview(flexContainer)
@@ -175,6 +182,20 @@ extension DescriptionContainerView {
             .marginVertical(8)
         }
       }
+  }
+  
+  func bindEvent() {
+    uiBindingRelay.bind { [weak self] in
+      if let button = self?.customView as? CastableButton {
+        button.setTitle($0, for: .normal)
+      }
+    }.disposed(by: disposeBag)
+    
+    if let button = customView as? CastableButton {
+      button.handler = { [weak self] in
+        self?.buttonHandlerRelay.accept(())
+      }
+    }
   }
 }
 
