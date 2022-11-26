@@ -38,6 +38,9 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
                 .height(50)
             $0.addItem(self.tableView)
                 .grow(1)
+            
+            $0.addItem(InputArea())
+                .height(73)
         }
     }
     
