@@ -20,6 +20,8 @@ import COExtensions
 
 public final class MeetingCreateViewController: UIViewController, ReactorKit.View {
   
+  public typealias Reactor = MeetingCreateReactor
+  
   enum Height {
     static let scrollView: CGFloat = 160 + (UIDevice.current.hasNotch ? 0 : 150)
   }
@@ -131,6 +133,10 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
   
   private let flexContainer = UIView()
   
+  private let interestButtonRelay = PublishRelay<String>()
+  private let dateButtonRelay = PublishRelay<String>()
+  private let locationButtonRelay = PublishRelay<String>()
+  
   public var disposeBag = DisposeBag()
   
   deinit {
@@ -168,7 +174,22 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
     navigationController?.setNavigationBarHidden(false, animated: false)
   }
   
-  public func bind(reactor: MeetingCreateReactor) {
+  public func bind(reactor: Reactor) {
+    
+    interestContainerView.buttonHandlerRelay
+      .map { Reactor.Action.didTapInterestButton }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    dateContainerView.buttonHandlerRelay
+      .map { Reactor.Action.didTapDateButton }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    locationContainerView.buttonHandlerRelay
+      .map { Reactor.Action.didTapLocationButton }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
     
     reactor.pulse(\.$route)
       .compactMap { $0 }
@@ -176,22 +197,25 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
       .bind { [weak self] in
         switch $0 {
         case let .bottomSheet(type):
-          let bottomSheet = BottomSheetController(
-            type: type
-          )
-          bottomSheet.modalPresentationStyle = .overFullScreen
-          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex, text in
-            reactor?.action.onNext(.didTapLocationButton)
-              
-            if let button = self?.interestContainerView.customView as? CastableButton {
-              button.setTitle(text, for: .normal)
+          BottomSheet(type: type)
+            .show()
+            .handler = { [weak self] state in
+              switch state {
+              case let .confirm(_, text):
+                switch type {
+                case .interest:
+                  self?.interestButtonRelay.accept(text)
+                case .address:
+                  self?.locationButtonRelay.accept("서울 \(text)")
+                default:
+                  break
+                }
+              case let .date(dateRange):
+                self?.dateButtonRelay.accept(dateRange.description)
+              default:
+                break
+              }
             }
-            
-            if let button = self?.locationContainerView.customView as? CastableButton {
-              button.setTitle("서울 \(text)", for: .normal)
-            }
-          }
-          self?.present(bottomSheet, animated: true)
         case .close:
           self?.dismiss(animated: true)
         }
@@ -230,23 +254,17 @@ private extension MeetingCreateViewController {
   }
   
   func bindEvent() {
-    if let interestButton = interestContainerView.customView as? CastableButton {
-      interestButton.handler = { [weak reactor] in
-        reactor?.action.onNext(.didTapInterestButton)
-      }
-    }
+    interestButtonRelay
+      .bind(to: interestContainerView.uiBindingRelay)
+      .disposed(by: disposeBag)
     
-    if let dateButton = dateContainerView.customView as? CastableButton {
-      dateButton.handler = { [weak reactor] in
-        reactor?.action.onNext(.didTapDateButton)
-      }
-    }
+    dateButtonRelay
+      .bind(to: dateContainerView.uiBindingRelay)
+      .disposed(by: disposeBag)
     
-    if let locationButton = locationContainerView.customView as? CastableButton {
-      locationButton.handler = { [weak reactor] in
-        reactor?.action.onNext(.didTapLocationButton)
-      }
-    }
+    locationButtonRelay
+      .bind(to: locationContainerView.uiBindingRelay)
+      .disposed(by: disposeBag)
     
     let tapGesture = UITapGestureRecognizer(
       target: self,
@@ -263,7 +281,7 @@ private extension MeetingCreateViewController {
   }
   
   @objc func didTapCreateButton() {
-    
+    dismiss(animated: true)
   }
 }
 
