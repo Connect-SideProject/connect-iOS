@@ -7,6 +7,7 @@
 
 import UIKit
 
+import RxCocoa
 import ReactorKit
 import RxDataSources
 import COExtensions
@@ -32,6 +33,7 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
             return cell
         }
     }
+    private let keyboardHeight = BehaviorRelay<CGFloat>(value: 0)
     
     public override func setupContainer() {
         super.setupContainer()
@@ -63,9 +65,22 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
     }
     
     public override func bind(reactor: Reactor) {
+        self.bindKeyboard()
+        
         reactor.pulse(\.$sectionModels).share()
             .observe(on: MainScheduler.asyncInstance)
             .bind(to: self.tableView.rx.items(dataSource: self.dataSource))
+            .disposed(by: self.disposeBag)
+    }
+    
+    private func bindKeyboard() {
+        self.keyboardHeight.share()
+            .compactMap { [weak self] in
+                guard let self = self else { return nil }
+                return $0 == .zero ? $0 : $0 - self.safeBottom
+            }
+            .observe(on: MainScheduler.instance)
+            .bind(onNext: self.setInputAreaMargin(bottom:))
             .disposed(by: self.disposeBag)
     }
     
@@ -78,7 +93,6 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
     }
 }
 
-// TODO: 정리좀
 extension ChatRoomController {
     private func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -87,15 +101,16 @@ extension ChatRoomController {
     
     @objc private func keyboardWillShow(_ noti: Notification) {
         if let keyboardFrame = noti.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-            let keyboardHeight = keyboardFrame.cgRectValue.height
-            self.inputArea.flex.marginBottom(keyboardHeight - self.safeBottom)
-            self.inputArea.flex.markDirty()
-            self.view.setNeedsLayout()
+            self.keyboardHeight.accept(keyboardFrame.cgRectValue.height)
         }
     }
     
     @objc private func keyboardWillHide(_ noti: Notification) {
-        self.inputArea.flex.marginBottom(0)
+        self.keyboardHeight.accept(.zero)
+    }
+    
+    private func setInputAreaMargin(bottom: CGFloat) {
+        self.inputArea.flex.marginBottom(bottom)
         self.inputArea.flex.markDirty()
         self.view.setNeedsLayout()
     }
