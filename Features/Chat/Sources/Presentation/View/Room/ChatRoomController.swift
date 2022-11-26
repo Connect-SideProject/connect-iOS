@@ -14,7 +14,11 @@ import COCommonUI
 
 public final class ChatRoomController: ChatBaseController<ChatRoomController.Reactor> {
     private let tableView = UITableView()
-    private let titleView = TitleView()
+    private let titleView = TitleView().setLeftBtn(type: .back)
+    private lazy var inputArea = InputArea()
+    
+    private static var inputAreaHeight: CGFloat = 73
+    private var safeBottom: CGFloat { UIApplication.keyWindow?.safeAreaInsets.bottom ?? 0 }
     
     private var dataSource = RxTableViewSectionedReloadDataSource<SectionModel> { dataSource, tableView, indexPath, item in
         switch dataSource[indexPath] {
@@ -39,15 +43,17 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
             $0.addItem(self.tableView)
                 .grow(1)
             
-            $0.addItem(InputArea())
+            $0.addItem(self.inputArea)
                 .height(73)
         }
     }
     
     public override func setAttrs() {
         self.setTable()
-        self.rootContainer.backgroundColor = .yellow
-        self.tableView.backgroundColor = .blue
+        self.addObservers()
+        self.addGestureRec()
+        self.view.backgroundColor = .white
+        self.tableView.backgroundColor = .hexEDEDED
     }
     
     public override func layout() {
@@ -69,6 +75,38 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
         self.tableView.register(ReceivedMsgCell.self, forCellReuseIdentifier: ReceivedMsgCell.reuseableIdentifier)
         self.tableView.register(SentMsgCell.self, forCellReuseIdentifier: SentMsgCell.reuseableIdentifier)
         self.tableView.separatorStyle = .none
+    }
+}
+
+// TODO: 정리좀
+extension ChatRoomController {
+    private func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func keyboardWillShow(_ noti: Notification) {
+        if let keyboardFrame = noti.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardHeight = keyboardFrame.cgRectValue.height
+            self.inputArea.flex.marginBottom(keyboardHeight - self.safeBottom)
+            self.inputArea.flex.markDirty()
+            self.view.setNeedsLayout()
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ noti: Notification) {
+        self.inputArea.flex.marginBottom(0)
+        self.inputArea.flex.markDirty()
+        self.view.setNeedsLayout()
+    }
+    
+    private func addGestureRec() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.dismissKeyboard))
+        self.view.addGestureRecognizer(tap)
+    }
+    
+    @objc private func dismissKeyboard() {
+        self.view.endEditing(true)
     }
 }
 
