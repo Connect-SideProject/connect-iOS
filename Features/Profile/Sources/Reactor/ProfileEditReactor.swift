@@ -19,7 +19,7 @@ public final class ProfileEditReactor: Reactor {
   
   public enum Route {
     case back
-    case bottomSheet([BottomSheetItem<법정주소>])
+    case bottomSheet([BottomSheetItem])
   }
   
   public enum Action {
@@ -39,7 +39,7 @@ public final class ProfileEditReactor: Reactor {
   }
   
   public enum Mutation {
-    case setAddressList([BottomSheetItem<법정주소>])
+    case setAddressList([BottomSheetItem])
     case setInterestList([Interest])
     case setRoleSkillsList([RoleSkills])
     case setImageURL(URL?)
@@ -50,7 +50,7 @@ public final class ProfileEditReactor: Reactor {
   }
   
   public struct State {
-    var addressList: [BottomSheetItem<법정주소>] = []
+    var addressList: [BottomSheetItem] = []
     var interestList: [Interest] = []
     var roleSkillsList: [RoleSkills] = []
     var imageURL: URL?
@@ -87,10 +87,10 @@ public final class ProfileEditReactor: Reactor {
     self.interestService = interestService
     self.roleSkillsService = roleSkillsService
     
-    var addressList = addressService.addressList.map { BottomSheetItem<법정주소>(value: $0) }
+    var addressList = addressService.addressList.map { BottomSheetItem(value: $0.법정동명) }
     let index = addressList.enumerated()
       .map { offset, element in
-        return element.value.법정동명 == userService.profile?.region?.description ? offset : -1
+        return element.value == userService.profile?.region?.description ? offset : -1
       }
       .filter { $0 != -1 }
       .reduce(0, +)
@@ -106,7 +106,7 @@ public final class ProfileEditReactor: Reactor {
   public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .viewDidLoad:
-      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressService.addressList.map { BottomSheetItem(value: $0) }))
+      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressService.addressList.map { BottomSheetItem(value: $0.법정동명) }))
       let setInterestList: Observable<Mutation> = .just(.setInterestList(interestService.interestList))
       let setRoleSkillsList: Observable<Mutation> = .just(.setRoleSkillsList(roleSkillsService.roleSkillsList))
       let setProfile: Observable<Mutation> = .just(.setProfile(userService.profile))
@@ -138,9 +138,11 @@ public final class ProfileEditReactor: Reactor {
       
       guard let address = currentState.addressList[safe: index] else { return .empty() }
       
+      guard let value = addressService.addressList.filter({ $0.법정동명 == address.value }).first else { return .empty() }
+      
       let region = Region(
-        code: address.value.법정코드,
-        name: address.value.법정동명
+        code: value.법정코드,
+        name: value.법정동명
       )
       
       var addressList = currentState.addressList

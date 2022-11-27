@@ -5,11 +5,16 @@ let thirdParty = Project.feature(
   name: "COThirdParty",
   products: [.framework(.dynamic)],
   dependencies: [
-    .external(name: "KakaoSDKUser"),
-    .external(name: "RxCocoa"),
-    .external(name: "RxDataSources"),
-    .external(name: "ReactorKit"),
-    .external(name: "FloatingPanel"),
-    .external(name: "RxGesture")
+    .ThirdParty.Auth.kakao,
+    .ThirdParty.Reactive.reactorKit,
+    .ThirdParty.Reactive.rxCocoa,
+    .ThirdParty.Reactive.rxDataSources,
+    .ThirdParty.Reactive.rxGesture,
+    .ThirdParty.UI.flexLayout,
+    .ThirdParty.UI.pinLayout,
+    .ThirdParty.UI.snapKit,
+    .ThirdParty.UI.then,
+    .ThirdParty.UI.floatingPanel,
+    .ThirdParty.UI.appleCalendar
   ]
 )

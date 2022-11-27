@@ -41,6 +41,10 @@ let dependencies = Dependencies(
     .remote(
         url: "https://github.com/devxoul/Then",
         requirement: .upToNextMajor(from: "3.0.0")
+    ),
+    .remote(
+      url: "https://github.com/patchthecode/JTAppleCalendar",
+      requirement: .upToNextMajor(from: "8.0.4")
     )
   ],
   platforms: [.iOS]

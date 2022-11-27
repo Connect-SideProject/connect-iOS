@@ -66,7 +66,7 @@ extension MainController {
       selectedImage: .init(named: "ic_home_active")?.withRenderingMode(.alwaysOriginal)
     )
     
-    let chatListController = ChatListDIContainer().makeVC()
+    let chatListController = ChatDIContainer().makeChatListVC()
       chatListController.tabBarItem = .init(
       title: "main.tabItem.message".localized(),
       image: .init(named: "ic_chat_inactive")?.withRenderingMode(.alwaysOriginal),

@@ -13,7 +13,7 @@ let profile = Project.feature(
   name: "Chat",
   products: [.framework(.static), .demoApp, .unitTests],
   dependencies: [
-    .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
-    .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation"))
+    .Project.UI.common,
+    .Project.Core.foundation
   ]
 )

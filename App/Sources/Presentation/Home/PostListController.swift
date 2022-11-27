@@ -123,9 +123,8 @@ extension PostListController: ReactorKit.View {
 extension PostListController: PostCoordinatorDelegate {
     
     public func didFilterSheetCreate(_ type: BottomSheetType) {
-        let bottomSheetController = BottomSheetController(type: type)
-        bottomSheetController.modalPresentationStyle = .overFullScreen
-        self.present(bottomSheetController, animated: true)
+      BottomSheet(type: type)
+        .show()
     }
     
 }
