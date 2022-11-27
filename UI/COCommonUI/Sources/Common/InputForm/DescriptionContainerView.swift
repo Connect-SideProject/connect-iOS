@@ -36,6 +36,10 @@ public struct DescriptionItem {
   }
 }
 
+public enum RoundSelectionButtonUpdateType {
+  case titles([String]), selectedItems([String])
+}
+
 public enum DescriptionType {
   // DescriptionLabel, View
   case textField(DescriptionItem)
@@ -76,7 +80,7 @@ public class DescriptionContainerView: UIView {
     $0.delegate = self
   }
   
-  private var customView: CastableView?
+  public private(set) var customView: CastableView?
   private var customViews: [CastableView]?
   
   private let noticeTextLabel = UILabel().then {
@@ -90,7 +94,8 @@ public class DescriptionContainerView: UIView {
   private var type: DescriptionType = .textField(.init())
   
   private var disposeBag = DisposeBag()
-  public var uiBindingRelay = PublishRelay<String>()
+  public var castableButtonRelay = PublishRelay<String>()
+  public var updateRoundSelectionButtonRelay = PublishRelay<RoundSelectionButtonUpdateType>()
   public var buttonHandlerRelay = PublishRelay<Void>()
   
   public override func layoutSubviews() {
@@ -185,9 +190,27 @@ private extension DescriptionContainerView {
   }
   
   func bindEvent() {
-    uiBindingRelay.bind { [weak self] in
+    
+    castableButtonRelay.bind { [weak self] in
       if let button = self?.customView as? CastableButton {
         button.setTitle($0, for: .normal)
+      }
+    }.disposed(by: disposeBag)
+    
+    updateRoundSelectionButtonRelay.bind { [weak self] type in
+      if let containerView = self?.customView as? CastableContainerView {
+        
+        let _ = containerView.views.map {
+          if let selectedButtonView = $0 as? RoundSelectionButtonView {
+            switch type {
+            case let .titles(titles):
+              selectedButtonView.updateTitles(titles)
+              
+            case let .selectedItems(items):
+              selectedButtonView.setSelectedItems(items: items)
+            }
+          }
+        }
       }
     }.disposed(by: disposeBag)
     

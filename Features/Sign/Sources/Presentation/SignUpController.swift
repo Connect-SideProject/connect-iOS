@@ -135,6 +135,8 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   public weak var delegate: SignUpDelegate?
   
+  private let addressButtonRelay = PublishRelay<String>()
+  
   public var disposeBag = DisposeBag()
   
   public override func viewDidLayoutSubviews() {
@@ -192,6 +194,13 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   public func bind(reactor: SignUpReactor) {
     
+    addressContainerView.buttonHandlerRelay
+      .flatMap { () -> Observable<Reactor.Action> in
+        return .just(.didTapAddressButton)
+      }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
     reactor.pulse(\.$route)
       .compactMap { $0 }
       .observe(on: MainScheduler.instance)
@@ -200,18 +209,17 @@ public final class SignUpController: UIViewController, ReactorKit.View {
         case .home:
           self?.delegate?.routeToMain()
         case let .bottomSheet(type):
-          let bottomSheet = BottomSheetController(
-            type: type
-          )
-          bottomSheet.modalPresentationStyle = .overFullScreen
-          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex, text in
-            reactor?.action.onNext(.didSelectedLocation(selectedIndex))
-            
-            if let button = self?.addressContainerView.customView as? CastableButton {
-              button.setTitle("서울 \(text)", for: .normal)
+          BottomSheet(type: type)
+            .show()
+            .handler = { [weak self, weak reactor] in
+              switch $0 {
+              case let .confirm(selectedIndex, title):
+                reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+                self?.addressButtonRelay.accept("서울 \(title)")
+              default:
+                break
+              }
             }
-          }
-          self?.present(bottomSheet, animated: true)
         }
       }.disposed(by: disposeBag)
     
@@ -283,11 +291,9 @@ extension SignUpController {
   
   private func bindEvent() {
 
-    if let castableButton = addressContainerView.customView as? CastableButton {
-      castableButton.handler = { [weak reactor] in
-        reactor?.action.onNext(.didTapAddressButton)
-      }
-    }
+    addressButtonRelay
+      .bind(to: addressContainerView.castableButtonRelay)
+      .disposed(by: disposeBag)
     
     termsCheckBoxContainerView.handler = { [weak self] checkItems in
       if checkItems.count == 3 {

@@ -255,15 +255,15 @@ private extension MeetingCreateViewController {
   
   func bindEvent() {
     interestButtonRelay
-      .bind(to: interestContainerView.uiBindingRelay)
+      .bind(to: interestContainerView.castableButtonRelay)
       .disposed(by: disposeBag)
     
     dateButtonRelay
-      .bind(to: dateContainerView.uiBindingRelay)
+      .bind(to: dateContainerView.castableButtonRelay)
       .disposed(by: disposeBag)
     
     locationButtonRelay
-      .bind(to: locationContainerView.uiBindingRelay)
+      .bind(to: locationContainerView.castableButtonRelay)
       .disposed(by: disposeBag)
     
     let tapGesture = UITapGestureRecognizer(

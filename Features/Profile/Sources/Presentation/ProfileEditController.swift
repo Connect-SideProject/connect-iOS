@@ -122,6 +122,12 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   
   public weak var delegate: ProfileEditDelegate?
   
+  private let addressButtonRelay = PublishRelay<String>()
+  private let roleItemsRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  private let interestItemsRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  private let periodItemsRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  private let skillsItemsRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  
   public var disposeBag = DisposeBag()
   
   public override func viewDidLoad() {
@@ -220,18 +226,17 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
           }
           
         case let .bottomSheet(items):
-          let bottomSheet = BottomSheetController(
-            type: .address(items)
-          )
-          bottomSheet.modalPresentationStyle = .overFullScreen
-          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex, text in
-            reactor?.action.onNext(.didSelectedLocation(selectedIndex))
-            
-            if let button = self?.addressContainerView.customView as? CastableButton {
-              button.setTitle("서울 \(text)", for: .normal)
+          BottomSheet(type: .address(items))
+            .show()
+            .handler = { [weak self, weak reactor] state in
+              switch state {
+              case let .confirm(selectedIndex, title):
+                reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+                self?.addressButtonRelay.accept(title)
+              default:
+                break
+              }
             }
-          }
-          self?.present(bottomSheet, animated: true)
         }
       }.disposed(by: disposeBag)
     
@@ -293,11 +298,27 @@ private extension ProfileEditController {
     tapGesture.delegate = self
     view.addGestureRecognizer(tapGesture)
     
-    if let castableButton = addressContainerView.customView as? CastableButton {
-      castableButton.handler = { [weak reactor] in
+    addressButtonRelay
+      .bind(to: addressContainerView.castableButtonRelay)
+      .disposed(by: disposeBag)
+    
+    roleItemsRelay
+      .debug()
+      .bind(to: roleContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
+    
+    interestItemsRelay
+      .bind(to: interestsContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
+    
+    skillsItemsRelay
+      .bind(to: skillContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
+    
+    addressContainerView.buttonHandlerRelay
+      .bind { [weak reactor] in
         reactor?.action.onNext(.didTapAddressButton)
-      }
-    }
+      }.disposed(by: disposeBag)
   }
   
   func updateViews(profile: Profile) {
@@ -307,40 +328,23 @@ private extension ProfileEditController {
       roles: profile.roles
     )
     
-    if let role = roleContainerView.customView?.casting(
-      type: RoundSelectionButtonView.self
-    ) {
-      role.setSelectedItems(
-        items: profile.roles.map { $0.description }
-      )
-    }
+    let roleItems = profile.roles.map { $0.description }
+    roleItemsRelay.accept(.selectedItems(roleItems))
     
-    if let castableButton = addressContainerView.customView as? CastableButton {
-      if let address = profile.region?.description {
-        castableButton.setTitle(address, for: .normal)
-      }
-    }
+    let address = profile.region?.description ?? ""
+    addressButtonRelay.accept(address)
     
-    if let interests = interestsContainerView.customView?.casting(
-      type: RoundSelectionButtonView.self
-    ) {
-      interests.setSelectedItems(items: profile.interestings.map { $0.description })
-    }
+    let interestItems = profile.interestings.map { $0.description }
+    interestItemsRelay.accept(.selectedItems(interestItems))
     
     let portfolio = portfolioContainerView.textField
     portfolio.text = profile.portfolioURL
     
-    if let period = periodContainerView.customView?.casting(
-      type: CheckBoxContainerView.self
-    ) {
-      period.setSelectedItems(items: [profile.career?.description ?? ""])
-    }
+    let periodItems = [profile.career?.description ?? ""]
+    periodItemsRelay.accept(.selectedItems(periodItems))
     
-    if let skills = skillContainerView.customView?.casting(
-      type: CastableContainerView.self
-    ) {
-      skills.setSelectedItems(items: profile.skills)
-    }
+    let skillsItems = profile.skills
+    skillsItemsRelay.accept(.selectedItems(skillsItems))
   }
   
   @objc func didTapSaveButton() {

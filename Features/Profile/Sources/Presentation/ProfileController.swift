@@ -79,6 +79,8 @@ public final class ProfileController: UIViewController, ReactorKit.View {
   
   public weak var delegate: ProfileDelegate?
   
+  private let skillsButtonRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  
   public var disposeBag: DisposeBag = .init()
   
   public override func viewDidLayoutSubviews() {
@@ -127,13 +129,7 @@ public final class ProfileController: UIViewController, ReactorKit.View {
           roles: profile.roles
         )
         
-        if let containerView = self?.skillContainerView.customView as? CastableContainerView {
-          let _ = containerView.views.map {
-            if let selectedButtonView = $0 as? RoundSelectionButtonView {
-              selectedButtonView.updateTitles(profile.skills)
-            }
-          }
-        }
+        self?.skillsButtonRelay.accept(.titles(profile.skills))
         
       }.disposed(by: disposeBag)
     
@@ -235,10 +231,9 @@ extension ProfileController {
       print(offset)
     }
     
-    skillContainerView.customView?
-      .casting(type: CastableContainerView.self).handler = {
-        print($0)
-    }
+    skillsButtonRelay
+      .bind(to: skillContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
   }
   
   private func defineProfileListViews(items: [ProfileViewItem]) {
