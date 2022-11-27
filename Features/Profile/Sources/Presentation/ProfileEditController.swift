@@ -135,6 +135,8 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     
     configureUI()
     bindEvent()
+    
+    reactor?.action.onNext(.viewDidLoad)
   }
   
   @objc func dismissKeyboards() {
@@ -303,12 +305,15 @@ private extension ProfileEditController {
       .disposed(by: disposeBag)
     
     roleItemsRelay
-      .debug()
       .bind(to: roleContainerView.updateRoundSelectionButtonRelay)
       .disposed(by: disposeBag)
     
     interestItemsRelay
       .bind(to: interestsContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
+    
+    periodItemsRelay
+      .bind(to: periodContainerView.updateRoundSelectionButtonRelay)
       .disposed(by: disposeBag)
     
     skillsItemsRelay
