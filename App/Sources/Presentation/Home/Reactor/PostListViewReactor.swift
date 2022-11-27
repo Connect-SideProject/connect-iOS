@@ -10,6 +10,16 @@ import ReactorKit
 import COExtensions
 import CONetwork
 
+
+public enum PostFilterTransform: TransformType, Equatable {
+    enum Event {
+        case didTapInterestingSheet(type: String)
+        case didTapOnOffLineSheet(type: String)
+    }
+
+    case none
+}
+
 public final class PostListReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
