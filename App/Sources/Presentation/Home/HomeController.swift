@@ -188,9 +188,18 @@ public final class HomeController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = .white
         
-        
-        
         configure()
+    }
+    
+    public override func viewDidLayoutSubviews() {
+        
+        let tabbarHeight = self.tabBarController?.tabBar.frame.height ?? 0.0
+        
+        floatingButton.snp.makeConstraints {
+            $0.right.equalToSuperview().offset(-20)
+            $0.bottom.equalToSuperview().offset(-(tabbarHeight + 12))
+            $0.width.height.equalTo(56)
+        }
     }
     
     public override func viewWillLayoutSubviews() {
@@ -200,13 +209,15 @@ public final class HomeController: UIViewController {
     
     
     private func configure() {
-        
+    
         self.view.addSubview(homeScrollView)
         self.view.addSubview(homeNavgaionBar)
+        self.view.addSubview(floatingButton)
+        
         homeScrollView.addSubview(homeScrollContainerView)
         self.view.addSubview(releaseHeaderTitleLabel)
         
-        _ = [homeIndicatorView, collectionView ,releaseCollectionView, floatingButton].map {
+        _ = [homeIndicatorView, collectionView ,releaseCollectionView].map {
             homeScrollContainerView.addSubview($0)
         }
         
@@ -239,11 +250,6 @@ public final class HomeController: UIViewController {
             $0.bottom.equalToSuperview()
         }
         
-        floatingButton.snp.makeConstraints {
-            $0.right.equalToSuperview().offset(-20)
-            $0.bottom.equalToSuperview().offset(-12)
-            $0.width.height.equalTo(75)
-        }
         
         homeIndicatorView.snp.makeConstraints {
             $0.center.equalToSuperview()
@@ -277,6 +283,13 @@ extension HomeController: ReactorKit.View {
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
             .bind(to: homeIndicatorView.rx.isAnimating)
+            .disposed(by: disposeBag)
+        
+        // Action -> Floating Button
+        floatingButton
+            .rx.tap
+            .throttle(.microseconds(1), scheduler: MainScheduler.instance)
+            .bind { () }
             .disposed(by: disposeBag)
         
         
