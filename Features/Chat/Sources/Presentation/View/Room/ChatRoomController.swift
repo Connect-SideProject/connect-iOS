@@ -33,7 +33,7 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
             return cell
         }
     }
-    private let keyboardHeight = BehaviorRelay<CGFloat>(value: 0)
+    private let keyboardHeight = PublishRelay<CGFloat>()
     
     public override func setupContainer() {
         super.setupContainer()
@@ -113,6 +113,7 @@ extension ChatRoomController {
         self.inputArea.flex.marginBottom(bottom)
         self.inputArea.flex.markDirty()
         self.view.setNeedsLayout()
+        UIView.animate(withDuration: 0.5, animations: self.view.layoutIfNeeded)
     }
     
     private func addGestureRec() {
