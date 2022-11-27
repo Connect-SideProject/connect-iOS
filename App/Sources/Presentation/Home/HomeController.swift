@@ -16,7 +16,8 @@ import RxCocoa
 import CONetwork
 import COManager
 import CODomain
-
+import COCommonUI
+import Meeting
 
 /// 홈 화면 컨트롤러.
 public final class HomeController: UIViewController {
@@ -289,13 +290,20 @@ extension HomeController: ReactorKit.View {
         floatingButton
             .rx.tap
             .throttle(.microseconds(1), scheduler: MainScheduler.instance)
-            .bind { () }
+            .bind { [weak self] in
+              
+              let controller = MeetingCreateViewController()
+              controller.reactor = .init(
+                apiService: ApiManager.shared,
+                userService: UserManager.shared,
+                interestService: InterestManager.shared,
+                addressService: AddressManager.shared
+              )
+              controller.modalPresentationStyle = .fullScreen
+              self?.present(controller, animated: true)
+            }
             .disposed(by: disposeBag)
-        
-        
     }
-    
-    
 }
 
 extension HomeController {

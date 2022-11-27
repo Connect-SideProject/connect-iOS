@@ -23,6 +23,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
   public typealias Reactor = MeetingCreateReactor
   
   enum Height {
+    static let titleView: CGFloat = 50
     static let scrollView: CGFloat = 160 + (UIDevice.current.hasNotch ? 0 : 150)
   }
   
