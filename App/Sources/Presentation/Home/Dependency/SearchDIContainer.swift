@@ -16,7 +16,7 @@ public final class SearchDependencyContainer: HomeDIContainer {
     
     public typealias HomeReactor = SearchViewReactor
     public typealias HomeViewRepository = SearchRepository
-    public typealias HomeViewController = SearchViewController
+    public typealias HomeViewController = SearchController
     
     
     private let searchApiService: ApiService
@@ -34,8 +34,8 @@ public final class SearchDependencyContainer: HomeDIContainer {
         return SearchViewRepo(searchApiService: self.searchApiService)
     }
     
-    public func makeController() -> SearchViewController {
-        return SearchViewController(reactor: makeReactor())
+    public func makeController() -> SearchController {
+        return SearchController(reactor: makeReactor())
     }
     
     

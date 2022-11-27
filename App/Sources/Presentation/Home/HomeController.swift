@@ -175,7 +175,7 @@ public final class HomeController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
-    required convenience init?(coder: NSCoder) {
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     

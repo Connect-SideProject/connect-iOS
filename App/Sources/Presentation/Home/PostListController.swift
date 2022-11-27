@@ -60,6 +60,11 @@ public final class PostListController: UIViewController {
     }
     
     
+    deinit {
+        debugPrint(#function)
+    }
+    
+    
     //MARK: LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()

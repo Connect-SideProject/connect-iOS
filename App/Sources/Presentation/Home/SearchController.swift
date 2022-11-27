@@ -16,7 +16,7 @@ import RxDataSources
 
 
 /// 프로젝트 검색 화면 컨트롤러
-public final class SearchViewController: UIViewController {
+public final class SearchController: UIViewController {
     
     //MARK: Property
     
@@ -121,7 +121,7 @@ public final class SearchViewController: UIViewController {
 
 
 
-extension SearchViewController: ReactorKit.View {
+extension SearchController: ReactorKit.View {
     
     
     public func bind(reactor: Reactor) {
@@ -160,7 +160,7 @@ extension SearchViewController: ReactorKit.View {
 
 
 
-extension SearchViewController: UICollectionViewDelegateFlowLayout {
+extension SearchController: UICollectionViewDelegateFlowLayout {
     
     
     
