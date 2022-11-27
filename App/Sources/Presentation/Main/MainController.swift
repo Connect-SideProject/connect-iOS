@@ -53,12 +53,13 @@ extension MainController {
       selectedImage: .init(named: "ic_map_active")?.withRenderingMode(.alwaysOriginal)
     )
     
-    let homeDIContainer = HomeDIContainer(
+    let homeDIContainer = HomeDependencyContainer(
       homeApiService: ApiManager.shared
     )
     
     /// 홈 화면
-    let homeController = homeDIContainer.makeHomeController()
+    let homeController = homeDIContainer.makeController()
+    homeController.delegate = self
     homeController.tabBarItem = .init(
       title: "main.tabItem.home".localized(),
       image: .init(named: "ic_home_inactive")?.withRenderingMode(.alwaysOriginal),
@@ -144,4 +145,18 @@ extension MainController: ProfileEditDelegate {
   func routeToBack() {
     profileNavigationController.popViewController(animated: true)
   }
+}
+
+
+extension MainController: HomeCoordinatorDelegate {
+    func didTapToPostListCreate() {
+        let homeDependency = HomeDependencyContainer(homeApiService: ApiManager.shared)
+        let childrenCoordinator = homeDependency.makeChildrenController()
+        self.navigationController?.pushViewController(childrenCoordinator, animated: true)
+    }
+    
+    func didTapToSearchCreate() {
+        let searchDependency = SearchDependencyContainer(searchApiService: ApiManager.shared)
+        self.navigationController?.pushViewController(searchDependency.makeController(), animated: true)
+    }
 }

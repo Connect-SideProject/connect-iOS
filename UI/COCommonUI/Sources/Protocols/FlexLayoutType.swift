@@ -27,3 +27,7 @@ public protocol RxBaseType {
     var disposeBag: DisposeBag { get set }
     func clearBag()
 }
+
+public protocol RxBindable: RxBaseType {
+    func bind()
+}
