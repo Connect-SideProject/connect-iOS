@@ -51,11 +51,10 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
     }
     
     public override func setAttrs() {
+        super.setAttrs()
         self.setTable()
         self.addObservers()
         self.addGestureRec()
-        self.view.backgroundColor = .white
-        self.tableView.backgroundColor = .hexEDEDED
     }
     
     public override func layout() {
@@ -90,6 +89,7 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
         self.tableView.register(ReceivedMsgCell.self, forCellReuseIdentifier: ReceivedMsgCell.reuseableIdentifier)
         self.tableView.register(SentMsgCell.self, forCellReuseIdentifier: SentMsgCell.reuseableIdentifier)
         self.tableView.separatorStyle = .none
+        self.tableView.backgroundColor = .hexEDEDED
     }
 }
 

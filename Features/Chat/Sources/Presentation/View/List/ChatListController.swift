@@ -39,10 +39,9 @@ public final class ChatListController: ChatBaseController<ChatListController.Rea
     }
     
     public override func setAttrs() {
+        super.setAttrs()
         self.setTable()
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        self.rootContainer.backgroundColor = .yellow
-        self.tableView.backgroundColor = .blue
     }
     
     public override func layout() {
