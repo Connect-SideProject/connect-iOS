@@ -9,6 +9,7 @@ let thirdParty = Project.feature(
     .ThirdParty.Reactive.reactorKit,
     .ThirdParty.Reactive.rxCocoa,
     .ThirdParty.Reactive.rxDataSources,
+    .ThirdParty.Reactive.rxGesture,
     .ThirdParty.UI.flexLayout,
     .ThirdParty.UI.pinLayout,
     .ThirdParty.UI.snapKit,
