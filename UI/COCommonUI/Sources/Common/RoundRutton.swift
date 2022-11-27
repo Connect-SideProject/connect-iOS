@@ -13,9 +13,10 @@ public final class RoundRutton: UIButton {
   public override func draw(_ rect: CGRect) {
     super.draw(rect)
     
-    layer.borderWidth = 1
-    layer.borderColor = borderColor?.cgColor
-    
+    if let color = borderColor {
+      layer.borderWidth = 1
+      layer.borderColor = color.cgColor
+    }
     layer.cornerRadius = cornerRadius
     layer.masksToBounds = true
   }

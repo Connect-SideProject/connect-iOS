@@ -34,6 +34,12 @@ public enum COError: Error, Equatable {
   case unknown
 }
 
+public extension COError {
+  static let expiredAccessToken = "AUTH_EXPIRED_ACCESS_JWT"
+  static let expiredRefreshToken = "AUTH_REFRESH_TOKEN_JWT"
+  static let invalidRefreshToken = "AUTH_REFRESH_TOKEN_INVALID"
+}
+
 extension Error {
   public var asCOError: COError? {
     return self as? COError

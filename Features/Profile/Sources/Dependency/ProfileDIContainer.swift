@@ -36,6 +36,7 @@ public final class ProfileDIContainer {
   public func makeController() -> ProfileController {
       let controller = ProfileController()
       controller.reactor = .init(
+        apiService: apiService,
         userService: userService
       )
       return controller

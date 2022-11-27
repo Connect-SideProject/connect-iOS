@@ -23,7 +23,6 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
   }
   
   public enum Action {
-    case viewDidLoad
     case didTapAddressButton
     case didSelectedLocation(Int)
     case didTapSignUpButton(SignUpParameter)
@@ -86,14 +85,6 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
     let accessToken = accessToken
     
     switch action {
-    case .viewDidLoad:
-      let setAddressList: Observable<Mutation> = .just(.setAddressList(addressService.addressList.map { BottomSheetItem(value: $0) }))
-      let setInterestList: Observable<Mutation> = .just(.setInterestList(interestService.interestList))
-      let setRoleSkillsList: Observable<Mutation> = .just(.setRoleSkillsList(roleSkillsService.roleSkillsList))
-      return setAddressList
-        .concat(setInterestList)
-        .concat(setRoleSkillsList)
-      
     case .didTapAddressButton:
       return Observable.just(currentState.addressList)
         .flatMap { addressList -> Observable<Mutation> in

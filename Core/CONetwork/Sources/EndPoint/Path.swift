@@ -22,6 +22,9 @@ public enum Path {
   case homeNews
   case updateProfile(ProfileEditParameter)
   case homeRelease
+  case refreshToken
+  case logout
+  case signOut
   
   public var string: String {
     switch self {
@@ -40,11 +43,17 @@ public enum Path {
     case .homeNews:
         return "/api/study/news"
     case .homeRelease:
-        return "/api/study/hots"
+      return "/api/study/hots"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:
       return "/api/member/myPage/detail"
+    case .refreshToken:
+      return "/api/member/issue/token/refresh"
+    case .logout:
+      return "/api/member/auth/logout"
+    case .signOut:
+      return "/api/member/signOut"
     }
   }
   
