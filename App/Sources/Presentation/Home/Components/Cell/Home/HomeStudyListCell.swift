@@ -16,12 +16,12 @@ public final class HomeStudyListReactor: Reactor {
     public typealias Action = NoAction
 
     public struct State {
-        var studyNewsModel: HomeStudyNodeList
+        var studyNewsModel: HomeStudyList
     }
     
     public let initialState: State
     
-    init(studyNewsModel: HomeStudyNodeList) {
+    init(studyNewsModel: HomeStudyList) {
         defer { _ = self.state }
         self.initialState = State(studyNewsModel: studyNewsModel)
         print("News Study Model: \(studyNewsModel)")

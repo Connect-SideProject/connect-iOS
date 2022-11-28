@@ -8,7 +8,7 @@
 import Foundation
 
 public struct HomeHotList: Codable, Identifiable {
-    public var id: String
+    public var id: Int
     public var releaseisEnd: Bool
     public var releaseTitle: String
     public var releaseBookMark: Int

@@ -9,29 +9,37 @@ import Foundation
 
 public struct HomeStudyList: Codable {
 
-    public var study: [HomeStudyNodeList]
-    
-}
-
-
-public struct HomeStudyNodeList: Codable {
-    
-    public var studyNewsType: String
-    public var studyNewsTitle: String
-    public var studyNewsBookMark: String
-    public var studyNewsInfo: String
-    public var studyNewsMember: [String]
+    public var id: Int
     public var studyNewsIsEnd: Bool
+    public var studyNewsTitle: String
+    public var studyNewsBookMark: Int
+    public var studyNewsMyBookMark: Bool
+    public var studyNewsInfo: String
+    public var parts: [HomeStudyPartList]
     
     
     enum CodingKeys: String, CodingKey {
-        case studyNewsType = "studyType"
+        case id
+        case studyNewsIsEnd = "isEnd"
         case studyNewsTitle = "studyTitle"
         case studyNewsBookMark = "bookmark"
+        case studyNewsMyBookMark = "myBookmark"
         case studyNewsInfo = "studyInfo"
-        case studyNewsMember = "studyMember"
-        case studyNewsIsEnd = "isEnd"
+        case parts
         
     }
     
 }
+
+
+public struct HomeStudyPartList: Codable {
+    var studyRole: String
+    var studyRoleCount: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case studyRole = "role"
+        case studyRoleCount = "count"
+    }
+}
+
+

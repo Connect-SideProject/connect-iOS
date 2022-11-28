@@ -69,7 +69,7 @@ public protocol HomeRepository {
     func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
     func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection
-    func responseHomeNewsSectionItem(item: [HomeStudyNodeList]) -> HomeViewSection
+    func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection
 }
 
 
@@ -99,7 +99,7 @@ final class HomeViewRepo: HomeRepository {
     }
     
     func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation> {
-        let createNewsResponse = homeApiService.request(endPoint: .init(path: .homeNews)).flatMap { (data: HomeStudyList) -> Observable<HomeViewReactor.Mutation> in
+        let createNewsResponse = homeApiService.request(endPoint: .init(path: .homeNews)).flatMap { (data: [HomeStudyList]) -> Observable<HomeViewReactor.Mutation> in
             
             return .just(.setHomeNewsItem(data))
         }
@@ -127,7 +127,7 @@ final class HomeViewRepo: HomeRepository {
     }
     
     
-    func responseHomeNewsSectionItem(item: [HomeStudyNodeList]) -> HomeViewSection {
+    func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection {
         var homeNewsSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
             homeNewsSectionItem.append(.homeStudyList(HomeStudyListReactor(studyNewsModel: item[i])))

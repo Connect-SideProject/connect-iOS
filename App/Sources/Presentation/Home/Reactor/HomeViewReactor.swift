@@ -41,7 +41,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     public enum Mutation {
         case setLoading(Bool)
         case setHomeMenuItem([HomeMenuList])
-        case setHomeNewsItem(HomeStudyList)
+        case setHomeNewsItem([HomeStudyList])
         case setReleaseItems([HomeHotList])
         case setSubMenuItems(HomeViewSection)
         case setHomeError(COError?)
@@ -113,7 +113,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
         case let .setHomeNewsItem(items):
             var newState = state
             let studyListIndex = self.getIndex(section: .homeStudyList([]))
-            newState.section[studyListIndex] = homeRepository.responseHomeNewsSectionItem(item: items.study)
+            newState.section[studyListIndex] = homeRepository.responseHomeNewsSectionItem(item: items)
             
             return newState
         case let .setSubMenuItems(items):
