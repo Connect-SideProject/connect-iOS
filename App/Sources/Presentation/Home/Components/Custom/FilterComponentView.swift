@@ -59,7 +59,7 @@ private extension FilterComponentViewReactor {
         let currentState = self.currentState.filterType
         switch event {
         case let .didTapOnOffLineSheet(text):
-            guard currentState == .onOffLine else { return .empty() }
+            guard currentState == .onOffLine(.default) else { return .empty() }
             print("Transoform bottomSheet \(currentState)")
             return .just(.setOnOffLineFilter(text))
         default:
