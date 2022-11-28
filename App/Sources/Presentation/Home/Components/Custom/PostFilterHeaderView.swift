@@ -172,7 +172,7 @@ extension PostFilterHeaderView: ReactorKit.View {
             .when(.recognized)
             .throttle(.seconds(2), scheduler: MainScheduler.instance)
             .bind { _ in
-                self.delegate?.didFilterSheetCreate(.onOffLine)
+                self.delegate?.didFilterSheetCreate(.onOffLine(.default))
             }.disposed(by: disposeBag)
         
         studyTypeFilterView
@@ -180,7 +180,7 @@ extension PostFilterHeaderView: ReactorKit.View {
             .when(.recognized)
             .throttle(.seconds(2), scheduler: MainScheduler.instance)
             .bind { _ in
-                self.delegate?.didFilterSheetCreate(.studyType)
+                self.delegate?.didFilterSheetCreate(.studyType(.default))
             }.disposed(by: disposeBag)
         
         interestFieldFilterComponentView
@@ -188,7 +188,7 @@ extension PostFilterHeaderView: ReactorKit.View {
             .when(.recognized)
             .throttle(.seconds(2), scheduler: MainScheduler.instance)
             .bind { _ in
-                self.delegate?.didFilterSheetCreate(.aligment)
+                self.delegate?.didFilterSheetCreate(.aligment(.default))
             }
         
     }
