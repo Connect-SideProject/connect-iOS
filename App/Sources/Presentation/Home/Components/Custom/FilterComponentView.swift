@@ -9,6 +9,8 @@ import UIKit
 import Then
 import SnapKit
 import ReactorKit
+import RxCocoa
+import RxSwift
 
 import COCommonUI
 
@@ -110,13 +112,14 @@ final class FilterComponentView: BaseView {
         
         titleLabel.snp.makeConstraints {
             $0.top.bottom.equalToSuperview()
-            $0.right.equalTo(arrImageView.snp.left).offset(-3)
+            $0.left.equalToSuperview().offset(12)
             $0.centerY.equalToSuperview()
             $0.height.equalTo(14)
         }
         
         arrImageView.snp.makeConstraints {
             $0.width.height.equalTo(14)
+            $0.left.equalTo(titleLabel.snp.right).offset(3)
             $0.right.equalToSuperview().offset(-12)
             $0.centerY.equalToSuperview()
         }
@@ -133,8 +136,52 @@ extension FilterComponentView: ReactorKit.View {
         
         reactor.state
             .map { $0.titleType }
+            .observe(on: MainScheduler.instance)
             .bind(to: titleLabel.rx.text)
             .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.titleType != "전체" }
+            .map {_ in UIColor.hexD4F6E2 }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.titleType != "전체" }
+            .map { _ in UIColor.hex028236 }
+            .observe(on: MainScheduler.instance)
+            .bind(to: titleLabel.rx.textColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.titleType != "전체" }
+            .map { _ in UIImage(named: "ic_downward_arrow_color") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: arrImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.titleType == "전체" }
+            .map { _ in UIColor.hexEDEDED }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.titleType == "전체" }
+            .map { _ in UIColor.hex3A3A3A }
+            .observe(on: MainScheduler.instance)
+            .bind(to: titleLabel.rx.textColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.titleType == "전체" }
+            .map { _ in UIImage(named: "ic_downward_arrow")}
+            .observe(on: MainScheduler.instance)
+            .bind(to: arrImageView.rx.image)
+            .disposed(by: disposeBag)
+        
         
         
     }
