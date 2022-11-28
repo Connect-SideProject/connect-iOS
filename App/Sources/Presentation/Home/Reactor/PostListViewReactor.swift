@@ -15,7 +15,7 @@ import COCommonUI
 
 public enum PostFilterTransform: TransformType, Equatable {
     enum Event {
-        case didTapOnOffLineSheet(text: String, type: BottomSheetType)
+        case didTapOnOffLineSheet(text: String)
         case didTapAligmentSheet(type: String)
     }
 
@@ -31,13 +31,11 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
     public struct State {
         var isLoading: Bool
         var isError: COError?
-        var onOffLineType: String
     }
     
     public enum Mutation {
         case setLoading(Bool)
         case setPostError(COError?)
-        case setOnOffLineFilter(String, BottomSheetType)
     }
     
     public var initialState: State
@@ -49,7 +47,7 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
     
     init() {
         defer { _ = self.state }
-        self.initialState = State(isLoading: false, onOffLineType: "전체")
+        self.initialState = State(isLoading: false)
     }
     
     
@@ -61,16 +59,6 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
             
             return .concat(startLoading,endLoading)
         }
-    }
-    
-    
-    public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
-        
-        let fromSheetTypeMutation = PostFilterTransform.event.flatMap { [weak self] event in
-            self?.didTapBottomSheetTransform(from: event) ?? .empty()
-        }
-    
-        return Observable.of(mutation, fromSheetTypeMutation).merge()
     }
     
     
@@ -87,27 +75,6 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
             newState.isError = isError
             
             return newState
-            
-        case let .setOnOffLineFilter(onOffLineType, SheetType):
-            var newState = state
-            newState.onOffLineType = onOffLineType
-            
-            return newState
-        }
-    }
-    
-}
-
-
-
-private extension PostListReactor {
-    func didTapBottomSheetTransform(from event: PostFilterTransform.Event) -> Observable<Mutation> {
-        
-        switch event {
-        case let .didTapOnOffLineSheet(text, type):
-            return .just(.setOnOffLineFilter(text, type))
-        default:
-            return .empty()
         }
     }
     

@@ -130,7 +130,7 @@ extension PostListController: PostCoordinatorDelegate {
             case let .confirm(_, text):
                 switch type {
                 case .onOffLine:
-                    PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: text, type: type))
+                    PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: text))
                 case .aligment:
                     PostFilterTransform.event.onNext(.didTapAligmentSheet(type: text))
                 default:

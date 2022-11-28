@@ -21,11 +21,52 @@ final class FilterComponentViewReactor: Reactor {
         var filterType: BottomSheetType
     }
     
+    enum Mutation {
+        case setOnOffLineFilter(String)
+    }
+    
     var initialState: State
     
     init(filterType: BottomSheetType) {
         self.initialState = State(titleType: "전체", filterType: filterType)
     }
+    
+    func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let formSheetTypeMutation = PostFilterTransform.event.flatMap { [weak self] event in
+            self?.didTapBottomSheetTransform(from: event) ?? .empty()
+        }
+        return Observable.of(mutation, formSheetTypeMutation).merge()
+    }
+    
+    
+    func reduce(state: State, mutation: Mutation) -> State {
+        switch mutation {
+        case let .setOnOffLineFilter(titleType):
+            var newState = state
+            newState.titleType = titleType
+            
+            return newState
+        }
+    }
+    
+    
+}
+
+
+private extension FilterComponentViewReactor {
+    
+    func didTapBottomSheetTransform(from event: PostFilterTransform.Event) -> Observable<Mutation> {
+        let currentState = self.currentState.filterType
+        switch event {
+        case let .didTapOnOffLineSheet(text):
+            guard currentState == .onOffLine else { return .empty() }
+            print("Transoform bottomSheet \(currentState)")
+            return .just(.setOnOffLineFilter(text))
+        default:
+            return .empty()
+        }
+    }
+    
     
 }
 
@@ -53,6 +94,7 @@ final class FilterComponentView: BaseView {
     init(reactor: Reactor) {
         defer { self.reactor = reactor}
         super.init(frame: .zero)
+        configure()
     }
     
     required init?(coder: NSCoder) {
@@ -88,6 +130,12 @@ extension FilterComponentView: ReactorKit.View {
     
     
     func bind(reactor: Reactor) {
+        
+        reactor.state
+            .map { $0.titleType }
+            .bind(to: titleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
         
     }
     
