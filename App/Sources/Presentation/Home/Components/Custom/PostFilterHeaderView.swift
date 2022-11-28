@@ -75,13 +75,13 @@ final class PostFilterHeaderView: BaseView {
         $0.backgroundColor = .hexEDEDED
     }
     
-    private let onOffLineFilterComponentView: FilterComponentView = FilterComponentView()
+    private let onOffLineFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .onOffLine))
     
-    private let studyTypeFilterComponentView: FilterComponentView = FilterComponentView()
+    private let studyTypeFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .studyType))
     
-    private let interestFieldFilterComponentView: FilterComponentView = FilterComponentView()
+    private let interestFieldFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .interest([])))
     
-    private let alignmentFilterComponentView: FilterComponentView = FilterComponentView()
+    private let alignmentFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .aligment))
     
     
     init(reactor: Reactor) {

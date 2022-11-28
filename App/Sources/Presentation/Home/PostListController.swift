@@ -125,6 +125,21 @@ extension PostListController: PostCoordinatorDelegate {
     public func didFilterSheetCreate(_ type: BottomSheetType) {
       BottomSheet(type: type)
         .show()
+        .handler = { state in
+            switch state {
+            case let .confirm(_, text):
+                switch type {
+                case .onOffLine:
+                    PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: text, type: type))
+                case .aligment:
+                    PostFilterTransform.event.onNext(.didTapAligmentSheet(type: text))
+                default:
+                    break
+                }
+            default:
+                break
+            }
+        }
     }
     
 }
