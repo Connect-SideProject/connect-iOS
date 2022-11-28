@@ -32,12 +32,26 @@ public enum BottomSheetType: CustomStringConvertible {
     }
   }
   
-  case onOffLine
-  case aligment
-  case studyType
+  /// 버튼 형식의 선택타입인지 여부.
+  var isButtonSelection: Bool {
+    switch self {
+    case .interest, .address, .date:
+      return true
+    default:
+      return false
+    }
+  }
+  
+  case onOffLine(SelectionState?)
+  case aligment(SelectionState?)
+  case studyType(SelectionState?)
   case date
   case address([BottomSheetItem])
   case interest([BottomSheetItem])
+}
+
+public enum SelectionState {
+  case `default`, index(Int), string(String)
 }
 
 public enum BottomSheetHandlerState {
@@ -115,6 +129,11 @@ public final class BottomSheet: UIViewController {
         width: (view.bounds.width - 52) / 2,
         height: Height.collectionItem
       )
+    case .onOffLine, .aligment, .studyType:
+      $0.itemSize = .init(
+        width: view.bounds.width - 40,
+        height: Height.defaultItem
+      )
     default:
       $0.itemSize = .init(
         width: view.bounds.width,
@@ -131,23 +150,58 @@ public final class BottomSheet: UIViewController {
     $0.register(BottomSheetListCell.self, forCellWithReuseIdentifier: "BottomSheetListCell")
     $0.delegate = self
     $0.dataSource = self
-    $0.contentInset = .init(top: 0, left: 0, bottom: 13, right: 0)
+    if type.isButtonSelection {
+      $0.contentInset = .init(top: 0, left: 0, bottom: 13, right: 0)
+    }
   }
   
-  private let type: BottomSheetType
   private var items: [BottomSheetItem] = []
   
   private var dateRange: DateRange = .init()
   
   public var handler: ((BottomSheetHandlerState) -> Void) = { _ in }
   
+  private let type: BottomSheetType
   public init(type: BottomSheetType) {
+    func updateItems(strings: [String], selectionState: SelectionState?) -> [BottomSheetItem] {
+      return strings
+        .enumerated()
+        .map {
+          var item = BottomSheetItem(value: $0.element)
+          
+          if let selectionState = selectionState {
+            switch selectionState {
+            case .default:
+              if $0.offset == 0 {
+                item.update(isSelected: true)
+              }
+            case let .index(value):
+              if $0.offset == value {
+                item.update(isSelected: true)
+              }
+            case let .string(value):
+              if $0.element == value {
+                item.update(isSelected: true)
+              }
+            }
+          }
+          return item
+        }
+    }
+    
     self.type = type
     self.titleLabel.text = type.description
     
     switch type {
     case let .address(items), let .interest(items):
       self.items = items
+    case let .onOffLine(selectionState):
+      
+      self.items = updateItems(strings: ["전체", "온라인", "오프라인"], selectionState: selectionState)
+    case let .aligment(selectionState):
+      self.items = updateItems(strings: ["전체", "인기순", "거리순"], selectionState: selectionState)
+    case let .studyType(selectionState):
+      self.items = updateItems(strings: ["전체", "스터디", "프로젝트"], selectionState: selectionState)
     default:
       break
     }
@@ -224,8 +278,8 @@ private extension BottomSheet {
       containerView.addSubview(collectionView)
       collectionView.snp.makeConstraints {
         $0.top.equalTo(titleLabel.snp.bottom).offset(24)
-        $0.leading.equalToSuperview().offset(20)
-        $0.trailing.equalToSuperview().inset(20)
+        $0.leading.equalToSuperview().offset(type.isButtonSelection ? 20 : 0)
+        $0.trailing.equalToSuperview().inset(type.isButtonSelection ? 20 : 0)
         $0.bottom.equalTo(confirmButton.snp.top).offset(-13)
       }
     }
@@ -315,11 +369,20 @@ extension BottomSheet: UICollectionViewDataSource {
   }
   
   public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-    if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BottomSheetItemCell", for: indexPath) as? BottomSheetItemCell {
-      let item = items[indexPath.item]
-      
-      cell.setup(title: item.value, isSelected: item.isSelected)
-      return cell
+    switch type {
+    case .address, .interest, .date:
+      if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BottomSheetItemCell", for: indexPath) as? BottomSheetItemCell {
+        let item = items[indexPath.item]
+        
+        cell.setup(title: item.value, isSelected: item.isSelected)
+        return cell
+      }
+    default:
+      if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BottomSheetListCell", for: indexPath) as? BottomSheetListCell {
+        let item = items[indexPath.item]
+        cell.setup(title: item.value, isSelected: item.isSelected)
+        return cell
+      }
     }
     
     return UICollectionViewCell()
@@ -333,21 +396,20 @@ extension BottomSheet: UICollectionViewDelegateFlowLayout {
       return
     }
     
-    let _ = self.items.indices.map { offset in
+    let _ = items.indices.map { offset in
       items[offset].update(isSelected: false)
     }
     
     items[indexPath.item].update(isSelected: true)
-    
     collectionView.reloadData()
   }
   
   public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-    return 12
+    return type.isButtonSelection ? 12 : 0
   }
   
   public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-    return 8
+    return type.isButtonSelection ? 8 : 0
   }
 }
 
