@@ -57,7 +57,28 @@ public enum SelectionState {
 public enum BottomSheetHandlerState {
   case confirm(Int, String), date(DateRange), cancel
 }
+/**
+ BottomSheet 화면.
+ ```
+ // 리스트형태이면서 첫번째 항목 선택의 경우:
+ BottomSheet(type: onOffLine(.default))
+    .show()
+    .handler = { state in
+       switch state {
+           ...
+       }
+    }
 
+ // 버튼형태이면서 첫번째 항목 선택의 경우:
+ BottomSheet(type: .address(items))
+    .show()
+    .handler = { state in
+       switch state {
+           ...
+       }
+    }
+ ```
+ */
 public final class BottomSheet: UIViewController {
   
   private enum Height {
@@ -195,11 +216,13 @@ public final class BottomSheet: UIViewController {
     switch type {
     case let .address(items), let .interest(items):
       self.items = items
-    case let .onOffLine(selectionState):
       
+    case let .onOffLine(selectionState):
       self.items = updateItems(strings: ["전체", "온라인", "오프라인"], selectionState: selectionState)
+      
     case let .aligment(selectionState):
       self.items = updateItems(strings: ["전체", "인기순", "거리순"], selectionState: selectionState)
+      
     case let .studyType(selectionState):
       self.items = updateItems(strings: ["전체", "스터디", "프로젝트"], selectionState: selectionState)
     default:
