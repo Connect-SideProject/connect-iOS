@@ -15,8 +15,9 @@ import COCommonUI
 
 public enum PostFilterTransform: TransformType, Equatable {
     enum Event {
-        case didTapOnOffLineSheet(text: String, completion: () -> Void)
+        case didTapOnOffLineSheet(text: String, completion: (() -> Void)?)
         case didTapAligmentSheet(text: String)
+        case didTapStudyTypeSheet(text: String)
     }
 
     case none

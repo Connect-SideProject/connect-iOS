@@ -188,7 +188,7 @@ extension PostFilterHeaderView: ReactorKit.View {
             .when(.recognized)
             .throttle(.seconds(2), scheduler: MainScheduler.instance)
             .bind { _ in
-                self.delegate?.didFilterSheetCreate(.aligment(.default))
+
             }.disposed(by: disposeBag)
         
         alignmentFilterView

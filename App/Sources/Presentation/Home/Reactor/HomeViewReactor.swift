@@ -45,6 +45,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
         case setReleaseItems([HomeHotList])
         case setSubMenuItems(HomeViewSection)
         case setHomeError(COError?)
+        case setSelectMenuType(String)
     }
     
     public struct State {
@@ -52,6 +53,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
         var isError: COError?
         var section: [HomeViewSection]
         var releaseSection: [HomeReleaseSection]
+        var menuType: String
     }
     
     init(homeRepository: HomeRepository) {
@@ -69,7 +71,8 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             ],
             releaseSection: [
                 .hotMenu([])
-            ]
+            ],
+            menuType: "전체"
         )
     }
     
@@ -94,6 +97,15 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                 endLoading
             )
         }
+    }
+    
+    
+    public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let fromHomeMenuMutation = HomeViewTransform.event.flatMap { [weak self] event in
+            self?.didSelectMenuType(from: event) ?? .empty()
+        }
+        
+        return Observable.of(mutation, fromHomeMenuMutation).merge()
     }
     
     public func reduce(state: State, mutation: Mutation) -> State {
@@ -133,6 +145,13 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             let releaseIndex = self.getReleaseIndex(section: .hotMenu([]))
             newState.releaseSection[releaseIndex] = homeRepository.responseHomeReleaseSectionItem(item: items)
             return newState
+            
+        case let .setSelectMenuType(menuType):
+            var newState = state
+            print("State Menu Type Home")
+            newState.menuType = menuType
+            
+            return newState
         }
         
         
@@ -161,6 +180,16 @@ private extension HomeViewReactor {
             }
         }
         return index
+    }
+    
+    func didSelectMenuType(from event: HomeViewTransform.Event) -> Observable<Mutation> {
+        switch event {
+        case let .didSelectHomeMenu(type):
+            print("didSelectMenu Type Home : \(type.currentState.menuType.getTitle())")
+            return .just(.setSelectMenuType(type.currentState.menuType.getTitle()))
+            
+            
+        }
     }
     
 }
