@@ -25,6 +25,7 @@ final class FilterComponentViewReactor: Reactor {
     
     enum Mutation {
         case setOnOffLineFilter(String)
+        case setAligmentFilter(String)
     }
     
     var initialState: State
@@ -34,16 +35,27 @@ final class FilterComponentViewReactor: Reactor {
     }
     
     func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
-        let formSheetTypeMutation = PostFilterTransform.event.flatMap { [weak self] event in
+        let fromOnOffLineTypeMutation = PostFilterTransform.event.flatMap { [weak self] event in
             self?.didTapBottomSheetTransform(from: event) ?? .empty()
         }
-        return Observable.of(mutation, formSheetTypeMutation).merge()
+        
+        let fromAligmentTypeMutation = PostFilterTransform.event.flatMap { [weak self] event in
+            self?.didTapBottomSheetTransform(from: event) ?? .empty()
+        }
+        
+        return Observable.of(mutation, fromOnOffLineTypeMutation, fromAligmentTypeMutation).merge()
     }
     
     
     func reduce(state: State, mutation: Mutation) -> State {
         switch mutation {
         case let .setOnOffLineFilter(titleType):
+            var newState = state
+            newState.titleType = titleType
+            
+            return newState
+            
+        case let .setAligmentFilter(titleType):
             var newState = state
             newState.titleType = titleType
             
@@ -60,12 +72,16 @@ private extension FilterComponentViewReactor {
     func didTapBottomSheetTransform(from event: PostFilterTransform.Event) -> Observable<Mutation> {
         let currentState = self.currentState.filterType
         switch event {
-        case let .didTapOnOffLineSheet(text):
+        case let .didTapOnOffLineSheet(text, _):
             guard currentState == .onOffLine(.default) else { return .empty() }
             print("Transoform bottomSheet \(currentState)")
             return .just(.setOnOffLineFilter(text))
-        default:
-            return .empty()
+            
+        case let .didTapAligmentSheet(text):
+            guard currentState == .aligment(.default) else { return .empty() }
+            print("Transform aligment \(currentState)")
+            
+            return .just(.setAligmentFilter(text))
         }
     }
     

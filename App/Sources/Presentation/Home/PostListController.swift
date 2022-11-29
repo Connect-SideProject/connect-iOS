@@ -34,7 +34,7 @@ public final class PostListController: UIViewController {
     private let postTableView: UITableView = UITableView().then {
         $0.showsHorizontalScrollIndicator = false
         $0.showsVerticalScrollIndicator = true
-        $0.backgroundColor = .hexEDEDED
+        $0.backgroundColor = .hexF9F9F9
         $0.register(PostStduyListCell.self, forCellReuseIdentifier: "PostStduyListCell")
     }
     
@@ -131,9 +131,11 @@ extension PostListController: PostCoordinatorDelegate {
             case let .confirm(_, text):
                 switch type {
                 case .onOffLine:
-                    PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: text))
+                    PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: text, completion: {
+                        //TODO: 서버 통신 Action Transfrom 추가
+                    }))
                 case .aligment:
-                    PostFilterTransform.event.onNext(.didTapAligmentSheet(type: text))
+                    PostFilterTransform.event.onNext(.didTapAligmentSheet(text: text))
                 default:
                     break
                 }
