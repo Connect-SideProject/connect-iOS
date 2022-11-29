@@ -24,6 +24,10 @@ final class PostFilterReactor: Reactor {
         var bottomSheetItem: [BottomSheetItem]
     }
     
+    enum Mutation {
+        case setSheetItems([BottomSheetItem])
+    }
+    
     var initialState: State
     
     init(bottomSheetItem: [BottomSheetItem]) {
@@ -32,8 +36,39 @@ final class PostFilterReactor: Reactor {
         print("PostFilter Reactor: \(bottomSheetItem)")
     }
     
+    func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let fromSheetItemMutation = PostFilterTransform.event.flatMap { [weak self] event in
+            self?.responseSheetItemTransform(from: event) ?? .empty()
+        }
+        
+        return Observable.of(mutation, fromSheetItemMutation).merge()
+    }
     
-    
+
+    func reduce(state: State, mutation: Mutation) -> State {
+        switch mutation {
+        case let .setSheetItems(items):
+            var newState = state
+            newState.bottomSheetItem = items
+            
+            return newState
+        }
+    }
+}
+
+private extension PostFilterReactor {
+    func responseSheetItemTransform(from event: PostFilterTransform.Event) -> Observable<Mutation> {
+        switch event {
+        case let .responseSheetItem(item):
+            print("PostFilterReactor Transform Item: \(item)")
+            
+            return .just(.setSheetItems(item))
+            
+        default:
+            return .empty()
+        }
+        
+    }
 }
 
 
@@ -190,7 +225,7 @@ extension PostFilterHeaderView: ReactorKit.View {
             .when(.recognized)
             .throttle(.seconds(2), scheduler: MainScheduler.instance)
             .bind { _ in
-
+                self.delegate?.didFilterSheetCreate(.interest(self.reactor?.currentState.bottomSheetItem ?? []))
             }.disposed(by: disposeBag)
         
         alignmentFilterView

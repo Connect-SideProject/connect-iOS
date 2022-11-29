@@ -91,6 +91,9 @@ private extension FilterComponentViewReactor {
             print("Transform StudyType \(currentState)")
             
             return .just(.setStudyTypeFilter(text))
+        default:
+            return .empty()
+            
         }
     }
     

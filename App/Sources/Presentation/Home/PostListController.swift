@@ -116,12 +116,16 @@ extension PostListController: ReactorKit.View {
     
     
     public func bind(reactor: Reactor) {
-        self.rx.viewWillAppear
-            .map{ _ in  Reactor.Action.viewWillAppear }
+        self.rx.viewDidLoad
+            .map { Reactor.Action.viewDidLoad }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
-        
+        reactor.state
+            .map { $0.bottomSheetItem }
+            .bind { item in
+                PostFilterTransform.event.onNext(.responseSheetItem(item: item))
+            }.disposed(by: disposeBag)
         
     }
     

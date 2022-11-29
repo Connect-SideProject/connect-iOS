@@ -19,6 +19,7 @@ public enum PostFilterTransform: TransformType, Equatable {
         case didTapOnOffLineSheet(text: String, completion: (() -> Void)?)
         case didTapAligmentSheet(text: String)
         case didTapStudyTypeSheet(text: String)
+        case responseSheetItem(item: [BottomSheetItem])
     }
 
     case none
@@ -28,7 +29,6 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
         case viewDidLoad
-        case viewWillAppear
     }
     
     public struct State {
@@ -60,12 +60,6 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
-            let startLoading = Observable<Mutation>.just(.setLoading(true))
-            let endLoading = Observable<Mutation>.just(.setLoading(false))
-            
-            return .concat(startLoading,endLoading)
-            
-        case .viewWillAppear:
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             
