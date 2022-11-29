@@ -26,6 +26,7 @@ final class FilterComponentViewReactor: Reactor {
     enum Mutation {
         case setOnOffLineFilter(String)
         case setAligmentFilter(String)
+        case setStudyTypeFilter(String)
     }
     
     var initialState: State
@@ -35,15 +36,11 @@ final class FilterComponentViewReactor: Reactor {
     }
     
     func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
-        let fromOnOffLineTypeMutation = PostFilterTransform.event.flatMap { [weak self] event in
+        let fromFilterMutation = PostFilterTransform.event.flatMap { [weak self] event in
             self?.didTapBottomSheetTransform(from: event) ?? .empty()
         }
         
-        let fromAligmentTypeMutation = PostFilterTransform.event.flatMap { [weak self] event in
-            self?.didTapBottomSheetTransform(from: event) ?? .empty()
-        }
-        
-        return Observable.of(mutation, fromOnOffLineTypeMutation, fromAligmentTypeMutation).merge()
+        return Observable.of(mutation, fromFilterMutation).merge()
     }
     
     
@@ -56,6 +53,12 @@ final class FilterComponentViewReactor: Reactor {
             return newState
             
         case let .setAligmentFilter(titleType):
+            var newState = state
+            newState.titleType = titleType
+            
+            return newState
+            
+        case let .setStudyTypeFilter(titleType):
             var newState = state
             newState.titleType = titleType
             
@@ -82,6 +85,12 @@ private extension FilterComponentViewReactor {
             print("Transform aligment \(currentState)")
             
             return .just(.setAligmentFilter(text))
+            
+        case let .didTapStudyTypeSheet(text):
+            guard currentState == .studyType(.default) else { return .empty() }
+            print("Transform StudyType \(currentState)")
+            
+            return .just(.setStudyTypeFilter(text))
         }
     }
     

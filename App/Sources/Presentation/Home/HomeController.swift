@@ -102,7 +102,7 @@ public final class HomeController: UIViewController {
         guard let homeStudyListView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView", for: indexPath) as? HomeStudyListFooterView else { return UICollectionReusableView() }
         homeStudyListView.completion = {
         self.delegate?.didTapToPostListCreate()
-        PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: self.reactor?.currentState.menuType ?? "전체", completion: nil))
+        PostFilterTransform.event.onNext(.didTapStudyTypeSheet(text: self.reactor?.currentState.menuType ?? "전체"))
     }
         return homeStudyListView
     default:
