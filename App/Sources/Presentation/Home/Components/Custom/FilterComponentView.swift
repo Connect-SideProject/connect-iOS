@@ -27,6 +27,7 @@ final class FilterComponentViewReactor: Reactor {
         case setOnOffLineFilter(String)
         case setAligmentFilter(String)
         case setStudyTypeFilter(String)
+        case setInterestFilter(String)
     }
     
     var initialState: State
@@ -63,6 +64,12 @@ final class FilterComponentViewReactor: Reactor {
             newState.titleType = titleType
             
             return newState
+            
+        case let .setInterestFilter(titleType):
+            var newState = state
+            newState.titleType = titleType
+            
+            return newState
         }
     }
     
@@ -91,6 +98,11 @@ private extension FilterComponentViewReactor {
             print("Transform StudyType \(currentState)")
             
             return .just(.setStudyTypeFilter(text))
+            
+        case let .didTapInterestSheet(text):
+            guard currentState == .interest([]) else { return .empty() }
+            print("Transform InterestType: \(currentState) or text \(text)")
+            return .just(.setInterestFilter(text))
         default:
             return .empty()
             

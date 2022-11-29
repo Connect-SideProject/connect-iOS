@@ -157,34 +157,19 @@ final class PostFilterHeaderView: BaseView {
             $0.left.equalToSuperview().offset(20)
             $0.centerY.equalToSuperview()
         }
-        
-        onOffLineFilterView.snp.makeConstraints {
-            $0.width.equalTo(73)
-        }
+
         
         onOffLineFilterComponentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
-        studyTypeFilterView.snp.makeConstraints {
-            $0.width.equalTo(62)
-        }
+
         
         studyTypeFilterComponentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
-        
-        interestFieldFilterView.snp.makeConstraints {
-            $0.width.equalTo(62)
-        }
-        
         interestFieldFilterComponentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
-        }
-        
-        alignmentFilterView.snp.makeConstraints {
-            $0.width.equalTo(73)
         }
         
         alignmentFilterComponentView.snp.makeConstraints {

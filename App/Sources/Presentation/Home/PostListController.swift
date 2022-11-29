@@ -145,6 +145,10 @@ extension PostListController: PostCoordinatorDelegate {
                     PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: text, completion: {
                         //TODO: 서버 통신 Action Transfrom 추가
                     }))
+                case .interest:
+                    PostFilterTransform.event.onNext(.didTapInterestSheet(text: text))
+                case .studyType:
+                    PostFilterTransform.event.onNext(.didTapStudyTypeSheet(text: text))
                 case .aligment:
                     PostFilterTransform.event.onNext(.didTapAligmentSheet(text: text))
                 default:

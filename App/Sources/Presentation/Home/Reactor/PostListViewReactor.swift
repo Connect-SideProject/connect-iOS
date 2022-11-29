@@ -19,6 +19,7 @@ public enum PostFilterTransform: TransformType, Equatable {
         case didTapOnOffLineSheet(text: String, completion: (() -> Void)?)
         case didTapAligmentSheet(text: String)
         case didTapStudyTypeSheet(text: String)
+        case didTapInterestSheet(text: String)
         case responseSheetItem(item: [BottomSheetItem])
     }
 
