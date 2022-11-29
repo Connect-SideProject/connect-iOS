@@ -21,13 +21,15 @@ final class PostFilterReactor: Reactor {
     
     struct State {
         var isSelected: Bool
+        var bottomSheetItem: [BottomSheetItem]
     }
     
     var initialState: State
     
-    init() {
+    init(bottomSheetItem: [BottomSheetItem]) {
         defer { _ = self.state }
-        self.initialState = State(isSelected: false)
+        self.initialState = State(isSelected: false, bottomSheetItem: bottomSheetItem)
+        print("PostFilter Reactor: \(bottomSheetItem)")
     }
     
     

@@ -10,6 +10,7 @@ import ReactorKit
 
 
 import COCommon
+import CODomain
 import CONetwork
 
 
@@ -28,7 +29,7 @@ public final class PostDependencyContainer: HomeDIContainer {
     
     
     public func makeReactor() -> PostListReactor {
-        return PostListReactor()
+        return PostListReactor(postRepository: makeRepository())
     }
     
     public func makeRepository() -> PostListRepository {
@@ -45,7 +46,7 @@ public final class PostDependencyContainer: HomeDIContainer {
 
 //MARK: Repository
 public protocol PostListRepository {
-    
+    func responsePostSheetItem() -> Observable<PostListReactor.Mutation>
     
     
 }
@@ -59,6 +60,16 @@ final class PostListRepo: PostListRepository {
     
     init(postApiService: ApiService = ApiManager.shared) {
         self.postApiService = postApiService
+    }
+    
+    
+    func responsePostSheetItem() -> Observable<PostListReactor.Mutation> {
+        let createSheetItemResponse = postApiService.request(endPoint: .init(path: .homeMenu)).flatMap { (data: [HomeMenuList]) -> Observable<PostListReactor.Mutation> in
+            
+            return .just(.setPostSheetItem(data.map {$0.menuTitle}))
+        }
+        
+        return createSheetItemResponse
     }
     
     

@@ -28,7 +28,7 @@ public final class PostListController: UIViewController {
         $0.backgroundColor = .clear
     }
     
-    private let postFilterHeaderView: PostFilterHeaderView = PostFilterHeaderView(reactor: PostFilterReactor())
+    private lazy var  postFilterHeaderView: PostFilterHeaderView = PostFilterHeaderView(reactor: PostFilterReactor(bottomSheetItem: self.reactor?.currentState.bottomSheetItem ?? []))
     
     
     private let postTableView: UITableView = UITableView().then {
@@ -73,6 +73,10 @@ public final class PostListController: UIViewController {
     }
     
     
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+    }
+    
     //MARK: Configure
     private func configure(){
         
@@ -112,7 +116,10 @@ extension PostListController: ReactorKit.View {
     
     
     public func bind(reactor: Reactor) {
-        
+        self.rx.viewWillAppear
+            .map{ _ in  Reactor.Action.viewWillAppear }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
         
         
         

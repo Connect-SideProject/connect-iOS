@@ -11,6 +11,7 @@ import RxCocoa
 import COExtensions
 import CONetwork
 import COCommonUI
+import CODomain
 
 
 public enum PostFilterTransform: TransformType, Equatable {
@@ -27,28 +28,32 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
         case viewDidLoad
+        case viewWillAppear
     }
     
     public struct State {
         var isLoading: Bool
         var isError: COError?
+        var bottomSheetItem: [BottomSheetItem]
     }
     
     public enum Mutation {
         case setLoading(Bool)
         case setPostError(COError?)
+        case setPostSheetItem([String])
     }
     
     public var initialState: State
-    
+    private let postRepository: PostListRepository
     
     public var errorHandler: (Error) -> Observable<Mutation> = { error in
         return .just(.setPostError(error.asCOError))
     }
     
-    init() {
+    init(postRepository: PostListRepository) {
         defer { _ = self.state }
-        self.initialState = State(isLoading: false)
+        self.postRepository = postRepository
+        self.initialState = State(isLoading: false, bottomSheetItem: [])
     }
     
     
@@ -59,6 +64,16 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             
             return .concat(startLoading,endLoading)
+            
+        case .viewWillAppear:
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            
+            return .concat(
+                startLoading,
+                postRepository.responsePostSheetItem(),
+                endLoading
+            )
         }
     }
     
@@ -75,6 +90,16 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
             var newState = state
             newState.isError = isError
             
+            return newState
+            
+        case let .setPostSheetItem(items):
+            var newState = state
+            var bottomSheetItems: [BottomSheetItem] = []
+            _ = items.map { item in
+                bottomSheetItems.append(BottomSheetItem(value: item))
+            }
+            newState.bottomSheetItem = bottomSheetItems
+            print("set Bottom Sheet Item: \(items)")
             return newState
         }
     }
