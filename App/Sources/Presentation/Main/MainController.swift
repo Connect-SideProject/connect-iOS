@@ -149,10 +149,12 @@ extension MainController: ProfileEditDelegate {
 
 
 extension MainController: HomeCoordinatorDelegate {
-    func didTapToPostListCreate() {
+    func didTapToPostListCreate(completion: (() -> Void)?) {
         let homeDependency = HomeDependencyContainer(homeApiService: ApiManager.shared)
         let childrenCoordinator = homeDependency.makeChildrenController()
-        self.navigationController?.pushViewController(childrenCoordinator, animated: true)
+        self.navigationController?.pushViewController(viewController: childrenCoordinator, animated: true, completion: {
+            completion?()
+        })
     }
     
     func didTapToSearchCreate() {

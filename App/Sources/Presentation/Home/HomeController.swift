@@ -101,8 +101,9 @@ public final class HomeController: UIViewController {
     case .homeStudyList:
         guard let homeStudyListView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "HomeStudyListFooterView", for: indexPath) as? HomeStudyListFooterView else { return UICollectionReusableView() }
         homeStudyListView.completion = {
-        self.delegate?.didTapToPostListCreate()
-        PostFilterTransform.event.onNext(.didTapStudyTypeSheet(text: self.reactor?.currentState.menuType ?? "전체"))
+            self.delegate?.didTapToPostListCreate(completion: {
+                PostFilterTransform.event.onNext(.didTapStudyTypeSheet(text: self.reactor?.currentState.menuType ?? "전체"))
+            })
     }
         return homeStudyListView
     default:
@@ -185,7 +186,7 @@ public final class HomeController: UIViewController {
         debugPrint(#function)
     }
     
-    
+    //MARK: LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
@@ -336,8 +337,10 @@ extension HomeController {
             .subscribe(onNext: { [weak self] indexPath in
                 guard let `self` = self else { return }
                 switch self.dataSource[indexPath] {
-                case .homeMenu:
-                    self.delegate?.didTapToPostListCreate()
+                case let .homeMenu(reactor):
+                    self.delegate?.didTapToPostListCreate(completion: {
+                        PostFilterTransform.event.onNext(.didTapInterestSheet(text: reactor.currentState.menuType.menuTitle))
+                    })
                 case let .homeStudyMenu(reactor):
                     HomeViewTransform.event.onNext(.didSelectHomeMenu(type: reactor))
                 default:
