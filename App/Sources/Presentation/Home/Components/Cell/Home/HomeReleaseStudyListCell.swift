@@ -186,7 +186,7 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         releaseMemberStateLabel.snp.makeConstraints {
             $0.left.equalTo(releaseMemberStateImageView.snp.right).offset(5)
             $0.height.equalTo(14)
-            $0.centerY.equalToSuperview()
+            $0.centerY.equalTo(releaseMemberStateImageView)
         }
         
         releaseMangerConfirmView.snp.makeConstraints {
@@ -245,7 +245,31 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         
+        reactor.state
+            .map { $0.releaseModel.releaseRecruitPart.map { parts -> String in
+                switch parts.role {
+                case "DEV":
+                    return "개발자"
+                case "DESIGN":
+                    return "디자이너"
+                case "PM":
+                    return "기획자"
+                case "MAK":
+                    return "마케터"
+                default:
+                    return ""
+                }
+            }.toStringWithVeticalBar}
+            .bind(to: self.releaseMemberStateLabel.rx.text)
+            .disposed(by: disposeBag)
         
+        reactor.state
+            .filter { $0.releaseModel.releaseMyBookMark == true }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+            
     }
     
 }

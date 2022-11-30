@@ -190,8 +190,12 @@ public final class HomeController: UIViewController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white
-        self.navigationController?.setNavigationBarHidden(false, animated: false)
         configure()
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
     public override func viewDidLayoutSubviews() {
@@ -287,8 +291,8 @@ extension HomeController: ReactorKit.View {
             .observe(on: MainScheduler.instance)
             .bind(to: homeIndicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
+
         
-        // Action -> Floating Button
         floatingButton
             .rx.tap
             .throttle(.microseconds(1), scheduler: MainScheduler.instance)
