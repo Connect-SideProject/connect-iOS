@@ -152,7 +152,6 @@ public final class HomeController: UIViewController {
         $0.register(HomeReleaseStudyListCell.self, forCellWithReuseIdentifier: "HomeReleaseStudyListCell")
         $0.showsVerticalScrollIndicator = false
         $0.isScrollEnabled = true
-        $0.contentInsetAdjustmentBehavior = .never
         $0.showsHorizontalScrollIndicator = false
     }
     
@@ -452,7 +451,7 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
         } else {
             switch self.releaseDataSource[section] {
             case .hotMenu:
-                return UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 20)
+                return UIEdgeInsets(top: 20, left: -(collectionView.frame.size.width - 20), bottom: 0, right: 20)
             }
         }
     }
