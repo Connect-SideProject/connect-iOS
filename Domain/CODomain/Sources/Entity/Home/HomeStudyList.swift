@@ -16,6 +16,7 @@ public struct HomeStudyList: Codable {
     public var studyNewsMyBookMark: Bool
     public var studyNewsInfo: String
     public var parts: [HomeStudyPartList]
+    public var studyNewsUserId: String
     
     
     enum CodingKeys: String, CodingKey {
@@ -26,6 +27,7 @@ public struct HomeStudyList: Codable {
         case studyNewsMyBookMark = "myBookmark"
         case studyNewsInfo = "studyInfo"
         case parts
+        case studyNewsUserId = "userId"
         
     }
     

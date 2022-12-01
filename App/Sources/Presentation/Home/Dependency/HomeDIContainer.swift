@@ -66,7 +66,7 @@ public protocol HomeRepository {
     func responseMenuImage(image: HomeMenuList) throws -> Data
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
-    func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation>
+    func responseHomeNewsItme() -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
     func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection
     func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection
@@ -98,7 +98,7 @@ final class HomeViewRepo: HomeRepository {
         return creteMenuResponse
     }
     
-    func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation> {
+    func responseHomeNewsItme() -> Observable<HomeViewReactor.Mutation> {
         let createNewsResponse = homeApiService.request(endPoint: .init(path: .homeNews)).flatMap { (data: [HomeStudyList]) -> Observable<HomeViewReactor.Mutation> in
             
             return .just(.setHomeNewsItem(data))

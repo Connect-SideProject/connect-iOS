@@ -10,6 +10,7 @@ import SnapKit
 import Then
 import ReactorKit
 import RxCocoa
+import RxGesture
 
 
 /// 홈 Hot 게시글 셀
@@ -210,6 +211,15 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
     
     
     func bind(reactor: Reactor) {
+        
+        releaseBookMarkContainerView
+            .rx.tapGesture()
+            .when(.recognized)
+            .map { _ in Reactor.Action.didTapBookMarkButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        
         
         reactor.state
             .map { $0.releaseModel.releaseTitle }

@@ -93,6 +93,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                 startLoading,
                 homeRepository.responseHomeMenuItem(),
                 setMenuItems,
+                homeRepository.responseHomeNewsItme(),
                 homeRepository.responseHomeReleaseItem(),
                 endLoading
             )
