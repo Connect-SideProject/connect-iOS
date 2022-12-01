@@ -10,10 +10,11 @@ import UIKit
 import PinLayout
 import FlexLayout
 import Differentiator
+import COCommonUI
 
 extension ChatListController {
     final class TableCell: RxBaseTableCell<SectionModel.Item> {
-        private let avatarView = UIImageView()
+        private let avatarView = ProfileImageView()
         private let nameLabel = UILabel()
         private let msgLabel = UILabel()
         private let timeLabel = UILabel()
@@ -60,6 +61,9 @@ extension ChatListController {
         }
         
         override func configure(with item: ChatListController.SectionModel.Item) {
+            if let url = URL(string: item.avatarUrl) {
+                Task { await self.avatarView.setImage(url: url) }
+            }
             self.nameLabel.text = item.name
             self.msgLabel.text = item.lastMsg
             self.timeLabel.text = "4분전"
