@@ -93,7 +93,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                 startLoading,
                 homeRepository.responseHomeMenuItem(),
                 setMenuItems,
-                homeRepository.responseHomeNewsItme(),
+                homeRepository.responseHomeNewsItem().catchAndReturn(Mutation.setHomeNewsItem([])),
                 homeRepository.responseHomeReleaseItem(),
                 endLoading
             )
@@ -149,7 +149,6 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             
         case let .setSelectMenuType(menuType):
             var newState = state
-            print("State Menu Type Home")
             newState.menuType = menuType
             
             return newState

@@ -75,7 +75,7 @@ public final class HomeController: UIViewController {
         return studyMenuCell
         
     case let .homeStudyList(cellReactor):
-        guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return UICollectionViewCell() }
+        guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return HomeStudyEmptyCell() }
         studyListCell.reactor = cellReactor
         return studyListCell
     }
