@@ -13,14 +13,17 @@ public final class SearchViewReactor: Reactor {
 
     public enum Action {
         case viewDidLoad
+        case updateKeyword(String?)
     }
     
     public enum Mutation {
+        case setKeyword(String?)
         case setLoading(Bool)
-        case setSearchKeywordItem([String])
+        case setSearchKeywordItem
     }
     
     public struct State {
+        var keyword: String?
         var isLoading: Bool
         var section: [SearchSection]
     }
@@ -33,9 +36,10 @@ public final class SearchViewReactor: Reactor {
         defer { _ = self.state }
         self.searchRepository = searchRepository
         self.initialState = State(
+            keyword: "",
             isLoading: false,
             section: [
-                .search([])
+                self.searchRepository.responseSearchKeywordsSectionItem()
             ]
         )
     }
@@ -48,7 +52,20 @@ public final class SearchViewReactor: Reactor {
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             
             return .concat(startLoading,endLoading)
+        case let .updateKeyword(keyword):
+            guard let keyword = keyword,
+                  keyword.count > 1 else {
+                return .concat(
+                  .just(.setKeyword(nil)),
+                  .just(.setSearchKeywordItem)
+                )
+            }
+            //TODO: Search API Event Return
+            
+            
+            return .empty()
         }
+        
     }
     
     
@@ -60,10 +77,15 @@ public final class SearchViewReactor: Reactor {
             
             return newState
             
-        case let .setSearchKeywordItem(items):
+        case .setSearchKeywordItem:
             var newState = state
             let searchIndex = self.getIndex(section: .search([]))
-            newState.section[searchIndex] = searchRepository.responseSearchKeywordsSectionItem(item: items)
+            newState.section[searchIndex] = searchRepository.responseSearchKeywordsSectionItem()
+            return newState
+        case let .setKeyword(keyword):
+            var newState = state
+            newState.keyword = keyword
+            
             return newState
         }
     }

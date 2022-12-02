@@ -76,6 +76,7 @@ final class SearchKeywordListCell: UICollectionViewCell {
         keywordImageView.snp.makeConstraints {
             $0.width.height.equalTo(14)
             $0.left.equalTo(keywordTitleLabel.snp.right).offset(6)
+            $0.right.equalToSuperview().offset(-11)
             $0.centerY.equalTo(keywordTitleLabel)
         }
         
@@ -89,6 +90,12 @@ final class SearchKeywordListCell: UICollectionViewCell {
 extension SearchKeywordListCell: ReactorKit.View {
     
     func bind(reactor: Reactor) {
+        
+        reactor.state
+            .map { $0.keywordItems }
+            .bind(to: keywordTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
         
     }
 }

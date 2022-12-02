@@ -27,7 +27,7 @@ public final class SearchController: UIViewController {
     public var disposeBag: DisposeBag = DisposeBag()
     
     private lazy var collectionViewLayout = LeftAlignedCollectionViewFlowLayout().then {
-        $0.scrollDirection = .horizontal
+        $0.scrollDirection = .vertical
         $0.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
     }
     
@@ -45,8 +45,9 @@ public final class SearchController: UIViewController {
     case let .searchList(cellReactor):
         guard let searchKeywordCell = collectionView.dequeueReusableCell(withReuseIdentifier: "SearchKeywordListCell", for: indexPath) as? SearchKeywordListCell else { return UICollectionViewCell() }
         searchKeywordCell.reactor = cellReactor
+            
+        return searchKeywordCell
     }
-        return UICollectionViewCell()
 })
     
     
@@ -98,7 +99,8 @@ public final class SearchController: UIViewController {
         
         keywordCollectionView.snp.makeConstraints {
             $0.top.equalTo(keywordSearchBar.snp.bottom)
-            $0.left.right.bottom.equalToSuperview()
+            $0.left.right.equalToSuperview().inset(20)
+            $0.bottom.equalToSuperview()
         }
         
         
@@ -139,6 +141,13 @@ extension SearchController: ReactorKit.View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        self.keywordSearchBar.searchTextField.rx.value
+            .distinctUntilChanged()
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { Reactor.Action.updateKeyword($0) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         
         reactor.state
             .map { $0.isLoading }
@@ -159,7 +168,9 @@ extension SearchController: ReactorKit.View {
             .withUnretained(self)
             .subscribe(onNext: { vc, keyword in
                 print("search keyword : \(keyword)")
-                UserDefaults.standard.set(keyword, forKey: .recentlyKeywords)
+                UserDefaults.standard.setRecentlyKeyWord(keyword: keyword)
+                
+                print("search Tap : \(UserDefaults.standard.setRecentlyKeyWord(keyword: keyword))")
             }).disposed(by: disposeBag)
         
         
@@ -173,6 +184,12 @@ extension SearchController: ReactorKit.View {
 
 extension SearchController: UICollectionViewDelegateFlowLayout {
     
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 9
+    }
     
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+    }
     
 }
