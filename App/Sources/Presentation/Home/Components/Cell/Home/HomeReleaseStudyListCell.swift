@@ -150,9 +150,10 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         }
         
         releaseBookMarkContainerView.snp.makeConstraints {
-            $0.right.equalToSuperview().offset(-20)
-            $0.top.equalTo(15)
+            $0.right.equalToSuperview().offset(-16)
+            $0.top.equalToSuperview().offset(15)
             $0.height.equalTo(20)
+            $0.width.equalTo(50)
         }
         
         releaseBookMarkImageView.snp.makeConstraints {
@@ -215,7 +216,8 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         releaseBookMarkContainerView
             .rx.tapGesture()
             .when(.recognized)
-            .map { _ in Reactor.Action.didTapBookMarkButton }
+            .debug("TapGesture relase")
+            .map { _ in Reactor.Action.didTapBookMarkButton(String(self.reactor?.currentState.releaseModel.id ?? 1)) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -276,6 +278,12 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         reactor.state
             .filter { $0.releaseModel.releaseMyBookMark == true }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.bookMarkModel?.result == "SUCCESS" }
+            .map {  _ in UIImage(named: "home_studylist_bookmark_select") }
             .bind(to: self.releaseBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         

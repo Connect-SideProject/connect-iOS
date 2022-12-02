@@ -20,6 +20,7 @@ public enum Path {
   case userProfile
   case homeMenu
   case homeNews(HomeNewsParameter)
+  case homeBookMark(String)
   case updateProfile(ProfileEditParameter)
   case homeRelease
   case refreshToken
@@ -44,6 +45,8 @@ public enum Path {
         return "/api/study/news"
     case .homeRelease:
       return "/api/study/hots"
+    case let .homeBookMark(id):
+        return "/api/study/\(id)/bookmark"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:

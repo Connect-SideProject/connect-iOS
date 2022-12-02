@@ -70,6 +70,7 @@ public protocol HomeRepository {
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
     func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection
     func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection
+    func requestHomeBookMarkItem(id: String) -> Observable<HomeReleaseCellReactor.Mutation>
 }
 
 
@@ -142,11 +143,20 @@ final class HomeViewRepo: HomeRepository {
         var homeReleaseSectionItem: [HomeRelaseSectionItem] = []
         
         for i in 0 ..< item.count {
-            homeReleaseSectionItem.append(.hotList(HomeReleaseCellReactor(releaseModel: item[i])))
+            homeReleaseSectionItem.append(.hotList(HomeReleaseCellReactor(releaseModel: item[i], homeReleaseRepo: self)))
         }
         
         return HomeReleaseSection.hotMenu(homeReleaseSectionItem)
     }
     
     
+    func requestHomeBookMarkItem(id: String) -> Observable<HomeReleaseCellReactor.Mutation> {
+        
+        let createBookMarkResponse = homeApiService.request(endPoint: .init(path: .homeBookMark(id))).flatMap { (data: HomeBookMarkList) -> Observable<HomeReleaseCellReactor.Mutation> in
+            
+            return .just(.updateSelected(data))
+        }
+        
+        return createBookMarkResponse
+    }
 }

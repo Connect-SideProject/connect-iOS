@@ -14,42 +14,44 @@ public final class HomeReleaseCellReactor: Reactor {
     
     
     public enum Action {
-        case didTapBookMarkButton
+        case didTapBookMarkButton(String)
     }
     
     public enum Mutation {
-        case updateSelected(Bool)
+        case updateSelected(HomeBookMarkList?)
     }
     
     
     public struct State {
         var releaseModel: HomeHotList
-        var isSelected: Bool
+        var bookMarkModel: HomeBookMarkList?
     }
     
     public let initialState: State
+    private let homeReleaseRepo: HomeViewRepo
     
-    init(releaseModel: HomeHotList) {
+    init(releaseModel: HomeHotList, homeReleaseRepo: HomeViewRepo) {
         defer { _ = self.state }
-        self.initialState = State(releaseModel: releaseModel, isSelected: false)
+        self.initialState = State(releaseModel: releaseModel, bookMarkModel: nil)
+        self.homeReleaseRepo = homeReleaseRepo
         print("Release Model : \(releaseModel)")
     }
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case .didTapBookMarkButton:
-            let updateSelectBookMark = Observable<Mutation>.just(.updateSelected(!self.currentState.isSelected))
+        case let .didTapBookMarkButton(id):
+            let bookMarkMutation = homeReleaseRepo.requestHomeBookMarkItem(id: id)
             
-            return .concat(updateSelectBookMark)
+            return bookMarkMutation
         }
     }
     
     public func reduce(state: State, mutation: Mutation) -> State {
         switch mutation {
-        case let .updateSelected(isSelected):
+        case let .updateSelected(items):
             var newState = state
-            newState.isSelected = isSelected
-            
+            newState.bookMarkModel = items
+            print("bookMark Model: \(items)")
             return newState
         }
     }
