@@ -7,6 +7,13 @@
 
 import ReactorKit
 
+enum SearchViewTransform: TransformType {
+    enum Event {
+        case refreshKeywordSection
+    }
+    case none
+}
+
 
 
 public final class SearchViewReactor: Reactor {
@@ -69,6 +76,14 @@ public final class SearchViewReactor: Reactor {
     }
     
     
+    public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let fromRefreshSectionMutaion = SearchViewTransform.event.flatMap { [weak self] event in
+            self?.updateRecentlyKeyword(from: event) ?? .empty()
+        }
+        return fromRefreshSectionMutaion
+    }
+    
+    
     public func reduce(state: State, mutation: Mutation) -> State {
         switch mutation {
         case let .setLoading(isLoading):
@@ -105,4 +120,24 @@ private extension SearchViewReactor {
         }
         return index
     }
+}
+
+
+private extension SearchViewReactor {
+    func updateRecentlyKeyword(from event: SearchViewTransform.Event) -> Observable<Mutation> {
+        switch event {
+        case .refreshKeywordSection:
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let refreshSection = Observable<Mutation>.just(.setSearchKeywordItem)
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            
+            return .concat(
+                startLoading,
+                refreshSection,
+                endLoading
+            )
+        }
+    }
+    
+    
 }

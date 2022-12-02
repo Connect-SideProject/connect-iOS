@@ -167,10 +167,8 @@ extension SearchController: ReactorKit.View {
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .withUnretained(self)
             .subscribe(onNext: { vc, keyword in
-                print("search keyword : \(keyword)")
                 UserDefaults.standard.setRecentlyKeyWord(keyword: keyword)
-                
-                print("search Tap : \(UserDefaults.standard.setRecentlyKeyWord(keyword: keyword))")
+                SearchViewTransform.event.onNext(.refreshKeywordSection)
             }).disposed(by: disposeBag)
         
         

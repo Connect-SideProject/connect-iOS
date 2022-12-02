@@ -16,14 +16,15 @@ public final class SearchKeywordCellReactor: Reactor {
     
     public struct State {
         var keywordItems: String
+        var indexPath: Int
     }
     
     public var initialState: State
     
     
-    public init(keywordItems: String) {
+    public init(keywordItems: String, indexPath: Int) {
         defer { _ = self.state }
-        self.initialState = State(keywordItems: keywordItems)
+        self.initialState = State(keywordItems: keywordItems, indexPath: indexPath)
     }
     
     

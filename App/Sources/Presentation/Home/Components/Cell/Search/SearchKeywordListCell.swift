@@ -96,6 +96,15 @@ extension SearchKeywordListCell: ReactorKit.View {
             .bind(to: keywordTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
+        keywordImageView.rx
+            .tapGesture()
+            .when(.recognized)
+            .subscribe(onNext: { _ in
+                var removeArray =  UserDefaults.standard.stringArray(forKey: .recentlyKeywords)
+                removeArray.remove(at: self.reactor?.currentState.indexPath ?? 1)
+                UserDefaults.standard.set(removeArray, forKey: .recentlyKeywords)
+                SearchViewTransform.event.onNext(.refreshKeywordSection)
+            }).disposed(by: disposeBag)
         
     }
 }

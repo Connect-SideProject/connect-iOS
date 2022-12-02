@@ -65,7 +65,7 @@ final class SearchViewRepo: SearchRepository {
         print("Userdefault DI: \(UserDefaults.standard.stringArray(forKey: .recentlyKeywords))")
         
         for i in 0 ..< recentlyKeyWordItems.count {
-            searchRecentlyKeywordItem.append(.searchList(SearchKeywordCellReactor(keywordItems: recentlyKeyWordItems[i])))
+            searchRecentlyKeywordItem.append(.searchList(SearchKeywordCellReactor(keywordItems: recentlyKeyWordItems[i], indexPath: i)))
         }
         
         return SearchSection.search(searchRecentlyKeywordItem)
