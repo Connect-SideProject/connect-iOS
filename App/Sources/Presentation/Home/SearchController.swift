@@ -8,9 +8,11 @@
 import UIKit
 import Then
 import ReactorKit
-import COCommonUI
-
+import RxCocoa
 import RxDataSources
+
+import COCommonUI
+import COExtensions
 
 
 
@@ -151,6 +153,14 @@ extension SearchController: ReactorKit.View {
             .observe(on: MainScheduler.instance)
             .bind(to: keywordCollectionView.rx.items(dataSource: self.searchDataSource))
             .disposed(by: disposeBag)
+        
+        keywordSearchBar.rx.searchButtonTap
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .withUnretained(self)
+            .subscribe(onNext: { vc, keyword in
+                print("search keyword : \(keyword)")
+                UserDefaults.standard.set(keyword, forKey: .recentlyKeywords)
+            }).disposed(by: disposeBag)
         
         
         

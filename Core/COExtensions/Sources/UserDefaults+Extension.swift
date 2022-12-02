@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import RxSwift
 
 public enum UserDefaultsKeys: String {
   case accessToken
@@ -51,8 +52,8 @@ public extension UserDefaults {
     return data(forKey: forKey.rawValue)
   }
 
-  func stringArray(forKey: UserDefaultsKeys) -> [String]? {
-    return stringArray(forKey: forKey.rawValue)
+  func stringArray(forKey: UserDefaultsKeys) -> [String] {
+    return stringArray(forKey: forKey.rawValue) ?? []
   }
 
   func integer(forKey: UserDefaultsKeys) -> Int {
@@ -73,6 +74,15 @@ public extension UserDefaults {
 
   func object(forKey: UserDefaultsKeys) -> Any? {
     return object(forKey: forKey.rawValue)
+  }
+    
+  func setRecentlyKeyWord(keyword: String) {
+    var saveData = UserDefaults.standard.stringArray(forKey: .recentlyKeywords)
+    saveData = saveData.filter { $0 != keyword }
+    saveData.insert(keyword, at: 0)
+    saveData = Array<String>(saveData.prefix(Int(10)))
+        
+    UserDefaults.standard.set(saveData, forKey: .recentlyKeywords)
   }
 
   func object<T: Decodable>(type: T.Type, forKey: UserDefaultsKeys) -> T? {
