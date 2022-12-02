@@ -172,6 +172,11 @@ extension SearchController: ReactorKit.View {
             }).disposed(by: disposeBag)
         
         
+        reactor.state
+            .map { $0.keyword }
+            .bind(to: keywordSearchBar.searchTextField.rx.text)
+            .disposed(by: disposeBag)
+        
         
     }
     

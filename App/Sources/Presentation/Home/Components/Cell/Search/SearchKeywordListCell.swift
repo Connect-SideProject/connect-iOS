@@ -96,12 +96,25 @@ extension SearchKeywordListCell: ReactorKit.View {
             .bind(to: keywordTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
+        keywordContainerView
+            .rx.tapGesture()
+            .when(.recognized)
+            .subscribe(onNext: { _ in
+                guard let indexPath = self.reactor?.currentState.indexPath else { return }
+                
+                var selectArray = UserDefaults.standard.stringArray(forKey: .recentlyKeywords)
+                SearchViewTransform.event.onNext(.didTapRecentlyKeyword(keyword: selectArray[indexPath]))
+            }).disposed(by: disposeBag)
+        
+        
         keywordImageView.rx
             .tapGesture()
             .when(.recognized)
             .subscribe(onNext: { _ in
+                guard let indexPath = self.reactor?.currentState.indexPath else { return }
+                
                 var removeArray =  UserDefaults.standard.stringArray(forKey: .recentlyKeywords)
-                removeArray.remove(at: self.reactor?.currentState.indexPath ?? 1)
+                removeArray.remove(at: indexPath)
                 UserDefaults.standard.set(removeArray, forKey: .recentlyKeywords)
                 SearchViewTransform.event.onNext(.refreshKeywordSection)
             }).disposed(by: disposeBag)

@@ -6,12 +6,12 @@
 //  Copyright © 2022 sideproj. All rights reserved.
 //
 
-import Foundation
-
 import ReactorKit
+
 import COExtensions
 import CONetwork
 import CODomain
+import COManager
 
 
 enum HomeViewTransform: TransformType, Equatable {
@@ -87,13 +87,15 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                 .homeStudyMenu(HomeStudyMenuReactor(menuType: .study, isSelected: false))
             ])))
             
+            guard let region = UserManager.shared.profile?.region?.description else { return .empty() }
+            let homeNewsParameter: HomeNewsParameter = .init(area: region)
             
                         
             return .concat(
                 startLoading,
                 homeRepository.responseHomeMenuItem(),
                 setMenuItems,
-                homeRepository.responseHomeNewsItem().catchAndReturn(Mutation.setHomeNewsItem([])),
+                homeRepository.responseHomeNewsItem(paramenter: homeNewsParameter).catchAndReturn(Mutation.setHomeNewsItem([])),
                 homeRepository.responseHomeReleaseItem(),
                 endLoading
             )

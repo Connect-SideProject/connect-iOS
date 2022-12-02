@@ -10,6 +10,7 @@ import ReactorKit
 enum SearchViewTransform: TransformType {
     enum Event {
         case refreshKeywordSection
+        case didTapRecentlyKeyword(keyword: String)
     }
     case none
 }
@@ -97,6 +98,7 @@ public final class SearchViewReactor: Reactor {
             let searchIndex = self.getIndex(section: .search([]))
             newState.section[searchIndex] = searchRepository.responseSearchKeywordsSectionItem()
             return newState
+            
         case let .setKeyword(keyword):
             var newState = state
             newState.keyword = keyword
@@ -136,6 +138,9 @@ private extension SearchViewReactor {
                 refreshSection,
                 endLoading
             )
+        case let .didTapRecentlyKeyword(keyword):
+            
+            return .just(.setKeyword(keyword))
         }
     }
     
