@@ -18,7 +18,7 @@ public final class HomeReleaseCellReactor: Reactor {
     }
     
     public enum Mutation {
-        case updateSelected(HomeBookMarkList?)
+        case updateSelected(HomeBookMarkList)
     }
     
     
@@ -51,6 +51,7 @@ public final class HomeReleaseCellReactor: Reactor {
         case let .updateSelected(items):
             var newState = state
             newState.bookMarkModel = items
+      
             print("bookMark Model: \(items)")
             return newState
         }

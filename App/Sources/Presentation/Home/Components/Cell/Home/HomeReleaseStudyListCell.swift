@@ -231,6 +231,7 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd }
+            .observe(on: MainScheduler.instance)
             .do(onNext:{ _ in
                 self.releaseStateLabel.text = "모집중"
             }).map { _ in UIColor.hex05A647 }
@@ -239,6 +240,7 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd == false }
+            .observe(on: MainScheduler.instance)
             .do(onNext:{ _ in
                 self.releaseStateLabel.text = "모집완료"
             }).map { _ in UIColor.hex8E8E8E }
@@ -248,11 +250,13 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .map { String($0.releaseModel.releaseBookMark) }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseBookMarkCountLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .map { $0.releaseModel.releaseStudyInfo }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseSubTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
@@ -272,21 +276,31 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
                     return ""
                 }
             }.toStringWithVeticalBar}
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseMemberStateLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.releaseModel.releaseMyBookMark == true }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        
+        //TODO: id field 값 추가시 Select Cell 구분 filter 추가
+        reactor.state
+            .filter { $0.bookMarkModel?.result == "SUCCESS" }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.bookMarkModel?.result == "SUCCESS" }
-            .map {  _ in UIImage(named: "home_studylist_bookmark_select") }
-            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .map { String($0.bookMarkModel?.data ?? 0)}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkCountLabel.rx.text)
             .disposed(by: disposeBag)
-        
             
     }
     

@@ -103,9 +103,9 @@ public extension EndPoint {
 
   var method: HTTPMethod {
     switch path {
-    case .signUp, .uploadProfileImage, .userProfile, .updateProfile:
+    case .signUp, .uploadProfileImage, .userProfile, .updateProfile, .homeBookMark:
       return .put
-    case .refreshToken, .signIn, .logout, .homeBookMark:
+    case .refreshToken, .signIn, .logout:
       return .post
     case .signOut:
       return .delete

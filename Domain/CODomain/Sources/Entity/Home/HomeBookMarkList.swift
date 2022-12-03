@@ -13,11 +13,12 @@ public struct HomeBookMarkList: Codable {
     public var data: Int
     public var message: String?
     public var errorCode: String?
-    
+
     enum CodingKeys: String, CodingKey {
-        case result, message
+        case result
+        case message
         case data
         case errorCode = "error_code"
     }
-    
+
 }
