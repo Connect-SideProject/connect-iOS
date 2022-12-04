@@ -51,8 +51,10 @@ public final class TitleView: FlexLayoutView {
                         .marginEnd(20)
                 }
             }
+      
+        leftBtn.addTarget(self, action: #selector(didTapLeftButton), for: .touchUpInside)
     }
-    
+  
     public override func layout() {
         self.rootContainer.pin.all()
         self.rootContainer.flex.layout()
@@ -112,4 +114,24 @@ public extension TitleView {
         self.rightOuterBtnAction = action
         return self
     }
+}
+
+private extension TitleView {
+  @objc func didTapLeftButton() {
+    
+    if let handler = leftBtnAction {
+      handler()
+      return
+    }
+    
+    if let handler = rightInnerBtnAction {
+      handler()
+      return
+    }
+    
+    if let handler = rightOuterBtnAction {
+      handler()
+      return
+    }
+  }
 }
