@@ -31,3 +31,8 @@ public protocol RxBaseType {
 public protocol RxBindable: RxBaseType {
     func bind()
 }
+
+public protocol RxDatasourceCell: RxBindable {
+    associatedtype SectionItem
+    func configure(with item: SectionItem)
+}
