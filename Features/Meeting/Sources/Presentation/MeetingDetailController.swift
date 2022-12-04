@@ -14,6 +14,7 @@ import COCommonUI
 public final class MeetingDetailController: ReactorBaseController<MeetingDetailController.Reactor> {
     private let titleView = TitleView()
     private let topArea = TopArea()
+    private let tableView = UITableView()
 }
 
 extension MeetingDetailController {
@@ -24,8 +25,18 @@ extension MeetingDetailController {
     }
 }
 
-private extension MeetingDetailController {
-    final class TopArea {
+extension MeetingDetailController {
+    final class TopArea: FlexLayoutView {
+        
+    }
+}
+
+extension MeetingDetailController {
+    final class CardTableCell: RxBaseTableCell<Any> {
+        
+    }
+    
+    final class TextTableCell: RxBaseTableCell<Any> {
         
     }
 }
