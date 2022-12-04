@@ -16,10 +16,11 @@ extension ChatRoomController {
     class TableCell: RxBaseTableCell<SectionModel.MessageData> {
         let timeLabel = UILabel()
         let msgLabel = PaddingLabel(padding: .init(top: 12, left: 12, bottom: 12, right: 12))
+        let msgMaxWidth = UIScreen.main.bounds.width * (60 / 100)
         
         override func configure(with item: ChatRoomController.SectionModel.MessageData) {
             self.msgLabel.text = item.msg
-            self.timeLabel.text = "\(item.timestamp)"
+            self.timeLabel.text = "오후 01:26"
         }
         
         public override func layout() {
@@ -31,6 +32,9 @@ extension ChatRoomController {
             self.msgLabel.numberOfLines = 0
             self.msgLabel.lineBreakMode = .byWordWrapping
             self.msgLabel.font = .medium(size: 14)
+            self.msgLabel.preferredMaxLayoutWidth = self.msgMaxWidth
+            self.timeLabel.textColor = .hex818181
+            self.timeLabel.font = .medium(size: 10)
         }
         
         override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -50,6 +54,7 @@ extension ChatRoomController {
                     $0.addItem(self.msgLabel)
                         .marginTop(10)
                         .marginLeft(23)
+                        .maxWidth(self.msgMaxWidth)
                     
                     $0.addItem(self.timeLabel)
                 }
@@ -77,6 +82,7 @@ extension ChatRoomController {
                     $0.addItem(self.msgLabel)
                         .marginTop(10)
                         .marginEnd(23)
+                        .maxWidth(self.msgMaxWidth)
                     
                     $0.addItem(self.timeLabel)
                 }
