@@ -24,6 +24,7 @@ public extension UIColor {
   static let hex3A3A3A: UIColor = .init(hex: "#3A3A3A")
   static let hex141616: UIColor = .init(hex: "#141616")
   static let hex818181: UIColor = .init(hex: "#818181")
+  static let hex000000: UIColor = .init(hex: "#000000")
 }
 
 public extension UIColor {

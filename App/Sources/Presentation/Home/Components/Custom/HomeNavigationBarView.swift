@@ -10,8 +10,14 @@ import Then
 import COManager
 import SnapKit
 
+import RxGesture
+import RxCocoa
+import RxSwift
+
 
 final class HomeNavigationBarView: BaseView {
+    
+    public var completion: (() -> Void)?
     
     //MARK: Property
     private let locationContainerView: UIView = UIView().then {
@@ -93,6 +99,14 @@ final class HomeNavigationBarView: BaseView {
             $0.right.equalToSuperview().offset(-21)
             $0.top.equalTo(locationContainerView)
         }
+        
+        notificationContainerView.rx
+            .tapGesture()
+            .when(.recognized)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .bind { _ in
+                self.completion?()
+            }.disposed(by: disposeBag)
     }
     
     

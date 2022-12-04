@@ -344,6 +344,9 @@ extension HomeController {
                 }
             }).disposed(by: disposeBag)
         
+        homeNavgaionBar.completion = {
+            self.delegate?.didTapToNoticeCreate()
+        }
         
         
         

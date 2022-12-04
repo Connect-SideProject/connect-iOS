@@ -10,4 +10,5 @@ import Foundation
 public protocol HomeCoordinatorDelegate: AnyObject {
     func didTapToPostListCreate()
     func didTapToSearchCreate()
+    func didTapToNoticeCreate()
 }
