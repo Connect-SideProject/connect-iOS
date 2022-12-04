@@ -9,16 +9,12 @@ import Foundation
 
 
 public struct HomeBookMarkList: Codable {
-    public var result: String
-    public var data: Int
-    public var message: String?
-    public var errorCode: String?
-
+    public var bookMarkId: Int
+    public var bookMarkCount: Int
+    
     enum CodingKeys: String, CodingKey {
-        case result
-        case message
-        case data
-        case errorCode = "error_code"
+        case bookMarkId = "id"
+        case bookMarkCount
     }
 
 }

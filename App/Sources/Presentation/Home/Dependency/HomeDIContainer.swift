@@ -152,11 +152,10 @@ final class HomeViewRepo: HomeRepository {
     
     func requestHomeBookMarkItem(id: String) -> Observable<HomeReleaseCellReactor.Mutation> {
         
-        let createBookMarkResponse = homeApiService.requestOutBound(endPoint: .init(path: .homeBookMark(id))).flatMap { data -> Observable<HomeReleaseCellReactor.Mutation> in
+        let createBookMarkResponse = homeApiService.request(endPoint: .init(path: .homeRelease)).flatMap { (data: HomeBookMarkList) -> Observable<HomeReleaseCellReactor.Mutation> in
             
             return .just(.updateSelected(data))
         }
-        
         return createBookMarkResponse
     }
 }

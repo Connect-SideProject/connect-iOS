@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct HomeHotList: Codable, Identifiable {
+public struct HomeHotList: Codable {
     public var id: Int
     public var releaseisEnd: Bool
     public var releaseTitle: String

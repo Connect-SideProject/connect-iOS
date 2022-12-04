@@ -290,14 +290,15 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         //TODO: id field 값 추가시 Select Cell 구분 filter 추가
         reactor.state
-            .filter { $0.bookMarkModel?.result == "SUCCESS" }
+            .filter { $0.bookMarkModel?.bookMarkId == $0.releaseModel.id  }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         
         reactor.state
-            .map { String($0.bookMarkModel?.data ?? 0)}
+            .filter { $0.bookMarkModel?.bookMarkId == $0.releaseModel.id  }
+            .map { String($0.bookMarkModel?.bookMarkCount ?? 0)}
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseBookMarkCountLabel.rx.text)
             .disposed(by: disposeBag)
