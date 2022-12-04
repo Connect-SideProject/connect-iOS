@@ -13,7 +13,7 @@ import RxDataSources
 import COExtensions
 import COCommonUI
 
-public final class ChatRoomController: ChatBaseController<ChatRoomController.Reactor> {
+public final class ChatRoomController: ReactorBaseController<ChatRoomController.Reactor> {
     private let tableView = UITableView()
     private let titleView = TitleView().setLeftBtn(type: .back)
     private lazy var inputArea = InputArea()

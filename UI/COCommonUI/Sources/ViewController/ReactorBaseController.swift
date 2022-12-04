@@ -1,8 +1,8 @@
 //
-//  ChatBaseController.swift
-//  App
+//  ReactorBaseController.swift
+//  COCommonUI
 //
-//  Created by Taeyoung Son on 2022/11/01.
+//  Created by Taeyoung Son on 2022/12/04.
 //
 
 import UIKit
@@ -10,17 +10,16 @@ import UIKit
 import RxSwift
 import ReactorKit
 import RxRelay
-import COCommonUI
 
-public class ChatBaseController<T: ReactorKit.Reactor>: UIViewController, FlexLayoutType, ReactorKit.View, RxBaseType {
+open class ReactorBaseController<T: ReactorKit.Reactor>: UIViewController, FlexLayoutType, ReactorKit.View, RxBaseType {
     public typealias Reactor = T
     
-    let rootContainer = UIView()
+    public let rootContainer = UIView()
     
     var reload = PublishRelay<Void>()
     public var disposeBag: DisposeBag = .init()
     
-    init(reactor: T? = nil) {
+    public init(reactor: T? = nil) {
         super.init(nibName: nil, bundle: nil)
         DispatchQueue.main.async {
             self.setup()
@@ -35,24 +34,24 @@ public class ChatBaseController<T: ReactorKit.Reactor>: UIViewController, FlexLa
         }
     }
 
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         super.init(coder: coder)
     }
     
-    public override func viewDidLayoutSubviews() {
+    open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.layout()
     }
     
-    public func setupContainer() {
+    open func setupContainer() {
         self.view.addSubview(self.rootContainer)
     }
-    public func setAttrs() {
+    open func setAttrs() {
         self.view.backgroundColor = .white
     }
-    public func layout() { }
-    public func bind(reactor: T) { }
-    public func clearBag() {
+    open func layout() { }
+    open func bind(reactor: T) { }
+    open func clearBag() {
         self.disposeBag = .init()
     }
 }

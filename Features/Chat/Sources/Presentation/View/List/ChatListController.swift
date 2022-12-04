@@ -16,7 +16,7 @@ import FlexLayout
 import COExtensions
 import COCommonUI
 
-public final class ChatListController: ChatBaseController<ChatListController.Reactor> {
+public final class ChatListController: ReactorBaseController<ChatListController.Reactor> {
     
     private let tableView = UITableView()
     private let titleView = TitleView().set(title: "대화 목록")
