@@ -297,7 +297,8 @@ extension HomeController: ReactorKit.View {
                 apiService: ApiManager.shared,
                 userService: UserManager.shared,
                 interestService: InterestManager.shared,
-                addressService: AddressManager.shared
+                addressService: AddressManager.shared,
+                roleSkillsService: RoleSkillsManager.shared
               )
               controller.modalPresentationStyle = .fullScreen
               self?.present(controller, animated: true)

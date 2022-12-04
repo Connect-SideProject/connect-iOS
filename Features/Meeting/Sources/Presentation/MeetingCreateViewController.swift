@@ -24,8 +24,13 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
   
   enum Height {
     static let titleView: CGFloat = 50
-    static let scrollView: CGFloat = 160 + (UIDevice.current.hasNotch ? 0 : 150)
+    static let scrollView: CGFloat = 400 + (UIDevice.current.hasNotch ? 0 : 150)
+    static let createButton: CGFloat = 41
   }
+  
+  private let titleView = TitleView()
+    .set(title: "모임 만들기")
+    .setLeftBtn(type: .back)
   
   private let typeContainerView = DescriptionContainerView(
     type: .custom(
@@ -64,7 +69,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
     type: .custom(
       .init(
         title: "모집인원",
-        castableView: CastableButton(type: .downwordArrow("역할"))
+        castableView: CastableButton(type: .downwordArrow("역할 및 인원"))
       )
     )
   )
@@ -136,6 +141,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
   
   private let interestButtonRelay = PublishRelay<String>()
   private let dateButtonRelay = PublishRelay<String>()
+  private let roleAndPeopleRelay = PublishRelay<String>()
   private let locationButtonRelay = PublishRelay<String>()
   
   public var disposeBag = DisposeBag()
@@ -156,21 +162,20 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
     
     containerScrollView.pin
       .all()
-      .layout()
-    
-    containerScrollView.contentSize = .init(
-      width: view.bounds.size.width,
-      height: view.bounds.size.height + Height.scrollView
-    )
     
     flexContainer.pin
       .width(of: view)
-      .height(containerScrollView.contentSize.height)
-      .top()
+      .height(of: view)
+      .top(UIApplication.keyWindow?.safeAreaInsets.top ?? 0)
       .left().right()
       .layout()
     
-    flexContainer.flex.layout()
+    flexContainer.flex.layout(mode: .adjustHeight)
+    
+    containerScrollView.contentSize = .init(
+      width: flexContainer.bounds.size.width,
+      height: flexContainer.bounds.size.height + Height.scrollView
+    )
     
     navigationController?.setNavigationBarHidden(false, animated: false)
   }
@@ -179,6 +184,11 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
     
     interestContainerView.buttonHandlerRelay
       .map { Reactor.Action.didTapInterestButton }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    peopleContainerView.buttonHandlerRelay
+      .map { Reactor.Action.didTapRoleAndPeopleButton }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
@@ -213,6 +223,13 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
                 }
               case let .date(dateRange):
                 self?.dateButtonRelay.accept(dateRange.description)
+              case let .roleAndCount(items):
+                let string = items
+                  .sorted { $0.id < $1.id }
+                  .map { "\($0.role): \($0.count) /" }
+                  .reduce("", +)
+                
+                self?.roleAndPeopleRelay.accept(string)
               default:
                 break
               }
@@ -228,17 +245,23 @@ private extension MeetingCreateViewController {
   func configureUI() {
     view.backgroundColor = .white
     
-    containerScrollView.addSubview(flexContainer)
-    
-    view.addSubview(containerScrollView)
+    view.addSubview(flexContainer)
     
     flexContainer.flex
+      .define { flex in
+        flex.addItem(titleView)
+          .height(Height.titleView)
+        
+        flex.addItem(containerScrollView)
+      }
+    
+    containerScrollView.flex
       .paddingHorizontal(20)
       .define { flex in
-        
         [typeContainerView,
          wayContainerView,
          interestContainerView,
+         peopleContainerView,
          dateContainerView,
          locationContainerView,
          titleContainerView,
@@ -246,17 +269,26 @@ private extension MeetingCreateViewController {
          commentContainerView
         ].forEach {
           flex.addItem($0)
-            .marginBottom(18)
+            .marginVertical(18)
+          flex.separator(
+            direction: .vertical,
+            value: 1,
+            backgroundColor: .hexF9F9F9
+          )
         }
         
         flex.addItem(createButton)
-          .height(41)
+          .height(Height.createButton)
       }
   }
   
   func bindEvent() {
     interestButtonRelay
       .bind(to: interestContainerView.castableButtonRelay)
+      .disposed(by: disposeBag)
+    
+    roleAndPeopleRelay
+      .bind(to: peopleContainerView.castableButtonRelay)
       .disposed(by: disposeBag)
     
     dateButtonRelay

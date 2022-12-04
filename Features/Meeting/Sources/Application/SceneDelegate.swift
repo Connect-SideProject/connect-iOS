@@ -26,7 +26,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
       apiService: ApiManaerStub(),
       userService: UserManagerStub(),
       interestService: InterestManagerStub(isExists: true),
-      addressService: AddressManager.shared
+      addressService: AddressManager.shared,
+      roleSkillsService: RoleSkillsManager.shared
     )
     window?.rootViewController = controller
     window?.makeKeyAndVisible()

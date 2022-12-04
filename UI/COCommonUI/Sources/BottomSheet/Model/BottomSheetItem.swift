@@ -32,3 +32,31 @@ public struct DateRange: CustomStringConvertible {
   public var start: Date?
   public var end: Date?
 }
+
+public struct BottomSheetRoleItem {
+  public let roles: [String]
+  public var items: [RoleAndCountItem] = []
+  
+  public init(roles: [String], items: [RoleAndCountItem] = []) {
+    self.roles = roles
+    self.items = items
+  }
+}
+
+public extension BottomSheetRoleItem {
+  mutating func updateItems(_ items: [RoleAndCountItem]) {
+    self.items = items
+  }
+}
+
+public struct RoleAndCountItem: Identifiable {
+  public var id: Int
+  public var role: String
+  public var count: Int
+  
+  public init(id: Int = 0, role: String = "", count: Int = 0) {
+    self.id = id
+    self.role = role
+    self.count = count
+  }
+}

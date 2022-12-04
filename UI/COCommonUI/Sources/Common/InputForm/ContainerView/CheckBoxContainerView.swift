@@ -1,5 +1,5 @@
 //
-//  CheckBoxView.swift
+//  CheckBoxContainerView.swift
 //  COCommonUI
 //
 //  Created by sean on 2022/09/12.
@@ -38,7 +38,11 @@ public final class CheckBoxContainerView: UIView, CastableView {
   private let direction: CheckBoxContainerDirection
   private let eventType: CheckBoxContainerEventType
   
-  public init(titles: [String], direction: CheckBoxContainerDirection = .horizontal, eventType: CheckBoxContainerEventType = .default) {
+  public init(
+    titles: [String],
+    direction: CheckBoxContainerDirection = .horizontal,
+    eventType: CheckBoxContainerEventType = .default
+  ) {
     self.direction = direction
     self.eventType = eventType
     super.init(frame: .zero)

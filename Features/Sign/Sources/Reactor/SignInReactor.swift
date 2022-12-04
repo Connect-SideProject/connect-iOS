@@ -93,6 +93,7 @@ public final class SignInReactor: Reactor, ErrorHandlerable {
 private extension SignInReactor {
   func signInProcess(authType: AuthType, accessToken: String) -> Observable<Mutation> {
     return useCase.signIn(authType: authType, accessToken: accessToken)
+      .debug()
       .flatMap { [weak self] profile -> Observable<Mutation> in
         self?.userService.update(tokens: nil, profile: profile)
         return .just(.setRoute(.home))

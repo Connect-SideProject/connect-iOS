@@ -81,7 +81,6 @@ public class DescriptionContainerView: UIView {
   }
   
   public private(set) var customView: CastableView?
-  private var customViews: [CastableView]?
   
   private let noticeTextLabel = UILabel().then {
     $0.font = .regular(size: 12)
@@ -94,9 +93,13 @@ public class DescriptionContainerView: UIView {
   private var type: DescriptionType = .textField(.init())
   
   private var disposeBag = DisposeBag()
+  
   public var castableButtonRelay = PublishRelay<String>()
+  public var multipleCastableButtonRelay = PublishRelay<(Int, String)>()
   public var updateRoundSelectionButtonRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  
   public var buttonHandlerRelay = PublishRelay<Void>()
+  public var multipleButtonHandlerRelay = PublishRelay<Int>()
   
   public override func layoutSubviews() {
     super.layoutSubviews()
@@ -162,6 +165,7 @@ private extension DescriptionContainerView {
             flex.addItem(containerView)
           } else {
             flex.addItem(customView)
+              .grow(1)
               .height(36)
           }
         } else {
@@ -197,6 +201,13 @@ private extension DescriptionContainerView {
       }
     }.disposed(by: disposeBag)
     
+    multipleCastableButtonRelay
+      .bind { [weak self] in
+        if let multipleButton = self?.customView as? MultipleButtonCastableView {
+          multipleButton.buttons[$0.0].setTitle($0.1, for: .normal)
+        }
+      }.disposed(by: disposeBag)
+    
     updateRoundSelectionButtonRelay.bind { [weak self] type in
       if let containerView = self?.customView as? CastableContainerView {
         
@@ -217,6 +228,12 @@ private extension DescriptionContainerView {
     if let button = customView as? CastableButton {
       button.handler = { [weak self] in
         self?.buttonHandlerRelay.accept(())
+      }
+    }
+    
+    if let multipleButton = customView as? MultipleButtonCastableView {
+      multipleButton.handler = { [weak self] in
+        self?.multipleButtonHandlerRelay.accept($0)
       }
     }
   }
