@@ -69,7 +69,7 @@ public extension TitleView {
     typealias ButtonAction = (() -> Void)
     
     enum BtnType {
-        case back, pin, star, alert, search, menu
+        case back, pin, star, alert, search, menu, share
         
         var image: UIImage? {
             var img: UIImage?
@@ -80,6 +80,7 @@ public extension TitleView {
             case .alert: img = COCommonUIAsset.icTitleAlert.image
             case .search: img = COCommonUIAsset.icTitleSearch.image
             case .menu: img = COCommonUIAsset.icTitleKebabMenu.image
+            case .share: img = COCommonUIAsset.icTitleShare.image
             }
             return img
         }
