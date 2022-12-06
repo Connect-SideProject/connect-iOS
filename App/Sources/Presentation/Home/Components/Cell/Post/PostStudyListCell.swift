@@ -8,10 +8,12 @@
 import UIKit
 import Then
 import SnapKit
+
 import ReactorKit
+import RxCocoa
 
 
-final class PostStduyListCell: UITableViewCell {
+final class PostStduyListCell: UICollectionViewCell {
     
     
     //MARK: Property
@@ -85,8 +87,8 @@ final class PostStduyListCell: UITableViewCell {
     
     
     //MARK: initalization
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    override init(frame: CGRect) {
+        super.init(frame: .zero)
         configure()
     }
     
@@ -113,23 +115,18 @@ final class PostStduyListCell: UITableViewCell {
         }
         
         postStateView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(14)
-            $0.left.equalToSuperview().offset(20)
+            $0.top.equalToSuperview().offset(15)
+            $0.left.equalToSuperview().offset(15)
             $0.height.equalTo(18)
-            $0.centerY.equalToSuperview()
         }
         
         postStateTitleLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(3)
-            $0.width.equalTo(30)
-            $0.height.equalTo(12)
-            $0.center.equalToSuperview()
+            $0.edges.equalToSuperview().inset(3)
         }
         
         postTitleLabel.snp.makeConstraints {
             $0.top.equalTo(postStateView)
             $0.left.equalTo(postStateView.snp.right).offset(10)
-            $0.centerY.equalToSuperview()
             $0.height.equalTo(19)
         }
         
@@ -146,8 +143,7 @@ final class PostStduyListCell: UITableViewCell {
         postExplanationLabel.snp.makeConstraints {
             $0.top.equalTo(postStateView.snp.bottom).offset(8)
             $0.left.equalTo(postStateView)
-            $0.height.equalTo(17)
-            $0.centerY.equalToSuperview()
+            $0.right.equalToSuperview().offset(-16)
         }
         
         postMemberImageView.snp.makeConstraints {
@@ -157,9 +153,9 @@ final class PostStduyListCell: UITableViewCell {
         }
         
         postMemberLabel.snp.makeConstraints {
-            $0.left.equalTo(postMemberLabel.snp.right).offset(5)
+            $0.left.equalTo(postMemberImageView.snp.right).offset(5)
             $0.height.equalTo(14)
-            $0.centerY.equalToSuperview()
+            $0.centerY.equalTo(postMemberImageView)
         }
         
         
@@ -176,6 +172,57 @@ extension PostStduyListCell: ReactorKit.View {
     
     func bind(reactor: Reactor) {
         
+        reactor.state
+            .map { $0.postModel.contentStudyTitle }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd }
+            .observe(on: MainScheduler.instance)
+            .do(onNext: { _ in
+                self.postStateTitleLabel.text = "모집중"
+            }).map { _ in UIColor.hex05A647 }
+            .bind(to: postStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd == false }
+            .observe(on: MainScheduler.instance)
+            .do(onNext: { _ in
+                self.postStateTitleLabel.text = "모집완료"
+            }).map { _ in UIColor.hex8E8E8E }
+            .bind(to: postStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.postModel.contentStudyInfo}
+            .observe(on: MainScheduler.instance)
+            .bind(to: postExplanationLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.postModel.contentStudyParts.map { parts -> String in
+                switch parts.contentStudyRole {
+                case "DEV":
+                    return "개발자"
+                case "DESIGN":
+                    return "디자이너"
+                case "PM":
+                    return "기획자"
+                case "MAK":
+                    return "마케터"
+                default:
+                    return ""
+                }
+            }.toStringWithVeticalBar}
+            .observe(on: MainScheduler.instance)
+            .bind(to: postMemberLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        
+            
         
         
     }

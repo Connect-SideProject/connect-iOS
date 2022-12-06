@@ -31,21 +31,23 @@ public final class PostListController: UIViewController {
     private lazy var  postFilterHeaderView: PostFilterHeaderView = PostFilterHeaderView(reactor: PostFilterReactor(bottomSheetItem: self.reactor?.currentState.bottomSheetItem ?? []))
     
     
-    private let postTableView: UITableView = UITableView().then {
+    private let postCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
+        $0.scrollDirection = .vertical
+    }).then {
         $0.showsHorizontalScrollIndicator = false
         $0.showsVerticalScrollIndicator = true
         $0.backgroundColor = .hexF9F9F9
-        $0.register(PostStduyListCell.self, forCellReuseIdentifier: "PostStduyListCell")
+        $0.register(PostStduyListCell.self, forCellWithReuseIdentifier: "PostStduyListCell")
     }
     
-    private let postDataSource: RxTableViewSectionedReloadDataSource<PostViewSection>
+    private let postDataSource: RxCollectionViewSectionedReloadDataSource<PostViewSection>
     
-    private static func postSourceFactory() -> RxTableViewSectionedReloadDataSource<PostViewSection> {
+    private static func postSourceFactory() -> RxCollectionViewSectionedReloadDataSource<PostViewSection> {
         return .init(configureCell: { dataSource, tableView, indexPath, sectionItem in
             
             switch sectionItem {
             case let .postList(cellReactor):
-                guard let postListCell = tableView.dequeueReusableCell(withIdentifier: "PostStduyListCell", for: indexPath) as? PostStduyListCell else { return UITableViewCell() }
+                guard let postListCell = tableView.dequeueReusableCell(withReuseIdentifier: "PostStduyListCell", for: indexPath) as? PostStduyListCell else { return UICollectionViewCell() }
                 
                 postListCell.reactor = cellReactor
                 
@@ -92,7 +94,7 @@ public final class PostListController: UIViewController {
         
         self.view.backgroundColor = .white
         
-        _ = [postListIndicatorView, postFilterHeaderView ,postTableView].map {
+        _ = [postListIndicatorView, postFilterHeaderView ,postCollectionView].map {
             self.view.addSubview($0)
         }
         
@@ -107,7 +109,7 @@ public final class PostListController: UIViewController {
             $0.width.height.equalTo(24)
         }
         
-        postTableView.snp.makeConstraints {
+        postCollectionView.snp.makeConstraints {
             $0.top.equalTo(postFilterHeaderView.snp.bottom)
             $0.left.right.bottom.equalToSuperview()
         }
@@ -129,11 +131,21 @@ extension PostListController: ReactorKit.View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        self.postCollectionView.rx
+            .setDelegate(self)
+            .disposed(by: disposeBag)
+        
         reactor.state
             .map { $0.bottomSheetItem }
             .bind { item in
                 PostFilterTransform.event.onNext(.responseSheetItem(item: item))
             }.disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.section }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postCollectionView.rx.items(dataSource: self.postDataSource))
+            .disposed(by: disposeBag)
         
     }
     
@@ -168,4 +180,23 @@ extension PostListController: PostCoordinatorDelegate {
         }
     }
     
+}
+
+
+
+
+extension PostListController: UICollectionViewDelegateFlowLayout {
+    
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.frame.size.width - 40, height: 97)
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+    }
+    
+    
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 8
+    }
 }
