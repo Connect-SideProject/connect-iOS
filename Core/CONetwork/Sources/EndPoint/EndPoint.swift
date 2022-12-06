@@ -90,6 +90,12 @@ public extension EndPoint {
     case .serchPlace(let query):
       components.host = "dapi.kakao.com"
       components.queryItems = [URLQueryItem(name: "query", value: query)]
+    case let .search(query):
+        if let queryItems = query {
+            _ = queryItems.map {
+                components.queryItems?.append(URLQueryItem(name: $0.key, value: $0.value))
+            }
+        }
     default:
       break
     }

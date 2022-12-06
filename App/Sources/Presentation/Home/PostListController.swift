@@ -20,7 +20,7 @@ public final class PostListController: UIViewController {
     
     //MARK: Property
     
-    public typealias Reactor = PostListReactor
+    public typealias Reactor = PostListViewReactor
     
     public var disposeBag: DisposeBag = DisposeBag()
     
@@ -38,12 +38,20 @@ public final class PostListController: UIViewController {
         $0.register(PostStduyListCell.self, forCellReuseIdentifier: "PostStduyListCell")
     }
     
-    private let postDataSource: RxTableViewSectionedReloadDataSource<PostSection>
+    private let postDataSource: RxTableViewSectionedReloadDataSource<PostViewSection>
     
-    private static func postSourceFactory() -> RxTableViewSectionedReloadDataSource<PostSection> {
+    private static func postSourceFactory() -> RxTableViewSectionedReloadDataSource<PostViewSection> {
         return .init(configureCell: { dataSource, tableView, indexPath, sectionItem in
-            guard let postListCell = tableView.dequeueReusableCell(withIdentifier: "PostStduyListCell", for: indexPath) as? PostStduyListCell else { return UITableViewCell() }
-            return postListCell
+            
+            switch sectionItem {
+            case let .postList(cellReactor):
+                guard let postListCell = tableView.dequeueReusableCell(withIdentifier: "PostStduyListCell", for: indexPath) as? PostStduyListCell else { return UITableViewCell() }
+                
+                postListCell.reactor = cellReactor
+                
+                return postListCell
+                
+            }
         })
     }
     

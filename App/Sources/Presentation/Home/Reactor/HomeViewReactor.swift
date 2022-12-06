@@ -88,12 +88,13 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             ])))
             
             guard let region = UserManager.shared.profile?.region?.description else { return .empty() }
-            let homeNewsParameter: HomeNewsParameter = .init(area: region)
+            let homeNewsParameter: HomeNewsParameter = .init(area: "서울시" + region)
             
                         
             return .concat(
                 startLoading,
                 homeRepository.responseHomeMenuItem(),
+
                 setMenuItems,
                 homeRepository.responseHomeNewsItem(paramenter: homeNewsParameter).catchAndReturn(Mutation.setHomeNewsItem([])),
                 homeRepository.responseHomeReleaseItem(),

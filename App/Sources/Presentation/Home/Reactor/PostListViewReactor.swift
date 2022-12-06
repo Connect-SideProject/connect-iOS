@@ -26,7 +26,7 @@ public enum PostFilterTransform: TransformType, Equatable {
     case none
 }
 
-public final class PostListReactor: Reactor, ErrorHandlerable {
+public final class PostListViewReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
         case viewDidLoad
@@ -36,12 +36,14 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
         var isLoading: Bool
         var isError: COError?
         var bottomSheetItem: [BottomSheetItem]
+        var section: [PostViewSection]
     }
     
     public enum Mutation {
         case setLoading(Bool)
         case setPostError(COError?)
         case setPostSheetItem([String])
+        case setPostListItem(PostAllList)
     }
     
     public var initialState: State
@@ -54,7 +56,13 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
     init(postRepository: PostListRepository) {
         defer { _ = self.state }
         self.postRepository = postRepository
-        self.initialState = State(isLoading: false, bottomSheetItem: [])
+        self.initialState = State(
+            isLoading: false,
+            bottomSheetItem: [],
+            section: [
+                .post([])
+            ]
+        )
     }
     
     
@@ -64,8 +72,10 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             
+            
             return .concat(
                 startLoading,
+                postRepository.responsePostListItem(parameter: nil),
                 postRepository.responsePostSheetItem(),
                 endLoading
             )
@@ -96,7 +106,31 @@ public final class PostListReactor: Reactor, ErrorHandlerable {
             newState.bottomSheetItem = bottomSheetItems
             print("set Bottom Sheet Item: \(items)")
             return newState
+        case let .setPostListItem(items):
+            var newState = state
+            let postAllIndex = self.getIndex(section: .post([]))
+            print("Post All List Items: \(items)")
+            newState.section[postAllIndex] = postRepository.responsePostListSectionItem(item: items.postList)
+            return newState
         }
     }
+    
+}
+
+
+
+private extension PostListViewReactor {
+    func getIndex(section: PostViewSection) -> Int {
+        var index: Int = 0
+        
+        for i in 0 ..< self.currentState.section.count {
+            if self.currentState.section[i].getSectionType() == section.getSectionType() {
+                index = i
+            }
+        }
+        
+        return index
+    }
+    
     
 }

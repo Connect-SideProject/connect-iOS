@@ -14,7 +14,7 @@ public struct HomeBookMarkList: Codable {
     
     enum CodingKeys: String, CodingKey {
         case bookMarkId = "id"
-        case bookMarkCount
+        case bookMarkCount = "bookmarkCount"
     }
 
 }

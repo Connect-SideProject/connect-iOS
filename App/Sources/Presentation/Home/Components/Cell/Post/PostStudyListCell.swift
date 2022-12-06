@@ -8,13 +8,18 @@
 import UIKit
 import Then
 import SnapKit
-
+import ReactorKit
 
 
 final class PostStduyListCell: UITableViewCell {
     
     
     //MARK: Property
+    
+    typealias Reactor = PostListCellReactor
+    
+    var disposeBag: DisposeBag = DisposeBag()
+    
     
     private let postContainerView: UIView = UIView().then {
         $0.backgroundColor = .white
@@ -162,4 +167,16 @@ final class PostStduyListCell: UITableViewCell {
     }
     
     
+}
+
+
+
+extension PostStduyListCell: ReactorKit.View {
+    
+    
+    func bind(reactor: Reactor) {
+        
+        
+        
+    }
 }

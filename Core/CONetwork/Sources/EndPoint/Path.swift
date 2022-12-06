@@ -16,6 +16,7 @@ public enum Path {
   case signIn(AuthType, String)
   case signUp(SignUpParameter, String)
   case serchPlace(String)
+  case search([String:String]?)
   case uploadProfileImage(Data)
   case userProfile
   case homeMenu
@@ -47,6 +48,8 @@ public enum Path {
       return "/api/study/hots"
     case let .homeBookMark(id):
         return "/api/study/\(id)/bookmark"
+    case .search:
+        return "/api/study/search"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:

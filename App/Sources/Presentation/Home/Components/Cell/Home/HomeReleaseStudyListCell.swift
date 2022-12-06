@@ -288,7 +288,6 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         
-        //TODO: id field 값 추가시 Select Cell 구분 filter 추가
         reactor.state
             .filter { $0.bookMarkModel?.bookMarkId == $0.releaseModel.id  }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }

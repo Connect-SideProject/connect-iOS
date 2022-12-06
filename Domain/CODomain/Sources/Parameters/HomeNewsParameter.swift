@@ -14,7 +14,7 @@ public struct HomeNewsParameter: Parameterable {
     var studyType: String?
     
     enum CodingKeys: String, CodingKey {
-        case area = "area2"
+        case area = "area"
         case studyType
     }
     
