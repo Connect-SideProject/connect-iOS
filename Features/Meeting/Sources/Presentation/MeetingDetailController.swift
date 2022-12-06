@@ -24,8 +24,9 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
             guard let self = self else { return }
             $0.addItem(self.titleView)
                 .height(50)
+            
             $0.addItem(self.topArea)
-                .height(128)
+            
             $0.addItem(self.tableView)
                 .grow(1)
         }
