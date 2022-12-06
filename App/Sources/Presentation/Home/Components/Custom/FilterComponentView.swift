@@ -82,10 +82,12 @@ private extension FilterComponentViewReactor {
     func didTapBottomSheetTransform(from event: PostFilterTransform.Event) -> Observable<Mutation> {
         let currentState = self.currentState.filterType
         switch event {
-        case let .didTapOnOffLineSheet(text, _):
+        case let .didTapOnOffLineSheet(text):
             guard currentState == .onOffLine(.default) else { return .empty() }
             print("Transoform bottomSheet \(currentState)")
-            return .just(.setOnOffLineFilter(text))
+            return .concat(
+                .just(.setOnOffLineFilter(text))
+            )
             
         case let .didTapAligmentSheet(text):
             guard currentState == .aligment(.default) else { return .empty() }

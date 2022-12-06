@@ -16,7 +16,7 @@ import CODomain
 
 public enum PostFilterTransform: TransformType, Equatable {
     enum Event {
-        case didTapOnOffLineSheet(text: String, completion: (() -> Void)?)
+        case didTapOnOffLineSheet(text: String)
         case didTapAligmentSheet(text: String)
         case didTapStudyTypeSheet(text: String)
         case didTapInterestSheet(text: String)
@@ -30,6 +30,8 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
         case viewDidLoad
+        case didTapOnOffLine(String)
+        case didTapStudyType(String)
     }
     
     public struct State {
@@ -48,6 +50,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
     
     public var initialState: State
     private let postRepository: PostListRepository
+    private var postParameter: [String: String] = [:]
     
     public var errorHandler: (Error) -> Observable<Mutation> = { error in
         return .just(.setPostError(error.asCOError))
@@ -79,7 +82,34 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
                 postRepository.responsePostSheetItem(),
                 endLoading
             )
+        case let .didTapOnOffLine(meetingItem):
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            postParameter.updateValue(meetingItem, forKey: "meetingType")
+            return .concat(
+                startLoading,
+                postRepository.responsePostListItem(parameter: postParameter),
+                endLoading
+            )
+        case let .didTapStudyType(studyItem):
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            postParameter.updateValue(studyItem, forKey: "studyType")
+            print("postParameter: \(postParameter)")
+            return .concat(
+                startLoading,
+                postRepository.responsePostListItem(parameter: postParameter),
+                endLoading
+            )
         }
+    }
+    
+    public func transform(action: Observable<Action>) -> Observable<Action> {
+        let fromSheetAction = PostFilterTransform.event.flatMap { [weak self] event in
+            self?.didTapSheetAction(from: event) ?? .empty()
+        }
+        
+        return Observable.of(action, fromSheetAction).merge()
     }
     
     
@@ -132,5 +162,15 @@ private extension PostListViewReactor {
         return index
     }
     
+    
+    func didTapSheetAction(from event: PostFilterTransform.Event) -> Observable<Action> {
+        switch event {
+        case let .didTapStudyTypeSheet(text):
+            print("Action DIdTapSheet: \(text)")
+            return .just(.didTapStudyType(text))
+        default:
+            return .empty()
+        }
+    }
     
 }

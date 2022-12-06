@@ -94,6 +94,7 @@ public extension EndPoint {
         if let queryItems = query {
             _ = queryItems.map {
                 components.queryItems?.append(URLQueryItem(name: $0.key, value: $0.value))
+                print("queryItem: \(queryItems) or components: \(components)")
             }
         }
     default:

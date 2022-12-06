@@ -162,9 +162,7 @@ extension PostListController: PostCoordinatorDelegate {
             case let .confirm(_, text):
                 switch type {
                 case .onOffLine:
-                    PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: text, completion: {
-                        //TODO: 서버 통신 Action Transfrom 추가
-                    }))
+                    PostFilterTransform.event.onNext(.didTapOnOffLineSheet(text: text))
                 case .interest:
                     PostFilterTransform.event.onNext(.didTapInterestSheet(text: text))
                 case .studyType:

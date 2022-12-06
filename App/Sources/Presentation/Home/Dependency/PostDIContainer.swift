@@ -50,7 +50,7 @@ public enum MeetingType: String, Equatable {
     case offline = "OFFLINE"
     case none = ""
     
-    func getMeetingType(_ type: String?) -> String {
+    static func getMeetingType(_ type: String?) -> String {
         switch type {
         case "온라인":
             return MeetingType.online.rawValue
@@ -70,7 +70,7 @@ public enum StudyType: String, Equatable {
     case project = "PROJECT"
     case none = ""
     
-    func getStudyType(_ type: String?) -> String {
+    static func getStudyType(_ type: String?) -> String {
         switch type {
         case "스터디":
             return StudyType.study.rawValue
