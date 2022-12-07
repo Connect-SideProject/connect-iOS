@@ -75,7 +75,7 @@ public final class HomeController: UIViewController {
         return studyMenuCell
         
     case let .homeStudyList(cellReactor):
-        guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return HomeStudyEmptyCell() }
+        guard let studyListCell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeStudyListCell", for: indexPath) as? HomeStudyListCell else { return UICollectionViewCell() }
         studyListCell.reactor = cellReactor
         return studyListCell
     }
@@ -124,7 +124,6 @@ public final class HomeController: UIViewController {
         $0.register(HomeCategoryCell.self, forCellWithReuseIdentifier: "HomeCategoryCell")
         $0.register(HomeStudyMenuCell.self, forCellWithReuseIdentifier: "HomeStudyMenuCell")
         $0.register(HomeStudyListCell.self, forCellWithReuseIdentifier: "HomeStudyListCell")
-        $0.register(HomeStudyEmptyCell.self, forCellWithReuseIdentifier: "HomeStudyEmptyCell")
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
         $0.backgroundColor = .white
@@ -283,6 +282,11 @@ extension HomeController: ReactorKit.View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        self.rx.viewWillAppear
+            .map { _ in Reactor.Action.viewWillAppear }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         bindCollectionView(reactor: reactor)
         
         reactor.state.map { $0.isLoading }
@@ -380,7 +384,17 @@ extension HomeController: UICollectionViewDelegateFlowLayout {
             case .homeStudyMenu:
                 return CGSize(width: 60, height: 40)
             case .homeStudyList:
-                return CGSize(width: collectionView.frame.size.width - 40, height: 97)
+                if self.dataSource[indexPath.section].items.count == 1 {
+                    self.collectionView.snp.updateConstraints {
+                        $0.height.equalTo(500)
+                    }
+                    return CGSize(width: collectionView.frame.size.width - 40, height: 147)
+                } else {
+                    self.collectionView.snp.updateConstraints {
+                        $0.height.equalTo(650)
+                    }
+                    return CGSize(width: collectionView.frame.size.width - 40, height: 97)
+                }
             }
         } else {
             switch self.releaseDataSource[indexPath] {

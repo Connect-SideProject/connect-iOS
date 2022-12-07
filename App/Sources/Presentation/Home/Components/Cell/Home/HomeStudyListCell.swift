@@ -22,7 +22,7 @@ public final class HomeStudyListReactor: Reactor {
     }
 
     public struct State {
-        var studyNewsModel: HomeStudyList
+        var studyNewsModel: HomeStudyList?
         var studyNewsBookMarkModel: HomeBookMarkList?
     }
     
@@ -31,9 +31,9 @@ public final class HomeStudyListReactor: Reactor {
     }
     
     public let initialState: State
-    private let homeNewsRepo: HomeViewRepo
+    private let homeNewsRepo: HomeViewRepo?
     
-    init(studyNewsModel: HomeStudyList, homeNewsRepo: HomeViewRepo) {
+    init(studyNewsModel: HomeStudyList?, homeNewsRepo: HomeViewRepo?) {
         defer { _ = self.state }
         self.initialState = State(studyNewsModel: studyNewsModel)
         self.homeNewsRepo = homeNewsRepo
@@ -43,9 +43,9 @@ public final class HomeStudyListReactor: Reactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case let .didTapNewsBookMark(id):
-            let newsBookMarkMutaion = homeNewsRepo.requestHomeNewsBookMarkItem(id: id)
+            let newsBookMarkMutaion = homeNewsRepo?.requestHomeNewsBookMarkItem(id: id)
             
-            return newsBookMarkMutaion
+            return newsBookMarkMutaion ?? .empty()
         }
     }
 
@@ -73,6 +73,8 @@ final class HomeStudyListCell: UICollectionViewCell {
     typealias Reactor = HomeStudyListReactor
     
     var disposeBag: DisposeBag = DisposeBag()
+    
+    private lazy var emptyView: HomeEmptyView = HomeEmptyView()
     
     private let studyListContainerView: UIView = UIView().then {
         $0.backgroundColor = UIColor.white
@@ -152,8 +154,8 @@ final class HomeStudyListCell: UICollectionViewCell {
 
         studyListStateView.addSubview(studyListStateLabel)
         studyBookMarkView.addSubview(studyBookMarkImageView)
-        
         self.contentView.addSubview(studyListContainerView)
+        self.contentView.addSubview(emptyView)
         
         _ = [studyListStateView,studyListTitleLabel,studyListSubTitleLabel,studyMemberImageView,studyMemberStateLabel,studyBookMarkView].map {
             studyListContainerView.addSubview($0)
@@ -208,6 +210,10 @@ final class HomeStudyListCell: UICollectionViewCell {
             $0.centerY.equalTo(studyMemberImageView)
         }
         
+        emptyView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
     }
     
     
@@ -220,19 +226,20 @@ extension HomeStudyListCell: ReactorKit.View {
     func bind(reactor: Reactor) {
         
         reactor.state
-            .map { $0.studyNewsModel.studyNewsTitle}
-            .observe(on: MainScheduler.instance)
+            .compactMap { $0.studyNewsModel}
+            .map { $0.studyNewsTitle }
             .bind(to: studyListTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
-            .map { $0.studyNewsModel.studyNewsInfo }
-            .observe(on: MainScheduler.instance)
+            .compactMap { $0.studyNewsModel }
+            .map { $0.studyNewsInfo }
             .bind(to: studyListSubTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.studyNewsModel.studyNewsIsEnd }
+            .compactMap { $0.studyNewsModel}
+            .filter { $0.studyNewsIsEnd }
             .observe(on: MainScheduler.instance)
             .do(onNext: { _ in
                 self.studyListStateLabel.text = "모집중"
@@ -241,7 +248,7 @@ extension HomeStudyListCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.studyNewsModel.studyNewsIsEnd == false }
+            .filter { $0.studyNewsModel?.studyNewsIsEnd == false }
             .observe(on: MainScheduler.instance)
             .do(onNext: { _ in
                 self.studyListStateLabel.text = "모집완료"
@@ -250,7 +257,7 @@ extension HomeStudyListCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         reactor.state
-            .map { $0.studyNewsModel.studyNewsParts.map { studyParts -> String in
+            .compactMap { $0.studyNewsModel?.studyNewsParts.map { studyParts -> String in
                 
                 switch studyParts.studyRole {
                 case "DEV":
@@ -269,7 +276,7 @@ extension HomeStudyListCell: ReactorKit.View {
             .bind(to: studyMemberStateLabel.rx.text)
             .disposed(by: disposeBag)
         
-        guard let bookMarkId = self.reactor?.currentState.studyNewsModel.id else { return }
+        guard let bookMarkId = self.reactor?.currentState.studyNewsModel?.id else { return }
         
         studyBookMarkView.rx
             .tapGesture()
@@ -280,13 +287,33 @@ extension HomeStudyListCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.studyNewsBookMarkModel?.bookMarkId == $0.studyNewsModel.id }
+            .compactMap { $0.studyNewsModel }
+            .filter { $0.studyNewsMyBookMark }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
             .observe(on: MainScheduler.instance)
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         
+        reactor.state
+            .compactMap { $0.studyNewsModel }
+            .filter { $0.studyNewsMyBookMark == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: studyBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+            
         
+        reactor.state
+            .filter { $0.studyNewsBookMarkModel?.bookMarkId == $0.studyNewsModel?.id }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: studyBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.studyNewsModel?.id != nil }
+            .bind(to: emptyView.rx.isHidden)
+            .disposed(by: disposeBag)
         
     }
     

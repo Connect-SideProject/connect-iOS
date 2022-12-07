@@ -82,12 +82,32 @@ public enum StudyType: String, Equatable {
     }
 }
 
+public enum AligmentType: String, Equatable {
+    
+    case fame = "FAME"
+    case distance = "DISTANCE"
+    case none = ""
+    
+    static func getAligmentType(_ type: String?) -> String {
+        switch type {
+        case "인기순":
+            return AligmentType.fame.rawValue
+        case "거리순":
+            return AligmentType.distance.rawValue
+        default:
+            return AligmentType.none.rawValue
+        }
+    }
+}
+
+
 
 //MARK: Repository
 public protocol PostListRepository {
     func responsePostSheetItem() -> Observable<PostListViewReactor.Mutation>
     func responsePostListSectionItem(item: [PostContentList]) -> PostViewSection
     func responsePostListItem(parameter: [String: String]?) -> Observable<PostListViewReactor.Mutation>
+    func requestPostBookMarkItem(id: String) -> Observable<PostListCellReactor.Mutation>
     
 }
 
@@ -116,7 +136,7 @@ final class PostListRepo: PostListRepository {
         var postAllSectionItem: [PostSectionItem] = []
         
         for i in 0 ..< item.count {
-            postAllSectionItem.append(.postList(PostListCellReactor(postModel: item[i])))
+            postAllSectionItem.append(.postList(PostListCellReactor(postModel: item[i], postListRepo: self)))
         }
         
         return PostViewSection.post(postAllSectionItem)
@@ -132,6 +152,16 @@ final class PostListRepo: PostListRepository {
         return createPostItemResponse
     }
     
+    
+    func requestPostBookMarkItem(id: String) -> Observable<PostListCellReactor.Mutation> {
+        
+        let createPostBookMarkResponse = postApiService.request(endPoint: .init(path: .homeBookMark(id))).flatMap { (data: HomeBookMarkList) -> Observable<PostListCellReactor.Mutation> in
+            
+            return .just(.setPostBookMarkItems(data))
+        }
+        
+        return createPostBookMarkResponse
+    }
     
     
     

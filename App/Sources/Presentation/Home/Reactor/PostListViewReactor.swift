@@ -35,6 +35,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
         case didTapOnOffType(String)
         case didTapStudyType(String)
         case didTapInterestType(String)
+        case didTapAligmentType(String)
     }
     
     public struct State {
@@ -122,6 +123,18 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
                 postRepository.responsePostListItem(parameter: postParameter),
                 endLoading
             )
+            
+        case let .didTapAligmentType(aligmentItem):
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            postParameter.updateValue(aligmentItem, forKey: "sortOption")
+            
+            return .concat(
+                startLoading,
+                postRepository.responsePostListItem(parameter: postParameter),
+                endLoading
+            )
+            
         case let .updateKeywordItem(keyword):
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
@@ -202,6 +215,8 @@ private extension PostListViewReactor {
             return .just(.didTapStudyType(StudyType.getStudyType(text)))
         case let .didTapInterestSheet(text):
             return .just(.didTapInterestType(text))
+        case let .didTapAligmentSheet(text):
+            return .just(.didTapAligmentType(AligmentType.getAligmentType(text)))
         case let .searchToKeyword(keyword):
             return .just(.updateKeywordItem(keyword))
         default:

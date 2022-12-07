@@ -29,11 +29,12 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
         case viewDidLoad
+        case viewWillAppear
         case updateNewItem(String)
     }
     
     public var errorHandler: (Error) -> Observable<Mutation> = { error in
-        return .just(.setHomeError(error.asCOError))
+        return .just(.setHomeEmptySection(.homeStudyList([.homeStudyList(HomeStudyListReactor(studyNewsModel: nil, homeNewsRepo: nil))])))
     }
     
     private let homeRepository: HomeRepository
@@ -43,6 +44,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
         case setLoading(Bool)
         case setHomeMenuItem([HomeMenuList])
         case setHomeNewsItem([HomeStudyList])
+        case setHomeEmptySection(HomeViewSection)
         case setReleaseItems([HomeHotList])
         case setSubMenuItems(HomeViewSection)
         case setHomeError(COError?)
@@ -99,7 +101,26 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                 startLoading,
                 homeRepository.responseHomeMenuItem(),
                 setMenuItems,
-                homeRepository.responseHomeNewsItem(paramenter: homeParameter).catchAndReturn(Mutation.setHomeNewsItem([])),
+                homeRepository.responseHomeNewsItem(paramenter: homeParameter).catch(errorHandler),
+                homeRepository.responseHomeReleaseItem(),
+                endLoading
+            )
+            
+        case .viewWillAppear:
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            let setMenuItems = Observable<Mutation>.just(.setSubMenuItems(.homeSubMenu([
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .all, isSelected: true)),
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .project, isSelected: false)),
+                .homeStudyMenu(HomeStudyMenuReactor(menuType: .study, isSelected: false))
+            ])))
+            
+                        
+            return .concat(
+                startLoading,
+                homeRepository.responseHomeMenuItem(),
+                setMenuItems,
+                homeRepository.responseHomeNewsItem(paramenter: homeParameter).catch(errorHandler),
                 homeRepository.responseHomeReleaseItem(),
                 endLoading
             )
@@ -175,6 +196,13 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
         case let .setSelectMenuType(menuType):
             var newState = state
             newState.menuType = menuType
+            
+            return newState
+        case let .setHomeEmptySection(section):
+            var newState = state
+            let emptyIndex = self.getIndex(section: .homeStudyList([]))
+            print("empty Mutation")
+            newState.section[emptyIndex] = section
             
             return newState
         }

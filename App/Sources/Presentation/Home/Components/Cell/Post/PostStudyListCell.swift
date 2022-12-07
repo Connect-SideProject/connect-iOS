@@ -8,9 +8,9 @@
 import UIKit
 import Then
 import SnapKit
-
 import ReactorKit
 import RxCocoa
+import RxGesture
 
 
 final class PostStduyListCell: UICollectionViewCell {
@@ -221,8 +221,38 @@ extension PostStduyListCell: ReactorKit.View {
             .bind(to: postMemberLabel.rx.text)
             .disposed(by: disposeBag)
         
+        guard let postBookMarkid = self.reactor?.currentState.postModel.id else { return }
         
             
+        reactor.state
+            .filter { $0.postModel.contentisBookMark  }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisBookMark == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+            
+        
+        postBookMarkContainerView.rx
+            .tapGesture()
+            .when(.recognized)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { _ in Reactor.Action.didTapPostBookMark(String(postBookMarkid))}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postBookMarkItems?.bookMarkId == $0.postModel.id }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select")}
+            .observe(on: MainScheduler.instance)
+            .bind(to: postBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
         
         
     }

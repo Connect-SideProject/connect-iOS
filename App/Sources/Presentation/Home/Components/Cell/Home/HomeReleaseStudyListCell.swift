@@ -216,7 +216,7 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         releaseBookMarkContainerView
             .rx.tapGesture()
             .when(.recognized)
-            .debug("TapGesture relase")
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .map { _ in Reactor.Action.didTapBookMarkButton(String(self.reactor?.currentState.releaseModel.id ?? 1)) }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
