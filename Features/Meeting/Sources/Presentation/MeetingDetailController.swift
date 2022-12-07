@@ -40,6 +40,18 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
         self.rootContainer.flex.margin(safe ?? self.view.safeAreaInsets).layout()
     }
     
+    public override func bind(reactor: Reactor) {
+        self.reload.share()
+            .map { Reactor.Action.reload }
+            .bind(to: reactor.action)
+            .disposed(by: self.disposeBag)
+        
+        reactor.pulse(\.$meetingInfo).share()
+            .compactMap { $0 }
+            .bind(onNext: self.configure(with:))
+            .disposed(by: self.disposeBag)
+    }
+    
     public override func setAttrs() {
         super.setAttrs()
         self.setTitleView()
@@ -51,6 +63,8 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
             .setRightInnerBtn(type: .star)
             .setRightOuterBtn(type: .share)
     }
+    
+    private func configure(with info: MeetingInfo) { }
 }
 
 extension MeetingDetailController {
