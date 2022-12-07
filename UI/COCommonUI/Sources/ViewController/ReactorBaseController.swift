@@ -16,7 +16,7 @@ open class ReactorBaseController<T: ReactorKit.Reactor>: UIViewController, FlexL
     
     public let rootContainer = UIView()
     
-    var reload = PublishRelay<Void>()
+    public var reload = BehaviorRelay<Void>(value: ())
     public var disposeBag: DisposeBag = .init()
     
     public init(reactor: T? = nil) {
