@@ -11,6 +11,8 @@ import RxSwift
 import ReactorKit
 import COCommonUI
 import COExtensions
+import CONetwork
+import CODomain
 
 public final class MeetingDetailController: ReactorBaseController<MeetingDetailController.Reactor> {
     private let titleView = TitleView()
@@ -53,9 +55,41 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
 
 extension MeetingDetailController {
     final public class Reactor: ReactorKit.Reactor {
-        public var initialState = State()
-        public enum Action { }
-        public struct State { }
+        init(id: Int) {
+            self.initialState = .init(id: id)
+        }
+        public var initialState: State
+        public enum Action {
+            case reload
+        }
+        
+        public enum Mutation {
+            case setMeetingInfo(MeetingInfo)
+        }
+        
+        public struct State {
+            var id: Int
+            @Pulse var meetingInfo: MeetingInfo?
+        }
+        
+        public func mutate(action: Action) -> Observable<Mutation> {
+            switch action {
+            case .reload:
+                let meetingInfo = ApiManager.shared
+                    .request(endPoint: .init(path: .meetingDetail(id: self.currentState.id)))
+                    .map(Mutation.setMeetingInfo)
+                return meetingInfo
+            }
+        }
+        
+        public func reduce(state: State, mutation: Mutation) -> State {
+            var new = state
+            switch mutation {
+            case .setMeetingInfo(let info):
+                new.meetingInfo = info
+            }
+            return new
+        }
     }
 }
 
