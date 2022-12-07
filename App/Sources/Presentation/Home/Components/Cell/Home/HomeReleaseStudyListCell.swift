@@ -231,7 +231,6 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd }
-            .observe(on: MainScheduler.instance)
             .do(onNext:{ _ in
                 self.releaseStateLabel.text = "모집중"
             }).map { _ in UIColor.hex05A647 }
@@ -240,7 +239,6 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd == false }
-            .observe(on: MainScheduler.instance)
             .do(onNext:{ _ in
                 self.releaseStateLabel.text = "모집완료"
             }).map { _ in UIColor.hex8E8E8E }

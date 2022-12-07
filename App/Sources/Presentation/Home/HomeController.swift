@@ -324,7 +324,7 @@ extension HomeController {
         reactor.state
             .map { $0.section }
             .debug("Section Item ")
-            .observe(on: MainScheduler.instance)
+            .observe(on: MainScheduler.asyncInstance)
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
         

@@ -66,11 +66,12 @@ public protocol HomeRepository {
     func responseMenuImage(image: HomeMenuList) throws -> Data
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
-    func responseHomeNewsItem(paramenter: [String: String]) -> Observable<HomeViewReactor.Mutation>
+    func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
     func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection
     func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection
     func requestHomeBookMarkItem(id: String) -> Observable<HomeReleaseCellReactor.Mutation>
+    func requestHomeNewsBookMarkItem(id: String) -> Observable<HomeStudyListReactor.Mutation>
 }
 
 
@@ -99,7 +100,7 @@ final class HomeViewRepo: HomeRepository {
         return creteMenuResponse
     }
     
-    func responseHomeNewsItem(paramenter: [String: String]) -> Observable<HomeViewReactor.Mutation> {
+    func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation> {
         let createNewsResponse = homeApiService.request(endPoint: .init(path: .homeNews(paramenter))).flatMap { (data: [HomeStudyList]) -> Observable<HomeViewReactor.Mutation> in
             
             return .just(.setHomeNewsItem(data))
@@ -131,7 +132,7 @@ final class HomeViewRepo: HomeRepository {
     func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection {
         var homeNewsSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
-            homeNewsSectionItem.append(.homeStudyList(HomeStudyListReactor(studyNewsModel: item[i])))
+            homeNewsSectionItem.append(.homeStudyList(HomeStudyListReactor(studyNewsModel: item[i], homeNewsRepo: self)))
         }
         
         return HomeViewSection.homeStudyList(homeNewsSectionItem)
@@ -157,5 +158,14 @@ final class HomeViewRepo: HomeRepository {
             return .just(.updateSelected(data))
         }
         return createBookMarkResponse
+    }
+    
+    func requestHomeNewsBookMarkItem(id: String) -> Observable<HomeStudyListReactor.Mutation> {
+        
+        let createNewsBookMarkResponse = homeApiService.request(endPoint: .init(path: .homeBookMark(id))).flatMap { (data: HomeBookMarkList) -> Observable<HomeStudyListReactor.Mutation> in
+            
+            return .just(.updateNewsBookMark(data))
+        }
+        return createNewsBookMarkResponse
     }
 }

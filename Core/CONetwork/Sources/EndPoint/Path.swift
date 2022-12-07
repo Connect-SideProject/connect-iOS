@@ -20,7 +20,7 @@ public enum Path {
   case uploadProfileImage(Data)
   case userProfile
   case homeMenu
-  case homeNews([String:String])
+  case homeNews([String:String?])
   case homeBookMark(String)
   case updateProfile(ProfileEditParameter)
   case homeRelease
@@ -68,8 +68,6 @@ public enum Path {
     case let .signUp(parameter, _):
       return parameter.asDictionary()
     case let .updateProfile(parameter):
-      return parameter.asDictionary()
-    case let .homeNews(parameter):
       return parameter.asDictionary()
     default:
       return nil

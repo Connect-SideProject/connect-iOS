@@ -96,7 +96,6 @@ extension HomeCategoryCell: ReactorKit.View {
         reactor.state
             .map{ $0.menuType.menuTitle }
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(to: self.menuTitleLabel.rx.text)
             .disposed(by: disposeBag)
 
@@ -104,7 +103,6 @@ extension HomeCategoryCell: ReactorKit.View {
             .map { try $0.homeCellRepo.responseMenuImage(image: $0.menuType) }
             .map { UIImage(data: $0)}
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(to: self.menuImageView.rx.image)
             .disposed(by: disposeBag)
     }

@@ -81,32 +81,34 @@ public extension EndPoint {
 
   var url: URL? {
 
-    var components = URLComponents()
-    components.scheme = baseURL.scheme
-    components.host = baseURL.host
-    components.path = path.string
+    var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)
+    components?.scheme = baseURL.scheme
+    components?.host = baseURL.host
+    components?.path = path.string
     
     switch path {
     case .serchPlace(let query):
-      components.host = "dapi.kakao.com"
-      components.queryItems = [URLQueryItem(name: "query", value: query)]
+      components?.host = "dapi.kakao.com"
+      components?.queryItems = [URLQueryItem(name: "query", value: query)]
     case let .search(query):
         if let queryItems = query {
+            var queryItem: [URLQueryItem] = []
             _ = queryItems.map {
-                components.queryItems?.append(URLQueryItem(name: $0.key, value: $0.value))
-                print("queryItem: \(queryItems) or components: \(components)")
+                queryItem.append(URLQueryItem(name: $0.key, value: $0.value))
             }
+            components?.queryItems = queryItem
         }
     case let .homeNews(query):
+        var queryItem: [URLQueryItem] = []
         _ = query.map {
-            components.queryItems?.append(URLQueryItem(name: $0.key, value: $0.value))
-            debugPrint("Home News KEY: \($0.key) \n Home News VALUE: \($0.value)")
+            queryItem.append(URLQueryItem(name: $0.key, value: $0.value))
         }
+        components?.queryItems = queryItem
     default:
       break
     }
     
-    return components.url
+    return components?.url
   }
 
   var parameter: [String: Any]? {

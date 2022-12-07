@@ -15,7 +15,7 @@ public struct HomeStudyList: Codable {
     public var studyNewsBookMark: Int
     public var studyNewsMyBookMark: Bool
     public var studyNewsInfo: String
-    public var parts: [HomeStudyPartList]
+    public var studyNewsParts: [HomeStudyPartList]
     public var studyNewsUserId: String
     
     
@@ -26,7 +26,7 @@ public struct HomeStudyList: Codable {
         case studyNewsBookMark = "bookmark"
         case studyNewsMyBookMark = "myBookmark"
         case studyNewsInfo = "studyInfo"
-        case parts
+        case studyNewsParts = "parts"
         case studyNewsUserId = "userId"
         
     }
@@ -35,8 +35,8 @@ public struct HomeStudyList: Codable {
 
 
 public struct HomeStudyPartList: Codable {
-    var studyRole: String
-    var studyRoleCount: Int
+    public var studyRole: String
+    public var studyRoleCount: Int
     
     enum CodingKeys: String, CodingKey {
         case studyRole = "role"

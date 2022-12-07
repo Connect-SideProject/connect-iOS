@@ -37,7 +37,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     }
     
     private let homeRepository: HomeRepository
-    private var homeParameter: [String:String]
+    private var homeParameter: [String:String?]
     
     public enum Mutation {
         case setLoading(Bool)
@@ -59,8 +59,8 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     
     init(homeRepository: HomeRepository) {
         self.homeParameter = [
-            "area": "서울시 \(UserManager.shared.profile?.region?.description ?? "")",
-            "studyType": ""
+            "area": UserManager.shared.profile?.region?.description ?? "",
+            "studyType": nil
         ]
         
         defer { _ = self.state }
