@@ -25,6 +25,7 @@ public enum Path {
   case refreshToken
   case logout
   case signOut
+  case meetingDetail(id: Int)
   
   public var string: String {
     switch self {
@@ -54,6 +55,8 @@ public enum Path {
       return "/api/member/auth/logout"
     case .signOut:
       return "/api/member/signOut"
+    case .meetingDetail(let id):
+      return "/api/study/\(id)/info"
     }
   }
   
