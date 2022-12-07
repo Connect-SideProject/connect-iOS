@@ -89,6 +89,7 @@ extension MeetingDetailController {
         public func mutate(action: Action) -> Observable<Mutation> {
             switch action {
             case .reload:
+                // TODO: 추후에 의존성 주입 필요(ApiService)
                 let meetingInfo = ApiManager.shared
                     .request(endPoint: .init(path: .meetingDetail(id: self.currentState.id)))
                     .map(Mutation.setMeetingInfo)
