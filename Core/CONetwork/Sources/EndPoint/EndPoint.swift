@@ -97,6 +97,11 @@ public extension EndPoint {
                 print("queryItem: \(queryItems) or components: \(components)")
             }
         }
+    case let .homeNews(query):
+        _ = query.map {
+            components.queryItems?.append(URLQueryItem(name: $0.key, value: $0.value))
+            debugPrint("Home News KEY: \($0.key) \n Home News VALUE: \($0.value)")
+        }
     default:
       break
     }

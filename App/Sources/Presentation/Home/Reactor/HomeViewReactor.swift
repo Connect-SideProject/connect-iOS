@@ -29,6 +29,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
         case viewDidLoad
+        case updateNewItem(String)
     }
     
     public var errorHandler: (Error) -> Observable<Mutation> = { error in
@@ -36,7 +37,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     }
     
     private let homeRepository: HomeRepository
-    
+    private var homeParameter: [String:String]
     
     public enum Mutation {
         case setLoading(Bool)
@@ -57,7 +58,13 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     }
     
     init(homeRepository: HomeRepository) {
+        self.homeParameter = [
+            "area": "서울시 \(UserManager.shared.profile?.region?.description ?? "")",
+            "studyType": ""
+        ]
+        
         defer { _ = self.state }
+        
         self.homeRepository = homeRepository
         
         
@@ -87,22 +94,37 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                 .homeStudyMenu(HomeStudyMenuReactor(menuType: .study, isSelected: false))
             ])))
             
-            guard let region = UserManager.shared.profile?.region?.description else { return .empty() }
-            let homeNewsParameter: HomeNewsParameter = .init(area: "서울시" + region)
-            
                         
             return .concat(
                 startLoading,
                 homeRepository.responseHomeMenuItem(),
-
                 setMenuItems,
-                homeRepository.responseHomeNewsItem(paramenter: homeNewsParameter).catchAndReturn(Mutation.setHomeNewsItem([])),
+                homeRepository.responseHomeNewsItem(paramenter: homeParameter).catchAndReturn(Mutation.setHomeNewsItem([])),
                 homeRepository.responseHomeReleaseItem(),
+                endLoading
+            )
+            
+        case let .updateNewItem(menuType):
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            
+            homeParameter.updateValue(menuType, forKey: "studyType")
+            
+            return .concat(
+                startLoading,
+                homeRepository.responseHomeNewsItem(paramenter: homeParameter),
                 endLoading
             )
         }
     }
     
+    public func transform(action: Observable<Action>) -> Observable<Action> {
+        let fromHomeMenuAction = HomeViewTransform.event.flatMap { [weak self] event in
+            self?.didSelectMenuAction(from: event) ?? .empty()
+        }
+        
+        return Observable.of(action, fromHomeMenuAction).merge()
+    }
     
     public func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
         let fromHomeMenuMutation = HomeViewTransform.event.flatMap { [weak self] event in
@@ -190,9 +212,18 @@ private extension HomeViewReactor {
         case let .didSelectHomeMenu(type):
             print("didSelectMenu Type Home : \(type.currentState.menuType.getTitle())")
             return .just(.setSelectMenuType(type.currentState.menuType.getTitle()))
-            
-            
         }
+    }
+    
+    func didSelectMenuAction(from event: HomeViewTransform.Event) -> Observable<Action> {
+        switch event {
+        case let .didSelectHomeMenu(menuType):
+            print("did SelectMenu Action Type \(menuType.currentState.menuType.getTitle())")
+            
+            return .just(.updateNewItem(StudyType.getStudyType(menuType.currentState.menuType.getTitle())))
+        }
+        
+        
     }
     
 }

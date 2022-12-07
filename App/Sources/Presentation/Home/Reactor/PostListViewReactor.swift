@@ -30,8 +30,9 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
         case viewDidLoad
-        case didTapOnOffLine(String)
+        case didTapOnOffType(String)
         case didTapStudyType(String)
+        case didTapInterestType(String)
     }
     
     public struct State {
@@ -78,14 +79,14 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             
             return .concat(
                 startLoading,
-                postRepository.responsePostListItem(parameter: nil),
                 postRepository.responsePostSheetItem(),
                 endLoading
             )
-        case let .didTapOnOffLine(meetingItem):
+        case let .didTapOnOffType(meetingItem):
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             postParameter.updateValue(meetingItem, forKey: "meetingType")
+            print("postParameter: \(postParameter)")
             return .concat(
                 startLoading,
                 postRepository.responsePostListItem(parameter: postParameter),
@@ -96,6 +97,24 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             postParameter.updateValue(studyItem, forKey: "studyType")
             print("postParameter: \(postParameter)")
+            if studyItem == "전체" {
+                return .concat(
+                    startLoading,
+                    postRepository.responsePostListItem(parameter: nil),
+                    endLoading
+                )
+            } else {
+                return .concat(
+                    startLoading,
+                    postRepository.responsePostListItem(parameter: postParameter),
+                    endLoading
+                )
+            }
+        case let .didTapInterestType(interestItem):
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            postParameter.updateValue(interestItem, forKey: "category")
+            
             return .concat(
                 startLoading,
                 postRepository.responsePostListItem(parameter: postParameter),
@@ -165,9 +184,12 @@ private extension PostListViewReactor {
     
     func didTapSheetAction(from event: PostFilterTransform.Event) -> Observable<Action> {
         switch event {
+        case let .didTapOnOffLineSheet(text):
+            return .just(.didTapOnOffType(MeetingType.getMeetingType(text)))
         case let .didTapStudyTypeSheet(text):
-            print("Action DIdTapSheet: \(text)")
-            return .just(.didTapStudyType(text))
+            return .just(.didTapStudyType(StudyType.getStudyType(text)))
+        case let .didTapInterestSheet(text):
+            return .just(.didTapInterestType(text))
         default:
             return .empty()
         }

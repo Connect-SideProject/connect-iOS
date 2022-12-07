@@ -20,7 +20,7 @@ public enum Path {
   case uploadProfileImage(Data)
   case userProfile
   case homeMenu
-  case homeNews(HomeNewsParameter)
+  case homeNews([String:String])
   case homeBookMark(String)
   case updateProfile(ProfileEditParameter)
   case homeRelease

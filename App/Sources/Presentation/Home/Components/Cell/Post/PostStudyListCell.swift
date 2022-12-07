@@ -180,7 +180,7 @@ extension PostStduyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.postModel.contentisEnd }
-            .observe(on: MainScheduler.instance)
+            .observe(on: MainScheduler.asyncInstance)
             .do(onNext: { _ in
                 self.postStateTitleLabel.text = "모집중"
             }).map { _ in UIColor.hex05A647 }
@@ -189,7 +189,7 @@ extension PostStduyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.postModel.contentisEnd == false }
-            .observe(on: MainScheduler.instance)
+            .observe(on: MainScheduler.asyncInstance)
             .do(onNext: { _ in
                 self.postStateTitleLabel.text = "모집완료"
             }).map { _ in UIColor.hex8E8E8E }
