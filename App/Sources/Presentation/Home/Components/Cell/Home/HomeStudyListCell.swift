@@ -10,9 +10,10 @@ import Then
 import SnapKit
 import ReactorKit
 import RxCocoa
-
+import RxGesture
 
 import CODomain
+
 
 public final class HomeStudyListReactor: Reactor {
 
@@ -232,6 +233,7 @@ extension HomeStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.studyNewsModel.studyNewsIsEnd }
+            .observe(on: MainScheduler.instance)
             .do(onNext: { _ in
                 self.studyListStateLabel.text = "모집중"
             }).map { _ in UIColor.hex05A647 }
@@ -240,6 +242,7 @@ extension HomeStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.studyNewsModel.studyNewsIsEnd == false }
+            .observe(on: MainScheduler.instance)
             .do(onNext: { _ in
                 self.studyListStateLabel.text = "모집완료"
             }).map { _ in UIColor.hex8E8E8E}
@@ -266,6 +269,22 @@ extension HomeStudyListCell: ReactorKit.View {
             .bind(to: studyMemberStateLabel.rx.text)
             .disposed(by: disposeBag)
         
+        guard let bookMarkId = self.reactor?.currentState.studyNewsModel.id else { return }
+        
+        studyBookMarkView.rx
+            .tapGesture()
+            .when(.recognized)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { _ in Reactor.Action.didTapNewsBookMark(String(bookMarkId))}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.studyNewsBookMarkModel?.bookMarkId == $0.studyNewsModel.id }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: studyBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
         
         
         

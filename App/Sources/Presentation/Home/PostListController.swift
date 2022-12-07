@@ -135,6 +135,15 @@ extension PostListController: ReactorKit.View {
             .setDelegate(self)
             .disposed(by: disposeBag)
         
+        
+        NotificationCenter.default.rx
+            .notification(.searchToPost)
+            .withUnretained(self)
+            .subscribe(onNext: { vc, userInfo in
+                guard let keyword = userInfo.object as? String else { return }
+                PostFilterTransform.event.onNext(.searchToKeyword(keyword: keyword))
+            }).disposed(by: disposeBag)
+        
         reactor.state
             .map { $0.bottomSheetItem }
             .bind { item in

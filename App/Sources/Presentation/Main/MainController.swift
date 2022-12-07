@@ -159,6 +159,8 @@ extension MainController: HomeCoordinatorDelegate {
     
     func didTapToSearchCreate() {
         let searchDependency = SearchDependencyContainer(searchApiService: ApiManager.shared)
-        self.navigationController?.pushViewController(searchDependency.makeController(), animated: true)
+        let childrenCoordinator = searchDependency.makeController()
+        childrenCoordinator.delegate = self
+        self.navigationController?.pushViewController(childrenCoordinator, animated: true)
     }
 }

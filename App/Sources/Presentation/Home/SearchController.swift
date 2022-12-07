@@ -24,6 +24,8 @@ public final class SearchController: UIViewController {
     
     public typealias Reactor = SearchViewReactor
     
+    public weak var delegate: HomeCoordinatorDelegate?
+    
     public var disposeBag: DisposeBag = DisposeBag()
     
     private lazy var collectionViewLayout = LeftAlignedCollectionViewFlowLayout().then {
@@ -166,9 +168,15 @@ extension SearchController: ReactorKit.View {
         keywordSearchBar.rx.searchButtonTap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .withUnretained(self)
+            .debug("Search Bar Tap Action -> ")
             .subscribe(onNext: { vc, keyword in
                 UserDefaults.standard.setRecentlyKeyWord(keyword: keyword)
                 SearchViewTransform.event.onNext(.refreshKeywordSection)
+                vc.navigationController?.popViewController {
+                    vc.delegate?.didTapToPostListCreate(completion: {
+                        NotificationCenter.default.post(name: .searchToPost, object: keyword)
+                    })
+                }
             }).disposed(by: disposeBag)
         
         

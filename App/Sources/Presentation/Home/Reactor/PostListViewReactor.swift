@@ -20,6 +20,7 @@ public enum PostFilterTransform: TransformType, Equatable {
         case didTapAligmentSheet(text: String)
         case didTapStudyTypeSheet(text: String)
         case didTapInterestSheet(text: String)
+        case searchToKeyword(keyword: String)
         case responseSheetItem(item: [BottomSheetItem])
     }
 
@@ -30,6 +31,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
     
     public enum Action {
         case viewDidLoad
+        case updateKeywordItem(String)
         case didTapOnOffType(String)
         case didTapStudyType(String)
         case didTapInterestType(String)
@@ -120,6 +122,16 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
                 postRepository.responsePostListItem(parameter: postParameter),
                 endLoading
             )
+        case let .updateKeywordItem(keyword):
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            postParameter.updateValue(keyword, forKey: "keyword")
+            
+            return .concat(
+                startLoading,
+                postRepository.responsePostListItem(parameter: postParameter),
+                endLoading
+            )
         }
     }
     
@@ -190,6 +202,8 @@ private extension PostListViewReactor {
             return .just(.didTapStudyType(StudyType.getStudyType(text)))
         case let .didTapInterestSheet(text):
             return .just(.didTapInterestType(text))
+        case let .searchToKeyword(keyword):
+            return .just(.updateKeywordItem(keyword))
         default:
             return .empty()
         }
