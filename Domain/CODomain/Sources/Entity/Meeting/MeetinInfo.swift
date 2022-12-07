@@ -8,14 +8,14 @@
 import Foundation
 
 // MARK: - MeetingInfo
-struct MeetingInfo: Codable {
+public struct MeetingInfo: Codable {
     let id: Int
     let userID, nickName: String
     let profileURL: String
     let roles: [MeeingInfoRole]
     let endDate, studyType, meetingType: String
     let categories: [Category]
-    let parts: [String]
+    let parts: [Part]
     let studyInfo, aspiration: String
     let bookmark: Int
     let place: Place
@@ -48,5 +48,11 @@ struct Location: Codable {
 
 // MARK: - MeeingInfoRole
 struct MeeingInfoRole: Codable {
+    let role: RoleType
+}
+
+// MARK: - Part
+struct Part: Codable {
+    let count: Int
     let role: RoleType
 }
