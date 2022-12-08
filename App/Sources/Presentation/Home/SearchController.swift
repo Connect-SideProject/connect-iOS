@@ -98,6 +98,14 @@ public final class SearchController: UIViewController {
             self.view.addSubview($0)
         }
         
+        if let searchTextFiled = keywordSearchBar.value(forKey: "searchField") as? UITextField {
+            searchTextFiled.snp.makeConstraints {
+                $0.left.equalToSuperview()
+                $0.right.equalToSuperview()
+                $0.height.equalTo(44)
+            }
+        }
+        
         
         keywordCollectionView.snp.makeConstraints {
             $0.top.equalTo(keywordSearchBar.snp.bottom)
@@ -172,7 +180,7 @@ extension SearchController: ReactorKit.View {
             .subscribe(onNext: { vc, keyword in
                 UserDefaults.standard.setRecentlyKeyWord(keyword: keyword)
                 SearchViewTransform.event.onNext(.refreshKeywordSection)
-                vc.navigationController?.popViewController {
+                vc.navigationController?.dismiss(animated: true) {
                     vc.delegate?.didTapToPostListCreate(completion: {
                         NotificationCenter.default.post(name: .searchToPost, object: keyword)
                     })

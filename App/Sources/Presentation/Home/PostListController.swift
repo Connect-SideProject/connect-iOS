@@ -24,8 +24,9 @@ public final class PostListController: UIViewController {
     
     public var disposeBag: DisposeBag = DisposeBag()
     
-    private let postListIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
-        $0.backgroundColor = .clear
+    private lazy var postListIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
+        $0.style = .medium
+        $0.color = .gray
     }
     
     private lazy var  postFilterHeaderView: PostFilterHeaderView = PostFilterHeaderView(reactor: PostFilterReactor(bottomSheetItem: self.reactor?.currentState.bottomSheetItem ?? []))
@@ -39,6 +40,18 @@ public final class PostListController: UIViewController {
         $0.backgroundColor = .hexF9F9F9
         $0.register(PostStduyListCell.self, forCellWithReuseIdentifier: "PostStduyListCell")
     }
+    
+    private lazy var backButton: UIButton = UIButton().then {
+        $0.setImage(UIImage(named: "ic_back_arrow"), for: .normal)
+        $0.setTitle("전체 프로젝트", for: .normal)
+        $0.titleLabel?.font = UIFont.semiBold(size: 16)
+        $0.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        $0.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        $0.setTitleColor(UIColor.hex3A3A3A, for: .normal)
+        $0.semanticContentAttribute = .forceLeftToRight
+    }
+    
+    private lazy var postBackButtonItem: UIBarButtonItem = UIBarButtonItem(customView: backButton)
     
     private let postDataSource: RxCollectionViewSectionedReloadDataSource<PostViewSection>
     
@@ -78,6 +91,7 @@ public final class PostListController: UIViewController {
     //MARK: LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationItem.leftBarButtonItem = postBackButtonItem
         self.navigationController?.setNavigationBarHidden(false, animated: false)
         configure()
     }
@@ -94,7 +108,7 @@ public final class PostListController: UIViewController {
         
         self.view.backgroundColor = .white
         
-        _ = [postListIndicatorView, postFilterHeaderView ,postCollectionView].map {
+        _ = [postFilterHeaderView ,postCollectionView,postListIndicatorView].map {
             self.view.addSubview($0)
         }
         
@@ -106,7 +120,6 @@ public final class PostListController: UIViewController {
         
         postListIndicatorView.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.width.height.equalTo(24)
         }
         
         postCollectionView.snp.makeConstraints {
@@ -135,6 +148,13 @@ extension PostListController: ReactorKit.View {
             .setDelegate(self)
             .disposed(by: disposeBag)
         
+        backButton.rx
+            .tap
+            .withUnretained(self)
+            .bind { vc, _ in
+                vc.navigationController?.popViewController(animated: true)
+            }.disposed(by: disposeBag)
+        
         
         NotificationCenter.default.rx
             .notification(.searchToPost)
@@ -154,6 +174,13 @@ extension PostListController: ReactorKit.View {
             .map { $0.section }
             .observe(on: MainScheduler.instance)
             .bind(to: postCollectionView.rx.items(dataSource: self.postDataSource))
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .map { $0.isLoading}
+            .observe(on: MainScheduler.instance)
+            .bind(to: postListIndicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
         
     }
