@@ -63,7 +63,7 @@ extension HomeDependencyContainer {
 
 
 public protocol HomeRepository {
-    func responseMenuImage(image: HomeMenuList) throws -> Data
+    func responseMenuImage(image: HomeMenuList) async throws -> Data
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation>
@@ -84,9 +84,9 @@ final class HomeViewRepo: HomeRepository {
     }
     
     
-    func responseMenuImage(image item: HomeMenuList) throws -> Data {
+    func responseMenuImage(image item: HomeMenuList) async throws -> Data {
         guard let imageurl = URL(string: item.menuImage),
-              let imageData = try? Data(contentsOf: imageurl) else { return Data() }
+              let (imageData, _) = try? await URLSession.shared.data(from: imageurl) else { return Data() }
         return UIImage(data: imageData)?.pngData() ?? Data()
     }
     

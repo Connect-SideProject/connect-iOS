@@ -290,7 +290,6 @@ extension HomeStudyListCell: ReactorKit.View {
             .compactMap { $0.studyNewsModel }
             .filter { $0.studyNewsMyBookMark }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
-            .observe(on: MainScheduler.instance)
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         
@@ -298,7 +297,6 @@ extension HomeStudyListCell: ReactorKit.View {
             .compactMap { $0.studyNewsModel }
             .filter { $0.studyNewsMyBookMark == false }
             .map { _ in UIImage(named: "home_studylist_bookmark") }
-            .observe(on: MainScheduler.instance)
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
             
@@ -306,7 +304,6 @@ extension HomeStudyListCell: ReactorKit.View {
         reactor.state
             .filter { $0.studyNewsBookMarkModel?.bookMarkId == $0.studyNewsModel?.id }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
-            .observe(on: MainScheduler.instance)
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         

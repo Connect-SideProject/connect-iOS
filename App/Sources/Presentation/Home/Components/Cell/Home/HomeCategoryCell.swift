@@ -38,7 +38,7 @@ final class HomeCategoryCell: UICollectionViewCell {
         return $0
     }(UIView())
     
-    private let menuImageView: UIImageView = {
+    private var menuImageView: UIImageView = {
         $0.contentMode = .scaleAspectFit
         
         return $0
@@ -96,15 +96,24 @@ extension HomeCategoryCell: ReactorKit.View {
         reactor.state
             .map{ $0.menuType.menuTitle }
             .distinctUntilChanged()
+            .delay(.milliseconds(180), scheduler: MainScheduler.instance)
             .bind(to: self.menuTitleLabel.rx.text)
             .disposed(by: disposeBag)
 
         reactor.state
-            .map { try $0.homeCellRepo.responseMenuImage(image: $0.menuType) }
-            .map { UIImage(data: $0)}
-            .distinctUntilChanged()
-            .bind(to: self.menuImageView.rx.image)
-            .disposed(by: disposeBag)
+            .map { state -> Task<Data, _> in
+                Task {
+                    let originImage = try await state.homeCellRepo.responseMenuImage(image: state.menuType)
+                    return originImage
+                }
+            }.asObservable()
+            .delay(.milliseconds(180), scheduler: MainScheduler.instance)
+            .bind(onNext: { [weak self] originImage in
+                Task {
+                    self?.menuImageView.image = try await UIImage(data: originImage.value)
+                }
+            }).disposed(by: disposeBag)
+        
     }
     
 }
