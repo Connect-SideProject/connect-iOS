@@ -166,14 +166,3 @@ extension MeetingDetailController {
         }
     }
 }
-
-extension MeetingDetailController {
-    final class CardTableCell: RxBaseTableCell<Any> {
-        
-    }
-    
-    final class TextTableCell: RxBaseTableCell<Any> {
-        private let titleLabel = UILabel()
-        private let descLabel = UILabel()
-    }
-}
