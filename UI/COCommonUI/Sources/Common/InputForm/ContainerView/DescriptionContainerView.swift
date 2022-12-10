@@ -80,6 +80,15 @@ public class DescriptionContainerView: UIView {
     $0.delegate = self
   }
   
+  /// TextView 사용시 외부 text접근 코드.
+  public var textViewText: String {
+    var text = textView.text ?? ""
+    if case let .textView(item) = type {
+      return textView.text == item.placeholder ? "" : text
+    }
+    return text
+  }
+  
   public private(set) var customView: CastableView?
   
   private let noticeTextLabel = UILabel().then {

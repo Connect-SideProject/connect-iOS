@@ -480,7 +480,7 @@ extension BottomSheet: UICollectionViewDataSource {
 extension BottomSheet: UICollectionViewDelegateFlowLayout {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     
-    if items[indexPath.item].isSelected == true {
+    if items[safe: indexPath.item]?.isSelected == true {
       return
     }
     

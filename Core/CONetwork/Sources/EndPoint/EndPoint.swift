@@ -105,7 +105,7 @@ public extension EndPoint {
     switch path {
     case .signUp, .uploadProfileImage, .userProfile, .updateProfile:
       return .put
-    case .refreshToken, .signIn, .logout:
+    case .refreshToken, .signIn, .logout, .createMeeting:
       return .post
     case .signOut:
       return .delete

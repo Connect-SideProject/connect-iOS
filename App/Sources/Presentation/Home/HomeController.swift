@@ -294,7 +294,7 @@ extension HomeController: ReactorKit.View {
               
               let controller = MeetingCreateViewController()
               controller.reactor = .init(
-                apiService: ApiManager.shared,
+                repository: MeetingCreateRepositoryImpl(),
                 userService: UserManager.shared,
                 interestService: InterestManager.shared,
                 addressService: AddressManager.shared,

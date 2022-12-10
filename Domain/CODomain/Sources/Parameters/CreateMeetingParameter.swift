@@ -7,8 +7,19 @@
 
 import Foundation
 
-public enum StudyType: Codable {
+public enum StudyType: String, Codable {
   case project, study
+  
+  public init?(rawValue: String) {
+    switch rawValue {
+    case "PROJECT":
+      self = .project
+    case "STUDY":
+      self = .study
+    default:
+      return nil
+    }
+  }
   
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer().decode(String.self)
@@ -38,6 +49,17 @@ public enum StudyType: Codable {
 public enum MeetingType: Codable {
   case online, offline, none
   
+  public init?(rawValue: String) {
+    switch rawValue {
+    case "ONLINE":
+      self = .online
+    case "OFFLINE":
+      self = .offline
+    default:
+      self = .none
+    }
+  }
+  
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer().decode(String.self)
     
@@ -56,30 +78,24 @@ public enum MeetingType: Codable {
     
     switch self {
     case .online:
-      try container.encode("PROJECT")
+      try container.encode("ONLINE")
     case .offline:
-      try container.encode("STUDY")
+      try container.encode("OFFLINE")
     default:
       try container.encode("NONE")
     }
   }
-  
-}
-
-public struct RoleAndPeople: Codable {
-  let role: String
-  let count: Int
 }
 
 public struct CreateMeetingParameter: Parameterable {
   
-  let studyType: StudyType
+  let studyType: StudyType?
   let meetingType: MeetingType
-  let interestings: [Interest]
-  let roleAndPeople: RoleAndPeople
-  let startDate: String
-  let endDate: String
-  let region: String
+  public var interestings: [Interest] = []
+  public var roleAndCounts: [RoleAndCountItem] = []
+  public var startDate: String?
+  public var endDate: String?
+  public var place: String?
   let title: String
   let content: String
   let aspiration: String
@@ -90,10 +106,10 @@ public struct CreateMeetingParameter: Parameterable {
     try container.encode(studyType, forKey: .studyType)
     try container.encode(meetingType, forKey: .meetingType)
     try container.encode(interestings, forKey: .interestings)
-    try container.encode(roleAndPeople, forKey: .roleAndPeople)
+    try container.encode(roleAndCounts, forKey: .roleAndCounts)
     try container.encode(startDate, forKey: .startDate)
     try container.encode(endDate, forKey: .endDate)
-    try container.encode(region, forKey: .region)
+    try container.encode(place, forKey: .place)
     try container.encode(title, forKey: .title)
     try container.encode(content, forKey: .content)
     try container.encode(aspiration, forKey: .aspiration)
@@ -103,12 +119,45 @@ public struct CreateMeetingParameter: Parameterable {
     case studyType
     case meetingType
     case interestings = "categories"
-    case roleAndPeople = "parts"
+    case roleAndCounts = "parts"
     case startDate
     case endDate
-    case region = "place"
+    case place
     case title = "studyTitle"
     case content = "studyInfo"
     case aspiration
+  }
+}
+
+public extension CreateMeetingParameter {
+  init(
+    studyType: StudyType?,
+    meetingType: MeetingType,
+    title: String = "",
+    content: String = "",
+    aspiration: String = ""
+  ) {
+    self.studyType = studyType
+    self.meetingType = meetingType
+    self.title = title
+    self.content = content
+    self.aspiration = aspiration
+  }
+  
+  mutating func updateInterestings(_ interestings: [Interest]) {
+    self.interestings = interestings
+  }
+  
+  mutating func updatePlace(_ place: String) {
+    self.place = place
+  }
+  
+  mutating func updateRoleAndCounts(_ roleAndCounts: [RoleAndCountItem]) {
+    self.roleAndCounts = roleAndCounts
+  }
+  
+  mutating func updateDateRange(_ dateRange: DateRange) {
+    self.startDate = dateRange.start?.toFormattedString() ?? ""
+    self.endDate = dateRange.end?.toFormattedString() ?? ""
   }
 }

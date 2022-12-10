@@ -35,6 +35,7 @@ public final class CheckBoxContainerView: UIView, CastableView {
   
   private let flexContainer = UIView()
   
+  private var dictionray: [String: String]?
   private let direction: CheckBoxContainerDirection
   private let eventType: CheckBoxContainerEventType
   
@@ -48,6 +49,28 @@ public final class CheckBoxContainerView: UIView, CastableView {
     super.init(frame: .zero)
     
     self.checkBoxViews = titles.enumerated().map { [weak self] offset, element in
+      let checkBox = CheckBoxView(title: element)
+      checkBox.checkBoxButton.tag = offset
+      checkBox.handler = { [weak self] sender in
+        self?.didTapCheckBox(sender: sender)
+      }
+      return checkBox
+    }
+    
+    configureUI()
+  }
+  
+  public init(
+    dictionary: [String: String],
+    direction: CheckBoxContainerDirection = .horizontal,
+    eventType: CheckBoxContainerEventType = .default
+  ) {
+    self.dictionray = dictionary
+    self.direction = direction
+    self.eventType = eventType
+    super.init(frame: .zero)
+    
+    self.checkBoxViews = dictionary.keys.enumerated().map { [weak self] offset, element in
       let checkBox = CheckBoxView(title: element)
       checkBox.checkBoxButton.tag = offset
       checkBox.handler = { [weak self] sender in
@@ -143,6 +166,7 @@ private extension CheckBoxContainerView {
   }
   
   func methodRadio(sender: UIButton) {
+    let currentTitle = sender.currentTitle ?? ""
     let selectedList = checkBoxViews.map { $0.checkBoxButton.isSelected }.filter { $0 }
     let selectedTag = checkBoxViews.map { $0.checkBoxButton.isSelected ? $0.checkBoxButton.tag : -1 }
       .filter { $0 != -1 }
@@ -150,7 +174,8 @@ private extension CheckBoxContainerView {
     
     if selectedList.count == 0 {
       sender.isSelected = true
-      self.checkedItems = [(title: sender.currentTitle ?? "", index: sender.tag)]
+      let title = (dictionray == nil) ? currentTitle : dictionray?[currentTitle] ?? ""
+      self.checkedItems = [(title: title, index: sender.tag)]
     } else {
       
       if selectedTag == sender.tag {
@@ -159,7 +184,8 @@ private extension CheckBoxContainerView {
       
       let _ = checkBoxViews.map { $0.checkBoxButton.isSelected = false }
       sender.isSelected = true
-      self.checkedItems = [(title: sender.currentTitle ?? "", index: sender.tag)]
+      let title = (dictionray == nil) ? currentTitle : dictionray?[currentTitle] ?? ""
+      self.checkedItems = [(title: title, index: sender.tag)]
     }
   }
   
@@ -173,7 +199,9 @@ private extension CheckBoxContainerView {
     self.checkedItems = checkBoxViews
       .map {
         if $0.checkBoxButton.isSelected {
-          return CheckBoxItem(title: $0.checkBoxButton.currentTitle ?? "", index: $0.checkBoxButton.tag)
+          let currentTitle = $0.checkBoxButton.currentTitle ?? ""
+          let title = (dictionray == nil) ? currentTitle : dictionray?[currentTitle] ?? ""
+          return CheckBoxItem(title: title, index: $0.checkBoxButton.tag)
         } else {
           return CheckBoxItem(title: "", index: -1)
         }

@@ -11,6 +11,7 @@ import UIKit
 import FlexLayout
 import PinLayout
 import Then
+import CODomain
 
 final class BottomSheetRoleAndPeopleCell: UICollectionViewCell {
   

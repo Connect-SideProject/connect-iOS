@@ -29,49 +29,62 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     /// 역할 및 인원 버튼
     case didTapRoleAndPeopleButton
     
-    /// 추가하기 버튼
-    case didTapAdditionalButton
-    
     /// 기간 버튼 터치
     case didTapDateButton
     
     /// 모임위치 버튼 터치
     case didTapLocationButton
+    
+    /// BottomSheet에서 선택된 요소.
+    case didSelectedInterest(String)
+    case didSelectedAddress(String)
+    case didSelectedDateRange(DateRange)
+    case didSelectedRoleAndCountItems([RoleAndCountItem])
+    
+    /// 모임만들기 버튼 터치
+    case didTapCreateMeeting(CreateMeetingParameter)
   }
   
   public enum Mutation {
+    
+    case setSelectedInterest(Interest)
+    case setSelectedRegion(Region)
+    case setSelectedDateRange(DateRange)
+    case setSelectedRoleAndCountItems([RoleAndCountItem])
+    
     case setRoute(Route?)
-    case setMessage(MessageType?)
+    case setError(COError?)
   }
   
   public struct State {
-    var selectedInterestIndex: Int?
-    var selectedDateIndex: Int?
-    var selectedLocationIndex: Int?
+    var selectedInterest: Interest?
+    @Pulse var selectedRoleAndCountItems: [RoleAndCountItem]?
+    @Pulse var selectedDateRange: DateRange?
+    @Pulse var selectedRegion: Region?
     @Pulse var route: Route?
-    var message: MessageType?
+    @Pulse var error: COError?
   }
   
   public var initialState: State = .init()
   
   public lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
-    return .just(.setMessage(.message(error.localizedDescription)))
+    return .just(.setError(error.asCOError))
   }
   
-  private let apiService: ApiService
+  private let repository: MeetingCreateRepository
   private let userService: UserService
   private let interestService: InterestService
   private let addressService: AddressService
   private let roleSkillsService: RoleSkillsService
   
   public init(
-    apiService: ApiService,
+    repository: MeetingCreateRepository,
     userService: UserService,
     interestService: InterestService,
     addressService: AddressService,
     roleSkillsService: RoleSkillsService
   ) {
-    self.apiService = apiService
+    self.repository = repository
     self.userService = userService
     self.interestService = interestService
     self.addressService = addressService
@@ -95,9 +108,6 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
       
       return .just(.setRoute(.bottomSheet(.roleAndPeople(item))))
       
-    case .didTapAdditionalButton:
-      return .empty()
-      
     case .didTapDateButton:
       return .just(.setRoute(.bottomSheet(.date)))
       
@@ -106,16 +116,77 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
         .init(value: $0.법정동명)
       }
       return .just(.setRoute(.bottomSheet(.address(addressList))))
+      
+    case let .didSelectedInterest(string):
+      guard let interest = interestService.interestList
+        .filter({ $0.name == string })
+        .first else {
+        return .empty()
+      }
+      
+      return .just(.setSelectedInterest(interest))
+      
+    case let .didSelectedAddress(string):
+      guard let address = addressService.addressList
+        .filter({ $0.법정동명 == string })
+        .first else {
+        return .empty()
+      }
+      let region = Region(code: address.법정코드, name: address.법정동명)
+      return .just(.setSelectedRegion(region))
+      
+    case let .didSelectedDateRange(dateRange):
+      return .just(.setSelectedDateRange(dateRange))
+      
+    case let .didSelectedRoleAndCountItems(items):
+      return .just(.setSelectedRoleAndCountItems(items))
+      
+    case let .didTapCreateMeeting(parameter):
+      
+      guard let interesting = currentState.selectedInterest else {
+        return .just(.setError(COError.message(nil, "관심분야를 최소 하나이상 선택 해주세요.")))
+      }
+      
+      guard let roleAndCounts = currentState.selectedRoleAndCountItems else {
+        return .just(.setError(COError.message(nil, "모집인원을 선택 해주세요.")))
+      }
+      
+      guard let dateRange = currentState.selectedDateRange else {
+        return .just(.setError(COError.message(nil, "프로젝트 기간을 설정 해주세요.")))
+      }
+      
+      guard let region = currentState.selectedRegion else {
+        return .just(.setError(COError.message(nil, "모임위치를 선택 해주세요.")))
+      }
+      var parameter = parameter
+      parameter.updateInterestings([interesting])
+      parameter.updateRoleAndCounts(roleAndCounts)
+      parameter.updateDateRange(dateRange)
+      parameter.updatePlace(region.description)
+      
+      print(parameter)
+      return repository.requestCreateMeeting(parameter: parameter)
+        .flatMap { _ -> Observable<Mutation> in
+          return .just(.setRoute(.close))
+        }
     }
   }
   
   public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
+    case let .setSelectedInterest(interest):
+      newState.selectedInterest = interest
+    case let .setSelectedRegion(region):
+      newState.selectedRegion = region
+    case let .setSelectedDateRange(dateRange):
+      newState.selectedDateRange = dateRange
+    case let .setSelectedRoleAndCountItems(items):
+      newState.selectedRoleAndCountItems = items
     case let .setRoute(route):
       newState.route = route
-    case let .setMessage(message):
-      newState.message = message
+    case let .setError(error):
+      newState.error = error
     }
     
     return newState
