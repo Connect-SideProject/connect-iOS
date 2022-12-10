@@ -7,7 +7,7 @@
 
 import UIKit
 
-class HStackView: UIStackView {
+public class HStackView: UIStackView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.axis = .horizontal
@@ -19,7 +19,7 @@ class HStackView: UIStackView {
     }
 }
 
-class VStackView: UIStackView {
+public class VStackView: UIStackView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.axis = .vertical
