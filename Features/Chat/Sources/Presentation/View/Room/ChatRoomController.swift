@@ -38,8 +38,7 @@ public final class ChatRoomController: ReactorBaseController<ChatRoomController.
     public override func setupContainer() {
         super.setupContainer()
         
-        self.rootContainer.flex.define { [weak self] in
-            guard let self = self else { return }
+        self.rootContainer.flex.define {
             $0.addItem(self.titleView)
                 .height(50)
             $0.addItem(self.tableView)

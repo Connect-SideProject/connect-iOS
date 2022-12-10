@@ -22,8 +22,7 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
     public override func setupContainer() {
         super.setupContainer()
         
-        self.rootContainer.flex.define { [weak self] in
-            guard let self = self else { return }
+        self.rootContainer.flex.define {
             $0.addItem(self.titleView)
                 .height(50)
             
@@ -117,8 +116,7 @@ extension MeetingDetailController {
         private let tabUnderLineView = UIView()
         
         override func setupContainer() {
-            self.flex.define { [weak self] in
-                guard let self = self else { return }
+            self.flex.define {
                 $0.addItem(self.titleLabel)
                     .marginTop(16)
                     .height(22)

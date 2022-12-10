@@ -21,8 +21,7 @@ extension ChatRoomController {
             super.setupContainer()
             
             self.rootContainer.flex.direction(.row)
-                .define { [weak self] in
-                    guard let self = self else { return }
+                .define {
                     $0.addItem(self.fieldContainer)
                         .direction(.row)
                         .grow(1)

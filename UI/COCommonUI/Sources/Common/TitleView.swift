@@ -31,9 +31,7 @@ public final class TitleView: FlexLayoutView {
         self.rootContainer.flex
             .direction(.row)
             .alignItems(.center)
-            .define { [weak self] flex in
-                guard let self = self else { return }
-                
+            .define { flex in
                 flex.addItem(self.leftBtn)
                     .marginLeft(28)
                     .width(17).height(20)
