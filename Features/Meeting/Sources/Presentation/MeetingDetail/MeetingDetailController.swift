@@ -9,6 +9,7 @@ import UIKit
 
 import RxSwift
 import ReactorKit
+import RxDataSources
 import COCommonUI
 import COExtensions
 import CONetwork
@@ -18,6 +19,18 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
     private let titleView = TitleView()
     private let topArea = TopArea()
     private let tableView = UITableView()
+    private var dataSource = RxTableViewSectionedReloadDataSource<SectionModel> { dataSource, tableView, indexPath, item in
+        switch dataSource[indexPath] {
+        case .card(let info):
+            let cell = tableView.dequeueReusableCell(withIdentifier: CardTableCell.reuseableIdentifier, for: indexPath) as! CardTableCell
+            cell.configure(with: info)
+            return cell
+        case .default(let info):
+            let cell = tableView.dequeueReusableCell(withIdentifier: TextTableCell.reuseableIdentifier, for: indexPath) as! TextTableCell
+            cell.configure(with: info)
+            return cell
+        }
+    }
     
     public override func setupContainer() {
         super.setupContainer()
@@ -46,14 +59,21 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
             .disposed(by: self.disposeBag)
         
         reactor.pulse(\.$meetingInfo).share()
+            .asDriver(onErrorJustReturn: nil)
             .compactMap { $0 }
-            .bind(onNext: self.configure(with:))
+            .drive(onNext: self.configure(with:))
+            .disposed(by: self.disposeBag)
+        
+        reactor.pulse(\.$sectionModels).share()
+            .asDriver(onErrorJustReturn: [])
+            .drive(self.tableView.rx.items(dataSource: self.dataSource))
             .disposed(by: self.disposeBag)
     }
     
     public override func setAttrs() {
         super.setAttrs()
         self.setTitleView()
+        self.setTable()
     }
     
     private func setTitleView() {
@@ -64,6 +84,11 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
     }
     
     private func configure(with info: MeetingInfo) { }
+    
+    private func setTable() {
+        self.tableView.register(CardTableCell.self, forCellReuseIdentifier: CardTableCell.reuseableIdentifier)
+        self.tableView.rowHeight = UITableView.automaticDimension
+    }
 }
 
 extension MeetingDetailController {
@@ -83,6 +108,7 @@ extension MeetingDetailController {
         public struct State {
             var id: Int
             @Pulse var meetingInfo: MeetingInfo?
+            @Pulse var sectionModels = [SectionModel]()
         }
         
         public func mutate(action: Action) -> Observable<Mutation> {
@@ -101,6 +127,7 @@ extension MeetingDetailController {
             switch mutation {
             case .setMeetingInfo(let info):
                 new.meetingInfo = info
+                new.sectionModels = [.basic(items: [.card(info)])]
             }
             return new
         }

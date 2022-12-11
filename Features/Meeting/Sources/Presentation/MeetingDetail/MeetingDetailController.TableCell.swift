@@ -7,17 +7,19 @@
 
 import UIKit
 
+import RxDataSources
 import FlexLayout
 import COCommonUI
 import CODomain
-import RxDataSources
 
 extension MeetingDetailController {
-    final class CardTableCell: RxBaseTableCell<Any> {
+    final class CardTableCell: RxBaseTableCell<MeetingInfo> {
         private let titleLabel = UILabel()
         private let cardContainer = UIView()
-        private let cardTitleArea = VStackView()
-        private let cardValueArea = VStackView()
+        private let cardTitleArea = UIView()
+        private let cardValueArea = UIView()
+        private let cardTitleLabels = [UILabel(), UILabel(), UILabel(), UILabel(), UILabel()]
+        private let cardValueLabels = [UILabel(), UILabel(), UILabel(), UILabel(), UILabel()]
         
         override func setupContainer() {
             self.contentView.flex.define {
@@ -34,9 +36,22 @@ extension MeetingDetailController {
                         $0.addItem(self.cardTitleArea)
                             .minWidth(17)
                             .marginLeft(25)
+                            .marginVertical(20)
+                            .define { flex in
+                                self.cardTitleLabels.enumerated().forEach {
+                                    flex.addItem($1)
+                                        .marginTop($0 > 0 ? 12 : 0)
+                                }
+                            }
                         
                         $0.addItem(self.cardValueArea)
                             .marginLeft(25)
+                            .define { flex in
+                                self.cardValueLabels.enumerated().forEach {
+                                    flex.addItem($1)
+                                        .marginTop($0 > 0 ? 12 : 0)
+                                }
+                            }
                     }
             }
         }
@@ -49,6 +64,32 @@ extension MeetingDetailController {
             self.contentView.pin.width(size.width)
             self.layout()
             return self.contentView.frame.size
+        }
+        
+        override func setAttrs() {
+            self.contentView.backgroundColor = .hexF9F9F9
+            self.setCardContainer()
+            self.setLabels()
+        }
+        
+        override func configure(with item: MeetingInfo) {
+            
+        }
+        
+        private func setLabels() {
+            self.titleLabel.text = "모집정보"
+            self.titleLabel.font = .semiBold(size: 16)
+            let cardTitles = ["마감일", "모임유형", "진행방식", "분야", "모집인원"]
+            self.cardTitleLabels.enumerated().forEach { offset, label in
+                label.text = cardTitles[offset]
+                label.font = .medium(size: 14)
+                label.textColor = .hex8E8E8E
+            }
+        }
+        
+        private func setCardContainer() {
+            self.cardContainer.layer.backgroundColor = UIColor.white.cgColor
+            self.cardContainer.layer.cornerRadius = 16
         }
     }
     
