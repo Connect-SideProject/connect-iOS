@@ -26,7 +26,20 @@ public final class NoticeController: UIViewController {
     
     private lazy var noticeIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.backgroundColor = .gray
+        $0.style = .medium
     }
+    
+    private lazy var leftBackButton: UIButton = UIButton().then {
+        $0.setImage(UIImage(named: "ic_back_arrow"), for: .normal)
+        $0.setTitle("알림", for: .normal)
+        $0.titleLabel?.font = UIFont.semiBold(size: 16)
+        $0.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        $0.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        $0.setTitleColor(.hex3A3A3A, for: .normal)
+        $0.semanticContentAttribute = .forceLeftToRight
+    }
+    
+    private lazy var noticeBackButtonItem: UIBarButtonItem = UIBarButtonItem(customView: leftBackButton)
     
     private lazy var noticeTableView: UITableView = UITableView().then {
         $0.separatorStyle = .none
@@ -60,18 +73,21 @@ public final class NoticeController: UIViewController {
     //MARK: LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
         configure()
     }
     
     //MARK: Configure
     func configure() {
+        
+        self.navigationItem.leftBarButtonItem = noticeBackButtonItem
+        
         _ = [noticeTableView, noticeIndicatorView].map {
             self.view.addSubview($0)
         }
         
         noticeIndicatorView.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.width.height.equalTo(24)
         }
         
         noticeTableView.snp.makeConstraints {
@@ -99,6 +115,13 @@ extension NoticeController: ReactorKit.View {
             .observe(on: MainScheduler.instance)
             .bind(to: noticeIndicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
+        
+        leftBackButton
+            .rx.tap
+            .withUnretained(self)
+            .bind { vc, _ in
+                vc.navigationController?.popViewController(animated: true)
+            }.disposed(by: disposeBag)
         
     }
     
