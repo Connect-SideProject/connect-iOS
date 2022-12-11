@@ -46,9 +46,9 @@ public final class PostDependencyContainer: HomeDIContainer {
 
 public enum MeetingType: String, Equatable {
     
-    case online = "ONLINE"
-    case offline = "OFFLINE"
-    case none = ""
+    case online = "온라인"
+    case offline = "오프라인"
+    case none = "미정"
     
     static func getMeetingType(_ type: String?) -> String {
         switch type {
@@ -66,8 +66,8 @@ public enum MeetingType: String, Equatable {
 
 public enum StudyType: String, Equatable {
     
-    case study = "STUDY"
-    case project = "PROJECT"
+    case study = "스터디"
+    case project = "프로젝트"
     case none = ""
     
     static func getStudyType(_ type: String?) -> String {
