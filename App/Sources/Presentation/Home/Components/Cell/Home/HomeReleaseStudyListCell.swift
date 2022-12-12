@@ -279,16 +279,31 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.releaseModel.releaseMyBookMark == true }
+            .filter { $0.releaseModel.releaseMyBookMark }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.releaseModel.releaseMyBookMark == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark") }
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         
         
         reactor.state
-            .filter { $0.bookMarkModel?.bookMarkId == $0.releaseModel.id  }
+            .filter { $0.bookMarkModel != nil}
+            .filter { $0.bookMarkModel!.bookMarkId == $0.releaseModel.id && $0.bookMarkModel!.bookMarkisCheck }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.bookMarkModel?.bookMarkId == $0.releaseModel.id && $0.bookMarkModel?.bookMarkisCheck == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark")}
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseBookMarkImageView.rx.image)
             .disposed(by: disposeBag)

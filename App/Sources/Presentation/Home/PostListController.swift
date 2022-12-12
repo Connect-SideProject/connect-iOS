@@ -183,6 +183,18 @@ extension PostListController: ReactorKit.View {
             .bind(to: postListIndicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
         
+        self.postCollectionView
+            .rx.prefetchItems
+            .distinctUntilChanged()
+            .subscribe(onNext: { indexPath in
+                for item in indexPath {
+                    if item.row == self.reactor?.currentState.pages {
+                        self.reactor?.action.onNext(.updatePageItem(10))
+                    }
+                    print("indexPath post item : \(item.row)")
+                }
+            }).disposed(by: disposeBag)
+        
     }
     
 }

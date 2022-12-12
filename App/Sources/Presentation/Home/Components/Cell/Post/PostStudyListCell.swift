@@ -174,7 +174,6 @@ extension PostStduyListCell: ReactorKit.View {
         
         reactor.state
             .map { $0.postModel.contentStudyTitle }
-            .observe(on: MainScheduler.instance)
             .bind(to: postTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
@@ -198,7 +197,6 @@ extension PostStduyListCell: ReactorKit.View {
         
         reactor.state
             .map { $0.postModel.contentStudyInfo}
-            .observe(on: MainScheduler.instance)
             .bind(to: postExplanationLabel.rx.text)
             .disposed(by: disposeBag)
         
@@ -248,9 +246,17 @@ extension PostStduyListCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.postBookMarkItems?.bookMarkId == $0.postModel.id }
-            .map { _ in UIImage(named: "home_studylist_bookmark_select")}
-            .observe(on: MainScheduler.instance)
+            .filter { $0.postBookMarkItems != nil }
+            .filter{ $0.postBookMarkItems!.bookMarkId == $0.postModel.id && $0.postBookMarkItems!.bookMarkisCheck}
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .bind(to: postBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .filter { $0.postBookMarkItems != nil }
+            .filter { $0.postBookMarkItems!.bookMarkId == $0.postModel.id  && $0.postBookMarkItems?.bookMarkisCheck == false}
+            .map { _ in UIImage(named: "home_studylist_bookmark")}
             .bind(to: postBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         

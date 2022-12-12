@@ -302,8 +302,16 @@ extension HomeStudyListCell: ReactorKit.View {
             
         
         reactor.state
-            .filter { $0.studyNewsBookMarkModel?.bookMarkId == $0.studyNewsModel?.id }
+            .filter { $0.studyNewsBookMarkModel != nil && $0.studyNewsModel != nil }
+            .filter { $0.studyNewsBookMarkModel!.bookMarkId == $0.studyNewsModel!.id && $0.studyNewsBookMarkModel!.bookMarkisCheck }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .bind(to: studyBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.studyNewsBookMarkModel != nil && $0.studyNewsModel != nil }
+            .filter { $0.studyNewsBookMarkModel!.bookMarkId == $0.studyNewsModel!.id && $0.studyNewsBookMarkModel!.bookMarkisCheck == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark") }
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         

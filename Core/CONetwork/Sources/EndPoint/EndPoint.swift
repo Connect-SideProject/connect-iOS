@@ -96,6 +96,7 @@ public extension EndPoint {
             _ = queryItems.map {
                 queryItem.append(URLQueryItem(name: $0.key, value: $0.value))
             }
+            print("query Item KeyWord: \(queryItem)")
             components?.queryItems = queryItem
         }
     case let .homeNews(query):
@@ -103,6 +104,7 @@ public extension EndPoint {
         _ = query.map {
             queryItem.append(URLQueryItem(name: $0.key, value: $0.value))
         }
+        print("query Item News: \(queryItem)")
         components?.queryItems = queryItem
     default:
       break

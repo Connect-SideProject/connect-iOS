@@ -36,11 +36,13 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
         case didTapStudyType(String)
         case didTapInterestType(String)
         case didTapAligmentType(String)
+        case updatePageItem(Int)
     }
     
     public struct State {
         var isLoading: Bool
         var isError: COError?
+        var pages: Int
         var bottomSheetItem: [BottomSheetItem]
         var section: [PostViewSection]
     }
@@ -49,6 +51,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
         case setLoading(Bool)
         case setPostError(COError?)
         case setPostSheetItem([String])
+        case setUpdatePage(Int)
         case setPostListItem(PostAllList)
     }
     
@@ -63,8 +66,12 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
     init(postRepository: PostListRepository) {
         defer { _ = self.state }
         self.postRepository = postRepository
+        self.postParameter = [
+            "size": "10"
+        ]
         self.initialState = State(
             isLoading: false,
+            pages: 10,
             bottomSheetItem: [],
             section: [
                 .post([])
@@ -145,6 +152,19 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
                 postRepository.responsePostListItem(parameter: postParameter),
                 endLoading
             )
+        case let .updatePageItem(pages):
+            let startLoading = Observable<Mutation>.just(.setLoading(true))
+            let endLoading = Observable<Mutation>.just(.setLoading(false))
+            let updatePages = Observable<Mutation>.just(.setUpdatePage(pages))
+            
+            postParameter.updateValue(String(self.currentState.pages), forKey: "size")
+            
+            return .concat(
+                startLoading,
+                updatePages,
+                postRepository.responsePostListItem(parameter: postParameter),
+                endLoading
+            )
         }
     }
     
@@ -185,6 +205,11 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             let postAllIndex = self.getIndex(section: .post([]))
             print("Post All List Items: \(items)")
             newState.section[postAllIndex] = postRepository.responsePostListSectionItem(item: items.postList)
+            return newState
+        case let .setUpdatePage(pages):
+            var newState = state
+            newState.pages = self.currentState.pages + pages
+            print("newstate Page: \(newState.pages)")
             return newState
         }
     }
