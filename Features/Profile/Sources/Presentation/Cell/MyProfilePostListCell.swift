@@ -7,6 +7,8 @@
 
 import UIKit
 import SnapKit
+import ReactorKit
+
 import COManager
 
 
@@ -15,6 +17,11 @@ import COManager
 final class MyProfilePostListCell: UICollectionViewCell {
     
     //MARK: Property
+    
+    typealias Reactor = MyProfilePostListCellReactor
+    
+    var disposeBag: DisposeBag = DisposeBag()
+    
     private let profilePostContainerView: UIView = UIView().then {
         $0.backgroundColor = .white
         $0.clipsToBounds = true
@@ -149,4 +156,15 @@ final class MyProfilePostListCell: UICollectionViewCell {
         
     }
     
+}
+
+
+
+extension MyProfilePostListCell: ReactorKit.View {
+    func bind(reactor: Reactor) {
+        
+        
+        
+        
+    }
 }

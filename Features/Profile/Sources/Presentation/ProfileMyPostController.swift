@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Then
 import RxDataSources
+import ReactorKit
 
 
 /// MY 내가 찜한, 게시 글 컨트롤러
@@ -16,6 +17,10 @@ final class ProfileMyPostController: UIViewController {
     
     
     //MARK: Property
+    typealias Reactor = ProfileMyPostReactor
+    
+    var disposeBag: DisposeBag = DisposeBag()
+    
     private lazy var profilePostIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.style = .medium
         $0.color = .gray
@@ -23,8 +28,9 @@ final class ProfileMyPostController: UIViewController {
     
     private lazy var dataSource: RxCollectionViewSectionedReloadDataSource<ProfileMyPostSection> = .init(configureCell: { dataSource, collectionView, indexPath, sectionItem in
         switch sectionItem {
-        case .myProfilePostItem: break
+        case let .myProfilePostItem(cellReactor):
             guard let profilePostCell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyProfilePostListCell", for: indexPath) as? MyProfilePostListCell else { return UICollectionViewCell() }
+            profilePostCell.reactor = cellReactor
             return profilePostCell
         }
     })
@@ -43,6 +49,19 @@ final class ProfileMyPostController: UIViewController {
         $0.isScrollEnabled = false
     }
     
+    init(reactor: Reactor) {
+        defer { self.reactor = reactor }
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
+    deinit {
+        debugPrint(#function)
+    }
     
     
     //MARK: LifeCycle
@@ -67,4 +86,22 @@ final class ProfileMyPostController: UIViewController {
     
     
     
+}
+
+
+
+extension ProfileMyPostController: ReactorKit.View {
+    
+    func bind(reactor: Reactor) {
+        self.rx.viewDidLoad
+            .map { Reactor.Action.viewDidLoad}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state.map { $0.isLoading }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostIndicatorView.rx.isAnimating)
+            .disposed(by: disposeBag)
+    }
 }

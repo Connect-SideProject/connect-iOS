@@ -14,7 +14,7 @@ enum ProfileMyPostSection {
 }
 
 enum ProfileMyPostSectionItem {
-    case myProfilePostItem
+    case myProfilePostItem(MyProfilePostListCellReactor)
 }
 
 

@@ -25,6 +25,8 @@ public enum Path {
   case refreshToken
   case logout
   case signOut
+  case myStudy
+  case myBookMark
   
   public var string: String {
     switch self {
@@ -44,6 +46,10 @@ public enum Path {
         return "/api/study/news"
     case .homeRelease:
       return "/api/study/hots"
+    case .myStudy:
+        return "/api/study/myStudies"
+    case .myBookMark:
+        return "/api/study/myBookmark"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:
