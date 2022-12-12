@@ -13,6 +13,6 @@ import CODomain
 
 protocol ProfileMyPostRepository {
     func responseMyPostStudyItem() -> Observable<ProfileMyPostReactor.Mutation>
-    func responseMyPostBorkMarkItem() -> Observable<ProfileMyPostReactor.Mutation>
+    func responseMyPostBookMarkItem() -> Observable<ProfileMyPostReactor.Mutation>
     func responseMyPostSectionItem(item: [ProfileStudy]) -> ProfileMyPostSection
 }

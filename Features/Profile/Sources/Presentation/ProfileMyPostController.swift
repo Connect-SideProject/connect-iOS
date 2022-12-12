@@ -13,13 +13,13 @@ import ReactorKit
 
 
 /// MY 내가 찜한, 게시 글 컨트롤러
-final class ProfileMyPostController: UIViewController {
+public final class ProfileMyPostController: UIViewController {
     
     
     //MARK: Property
-    typealias Reactor = ProfileMyPostReactor
+    public typealias Reactor = ProfileMyPostReactor
     
-    var disposeBag: DisposeBag = DisposeBag()
+    public var disposeBag: DisposeBag = DisposeBag()
     
     private lazy var profilePostIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.style = .medium
@@ -36,17 +36,13 @@ final class ProfileMyPostController: UIViewController {
     })
     
     
-    private let profilePostCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
+    private lazy var profilePostCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
         $0.scrollDirection = .vertical
     }).then {
         $0.showsVerticalScrollIndicator = true
         $0.showsHorizontalScrollIndicator = false
         $0.register(MyProfilePostListCell.self, forCellWithReuseIdentifier: "MyProfilePostListCell")
-    }
-    
-    private let profilePostView: UICollectionView = UICollectionView().then {
         $0.backgroundColor = .hexF9F9F9
-        $0.isScrollEnabled = false
     }
     
     init(reactor: Reactor) {
@@ -65,8 +61,10 @@ final class ProfileMyPostController: UIViewController {
     
     
     //MARK: LifeCycle
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+        
         configure()
     }
     
@@ -92,7 +90,7 @@ final class ProfileMyPostController: UIViewController {
 
 extension ProfileMyPostController: ReactorKit.View {
     
-    func bind(reactor: Reactor) {
+    public func bind(reactor: Reactor) {
         self.rx.viewDidLoad
             .map { Reactor.Action.viewDidLoad}
             .bind(to: reactor.action)
@@ -103,5 +101,25 @@ extension ProfileMyPostController: ReactorKit.View {
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostIndicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.section}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.profilePostCollectionView.rx.items(dataSource: self.dataSource))
+            .disposed(by: disposeBag)
+        
+        self.profilePostCollectionView.rx.setDelegate(self)
+            .disposed(by: disposeBag)
+        
     }
+}
+
+
+
+extension ProfileMyPostController: UICollectionViewDelegateFlowLayout {
+    
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.frame.size.width - 40, height: 97)
+    }
+    
 }

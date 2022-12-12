@@ -18,6 +18,7 @@ import COExtensions
 public protocol ProfileDelegate: AnyObject {
   func routeToEditProfile()
   func routeToSingIn()
+  func routeToMyPost(_ type: ProfilePostType)
 }
 
 /// MY 화면 컨트롤러.
@@ -228,7 +229,14 @@ extension ProfileController {
   
   private func bindEvent() {
     buttonContainerView.handler = { offset in
-      print(offset)
+        switch offset {
+        case 1:
+            self.delegate?.routeToMyPost(.study)
+        case 2:
+            self.delegate?.routeToMyPost(.bookMark)
+        default:
+            break
+        }
     }
     
     skillsButtonRelay

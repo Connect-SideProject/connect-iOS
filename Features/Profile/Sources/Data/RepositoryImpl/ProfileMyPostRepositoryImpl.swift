@@ -24,7 +24,7 @@ final class ProfileMyPostRepositoryImpl: ProfileMyPostRepository {
 extension ProfileMyPostRepositoryImpl {
     
     func responseMyPostStudyItem() -> Observable<ProfileMyPostReactor.Mutation> {
-        let createMyStudyResponse = apiService.request(endPoint: .init(path: .myStudy)).flatMap { (data: ProfileStudy) -> Observable<ProfileMyPostReactor.Mutation> in
+        let createMyStudyResponse = apiService.request(endPoint: .init(path: .myStudy)).flatMap { (data: [ProfileStudy]) -> Observable<ProfileMyPostReactor.Mutation> in
             
             return .just(.setMyStudyItem(data))
         }
@@ -32,8 +32,8 @@ extension ProfileMyPostRepositoryImpl {
         return createMyStudyResponse
     }
     
-    func responseMyPostBorkMarkItem() -> Observable<ProfileMyPostReactor.Mutation> {
-        let createMyBookMarkResponse = apiService.request(endPoint: .init(path: .myBookMark)).flatMap { (data: ProfileBookMark) -> Observable<ProfileMyPostReactor.Mutation> in
+    func responseMyPostBookMarkItem() -> Observable<ProfileMyPostReactor.Mutation> {
+        let createMyBookMarkResponse = apiService.request(endPoint: .init(path: .myBookMark)).flatMap { (data: [ProfileBookMark]) -> Observable<ProfileMyPostReactor.Mutation> in
             
             return .just(.setMyBookMarkItem(data))
         }

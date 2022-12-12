@@ -8,9 +8,20 @@
 import Differentiator
 
 
+enum ProfileMyPostType: String, Equatable {
+    case myStudy
+    case myBookMark
+}
+
 
 enum ProfileMyPostSection {
     case myProfilePost([ProfileMyPostSectionItem])
+    
+    func getSectionType() -> ProfilePostType {
+        switch self {
+        case .myProfilePost: return .study
+        }
+    }
 }
 
 enum ProfileMyPostSectionItem {

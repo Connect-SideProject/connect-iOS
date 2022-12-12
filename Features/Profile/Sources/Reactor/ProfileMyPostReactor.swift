@@ -12,35 +12,35 @@ import CODomain
 import CONetwork
 
 
-enum ProfilePostType: String, Equatable {
+public enum ProfilePostType: String, Equatable {
     case bookMark
     case study
 }
 
 
 
-final class ProfileMyPostReactor: Reactor {
+public final class ProfileMyPostReactor: Reactor {
     
     //MARK: Property
     private var profilePostType: ProfilePostType?
     private var profileMyPostRepository: ProfileMyPostRepository
     
-    enum Action {
+    public enum Action {
         case viewDidLoad
     }
     
-    enum Mutation {
+    public enum Mutation {
         case setLoading(Bool)
-        case setMyStudyItem(ProfileStudy)
-        case setMyBookMarkItem(ProfileBookMark)
+        case setMyStudyItem([ProfileStudy])
+        case setMyBookMarkItem([ProfileBookMark])
     }
     
-    struct State {
+    public struct State {
         var isLoading: Bool
         var section: [ProfileMyPostSection]
     }
     
-    let initialState: State
+    public let initialState: State
     
     init(profilePostType: ProfilePostType, profileMyPostRepository: ProfileMyPostRepository) {
         defer { _ = self.state }
@@ -59,21 +59,28 @@ final class ProfileMyPostReactor: Reactor {
         
     }
     
-    func mutate(action: Action) -> Observable<Mutation> {
+    public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .viewDidLoad:
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             
             if profilePostType == .bookMark {
-                return .concat(startLoading, endLoading)
+                return .concat(
+                    startLoading,
+                    profileMyPostRepository.responseMyPostBookMarkItem(),
+                    endLoading
+                )
             } else {
-                return .empty()
+                return .concat(
+                    startLoading,
+                    profileMyPostRepository.responseMyPostStudyItem(),
+                    endLoading)
             }
         }
     }
     
-    func reduce(state: State, mutation: Mutation) -> State {
+    public func reduce(state: State, mutation: Mutation) -> State {
         switch mutation {
         case let .setLoading(isLoading):
             var newState = state
@@ -82,6 +89,8 @@ final class ProfileMyPostReactor: Reactor {
             return newState
         case let .setMyStudyItem(items):
             var newState = state
+            let myStudySectionIndex = self.getIndex(section: .myProfilePost([]))
+            newState.section[myStudySectionIndex] = profileMyPostRepository.responseMyPostSectionItem(item: items)
             
             return newState
 
@@ -93,4 +102,19 @@ final class ProfileMyPostReactor: Reactor {
     }
     
     
+}
+
+
+private extension ProfileMyPostReactor {
+    
+    func getIndex(section: ProfileMyPostSection) -> Int {
+        var index: Int = 0
+        
+        for i in 0 ..< self.currentState.section.count {
+            if self.currentState.section[i].getSectionType() == section.getSectionType() {
+                index = i
+            }
+        }
+        return index
+    }
 }
