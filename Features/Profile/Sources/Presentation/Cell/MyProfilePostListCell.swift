@@ -163,7 +163,35 @@ final class MyProfilePostListCell: UICollectionViewCell {
 extension MyProfilePostListCell: ReactorKit.View {
     func bind(reactor: Reactor) {
         
+        reactor.state
+            .map { $0.myStudyModel.myStudyTitle}
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostTitleLabel.rx.text)
+            .disposed(by: disposeBag)
         
+        reactor.state
+            .map { $0.myStudyModel.myStudyInfo}
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostSubTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.myStudyModel.myStudyisEnd }
+            .do(onNext: { _ in
+                self.profilePostStateLabel.text = "모집중"
+            }).map { _ in UIColor.hex05A647}
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.myStudyModel.myStudyisEnd == false }
+            .do(onNext: { _ in
+                self.profilePostStateLabel.text = "모집완료"
+            }).map { _ in UIColor.hex8E8E8E }
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
         
         
     }
