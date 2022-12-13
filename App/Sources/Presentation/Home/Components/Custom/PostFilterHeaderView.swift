@@ -33,7 +33,6 @@ final class PostFilterReactor: Reactor {
     init(bottomSheetItem: [BottomSheetItem]) {
         defer { _ = self.state }
         self.initialState = State(isSelected: false, bottomSheetItem: bottomSheetItem)
-        print("PostFilter Reactor: \(bottomSheetItem)")
     }
     
     func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
@@ -60,7 +59,6 @@ private extension PostFilterReactor {
     func responseSheetItemTransform(from event: PostFilterTransform.Event) -> Observable<Mutation> {
         switch event {
         case let .responseSheetItem(item):
-            print("PostFilterReactor Transform Item: \(item)")
             
             return .just(.setSheetItems(item))
             

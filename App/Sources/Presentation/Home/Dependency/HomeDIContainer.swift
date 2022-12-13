@@ -132,7 +132,7 @@ final class HomeViewRepo: HomeRepository {
     func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection {
         var homeNewsSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
-            homeNewsSectionItem.append(.homeStudyList(HomeStudyListReactor(studyNewsModel: item[i], homeNewsRepo: self)))
+            homeNewsSectionItem.append(.homeStudyList(HomeStudyListReactor(studyNewsModel: item[i], homeNewsRepo: self, studyNewsId: item[i].id)))
         }
         
         return HomeViewSection.homeStudyList(homeNewsSectionItem)
@@ -144,7 +144,7 @@ final class HomeViewRepo: HomeRepository {
         var homeReleaseSectionItem: [HomeRelaseSectionItem] = []
         
         for i in 0 ..< item.count {
-            homeReleaseSectionItem.append(.hotList(HomeReleaseCellReactor(releaseModel: item[i], homeReleaseRepo: self)))
+            homeReleaseSectionItem.append(.hotList(HomeReleaseCellReactor(releaseModel: item[i], homeReleaseRepo: self, releaseId: item[i].id)))
         }
         
         return HomeReleaseSection.hotMenu(homeReleaseSectionItem)

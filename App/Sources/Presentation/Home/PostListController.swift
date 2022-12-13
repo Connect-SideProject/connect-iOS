@@ -164,15 +164,13 @@ extension PostListController: ReactorKit.View {
                 PostFilterTransform.event.onNext(.searchToKeyword(keyword: keyword))
             }).disposed(by: disposeBag)
         
-        reactor.state
-            .map { $0.bottomSheetItem }
+        reactor.pulse(\.$bottomSheetItem)
             .bind { item in
                 PostFilterTransform.event.onNext(.responseSheetItem(item: item))
             }.disposed(by: disposeBag)
         
-        reactor.state
-            .map { $0.section }
-            .observe(on: MainScheduler.instance)
+        reactor.pulse(\.$section)
+            .observe(on: MainScheduler.asyncInstance)
             .bind(to: postCollectionView.rx.items(dataSource: self.postDataSource))
             .disposed(by: disposeBag)
         
@@ -183,18 +181,11 @@ extension PostListController: ReactorKit.View {
             .bind(to: postListIndicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
         
-        self.postCollectionView
-            .rx.prefetchItems
-            .distinctUntilChanged()
-            .subscribe(onNext: { indexPath in
-                for item in indexPath {
-                    if item.row == self.reactor?.currentState.pages {
-                        self.reactor?.action.onNext(.updatePageItem(10))
-                    }
-                    print("indexPath post item : \(item.row)")
-                }
-            }).disposed(by: disposeBag)
-        
+        reactor.state
+            .map { $0.isPageLoading}
+            .observe(on: MainScheduler.instance)
+            .bind(to: postListIndicatorView.rx.isAnimating)
+            .disposed(by: disposeBag)
     }
     
 }
@@ -245,4 +236,20 @@ extension PostListController: UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 8
     }
+}
+
+
+extension PostListController: UIScrollViewDelegate {
+    
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let scrollHeight = scrollView.frame.height
+        let scrollContentHeight = scrollView.contentSize.height
+        if scrollView.contentOffset.y + scrollHeight >= scrollContentHeight  {
+            if !(self.reactor?.currentState.isPageLoading ?? false) {
+                self.reactor?.action.onNext(.updatePageItem(10, !(self.reactor?.currentState.isPageLoading ?? false)))
+            }
+            
+        }
+    }
+    
 }

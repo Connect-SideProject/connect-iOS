@@ -179,20 +179,30 @@ extension PostStduyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.postModel.contentisEnd }
+            .map { _ in UIColor.hex05A647 }
             .observe(on: MainScheduler.asyncInstance)
-            .do(onNext: { _ in
-                self.postStateTitleLabel.text = "모집중"
-            }).map { _ in UIColor.hex05A647 }
             .bind(to: postStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd }
+            .map { _ in "모집중" }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postStateTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.postModel.contentisEnd == false }
             .observe(on: MainScheduler.asyncInstance)
-            .do(onNext: { _ in
-                self.postStateTitleLabel.text = "모집완료"
-            }).map { _ in UIColor.hex8E8E8E }
+            .map { _ in UIColor.hex8E8E8E }
             .bind(to: postStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd == false }
+            .map { _ in "모집완료" }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postStateTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
@@ -218,9 +228,6 @@ extension PostStduyListCell: ReactorKit.View {
             .observe(on: MainScheduler.instance)
             .bind(to: postMemberLabel.rx.text)
             .disposed(by: disposeBag)
-        
-        guard let postBookMarkid = self.reactor?.currentState.postModel.id else { return }
-        
             
         reactor.state
             .filter { $0.postModel.contentisBookMark  }
@@ -241,21 +248,21 @@ extension PostStduyListCell: ReactorKit.View {
             .tapGesture()
             .when(.recognized)
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .map { _ in Reactor.Action.didTapPostBookMark(String(postBookMarkid))}
+            .map { _ in Reactor.Action.didTapPostBookMark}
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.postBookMarkItems != nil }
-            .filter{ $0.postBookMarkItems!.bookMarkId == $0.postModel.id && $0.postBookMarkItems!.bookMarkisCheck}
+            .compactMap { $0.postBookMarkItems }
+            .filter { $0.bookMarkId == self.reactor?.currentState.postListId && $0.bookMarkisCheck }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
             .bind(to: postBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         
         
         reactor.state
-            .filter { $0.postBookMarkItems != nil }
-            .filter { $0.postBookMarkItems!.bookMarkId == $0.postModel.id  && $0.postBookMarkItems?.bookMarkisCheck == false}
+            .compactMap { $0.postBookMarkItems }
+            .filter { $0.bookMarkId == self.reactor?.currentState.postListId && $0.bookMarkisCheck == false }
             .map { _ in UIImage(named: "home_studylist_bookmark")}
             .bind(to: postBookMarkImageView.rx.image)
             .disposed(by: disposeBag)

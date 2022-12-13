@@ -34,7 +34,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     }
     
     public var errorHandler: (Error) -> Observable<Mutation> = { error in
-        return .just(.setHomeEmptySection(.homeStudyList([.homeStudyList(HomeStudyListReactor(studyNewsModel: nil, homeNewsRepo: nil))])))
+        return .just(.setHomeEmptySection(.homeStudyList([.homeStudyList(HomeStudyListReactor(studyNewsModel: nil, homeNewsRepo: nil, studyNewsId: 0))])))
     }
     
     private let homeRepository: HomeRepository
@@ -54,8 +54,8 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     public struct State {
         var isLoading: Bool
         var isError: COError?
-        var section: [HomeViewSection]
-        var releaseSection: [HomeReleaseSection]
+        @Pulse var section: [HomeViewSection]
+        @Pulse var releaseSection: [HomeReleaseSection]
         var menuType: String
     }
     
@@ -64,8 +64,6 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             "area": UserManager.shared.profile?.region?.description ?? "",
             "studyType": nil
         ]
-        
-        defer { _ = self.state }
         
         self.homeRepository = homeRepository
         
@@ -133,7 +131,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             
             return .concat(
                 startLoading,
-                homeRepository.responseHomeNewsItem(paramenter: homeParameter),
+                homeRepository.responseHomeNewsItem(paramenter: homeParameter).catch(errorHandler),
                 endLoading
             )
         }
@@ -156,58 +154,41 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     }
     
     public func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
+        
         switch mutation {
         case let .setLoading(isLoading):
-            var newState = state
             newState.isLoading = isLoading
-            
-            return newState
-            
+                        
         case let .setHomeMenuItem(items):
-            var newState = state
             let fieldSectionIndex = self.getIndex(section: .field([]))
             newState.section[fieldSectionIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
             
-            return newState
+
         case let .setHomeNewsItem(items):
-            var newState = state
             let studyListIndex = self.getIndex(section: .homeStudyList([]))
             newState.section[studyListIndex] = homeRepository.responseHomeNewsSectionItem(item: items)
             
-            return newState
         case let .setSubMenuItems(items):
-            var newState = state
             let subMenuIndex = self.getIndex(section: .homeSubMenu([]))
             newState.section[subMenuIndex] = items
-            return newState
             
         case let .setHomeError(error):
-            var newState = state
             newState.isError = error?.asCOError
-            
-            return newState
-            
+                        
         case let.setReleaseItems(items):
-            var newState = state
             let releaseIndex = self.getReleaseIndex(section: .hotMenu([]))
             newState.releaseSection[releaseIndex] = homeRepository.responseHomeReleaseSectionItem(item: items)
-            return newState
             
         case let .setSelectMenuType(menuType):
-            var newState = state
             newState.menuType = menuType
             
-            return newState
         case let .setHomeEmptySection(section):
-            var newState = state
             let emptyIndex = self.getIndex(section: .homeStudyList([]))
-            print("empty Mutation")
             newState.section[emptyIndex] = section
             
-            return newState
         }
-        
-        
+        return newState
     }
 }
 
@@ -238,7 +219,6 @@ private extension HomeViewReactor {
     func didSelectMenuType(from event: HomeViewTransform.Event) -> Observable<Mutation> {
         switch event {
         case let .didSelectHomeMenu(type):
-            print("didSelectMenu Type Home : \(type.currentState.menuType.getTitle())")
             return .just(.setSelectMenuType(type.currentState.menuType.getTitle()))
         }
     }
@@ -246,7 +226,6 @@ private extension HomeViewReactor {
     func didSelectMenuAction(from event: HomeViewTransform.Event) -> Observable<Action> {
         switch event {
         case let .didSelectHomeMenu(menuType):
-            print("did SelectMenu Action Type \(menuType.currentState.menuType.getTitle())")
             
             return .just(.updateNewItem(StudyType.getStudyType(menuType.currentState.menuType.getTitle())))
         }

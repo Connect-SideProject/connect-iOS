@@ -23,7 +23,6 @@ public final class SearchKeywordCellReactor: Reactor {
     
     
     public init(keywordItems: String, indexPath: Int) {
-        defer { _ = self.state }
         self.initialState = State(keywordItems: keywordItems, indexPath: indexPath)
     }
     

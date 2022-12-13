@@ -15,7 +15,7 @@ public final class PostListCellReactor: Reactor {
     
     
     public enum Action {
-        case didTapPostBookMark(String)
+        case didTapPostBookMark
     }
     
     public enum Mutation {
@@ -27,22 +27,22 @@ public final class PostListCellReactor: Reactor {
     public struct State {
         var postModel: PostContentList
         var postBookMarkItems: HomeBookMarkList?
+        var postListId: Int
     }
     
     
     public let initialState: State
     
-    init(postModel: PostContentList, postListRepo: PostListRepo) {
-        defer { _ = self.state }
-        self.initialState = State(postModel: postModel, postBookMarkItems: nil)
+    init(postModel: PostContentList, postListRepo: PostListRepo, postListId: Int) {
+        self.initialState = State(postModel: postModel, postBookMarkItems: nil, postListId: postListId)
         self.postListRepo = postListRepo
     }
     
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case let .didTapPostBookMark(id):
-            let postBookMarkMutation = postListRepo.requestPostBookMarkItem(id: id)
+        case .didTapPostBookMark:
+            let postBookMarkMutation = postListRepo.requestPostBookMarkItem(id: String(self.currentState.postListId))
             
             return postBookMarkMutation
         }
@@ -50,15 +50,13 @@ public final class PostListCellReactor: Reactor {
     }
     
     public func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
         switch mutation {
         case let .setPostBookMarkItems(items):
-            var newState = state
             newState.postBookMarkItems = items
-            
-            print("PostBookMark Item: \(items)")
-            
-            return newState
         }
+        
+        return newState
     }
     
     

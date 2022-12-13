@@ -67,7 +67,6 @@ final class SearchViewRepo: SearchRepository {
     func responseSearchKeywordsSectionItem() -> SearchSection {
         var searchRecentlyKeywordItem: [SearchSectionItem] = []
         var recentlyKeyWordItems = UserDefaults.standard.stringArray(forKey: .recentlyKeywords)
-        print("Userdefault DI: \(UserDefaults.standard.stringArray(forKey: .recentlyKeywords))")
         
         for i in 0 ..< recentlyKeyWordItems.count {
             searchRecentlyKeywordItem.append(.searchList(SearchKeywordCellReactor(keywordItems: recentlyKeyWordItems[i], indexPath: i)))

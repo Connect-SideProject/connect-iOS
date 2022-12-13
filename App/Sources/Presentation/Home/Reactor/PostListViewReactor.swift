@@ -36,19 +36,21 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
         case didTapStudyType(String)
         case didTapInterestType(String)
         case didTapAligmentType(String)
-        case updatePageItem(Int)
+        case updatePageItem(Int, Bool)
     }
     
     public struct State {
         var isLoading: Bool
+        var isPageLoading: Bool
         var isError: COError?
         var pages: Int
-        var bottomSheetItem: [BottomSheetItem]
-        var section: [PostViewSection]
+        @Pulse var bottomSheetItem: [BottomSheetItem]
+        @Pulse var section: [PostViewSection]
     }
     
     public enum Mutation {
         case setLoading(Bool)
+        case setPageLoading(Bool)
         case setPostError(COError?)
         case setPostSheetItem([String])
         case setUpdatePage(Int)
@@ -64,13 +66,13 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
     }
     
     init(postRepository: PostListRepository) {
-        defer { _ = self.state }
         self.postRepository = postRepository
         self.postParameter = [
             "size": "10"
         ]
         self.initialState = State(
             isLoading: false,
+            isPageLoading: false,
             pages: 10,
             bottomSheetItem: [],
             section: [
@@ -96,7 +98,6 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             postParameter.updateValue(meetingItem, forKey: "meetingType")
-            print("postParameter: \(postParameter)")
             return .concat(
                 startLoading,
                 postRepository.responsePostListItem(parameter: postParameter),
@@ -106,7 +107,6 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             postParameter.updateValue(studyItem, forKey: "studyType")
-            print("postParameter: \(postParameter)")
             if studyItem == "전체" {
                 return .concat(
                     startLoading,
@@ -152,9 +152,9 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
                 postRepository.responsePostListItem(parameter: postParameter),
                 endLoading
             )
-        case let .updatePageItem(pages):
-            let startLoading = Observable<Mutation>.just(.setLoading(true))
-            let endLoading = Observable<Mutation>.just(.setLoading(false))
+        case let .updatePageItem(pages, isPageLoad):
+            let startLoading = Observable<Mutation>.just(.setPageLoading(isPageLoad))
+            let endLoading = Observable<Mutation>.just(.setPageLoading(false))
             let updatePages = Observable<Mutation>.just(.setUpdatePage(pages))
             
             postParameter.updateValue(String(self.currentState.pages), forKey: "size")
@@ -178,40 +178,33 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
     
     
     public func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
+        
         switch mutation {
         case let .setLoading(isLoading):
-            var newState = state
             newState.isLoading = isLoading
             
-            return newState
-            
         case let .setPostError(isError):
-            var newState = state
             newState.isError = isError
-            
-            return newState
-            
+                        
         case let .setPostSheetItem(items):
-            var newState = state
             var bottomSheetItems: [BottomSheetItem] = []
             _ = items.map { item in
                 bottomSheetItems.append(BottomSheetItem(value: item))
             }
             newState.bottomSheetItem = bottomSheetItems
-            print("set Bottom Sheet Item: \(items)")
-            return newState
         case let .setPostListItem(items):
-            var newState = state
             let postAllIndex = self.getIndex(section: .post([]))
-            print("Post All List Items: \(items)")
             newState.section[postAllIndex] = postRepository.responsePostListSectionItem(item: items.postList)
-            return newState
+            
         case let .setUpdatePage(pages):
-            var newState = state
             newState.pages = self.currentState.pages + pages
-            print("newstate Page: \(newState.pages)")
-            return newState
+            
+        case let .setPageLoading(isPageLoading):
+            newState.isPageLoading = isPageLoading
         }
+        
+        return newState
     }
     
 }

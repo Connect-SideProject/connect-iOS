@@ -33,7 +33,7 @@ public final class SearchViewReactor: Reactor {
     public struct State {
         var keyword: String?
         var isLoading: Bool
-        var section: [SearchSection]
+        @Pulse var section: [SearchSection]
     }
     
     public var initialState: State
@@ -41,7 +41,6 @@ public final class SearchViewReactor: Reactor {
     private let searchRepository: SearchRepository
     
     init(searchRepository: SearchRepository) {
-        defer { _ = self.state }
         self.searchRepository = searchRepository
         self.initialState = State(
             keyword: "",
@@ -68,9 +67,6 @@ public final class SearchViewReactor: Reactor {
                   .just(.setSearchKeywordItem)
                 )
             }
-            //TODO: Search API Event Return
-            
-            
             return .empty()
         }
         
@@ -86,25 +82,22 @@ public final class SearchViewReactor: Reactor {
     
     
     public func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
+
         switch mutation {
         case let .setLoading(isLoading):
-            var newState = state
             newState.isLoading = isLoading
             
-            return newState
-            
         case .setSearchKeywordItem:
-            var newState = state
             let searchIndex = self.getIndex(section: .search([]))
             newState.section[searchIndex] = searchRepository.responseSearchKeywordsSectionItem()
-            return newState
             
         case let .setKeyword(keyword):
-            var newState = state
             newState.keyword = keyword
             
-            return newState
         }
+        
+        return newState
     }
     
     

@@ -125,6 +125,7 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         
         releaseStateContainerView.addSubview(releaseStateLabel)
         releaseMangerConfirmView.addSubview(releaseMangerConfirmTitleLabel)
+        releaseMangerConfirmView.isHidden = true
         
         _ = [releaseBookMarkCountLabel, releaseBookMarkImageView].map {
             self.releaseBookMarkContainerView.addSubview($0)
@@ -180,7 +181,7 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         }
         
         releaseMemberStateImageView.snp.makeConstraints {
-            $0.bottom.equalTo(releaseMangerConfirmView.snp.top).offset(-18)
+            $0.bottom.equalToSuperview().offset(-14)
             $0.left.equalTo(releaseSubTitleLabel)
             $0.width.height.equalTo(16)
         }
@@ -217,7 +218,7 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
             .rx.tapGesture()
             .when(.recognized)
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .map { _ in Reactor.Action.didTapBookMarkButton(String(self.reactor?.currentState.releaseModel.id ?? 1)) }
+            .map { _ in Reactor.Action.didTapBookMarkButton }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -231,20 +232,31 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd }
-            .do(onNext:{ _ in
-                self.releaseStateLabel.text = "모집중"
-            }).map { _ in UIColor.hex05A647 }
+            .map { _ in UIColor.hex05A647 }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseStateContainerView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd == false }
-            .do(onNext:{ _ in
-                self.releaseStateLabel.text = "모집완료"
-            }).map { _ in UIColor.hex8E8E8E }
+            .map { _ in UIColor.hex8E8E8E }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseStateContainerView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
+        reactor.state
+            .filter { $0.releaseModel.releaseisEnd == false }
+            .map { _ in "모집완료"}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseStateLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.releaseModel.releaseisEnd }
+            .map { _ in "모집중" }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseStateLabel.rx.text)
+            .disposed(by: disposeBag)
         
         reactor.state
             .map { String($0.releaseModel.releaseBookMark) }

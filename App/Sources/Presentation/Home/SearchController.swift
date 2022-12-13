@@ -166,17 +166,15 @@ extension SearchController: ReactorKit.View {
             .disposed(by: disposeBag)
         
         
-        reactor.state
-            .map { $0.section }
+        reactor.pulse(\.$section)
             .debug("Search Keywrod Section")
-            .observe(on: MainScheduler.instance)
+            .observe(on: MainScheduler.asyncInstance)
             .bind(to: keywordCollectionView.rx.items(dataSource: self.searchDataSource))
             .disposed(by: disposeBag)
         
         keywordSearchBar.rx.searchButtonTap
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .withUnretained(self)
-            .debug("Search Bar Tap Action -> ")
             .subscribe(onNext: { vc, keyword in
                 UserDefaults.standard.setRecentlyKeyWord(keyword: keyword)
                 SearchViewTransform.event.onNext(.refreshKeywordSection)

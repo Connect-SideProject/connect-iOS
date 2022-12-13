@@ -18,12 +18,13 @@ import CODomain
 public final class HomeStudyListReactor: Reactor {
 
     public enum Action {
-        case didTapNewsBookMark(String)
+        case didTapNewsBookMark
     }
 
     public struct State {
         var studyNewsModel: HomeStudyList?
         var studyNewsBookMarkModel: HomeBookMarkList?
+        var studyNewsId: Int
     }
     
     public enum Mutation {
@@ -33,30 +34,30 @@ public final class HomeStudyListReactor: Reactor {
     public let initialState: State
     private let homeNewsRepo: HomeViewRepo?
     
-    init(studyNewsModel: HomeStudyList?, homeNewsRepo: HomeViewRepo?) {
-        defer { _ = self.state }
-        self.initialState = State(studyNewsModel: studyNewsModel)
+    init(studyNewsModel: HomeStudyList?, homeNewsRepo: HomeViewRepo?, studyNewsId: Int) {
+        self.initialState = State(studyNewsModel: studyNewsModel, studyNewsId: studyNewsId)
         self.homeNewsRepo = homeNewsRepo
     }
     
     
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
-        case let .didTapNewsBookMark(id):
-            let newsBookMarkMutaion = homeNewsRepo?.requestHomeNewsBookMarkItem(id: id)
+        case .didTapNewsBookMark:
+            let newsBookMarkMutaion = homeNewsRepo?.requestHomeNewsBookMarkItem(id: String(self.currentState.studyNewsId))
             
             return newsBookMarkMutaion ?? .empty()
         }
     }
 
     public func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
+        
         switch mutation {
         case let .updateNewsBookMark(items):
-            var newState = state
             newState.studyNewsBookMarkModel = items
-            return newState
         }
         
+        return newState
     }
 
 }
@@ -240,20 +241,34 @@ extension HomeStudyListCell: ReactorKit.View {
         reactor.state
             .compactMap { $0.studyNewsModel}
             .filter { $0.studyNewsIsEnd }
+            .map { _ in UIColor.hex05A647 }
             .observe(on: MainScheduler.instance)
-            .do(onNext: { _ in
-                self.studyListStateLabel.text = "모집중"
-            }).map { _ in UIColor.hex05A647 }
             .bind(to: studyListStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.studyNewsModel?.studyNewsIsEnd == false }
+            .compactMap { $0.studyNewsModel }
+            .filter { $0.studyNewsIsEnd }
+            .map { _ in "모집중" }
             .observe(on: MainScheduler.instance)
-            .do(onNext: { _ in
-                self.studyListStateLabel.text = "모집완료"
-            }).map { _ in UIColor.hex8E8E8E}
+            .bind(to: studyListStateLabel.rx.text)
+            .disposed(by: disposeBag)
+                
+        reactor.state
+            .compactMap { $0.studyNewsModel }
+            .filter { $0.studyNewsIsEnd == false }
+            .map { _ in UIColor.hex8E8E8E}
+            .observe(on: MainScheduler.instance)
             .bind(to: studyListStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .compactMap { $0.studyNewsModel }
+            .filter { $0.studyNewsIsEnd == false }
+            .map { _ in "모집완료"}
+            .observe(on: MainScheduler.instance)
+            .bind(to: studyListStateLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
@@ -276,13 +291,11 @@ extension HomeStudyListCell: ReactorKit.View {
             .bind(to: studyMemberStateLabel.rx.text)
             .disposed(by: disposeBag)
         
-        guard let bookMarkId = self.reactor?.currentState.studyNewsModel?.id else { return }
-        
         studyBookMarkView.rx
             .tapGesture()
             .when(.recognized)
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
-            .map { _ in Reactor.Action.didTapNewsBookMark(String(bookMarkId))}
+            .map { _ in Reactor.Action.didTapNewsBookMark }
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
@@ -302,15 +315,15 @@ extension HomeStudyListCell: ReactorKit.View {
             
         
         reactor.state
-            .filter { $0.studyNewsBookMarkModel != nil && $0.studyNewsModel != nil }
-            .filter { $0.studyNewsBookMarkModel!.bookMarkId == $0.studyNewsModel!.id && $0.studyNewsBookMarkModel!.bookMarkisCheck }
+            .compactMap { $0.studyNewsBookMarkModel }
+            .filter { $0.bookMarkId == self.reactor?.currentState.studyNewsId && $0.bookMarkisCheck }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
-        
+
         reactor.state
-            .filter { $0.studyNewsBookMarkModel != nil && $0.studyNewsModel != nil }
-            .filter { $0.studyNewsBookMarkModel!.bookMarkId == $0.studyNewsModel!.id && $0.studyNewsBookMarkModel!.bookMarkisCheck == false }
+            .compactMap { $0.studyNewsBookMarkModel }
+            .filter { $0.bookMarkId == self.reactor?.currentState.studyNewsId && $0.bookMarkisCheck == false }
             .map { _ in UIImage(named: "home_studylist_bookmark") }
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)

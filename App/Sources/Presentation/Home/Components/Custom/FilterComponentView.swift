@@ -84,26 +84,26 @@ private extension FilterComponentViewReactor {
         switch event {
         case let .didTapOnOffLineSheet(text):
             guard currentState == .onOffLine(.default) else { return .empty() }
-            print("Transoform bottomSheet \(currentState)")
+            debugPrint("Transoform bottomSheet \(currentState)")
             return .concat(
                 .just(.setOnOffLineFilter(text))
             )
             
         case let .didTapAligmentSheet(text):
             guard currentState == .aligment(.default) else { return .empty() }
-            print("Transform aligment \(currentState)")
+            debugPrint("Transform aligment \(currentState)")
             
             return .just(.setAligmentFilter(text))
             
         case let .didTapStudyTypeSheet(text):
             guard currentState == .studyType(.default) else { return .empty() }
-            print("Transform StudyType \(currentState)")
+            debugPrint("Transform StudyType \(currentState)")
             
             return .just(.setStudyTypeFilter(text))
             
         case let .didTapInterestSheet(text):
             guard currentState == .interest([]) else { return .empty() }
-            print("Transform InterestType: \(currentState) or text \(text)")
+            debugPrint("Transform InterestType: \(currentState)")
             return .just(.setInterestFilter(text))
         default:
             return .empty()
@@ -136,8 +136,8 @@ final class FilterComponentView: BaseView {
     
     
     init(reactor: Reactor) {
-        defer { self.reactor = reactor}
         super.init(frame: .zero)
+        self.reactor = reactor
         configure()
     }
     

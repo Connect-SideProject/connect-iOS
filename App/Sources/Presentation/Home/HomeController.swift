@@ -324,17 +324,15 @@ extension HomeController {
         self.releaseCollectionView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
-        reactor.state
-            .map { $0.section }
+        reactor.pulse(\.$section)
             .debug("Section Item ")
             .observe(on: MainScheduler.asyncInstance)
             .bind(to: self.collectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
         
-        reactor.state
-            .map { $0.releaseSection}
+        reactor.pulse(\.$releaseSection)
             .debug("release Section Item")
-            .observe(on: MainScheduler.instance)
+            .observe(on: MainScheduler.asyncInstance)
             .bind(to: self.releaseCollectionView.rx.items(dataSource: self.releaseDataSource))
             .disposed(by: disposeBag)
         

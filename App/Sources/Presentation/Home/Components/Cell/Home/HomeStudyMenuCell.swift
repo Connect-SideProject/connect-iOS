@@ -42,7 +42,6 @@ public final class HomeStudyMenuReactor: Reactor {
     }
     
     init(menuType: HomeSubMenuType, isSelected: Bool) {
-        defer { _ = self.state }
         self.initialState = State(menuType: menuType, isSelected: isSelected)
     }
     

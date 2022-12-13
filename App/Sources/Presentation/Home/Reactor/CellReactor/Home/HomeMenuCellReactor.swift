@@ -28,9 +28,7 @@ public final class HomeMenuCellReactor: Reactor {
     init(menuType: HomeMenuList,
          homeCellRepo: HomeViewRepo
     ) {
-        defer { _ = self.state }
         self.initialState = State(menuType: menuType, homeCellRepo: homeCellRepo)
-        print("Menu Type : \(menuType)")
         
     }
     
