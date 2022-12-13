@@ -31,30 +31,40 @@ public final class ProfileMyPostReactor: Reactor {
     
     public enum Mutation {
         case setLoading(Bool)
+        case setLoadType(ProfilePostType)
         case setMyStudyItem([ProfileStudy])
         case setMyBookMarkItem([ProfileBookMark])
     }
     
     public struct State {
         var isLoading: Bool
+        var isPostType: ProfilePostType?
         var section: [ProfileMyPostSection]
     }
     
-    public let initialState: State
+    public var initialState: State
     
     init(profilePostType: ProfilePostType, profileMyPostRepository: ProfileMyPostRepository) {
         defer { _ = self.state }
         
         self.profilePostType = profilePostType
         self.profileMyPostRepository = profileMyPostRepository
+        print("debug postType init: \(self.profilePostType)")
         self.initialState = State(
             isLoading: false,
-            section: [
-                .myProfilePost([])
-            ]
+            isPostType: nil,
+            section: []
         )
         
-        
+        if self.profilePostType == .bookMark {
+            self.initialState.section = [
+                .myProfileBookMark([])
+            ]
+        } else {
+            self.initialState.section = [
+                .myProfilePost([])
+            ]
+        }
         
         
     }
@@ -66,16 +76,21 @@ public final class ProfileMyPostReactor: Reactor {
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             
             if profilePostType == .bookMark {
+                let bookMarkTypeMutation = Observable<Mutation>.just(.setLoadType(self.profilePostType ?? .study))
                 return .concat(
                     startLoading,
+                    Observable<Mutation>.just(.setLoadType(self.profilePostType ?? .study)),
                     profileMyPostRepository.responseMyPostBookMarkItem(),
                     endLoading
                 )
             } else {
+                let studyTypeMutation = Observable<Mutation>.just(.setLoadType(self.profilePostType ?? .bookMark))
                 return .concat(
                     startLoading,
+                    Observable<Mutation>.just(.setLoadType(self.profilePostType ?? .bookMark)),
                     profileMyPostRepository.responseMyPostStudyItem(),
-                    endLoading)
+                    endLoading
+                )
             }
         }
     }
@@ -96,6 +111,13 @@ public final class ProfileMyPostReactor: Reactor {
 
         case let .setMyBookMarkItem(items):
             var newState = state
+            let myBookMarkSectionIndex = self.getIndex(section: .myProfileBookMark([]))
+            newState.section[myBookMarkSectionIndex] = profileMyPostRepository.responseMyBookMarkSectionItem(item: items)
+            return newState
+            
+        case let .setLoadType(isPostType):
+            var newState = state
+            newState.isPostType = isPostType
             
             return newState
         }

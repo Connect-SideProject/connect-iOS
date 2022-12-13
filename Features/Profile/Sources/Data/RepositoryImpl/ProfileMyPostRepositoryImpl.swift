@@ -53,4 +53,14 @@ extension ProfileMyPostRepositoryImpl {
         
     }
     
+    func responseMyBookMarkSectionItem(item: [ProfileBookMark]) -> ProfileMyPostSection {
+        var myBookMarkSectionItem: [ProfileMyPostSectionItem] = []
+        
+        for i in 0 ..< item.count {
+            myBookMarkSectionItem.append(.myProfileBookMarkItem(MyProfileBookMarkListCellReactor(myBookMarkModel: item[i])))
+        }
+        
+        return ProfileMyPostSection.myProfileBookMark(myBookMarkSectionItem)
+    }
+    
 }

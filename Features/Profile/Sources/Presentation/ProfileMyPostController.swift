@@ -26,12 +26,27 @@ public final class ProfileMyPostController: UIViewController {
         $0.color = .gray
     }
     
+    private lazy var profilePostBackButton: UIButton = UIButton().then {
+        $0.setImage(UIImage(named: "ic_back_arrow"), for: .normal)
+        $0.semanticContentAttribute = .forceLeftToRight
+        $0.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        $0.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        $0.titleLabel?.font = .semiBold(size: 16)
+    }
+    
+    private lazy var profilePostBarButtonItem: UIBarButtonItem = UIBarButtonItem(customView: profilePostBackButton)
+    
     private lazy var dataSource: RxCollectionViewSectionedReloadDataSource<ProfileMyPostSection> = .init(configureCell: { dataSource, collectionView, indexPath, sectionItem in
         switch sectionItem {
         case let .myProfilePostItem(cellReactor):
             guard let profilePostCell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyProfilePostListCell", for: indexPath) as? MyProfilePostListCell else { return UICollectionViewCell() }
             profilePostCell.reactor = cellReactor
             return profilePostCell
+        case let .myProfileBookMarkItem(cellReactor):
+        guard let profileBookMarkCell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyProfileBookMarkListCell", for: indexPath) as? MyProfileBookMarkListCell else { return UICollectionViewCell() }
+        
+        profileBookMarkCell.reactor = cellReactor
+        return profileBookMarkCell
         }
     })
     
@@ -42,6 +57,7 @@ public final class ProfileMyPostController: UIViewController {
         $0.showsVerticalScrollIndicator = true
         $0.showsHorizontalScrollIndicator = false
         $0.register(MyProfilePostListCell.self, forCellWithReuseIdentifier: "MyProfilePostListCell")
+        $0.register(MyProfileBookMarkListCell.self, forCellWithReuseIdentifier: "MyProfileBookMarkListCell")
         $0.backgroundColor = .hexF9F9F9
     }
     
@@ -63,6 +79,7 @@ public final class ProfileMyPostController: UIViewController {
     //MARK: LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationItem.leftBarButtonItem = profilePostBarButtonItem
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         
         configure()
@@ -77,6 +94,10 @@ public final class ProfileMyPostController: UIViewController {
         
         profilePostCollectionView.snp.makeConstraints {
             $0.edges.equalToSuperview()
+        }
+        
+        profilePostIndicatorView.snp.makeConstraints {
+            $0.center.equalToSuperview()
         }
         
         
@@ -108,6 +129,20 @@ extension ProfileMyPostController: ReactorKit.View {
             .bind(to: self.profilePostCollectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
         
+        reactor.state
+            .filter { $0.isPostType == .study}
+            .debug("post Type -> ")
+            .map { _ in "내가 쓴 글"}
+            .bind(to: self.profilePostBackButton.rx.title())
+            .disposed(by: disposeBag)
+        
+        profilePostBackButton
+            .rx.tap
+            .withUnretained(self)
+            .bind { vc, _ in
+                vc.navigationController?.popViewController(animated: true)
+            }.disposed(by: disposeBag)
+        
         self.profilePostCollectionView.rx.setDelegate(self)
             .disposed(by: disposeBag)
         
@@ -120,6 +155,14 @@ extension ProfileMyPostController: UICollectionViewDelegateFlowLayout {
     
     public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.size.width - 40, height: 97)
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 8
     }
     
 }
