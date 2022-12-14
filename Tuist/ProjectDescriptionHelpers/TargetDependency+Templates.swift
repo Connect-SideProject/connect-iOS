@@ -20,6 +20,7 @@ extension TargetDependency {
     public struct Auth {}
     public struct Reactive {}
     public struct UI {}
+    public struct Log {}
   }
 }
 
@@ -59,6 +60,11 @@ extension TargetDependency.Project.Core {
   public static let thirdParty: TargetDependency = .project(
     target: "COThirdParty",
     path: .relativeToRoot("Core/COThirdParty")
+  )
+    
+  public static let log: TargetDependency = .project(
+    target: "COLog",
+    path: .relativeToRoot("Core/COLog")
   )
 }
 
@@ -112,6 +118,10 @@ extension TargetDependency.ThirdParty.Reactive {
   public static let rxCocoa: TargetDependency = .external(name: "RxCocoa")
   public static let rxDataSources: TargetDependency = .external(name: "RxDataSources")
   public static let rxGesture: TargetDependency = .external(name: "RxGesture")
+}
+
+extension TargetDependency.ThirdParty.Log {
+    public static let googleAnalytics: TargetDependency = .external(name: "FirebaseAnalytics")
 }
 
 extension TargetDependency.ThirdParty.UI {
