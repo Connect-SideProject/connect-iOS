@@ -358,7 +358,7 @@ extension MapController: CLLocationManagerDelegate {
             let latitude:CLLocationDegrees = location.coordinate.latitude
             print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
         var currentLocation = MapCoordinate(lat: latitude, lng: longtitude)
-        UserDefaults.standard.set(currentLocation, forKey: "currentLocation")
+        UserDefaults.standard.set(currentLocation, forKey: .currentLocation)
 //            moveCameraUpdate(mapView: naverMapView.mapView, mapCoordinate: MapCoordinate(lat: latitude, lng: longtitude))
 //            manager.stopUpdatingLocation()
 

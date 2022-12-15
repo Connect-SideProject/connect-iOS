@@ -14,6 +14,7 @@ public enum UserDefaultsKeys: String {
   case profile
   case roleSkillsList
   case interestList
+  case currentLocation
 }
 
 public extension UserDefaults {
