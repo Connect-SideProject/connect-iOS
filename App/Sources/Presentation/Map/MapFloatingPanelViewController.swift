@@ -29,6 +29,9 @@ class MapFloatingPanelViewController: UIViewController {
     
     lazy var connectCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewCompositionalLayout(sectionProvider: { [weak self] _, _ -> NSCollectionLayoutSection? in
         guard let `self` = self else { return nil }
+        if self.floatingType == .searchResult {
+            return type(of: self).createSearchResultsCollectionViewSection()
+        }
         return type(of: self).createConnectCollectionViewSection()
     })).then {
         $0.alwaysBounceHorizontal = true
@@ -85,11 +88,44 @@ class MapFloatingPanelViewController: UIViewController {
     
     //MARK: -Configure
     private static func createConnectCollectionViewSection() -> NSCollectionLayoutSection? {
-        let item = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .fractionalHeight(1)))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(2/3), heightDimension: .fractionalHeight(1)), subitem: item, count: 1)
+        // Who, Study 일때
+        let item = NSCollectionLayoutItem(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .fractionalHeight(1)
+            )
+        )
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(2/3),
+                heightDimension: .fractionalHeight(1)),
+            subitem: item,
+            count: 1
+        )
         group.contentInsets = NSDirectionalEdgeInsets(top: 30, leading: 10, bottom: 60, trailing: 10)
         let section = NSCollectionLayoutSection(group: group)
         section.orthogonalScrollingBehavior = .groupPaging
+        return section
+    }
+    
+    private static func createSearchResultsCollectionViewSection() -> NSCollectionLayoutSection? {
+        // addressResults 일때
+        let item = NSCollectionLayoutItem(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .fractionalHeight(0.2)
+            )
+        )
+        let group =  NSCollectionLayoutGroup.vertical(
+            layoutSize: NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .fractionalHeight(1)
+            ),
+            subitems: [item]
+        )
+//        group.contentInsets = NSDirectionalEdgeInsets(top: 30, leading: 10, bottom: 60, trailing: 10)
+        let section = NSCollectionLayoutSection(group: group)
+        section.orthogonalScrollingBehavior = .none
         return section
     }
     
