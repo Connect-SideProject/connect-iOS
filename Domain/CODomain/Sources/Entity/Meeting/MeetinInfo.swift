@@ -32,27 +32,31 @@ public struct MeetingInfo: Codable {
 
 // MARK: - Category
 public struct Category: Codable {
-    let category: String
+    public var category: String
 }
 
 // MARK: - Place
 public struct Place: Codable {
-    let name: String
-    let location: Location
+    public var name: String
+    public var location: Location
 }
 
 // MARK: - Location
 public struct Location: Codable {
-    let x, y: Double
+    public var x, y: Double
 }
 
 // MARK: - MeeingInfoRole
 public struct MeeingInfoRole: Codable {
-    let role: RoleType
+    public var role: RoleType
 }
 
 // MARK: - Part
 public struct Part: Codable {
-    let count: Int
-    let role: RoleType
+    public var count: Int
+    public var role: RoleType
+    
+    public var description: String {
+        return self.role.description + " \(count) 명"
+    }
 }
