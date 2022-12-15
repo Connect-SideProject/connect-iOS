@@ -73,7 +73,14 @@ extension MeetingDetailController {
         }
         
         override func configure(with item: MeetingInfo) {
-            
+            let values = [item.endDate.toDate(format: "yyyy-mm-dd")?.toFormattedString(dateFormat: "yy.mm.dd") ?? "",
+                          item.studyType,
+                          item.meetingType,
+                          item.categories.map(\.category).joined(separator: " ,"),
+                          item.parts.map(\.description).joined(separator: " ,")]
+            self.cardValueLabels.enumerated().forEach { offset, label in
+                label.text = values[offset]
+            }
         }
         
         private func setLabels() {
