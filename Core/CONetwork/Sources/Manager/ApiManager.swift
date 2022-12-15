@@ -51,10 +51,10 @@ public final class ApiManager: ApiService {
       
       let configuration = URLSessionConfiguration.default
       configuration.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
-      configuration.connectionProxyDictionary = [AnyHashable: Any]()
-      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
-      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = "172.31.47.70"
-      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = 443
+//      configuration.connectionProxyDictionary = [AnyHashable: Any]()
+//      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPEnable as String] = 1
+//      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPProxy as String] = "172.31.47.70"
+//      configuration.connectionProxyDictionary?[kCFNetworkProxiesHTTPPort as String] = 443
 
       
       let task = URLSession(configuration: configuration).dataTask(with: request) { data, response, error in

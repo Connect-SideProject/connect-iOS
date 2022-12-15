@@ -47,7 +47,9 @@ public class ChatBaseController<T: ReactorKit.Reactor>: UIViewController, FlexLa
     public func setupContainer() {
         self.view.addSubview(self.rootContainer)
     }
-    public func setAttrs() { }
+    public func setAttrs() {
+        self.view.backgroundColor = .white
+    }
     public func layout() { }
     public func bind(reactor: T) { }
     public func clearBag() {

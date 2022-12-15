@@ -9,36 +9,33 @@
 import UIKit
 import RxSwift
 import SnapKit
+import Then
 
 
 
 final class HomeSearchView: BaseView {
     
     //MARK: Property
-    private let placeHolderLabel: UILabel = {
+    private let placeHolderLabel: UILabel = UILabel().then {
         $0.textColor = .hexC6C6C6
         $0.numberOfLines = 1
         $0.text = "찾는 프로젝트 키워드를 검색해보세요."
         $0.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        return $0
-    }(UILabel())
+    }
     
-
-    private let imageView: UIImageView = {
-        $0.contentMode = .scaleAspectFill
-        $0.image = UIImage(named: "home_seach_filter")
+    private let imageView: UIImageView = UIImageView().then {
+        $0.contentMode = .scaleToFill
+        $0.image = UIImage(named: "home_main_search")
         
-        return $0
-    }(UIImageView())
+    }
     
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init() {
+        super.init(frame: .zero)
         configure()
     }
     
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
+        fatalError("init(coder:) has not been implemented")
     }
     
     
@@ -46,8 +43,6 @@ final class HomeSearchView: BaseView {
         self.clipsToBounds = true
         self.layer.cornerRadius = 12
         self.backgroundColor = .hexF9F9F9
-        
-                
         _ = [imageView,placeHolderLabel].map {
             addSubview($0)
         }
@@ -55,7 +50,7 @@ final class HomeSearchView: BaseView {
         imageView.snp.makeConstraints {
             $0.left.equalToSuperview().offset(15)
             $0.centerY.equalToSuperview()
-            $0.width.height.equalTo(24)
+            $0.width.height.equalTo(18)
         }
         placeHolderLabel.snp.makeConstraints {
             $0.centerY.equalTo(imageView)

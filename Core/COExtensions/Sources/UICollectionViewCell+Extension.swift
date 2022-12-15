@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension UICollectionViewCell {
+public extension UICollectionViewCell {
     static var reuseableIdentifier: String {
         get {
             return NSStringFromClass(self.classForCoder()).components(separatedBy: ".").last!

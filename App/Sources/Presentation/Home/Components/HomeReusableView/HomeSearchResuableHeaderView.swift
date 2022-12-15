@@ -6,14 +6,25 @@
 //
 
 import UIKit
+import Then
 import SnapKit
+import COCommonUI
+
+import RxGesture
+import RxSwift
 
 
 final class HomeSearchResuableHeaderView: UICollectionReusableView {
     
-    //MARK: Property
-    private let homeSearchView: HomeSearchView = HomeSearchView()
+    public var completion: (() -> Void)?
     
+    //MARK: Property
+    private let homeSearchView: HomeSearchView = HomeSearchView().then {
+        $0.layer.borderColor = UIColor.hexF9F9F9.cgColor
+        $0.layer.borderWidth = 2
+    }
+    
+    private var disposeBag: DisposeBag = DisposeBag()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -35,6 +46,14 @@ final class HomeSearchResuableHeaderView: UICollectionReusableView {
             $0.left.equalToSuperview().offset(20)
             $0.right.equalToSuperview().offset(-20)
         }
+        
+        homeSearchView.rx
+            .tapGesture()
+            .when(.recognized)
+            .throttle(.seconds(2), scheduler: MainScheduler.instance)
+            .bind { _ in
+                self.completion?()
+            }.disposed(by: disposeBag)
     }
     
     
