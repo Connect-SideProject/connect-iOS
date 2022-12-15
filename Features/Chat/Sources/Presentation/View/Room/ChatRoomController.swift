@@ -131,7 +131,7 @@ extension ChatRoomController {
         public var initialState: State = .init()
         public enum Action { }
         public struct State {
-            @Pulse var sectionModels = [SectionModel]()
+            @Pulse var sectionModels: [SectionModel] = .init([.basic(items: [.received(data: .init(sender: "음오아예", msg: "안녕하세요. iOS 개발자 마마무 입니다. iOS 개발자 마마무 입니다.iOS 개발자 마마무 입니다.iOS 개발자 마마무 입니다.iOS 개발자 마마무 입니다.", timestamp: 0)), .sent(data: .init(sender: "me", msg: "안녕하세요. 혹시 프로젝트 경험 있으신가요? 혹시 프로젝트 경험 있으신가요? 혹시 프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요?프로젝트 경험 있으신가요? 프로젝트 경험 있으신가요?", timestamp: 0))])])
         }
     }
 }
