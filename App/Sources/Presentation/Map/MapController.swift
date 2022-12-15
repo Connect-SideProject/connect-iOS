@@ -50,6 +50,7 @@ class MapController: UIViewController, View {
         appearance.backgroundColor = .clear
         
         // Set the new appearance
+        fpc.contentMode = .fitToBounds
         fpc.surfaceView.appearance = appearance
         fpc.surfaceView.grabberHandle.isHidden = true // FloatingPanel Grabber hidden true
 //        fpc.surfaceView.isUserInteractionEnabled = false // 아예 Fpc 안움직이게 함
@@ -94,7 +95,7 @@ class MapController: UIViewController, View {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-        exampleGetCurrentLocation()
+        getCurrentLocation()
 
 //        LocationManager.shared.setLocationManager()
 //        ApiManager.shared.request(endPoint: .init(path: .userProfile)).subscribe(onNext: { (data: KakaoMapAddress) in
@@ -187,6 +188,7 @@ class MapController: UIViewController, View {
                 guard let `self` = self else { return }
                 let contentViewController = MapFloatingPanelViewController(kakaoAddressResults: kakaoAddresses)
                 contentViewController.checkEmpty(isEmpty: isEmpty)
+                self.floatingPanelVC.panGestureRecognizer.isEnabled = true
                 self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
             })
             .disposed(by: disposeBag)
@@ -260,6 +262,7 @@ extension MapController: ConnectMapDataFuctionality {
                     guard let `self` = self else { return false }
                     self.moveCameraUpdate(mapView: mapView, mapCoordinate: mapCoordinate)
                     let contentViewController = MapFloatingPanelViewController(floatingType: .who)
+                    self.floatingPanelVC.panGestureRecognizer.isEnabled = false
                     self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
                     return true
                 }
@@ -300,6 +303,7 @@ extension MapController: ConnectMapDataFuctionality {
                     guard let `self` = self else { return false }
                     self.moveCameraUpdate(mapView: mapView, mapCoordinate: mapCoordinate)
                     let contentViewController = MapFloatingPanelViewController(floatingType: .study)
+                    self.floatingPanelVC.panGestureRecognizer.isEnabled = false
                     self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
                     return false
                 }
@@ -330,7 +334,7 @@ extension MapController: CLLocationManagerDelegate {
         }
     }
     
-    private func exampleGetCurrentLocation() { // 첫 현재위치를 위한 권한 받아오기위한 함수
+    private func getCurrentLocation() { // 첫 현재위치를 위한 권한 받아오기위한 함수
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
         self.locationManager.requestWhenInUseAuthorization()
@@ -353,6 +357,8 @@ extension MapController: CLLocationManagerDelegate {
             let longtitude: CLLocationDegrees = location.coordinate.longitude
             let latitude:CLLocationDegrees = location.coordinate.latitude
             print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
+        var currentLocation = MapCoordinate(lat: latitude, lng: longtitude)
+        UserDefaults.standard.set(currentLocation, forKey: "currentLocation")
 //            moveCameraUpdate(mapView: naverMapView.mapView, mapCoordinate: MapCoordinate(lat: latitude, lng: longtitude))
 //            manager.stopUpdatingLocation()
 
