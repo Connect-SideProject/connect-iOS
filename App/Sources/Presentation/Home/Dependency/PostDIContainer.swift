@@ -84,8 +84,8 @@ public enum StudyType: String, Equatable {
 
 public enum AligmentType: String, Equatable {
     
-    case fame = "FAME"
-    case distance = "DISTANCE"
+    case fame = "인기순"
+    case distance = "거리순"
     case none = ""
     
     static func getAligmentType(_ type: String?) -> String {

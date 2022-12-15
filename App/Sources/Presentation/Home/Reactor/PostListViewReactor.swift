@@ -134,7 +134,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
         case let .didTapAligmentType(aligmentItem):
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
-            postParameter.updateValue(aligmentItem, forKey: "sortOption")
+            postParameter.updateValue(aligmentItem, forKey: "sort")
             
             return .concat(
                 startLoading,
