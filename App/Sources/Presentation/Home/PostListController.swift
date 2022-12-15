@@ -30,9 +30,9 @@ class PostListController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let currentLocation = UserDefaults.standard.object(forKey: .currentLocation) as? MapCoordinate {
-            return
-        }
+//        if let currentLocation = UserDefaults.standard.object(forKey: .currentLocation) as? MapCoordinate {
+//            print("locaiton = \(currentLocation)")
+//        }
     }
     
     private func configure() {

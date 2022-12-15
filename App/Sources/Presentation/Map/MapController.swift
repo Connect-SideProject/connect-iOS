@@ -26,6 +26,7 @@ class MapController: UIViewController, View {
     
     // MARK: -Properties
     private let locationManager = CLLocationManager()
+    private var currentLocation: MapCoordinate?
 //    var guInfoWindows = [NMFInfoWindow]()
 //    var markers = [NMFMarker]()
     typealias Reactor = MapReactor
@@ -342,6 +343,10 @@ extension MapController: CLLocationManagerDelegate {
         if CLLocationManager.locationServicesEnabled() {
             print("위치 서비스 On 상태")
             locationManager.startUpdatingLocation() // 이 함수를 호출함으로써 didUpdateLocations로 현재위치를 받을 수 있음
+            guard let currentLocation = currentLocation else {
+                return
+            }
+            UserDefaults.standard.set(currentLocation, forKey: .currentLocation)
         } else {
             print("위치 서비스 Off 상태")
         }
@@ -358,7 +363,8 @@ extension MapController: CLLocationManagerDelegate {
             let latitude:CLLocationDegrees = location.coordinate.latitude
             print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
         var currentLocation = MapCoordinate(lat: latitude, lng: longtitude)
-        UserDefaults.standard.set(currentLocation, forKey: .currentLocation)
+        self.currentLocation = currentLocation
+//        UserDefaults.standard.set(currentLocation, forKey: .currentLocation)
 //            moveCameraUpdate(mapView: naverMapView.mapView, mapCoordinate: MapCoordinate(lat: latitude, lng: longtitude))
 //            manager.stopUpdatingLocation()
 
