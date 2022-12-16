@@ -8,28 +8,26 @@
 import UIKit
 import Then
 import SnapKit
+import RxSwift
+import RxCocoa
 
 
 final class HomeStudyListFooterView: UICollectionReusableView {
     
     //MARK: Property
-    private let studyMoreContainerView: UIView = UIView().then {
-        $0.backgroundColor = UIColor.white
-    }
-    
-    private let studyMoreLabel: UILabel = UILabel().then {
-        $0.text = "더보기"
-        $0.textColor = .hex8E8E8E
-        $0.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        $0.textAlignment = .center
-        $0.numberOfLines = 1
-    }
-    
-    private let studyMoreImageView: UIImageView = UIImageView().then {
-        $0.contentMode = .scaleToFill
-        $0.image = UIImage(named: "home_studylist_more")
         
+    public var completion: (() -> Void)?
+    
+    private var disposeBag: DisposeBag = DisposeBag()
+    
+    private let studyMoreButton: UIButton = UIButton(type: .custom).then {
+        $0.setTitle("더보기", for: .normal)
+        $0.setTitleColor(.hex8E8E8E, for: .normal)
+        $0.setImage(UIImage(named: "home_studylist_more"), for: .normal)
+        $0.semanticContentAttribute = .forceRightToLeft
+        $0.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
     }
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -42,27 +40,18 @@ final class HomeStudyListFooterView: UICollectionReusableView {
     
     //MARK: Configure
     private func configure() {
-        self.addSubview(studyMoreContainerView)
         
-        _ = [studyMoreLabel,studyMoreImageView].map {
-            studyMoreContainerView.addSubview($0)
-        }
+        self.addSubview(studyMoreButton)
         
-        studyMoreContainerView.snp.makeConstraints {
+        studyMoreButton.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
-        studyMoreLabel.snp.makeConstraints {
-            $0.width.equalTo(42)
-            $0.height.equalTo(16)
-            $0.center.equalToSuperview()
-        }
-        
-        studyMoreImageView.snp.makeConstraints {
-            $0.left.equalTo(studyMoreLabel.snp.right).offset(5)
-            $0.width.height.equalTo(16)
-            $0.centerY.equalToSuperview()
-        }
+        studyMoreButton.rx.tap
+            .withUnretained(self)
+            .subscribe { vc, _ in
+                vc.completion?()
+            }.disposed(by: disposeBag)
     }
     
     

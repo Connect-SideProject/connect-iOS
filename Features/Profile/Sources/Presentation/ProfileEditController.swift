@@ -38,58 +38,68 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   private var roleTitles: [String] = []
   private lazy var roleContainerView = DescriptionContainerView(
     type: .custom(
-      "원하는 역할",
-      RoundSelectionButtonView(
-        titles: roleTitles
-      ),
-      nil
+      .init(
+        title: "원하는 역할",
+        castableView: RoundSelectionButtonView(
+          titles: roleTitles
+        )
+      )
     )
   )
   
   private lazy var addressContainerView = DescriptionContainerView(
     type: .customWithAttributed(
-      "활동지역 *".setLastWord(color: .red),
-      CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
-      nil
+      .init(
+        attributedTitle: "활동지역 *".setLastWord(color: .red),
+        castableView: CastableButton(type: .downwordArrow("활동 지역을 선택해주세요."))
+      )
     )
   )
   
   private var interestTitles: [String] = []
   private lazy var interestsContainerView = DescriptionContainerView(
     type: .custom(
-      "관심분야",
-      RoundSelectionButtonView(
-        titles: interestTitles
-      ),
-      nil
+      .init(
+        title: "관심분야",
+        castableView: RoundSelectionButtonView(
+          titles: interestTitles
+        )
+      )
     )
   )
   
   private let portfolioContainerView = DescriptionContainerView(
-    type: .textField("포트폴리오", "포트폴리오 URL을 입력 해주세요. (선택)")
+    type: .textField(
+      .init(
+        title: "포트폴리오",
+        placeholder: "포트폴리오 URL을 입력 해주세요. (선택)"
+      )
+    )
   )
   
   private let periodContainerView = DescriptionContainerView(
     type: .custom(
-      "경력기간",
-      CheckBoxContainerView(
-        titles: [
-          Career.aspirant.description,
-          Career.junior.description,
-          Career.senior.description
-        ],
-        eventType: .radio
-      ),
-      nil
+      .init(
+        title: "경력기간",
+        castableView: CheckBoxContainerView(
+          titles: [
+            Career.aspirant.description,
+            Career.junior.description,
+            Career.senior.description
+          ],
+          eventType: .radio
+        )
+      )
     )
   )
   
   private var skillsViews: [CastableView] = []
   private lazy var skillContainerView = DescriptionContainerView(
     type: .custom(
-      "보유 스킬",
-      CastableContainerView(views: skillsViews),
-      nil
+      .init(
+        title: "보유 스킬",
+        castableView: CastableContainerView(views: skillsViews)
+      )
     )
   )
   
@@ -112,6 +122,12 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
   
   public weak var delegate: ProfileEditDelegate?
   
+  private let addressButtonRelay = PublishRelay<String>()
+  private let roleItemsRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  private let interestItemsRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  private let periodItemsRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  private let skillsItemsRelay = PublishRelay<RoundSelectionButtonUpdateType>()
+  
   public var disposeBag = DisposeBag()
   
   public override func viewDidLoad() {
@@ -119,6 +135,8 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
     
     configureUI()
     bindEvent()
+    
+    reactor?.action.onNext(.viewDidLoad)
   }
   
   @objc func dismissKeyboards() {
@@ -189,9 +207,9 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
       .compactMap { $0.imageURL }
       .observe(on: MainScheduler.instance)
       .bind { [weak self] imageURL in
-          guard let `self` = self else { return }
+        guard let `self` = self else { return }
         Task {
-            await self.profileView.profileImageView.setImage(url: imageURL)
+          await self.profileView.profileImageView.setImage(url: imageURL)
         }
       }.disposed(by: disposeBag)
     
@@ -210,21 +228,17 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
           }
           
         case let .bottomSheet(items):
-          let bottomSheet = BottomSheetController(
-            type: .address(items)
-          )
-          bottomSheet.modalPresentationStyle = .overFullScreen
-          bottomSheet.confirmHandler = { [weak self, weak reactor] selectedIndex in
-            if let item = items[safe: selectedIndex] {
-              let text = item.value.법정동명
-              reactor?.action.onNext(.didSelectedLocation(selectedIndex))
-              
-              if let button = self?.addressContainerView.customView as? CastableButton {
-                button.setTitle("서울 \(text)", for: .normal)
+          BottomSheet(type: .address(items))
+            .show()
+            .handler = { [weak self, weak reactor] state in
+              switch state {
+              case let .confirm(selectedIndex, title):
+                reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+                self?.addressButtonRelay.accept(title)
+              default:
+                break
               }
             }
-          }
-          self?.present(bottomSheet, animated: true)
         }
       }.disposed(by: disposeBag)
     
@@ -275,7 +289,7 @@ private extension ProfileEditController {
         
         flex.addItem(saveButton)
           .height(41)
-    }
+      }
   }
   
   func bindEvent() {
@@ -286,11 +300,30 @@ private extension ProfileEditController {
     tapGesture.delegate = self
     view.addGestureRecognizer(tapGesture)
     
-    if let castableButton = addressContainerView.customView as? CastableButton {
-      castableButton.handler = { [weak reactor] in
+    addressButtonRelay
+      .bind(to: addressContainerView.castableButtonRelay)
+      .disposed(by: disposeBag)
+    
+    roleItemsRelay
+      .bind(to: roleContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
+    
+    interestItemsRelay
+      .bind(to: interestsContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
+    
+    periodItemsRelay
+      .bind(to: periodContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
+    
+    skillsItemsRelay
+      .bind(to: skillContainerView.updateRoundSelectionButtonRelay)
+      .disposed(by: disposeBag)
+    
+    addressContainerView.buttonHandlerRelay
+      .bind { [weak reactor] in
         reactor?.action.onNext(.didTapAddressButton)
-      }
-    }
+      }.disposed(by: disposeBag)
   }
   
   func updateViews(profile: Profile) {
@@ -300,40 +333,23 @@ private extension ProfileEditController {
       roles: profile.roles
     )
     
-    if let role = roleContainerView.customView?.casting(
-      type: RoundSelectionButtonView.self
-    ) {
-      role.setSelectedItems(
-        items: profile.roles.map { $0.description }
-      )
-    }
+    let roleItems = profile.roles.map { $0.description }
+    roleItemsRelay.accept(.selectedItems(roleItems))
     
-    if let castableButton = addressContainerView.customView as? CastableButton {
-      if let address = profile.region?.description {
-        castableButton.setTitle(address, for: .normal)
-      }
-    }
+    let address = profile.region?.description ?? ""
+    addressButtonRelay.accept(address)
     
-    if let interests = interestsContainerView.customView?.casting(
-      type: RoundSelectionButtonView.self
-    ) {
-      interests.setSelectedItems(items: profile.interestings.map { $0.description })
-    }
+    let interestItems = profile.interestings.map { $0.description }
+    interestItemsRelay.accept(.selectedItems(interestItems))
     
     let portfolio = portfolioContainerView.textField
     portfolio.text = profile.portfolioURL
     
-    if let period = periodContainerView.customView?.casting(
-      type: CheckBoxContainerView.self
-    ) {
-      period.setSelectedItems(items: [profile.career?.description ?? ""])
-    }
+    let periodItems = [profile.career?.description ?? ""]
+    periodItemsRelay.accept(.selectedItems(periodItems))
     
-    if let skills = skillContainerView.customView?.casting(
-      type: CastableContainerView.self
-    ) {
-      skills.setSelectedItems(items: profile.skills)
-    }
+    let skillsItems = profile.skills
+    skillsItemsRelay.accept(.selectedItems(skillsItems))
   }
   
   @objc func didTapSaveButton() {
@@ -342,13 +358,11 @@ private extension ProfileEditController {
     
     let roles: [RoleType] = roleContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
-    )
-    .selectedItems.compactMap { RoleType(description: $0) } ?? []
+    ).selectedItems.compactMap { RoleType(description: $0) } ?? []
     
     let interestings: [String] = interestsContainerView.customView?.casting(
       type: RoundSelectionButtonView.self
-    )
-    .selectedItems ?? []
+    ).selectedItems ?? []
     
     let portfolioURL = portfolioContainerView.textField.text
     
@@ -362,9 +376,7 @@ private extension ProfileEditController {
     
     let skills: [String] = skillContainerView.customView?.casting(
       type: CastableContainerView.self
-    )
-    .selectedItems
-    .flatMap { $0 } ?? []
+    ).selectedItems.flatMap { $0 } ?? []
     
     let parameter: ProfileEditParameter = .init(
       profileURL: profileURL,

@@ -7,15 +7,25 @@
 
 import Foundation
 
+@objc public protocol ChildrenContainer {
+    typealias ChildrenDependency = AnyObject
+    typealias ChildrenController = AnyObject
+    
+    @objc optional func makeChildrenDependency() -> ChildrenDependency
+    @objc optional func makeChildrenController() -> ChildrenController
+}
 
-public protocol HomeDIConainer {
+
+
+public protocol HomeDIContainer: ChildrenContainer {
     
     associatedtype HomeReactor
     associatedtype HomeViewRepository
     associatedtype HomeViewController
     
-    func makeHomeReactor() -> HomeReactor
-    func makeHomeRepository() -> HomeViewRepository
-    func makeHomeController() -> HomeViewController
+    
+    func makeReactor() -> HomeReactor
+    func makeRepository() -> HomeViewRepository
+    func makeController() -> HomeViewController
     
 }
