@@ -16,4 +16,11 @@ public extension Data {
     
     return ""
   }
+    
+    func decode<T: Decodable>() -> T? {
+        if let json = try? JSONDecoder().decode(T.self, from: self) {
+            return json
+        }
+        return nil
+    }
 }

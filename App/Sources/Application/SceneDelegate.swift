@@ -47,7 +47,7 @@ extension SceneDelegate {
     controller.reactor = .init()
     controller.delegate = self
     
-    window?.rootViewController = MainController()
+    window?.rootViewController = MapController()
     window?.makeKeyAndVisible()
   }
   

@@ -344,9 +344,16 @@ extension MapController: CLLocationManagerDelegate {
             print("위치 서비스 On 상태")
             locationManager.startUpdatingLocation() // 이 함수를 호출함으로써 didUpdateLocations로 현재위치를 받을 수 있음
             guard let currentLocation = currentLocation else {
+                print("currentLocation is nil")
                 return
             }
-            UserDefaults.standard.set(currentLocation, forKey: .currentLocation)
+            UserDefaults.standard.set(currentLocation.encode(), forKey: .currentLocation)
+            guard let currentLocation = UserDefaults.standard.object(forKey: .currentLocation) as? Data else {
+                print("currentLocation is nil")
+                return
+            }
+            let decoded = currentLocation.decode() as? MapCoordinate
+            print("currentLocacaca = \(decoded)")
         } else {
             print("위치 서비스 Off 상태")
         }
@@ -358,16 +365,12 @@ extension MapController: CLLocationManagerDelegate {
                 오로지 locationManager를 통한 현재위치에만 해당
                 stopUpdatingLocation()을 해주지않으면 쓸데없이 계속 위치정보를 업데이트할 수 있다
              */
-            let location: CLLocation = locations[locations.count - 1]
-            let longtitude: CLLocationDegrees = location.coordinate.longitude
-            let latitude:CLLocationDegrees = location.coordinate.latitude
-            print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
+        let location: CLLocation = locations[locations.count - 1]
+        let longtitude: CLLocationDegrees = location.coordinate.longitude
+        let latitude:CLLocationDegrees = location.coordinate.latitude
+        print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
         var currentLocation = MapCoordinate(lat: latitude, lng: longtitude)
         self.currentLocation = currentLocation
-//        UserDefaults.standard.set(currentLocation, forKey: .currentLocation)
-//            moveCameraUpdate(mapView: naverMapView.mapView, mapCoordinate: MapCoordinate(lat: latitude, lng: longtitude))
-//            manager.stopUpdatingLocation()
-
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) { // 현재 위치를 가져올 수 있는 권한상태확인
