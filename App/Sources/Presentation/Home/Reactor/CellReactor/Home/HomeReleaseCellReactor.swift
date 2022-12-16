@@ -25,14 +25,13 @@ public final class HomeReleaseCellReactor: Reactor {
     public struct State {
         var releaseModel: HomeHotList
         var bookMarkModel: HomeBookMarkList?
-        var releaseId: Int
     }
     
     public let initialState: State
     private let homeReleaseRepo: HomeViewRepo
     
-    init(releaseModel: HomeHotList, homeReleaseRepo: HomeViewRepo, releaseId: Int) {
-        self.initialState = State(releaseModel: releaseModel, bookMarkModel: nil, releaseId: releaseId)
+    init(releaseModel: HomeHotList, homeReleaseRepo: HomeViewRepo) {
+        self.initialState = State(releaseModel: releaseModel, bookMarkModel: nil)
         self.homeReleaseRepo = homeReleaseRepo
 
     }
@@ -40,7 +39,8 @@ public final class HomeReleaseCellReactor: Reactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .didTapBookMarkButton:
-            let bookMarkMutation = homeReleaseRepo.requestHomeBookMarkItem(id: String(self.currentState.releaseId))
+
+            let bookMarkMutation = homeReleaseRepo.requestHomeBookMarkItem(id: String(self.currentState.releaseModel.id))
             
             
             return bookMarkMutation

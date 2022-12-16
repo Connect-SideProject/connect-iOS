@@ -24,7 +24,6 @@ public final class HomeStudyListReactor: Reactor {
     public struct State {
         var studyNewsModel: HomeStudyList?
         var studyNewsBookMarkModel: HomeBookMarkList?
-        var studyNewsId: Int
     }
     
     public enum Mutation {
@@ -34,8 +33,8 @@ public final class HomeStudyListReactor: Reactor {
     public let initialState: State
     private let homeNewsRepo: HomeViewRepo?
     
-    init(studyNewsModel: HomeStudyList?, homeNewsRepo: HomeViewRepo?, studyNewsId: Int) {
-        self.initialState = State(studyNewsModel: studyNewsModel, studyNewsId: studyNewsId)
+    init(studyNewsModel: HomeStudyList?, homeNewsRepo: HomeViewRepo?) {
+        self.initialState = State(studyNewsModel: studyNewsModel)
         self.homeNewsRepo = homeNewsRepo
     }
     
@@ -43,7 +42,9 @@ public final class HomeStudyListReactor: Reactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .didTapNewsBookMark:
-            let newsBookMarkMutaion = homeNewsRepo?.requestHomeNewsBookMarkItem(id: String(self.currentState.studyNewsId))
+            guard let bookMarkId = self.currentState.studyNewsModel?.id else { return .empty() }
+            
+            let newsBookMarkMutaion = homeNewsRepo?.requestHomeNewsBookMarkItem(id: String(bookMarkId))
             
             return newsBookMarkMutaion ?? .empty()
         }
@@ -316,14 +317,14 @@ extension HomeStudyListCell: ReactorKit.View {
         
         reactor.state
             .compactMap { $0.studyNewsBookMarkModel }
-            .filter { $0.bookMarkId == self.reactor?.currentState.studyNewsId && $0.bookMarkisCheck }
+            .filter { $0.bookMarkId == self.reactor?.currentState.studyNewsModel?.id && $0.bookMarkisCheck }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
 
         reactor.state
             .compactMap { $0.studyNewsBookMarkModel }
-            .filter { $0.bookMarkId == self.reactor?.currentState.studyNewsId && $0.bookMarkisCheck == false }
+            .filter { $0.bookMarkId == self.reactor?.currentState.studyNewsModel?.id && $0.bookMarkisCheck == false }
             .map { _ in UIImage(named: "home_studylist_bookmark") }
             .bind(to: studyBookMarkImageView.rx.image)
             .disposed(by: disposeBag)

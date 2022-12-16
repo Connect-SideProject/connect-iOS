@@ -34,7 +34,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     }
     
     public var errorHandler: (Error) -> Observable<Mutation> = { error in
-        return .just(.setHomeEmptySection(.homeStudyList([.homeStudyList(HomeStudyListReactor(studyNewsModel: nil, homeNewsRepo: nil, studyNewsId: 0))])))
+        return .just(.setHomeEmptySection(.homeStudyList([.homeStudyList(HomeStudyListReactor(studyNewsModel: nil, homeNewsRepo: nil))])))
     }
     
     private let homeRepository: HomeRepository

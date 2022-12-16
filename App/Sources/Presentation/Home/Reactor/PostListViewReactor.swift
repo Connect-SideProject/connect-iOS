@@ -12,6 +12,7 @@ import COExtensions
 import CONetwork
 import COCommonUI
 import CODomain
+import Foundation
 
 
 public enum PostFilterTransform: TransformType, Equatable {
@@ -91,7 +92,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             
             return .concat(
                 startLoading,
-                postRepository.responsePostSheetItem(),
+                postRepository.responsePostSheetItem().catch(errorHandler),
                 endLoading
             )
         case let .didTapOnOffType(meetingItem):
@@ -100,7 +101,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             postParameter.updateValue(meetingItem, forKey: "meetingType")
             return .concat(
                 startLoading,
-                postRepository.responsePostListItem(parameter: postParameter),
+                postRepository.responsePostListItem(parameter: postParameter).catch(errorHandler),
                 endLoading
             )
         case let .didTapStudyType(studyItem):
@@ -110,13 +111,13 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             if studyItem == "전체" {
                 return .concat(
                     startLoading,
-                    postRepository.responsePostListItem(parameter: nil),
+                    postRepository.responsePostListItem(parameter: nil).catch(errorHandler),
                     endLoading
                 )
             } else {
                 return .concat(
                     startLoading,
-                    postRepository.responsePostListItem(parameter: postParameter),
+                    postRepository.responsePostListItem(parameter: postParameter).catch(errorHandler),
                     endLoading
                 )
             }
@@ -127,7 +128,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             
             return .concat(
                 startLoading,
-                postRepository.responsePostListItem(parameter: postParameter),
+                postRepository.responsePostListItem(parameter: postParameter).catch(errorHandler),
                 endLoading
             )
             
@@ -135,12 +136,24 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             let startLoading = Observable<Mutation>.just(.setLoading(true))
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             postParameter.updateValue(aligmentItem, forKey: "sort")
+            if aligmentItem == "거리순" {
+                _ = UserDefaults.standard.dictionary(forKey: .currentLocation)?.map({ key, value in
+                    postParameter.updateValue(String(describing: value), forKey: key)
+                })
+                
+                return .concat(
+                    startLoading,
+                    postRepository.responsePostListItem(parameter: postParameter).catch(errorHandler),
+                    endLoading
+                )
+            } else {
+                return .concat(
+                    startLoading,
+                    postRepository.responsePostListItem(parameter: postParameter),
+                    endLoading
+                )
+            }
             
-            return .concat(
-                startLoading,
-                postRepository.responsePostListItem(parameter: postParameter),
-                endLoading
-            )
             
         case let .updateKeywordItem(keyword):
             let startLoading = Observable<Mutation>.just(.setLoading(true))
@@ -149,7 +162,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             
             return .concat(
                 startLoading,
-                postRepository.responsePostListItem(parameter: postParameter),
+                postRepository.responsePostListItem(parameter: postParameter).catch(errorHandler),
                 endLoading
             )
         case let .updatePageItem(pages, isPageLoad):
@@ -162,7 +175,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             return .concat(
                 startLoading,
                 updatePages,
-                postRepository.responsePostListItem(parameter: postParameter),
+                postRepository.responsePostListItem(parameter: postParameter).catch(errorHandler),
                 endLoading
             )
         }

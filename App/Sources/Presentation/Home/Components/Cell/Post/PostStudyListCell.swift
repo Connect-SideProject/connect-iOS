@@ -254,7 +254,7 @@ extension PostStduyListCell: ReactorKit.View {
         
         reactor.state
             .compactMap { $0.postBookMarkItems }
-            .filter { $0.bookMarkId == self.reactor?.currentState.postListId && $0.bookMarkisCheck }
+            .filter { $0.bookMarkId == self.reactor?.currentState.postModel.id && $0.bookMarkisCheck }
             .map { _ in UIImage(named: "home_studylist_bookmark_select") }
             .bind(to: postBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
@@ -262,7 +262,7 @@ extension PostStduyListCell: ReactorKit.View {
         
         reactor.state
             .compactMap { $0.postBookMarkItems }
-            .filter { $0.bookMarkId == self.reactor?.currentState.postListId && $0.bookMarkisCheck == false }
+            .filter { $0.bookMarkId == self.reactor?.currentState.postModel.id && $0.bookMarkisCheck == false }
             .map { _ in UIImage(named: "home_studylist_bookmark")}
             .bind(to: postBookMarkImageView.rx.image)
             .disposed(by: disposeBag)

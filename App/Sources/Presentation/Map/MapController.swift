@@ -343,9 +343,9 @@ extension MapController: CLLocationManagerDelegate {
         if CLLocationManager.locationServicesEnabled() {
             print("위치 서비스 On 상태")
             locationManager.startUpdatingLocation() // 이 함수를 호출함으로써 didUpdateLocations로 현재위치를 받을 수 있음
-            guard let currentLocation = currentLocation else {
-                return
-            }
+            guard let lat = self.locationManager.location?.coordinate.latitude,
+                   let log = self.locationManager.location?.coordinate.longitude else { return }
+            var currentLocation: [String: Any] = ["x":lat,"y":log]
             UserDefaults.standard.set(currentLocation, forKey: .currentLocation)
         } else {
             print("위치 서비스 Off 상태")

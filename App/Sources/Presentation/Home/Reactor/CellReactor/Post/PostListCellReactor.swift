@@ -27,14 +27,13 @@ public final class PostListCellReactor: Reactor {
     public struct State {
         var postModel: PostContentList
         var postBookMarkItems: HomeBookMarkList?
-        var postListId: Int
     }
     
     
     public let initialState: State
     
-    init(postModel: PostContentList, postListRepo: PostListRepo, postListId: Int) {
-        self.initialState = State(postModel: postModel, postBookMarkItems: nil, postListId: postListId)
+    init(postModel: PostContentList, postListRepo: PostListRepo) {
+        self.initialState = State(postModel: postModel, postBookMarkItems: nil)
         self.postListRepo = postListRepo
     }
     
@@ -42,7 +41,7 @@ public final class PostListCellReactor: Reactor {
     public func mutate(action: Action) -> Observable<Mutation> {
         switch action {
         case .didTapPostBookMark:
-            let postBookMarkMutation = postListRepo.requestPostBookMarkItem(id: String(self.currentState.postListId))
+            let postBookMarkMutation = postListRepo.requestPostBookMarkItem(id: String(self.currentState.postModel.id))
             
             return postBookMarkMutation
         }

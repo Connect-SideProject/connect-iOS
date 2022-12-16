@@ -136,7 +136,7 @@ final class PostListRepo: PostListRepository {
         var postAllSectionItem: [PostSectionItem] = []
         
         for i in 0 ..< item.count {
-            postAllSectionItem.append(.postList(PostListCellReactor(postModel: item[i], postListRepo: self, postListId: item[i].id)))
+            postAllSectionItem.append(.postList(PostListCellReactor(postModel: item[i], postListRepo: self)))
         }
         
         return PostViewSection.post(postAllSectionItem)
