@@ -22,9 +22,7 @@ final class MyProfilePostListCellReactor: Reactor {
     let initialState: State
     
     init(myStudyModel: ProfileStudy) {
-        defer { _ = self.state }
         self.initialState = State(myStudyModel: myStudyModel)
-        debugPrint("MY Study Model: \(myStudyModel)")
     }
     
     

@@ -26,12 +26,12 @@ public final class ProfileMyPostController: UIViewController {
         $0.color = .gray
     }
     
-    private lazy var profilePostBackButton: UIButton = UIButton().then {
+    private lazy var profilePostBackButton: UIButton = UIButton(type: .custom).then {
         $0.setImage(UIImage(named: "ic_back_arrow"), for: .normal)
         $0.semanticContentAttribute = .forceLeftToRight
-        $0.setContentHuggingPriority(.defaultHigh, for: .vertical)
-        $0.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        $0.setTitleColor(UIColor.hex3A3A3A, for: .normal)
         $0.titleLabel?.font = .semiBold(size: 16)
+        $0.titleLabel?.sizeToFit()
     }
     
     private lazy var profilePostBarButtonItem: UIBarButtonItem = UIBarButtonItem(customView: profilePostBackButton)
@@ -123,9 +123,8 @@ extension ProfileMyPostController: ReactorKit.View {
             .bind(to: profilePostIndicatorView.rx.isAnimating)
             .disposed(by: disposeBag)
         
-        reactor.state
-            .map { $0.section}
-            .observe(on: MainScheduler.instance)
+        reactor.pulse(\.$section)
+            .observe(on: MainScheduler.asyncInstance)
             .bind(to: self.profilePostCollectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
         
@@ -133,6 +132,13 @@ extension ProfileMyPostController: ReactorKit.View {
             .filter { $0.isPostType == .study}
             .debug("post Type -> ")
             .map { _ in "내가 쓴 글"}
+            .bind(to: self.profilePostBackButton.rx.title())
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.isPostType == .bookMark }
+            .debug("post Type -> ")
+            .map { _ in "내가 찜한 글"}
             .bind(to: self.profilePostBackButton.rx.title())
             .disposed(by: disposeBag)
         

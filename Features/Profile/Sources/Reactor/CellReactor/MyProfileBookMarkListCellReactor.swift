@@ -25,9 +25,7 @@ final class MyProfileBookMarkListCellReactor: Reactor {
     let initialState: State
     
     init(myBookMarkModel: ProfileBookMark) {
-        defer { _ = self.state }
         self.initialState = State(myBookMarkModel: myBookMarkModel)
-        debugPrint("MY BookMark Model: \(myBookMarkModel)")
     }
     
 }

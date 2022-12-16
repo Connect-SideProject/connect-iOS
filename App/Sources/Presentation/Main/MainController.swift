@@ -146,7 +146,7 @@ extension MainController: ProfileDelegate {
      )
         
     let controller = container.makeController(type)
-    profileNavigationController.pushViewController(controller, animated: true)
+    self.navigationController?.pushViewController(controller, animated: true)
   }
 }
 
