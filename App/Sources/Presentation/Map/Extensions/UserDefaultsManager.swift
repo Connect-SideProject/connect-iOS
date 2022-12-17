@@ -9,7 +9,7 @@ import Foundation
 import COExtensions
 
 public struct UserDefaultsManager {
-    @UserDefaultWrapper(key: .currentLocation, defaultValue: MapCoordinate(lat: 30, lng: 30))
+    @UserDefaultWrapper(key: .currentLocation, defaultValue: ["lat": 30.000, "lng": 30.000])
     static var currentLocation
 }
 

@@ -28,7 +28,7 @@ class MapController: UIViewController, View {
     
     // MARK: -Properties
     private let locationManager = CLLocationManager()
-    private var currentLocation: MapCoordinate?
+    private var currentLocation: [String: Any]?
 //    var guInfoWindows = [NMFInfoWindow]()
 //    var markers = [NMFMarker]()
     typealias Reactor = MapReactor
@@ -362,8 +362,8 @@ extension MapController: CLLocationManagerDelegate {
         let longtitude: CLLocationDegrees = location.coordinate.longitude
         let latitude:CLLocationDegrees = location.coordinate.latitude
         print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
-        var currentLocation = MapCoordinate(lat: latitude, lng: longtitude)
-        self.currentLocation = currentLocation
+//        var currentLocation = MapCoordinate(lat: latitude, lng: longtitude)
+        self.currentLocation = ["lat": latitude, "lng": longtitude]
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) { // 현재 위치를 가져올 수 있는 권한상태확인
