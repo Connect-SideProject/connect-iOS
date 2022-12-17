@@ -22,9 +22,4 @@ public extension Encodable {
       return nil
     }
   }
-    
-    func encode() -> Data? {
-        let encoded = try? JSONEncoder().encode(self)
-        return encoded
-    }
 }
