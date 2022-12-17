@@ -12,6 +12,8 @@ import ReactorKit
 import RxCocoa
 import SnapKit
 import UIKit
+import COExtensions
+import COManager
 
 protocol ConnectMapDataFuctionality {
     func showFloatingPanel(contentViewController: UIViewController, _ floatingPanelVC: FloatingPanelController)
@@ -97,7 +99,7 @@ class MapController: UIViewController, View {
         super.viewDidLoad()
         configureUI()
         getCurrentLocation()
-
+       
 //        LocationManager.shared.setLocationManager()
 //        ApiManager.shared.request(endPoint: .init(path: .userProfile)).subscribe(onNext: { (data: KakaoMapAddress) in
 //
@@ -343,17 +345,8 @@ extension MapController: CLLocationManagerDelegate {
         if CLLocationManager.locationServicesEnabled() {
             print("위치 서비스 On 상태")
             locationManager.startUpdatingLocation() // 이 함수를 호출함으로써 didUpdateLocations로 현재위치를 받을 수 있음
-            guard let currentLocation = currentLocation else {
-                print("currentLocation is nil")
-                return
-            }
-            UserDefaults.standard.set(currentLocation.encode(), forKey: .currentLocation)
-            guard let currentLocation = UserDefaults.standard.object(forKey: .currentLocation) as? Data else {
-                print("currentLocation is nil")
-                return
-            }
-            let decoded = currentLocation.decode() as? MapCoordinate
-            print("currentLocacaca = \(decoded)")
+            UserDefaultsManager.currentLocation = currentLocation
+            print("currentLocation = \(UserDefaultsManager.currentLocation)")
         } else {
             print("위치 서비스 Off 상태")
         }
