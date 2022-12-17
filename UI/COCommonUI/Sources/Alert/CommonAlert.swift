@@ -26,7 +26,7 @@ public enum MessageType: CustomStringConvertible, Equatable {
 }
 
 public enum AlertButtonType {
-  case confirm(String), cancel(String)
+  case confirm, cancel
 }
 
 public final class CommonAlert: UIAlertController {
@@ -73,16 +73,16 @@ public final class CommonAlert: UIAlertController {
     var action: UIAlertAction!
     
     switch type {
-    case let .confirm(title):
+    case .confirm:
       action = .init(
-        title: title,
+        title: "확인",
         style: .default,
         handler: { [weak self] _ in
           self?.confirmHandler()
         })
-    case let .cancel(title):
+    case .cancel:
       action = .init(
-        title: title,
+        title: "취소",
         style: .cancel,
         handler: { [weak self] _ in
           self?.cancelHandler()
