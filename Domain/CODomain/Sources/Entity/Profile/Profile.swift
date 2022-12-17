@@ -395,6 +395,7 @@ public class Interest: NSObject, NSCoding, Codable, Identifiable {
   public var id: Int = 0
   public var code: String = ""
   public var name: String = ""
+  public var imageURL: String = ""
   
   public override init() {
     super.init()
@@ -438,9 +439,12 @@ public class Interest: NSObject, NSCoding, Codable, Identifiable {
 public extension Interest {
   convenience init(code: String = "", name: String = "") {
     self.init()
-//    self.id = -1
     self.code = code
     self.name = name
+  }
+  
+  func updateImageURL(_ imageURL: String) {
+    self.imageURL = imageURL
   }
   
   override func isEqual(_ object: Any?) -> Bool {
