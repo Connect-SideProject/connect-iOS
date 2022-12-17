@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct MapCoordinate: Decodable {
+struct MapCoordinate: Codable {
     let lat: Double // 위도
     let lng: Double // 경도
 }
