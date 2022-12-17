@@ -51,7 +51,6 @@ public struct PostContentList: Codable, Identifiable {
     public var contentStudyInfo: String
     public var contentStudycreatAt: String
     public var contentStudyParts: [PostContentPartList]
-    public var contentStudyDistance: String?
     
     
     enum CodingKeys: String, CodingKey {
@@ -64,7 +63,6 @@ public struct PostContentList: Codable, Identifiable {
         case contentStudyInfo = "studyInfo"
         case contentStudycreatAt = "creatDt"
         case contentStudyParts = "parts"
-        case contentStudyDistance = "distance"
     }
 }
 

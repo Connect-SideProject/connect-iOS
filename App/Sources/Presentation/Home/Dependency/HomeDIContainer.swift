@@ -6,11 +6,13 @@
 //
 
 import Foundation
-import CODomain
-import COCommon
 import ReactorKit
 import UIKit
+
+import CODomain
 import CONetwork
+import COCommon
+import COManager
 
 //MARK: Dependency
 public final class HomeDependencyContainer: HomeDIContainer {
@@ -64,6 +66,7 @@ extension HomeDependencyContainer {
 
 public protocol HomeRepository {
     func responseMenuImage(image: HomeMenuList) async throws -> Data
+    func responseInterestMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation>
@@ -98,6 +101,11 @@ final class HomeViewRepo: HomeRepository {
         }
         
         return creteMenuResponse
+    }
+    
+    func responseInterestMenuItem() -> Observable<HomeViewReactor.Mutation> {
+        
+        return .just(.setHomeInterestMenuItem(InterestManager.shared.interestList))
     }
     
     func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation> {

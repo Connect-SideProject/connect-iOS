@@ -43,6 +43,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     public enum Mutation {
         case setLoading(Bool)
         case setHomeMenuItem([HomeMenuList])
+        case setHomeInterestMenuItem([Interest])
         case setHomeNewsItem([HomeStudyList])
         case setHomeEmptySection(HomeViewSection)
         case setReleaseItems([HomeHotList])
@@ -97,6 +98,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                         
             return .concat(
                 startLoading,
+//                homeRepository.responseInterestMenuItem(), //TODO: API 수정 후 주석 제거
                 homeRepository.responseHomeMenuItem(),
                 setMenuItems,
                 homeRepository.responseHomeNewsItem(paramenter: homeParameter).catch(errorHandler),
@@ -187,6 +189,10 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
             let emptyIndex = self.getIndex(section: .homeStudyList([]))
             newState.section[emptyIndex] = section
             
+        case let .setHomeInterestMenuItem(items):
+            let interestIndex = self.getIndex(section: .field([]))
+            //TODO: API 수정 후 주석 제거
+//            newState.section[interestIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
         }
         return newState
     }
