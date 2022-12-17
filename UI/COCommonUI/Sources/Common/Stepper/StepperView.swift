@@ -47,7 +47,7 @@ public final class StepperView: UIView {
   
   private let flexContainer = UIView()
   
-  private var value: Int
+  public private(set) var value: Int
   
   public var handler: (Int) -> Void = { _ in }
 

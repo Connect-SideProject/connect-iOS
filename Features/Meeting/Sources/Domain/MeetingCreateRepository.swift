@@ -11,5 +11,5 @@ import CODomain
 import RxSwift
 
 public protocol MeetingCreateRepository {
-  func requestCreateMeeting(parameter: CreateMeetingParameter) -> Observable<EmptyResponse>
+  func requestCreateMeeting(parameter: CreateMeetingParameter) -> Observable<String>
 }

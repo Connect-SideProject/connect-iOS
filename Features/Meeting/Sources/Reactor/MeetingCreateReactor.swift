@@ -15,14 +15,14 @@ import COExtensions
 import COManager
 import CONetwork
 
-public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
+final class MeetingCreateReactor: Reactor, ErrorHandlerable {
   
-  public enum Route {
+  enum Route {
     case close
     case bottomSheet(BottomSheetType)
   }
   
-  public enum Action {
+  enum Action {
     /// 분야선택 버튼 터치
     case didTapInterestButton
     
@@ -41,11 +41,14 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     case didSelectedDateRange(DateRange)
     case didSelectedRoleAndCountItems([RoleAndCountItem])
     
+    /// Alert 버튼 이벤트
+    case didTapAlertButton(AlertButtonType)
+    
     /// 모임만들기 버튼 터치
     case didTapCreateMeeting(CreateMeetingParameter)
   }
   
-  public enum Mutation {
+  enum Mutation {
     
     case setSelectedInterest(Interest)
     case setSelectedRegion(Region)
@@ -53,21 +56,23 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     case setSelectedRoleAndCountItems([RoleAndCountItem])
     
     case setRoute(Route?)
+    case setMessageType(MessageType?)
     case setError(COError?)
   }
   
-  public struct State {
+  struct State {
     var selectedInterest: Interest?
     @Pulse var selectedRoleAndCountItems: [RoleAndCountItem]?
     @Pulse var selectedDateRange: DateRange?
     @Pulse var selectedRegion: Region?
     @Pulse var route: Route?
+    @Pulse var messageType: MessageType?
     @Pulse var error: COError?
   }
   
-  public var initialState: State = .init()
+  var initialState: State = .init()
   
-  public lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
+  lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
     return .just(.setError(error.asCOError))
   }
   
@@ -77,7 +82,7 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
   private let addressService: AddressService
   private let roleSkillsService: RoleSkillsService
   
-  public init(
+  init(
     repository: MeetingCreateRepository,
     userService: UserService,
     interestService: InterestService,
@@ -91,7 +96,7 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     self.roleSkillsService = roleSkillsService
   }
   
-  public func mutate(action: Action) -> Observable<Mutation> {
+  func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .didTapInterestButton:
       let interestList: [BottomSheetItem] = interestService.interestList.map {
@@ -139,7 +144,17 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
       return .just(.setSelectedDateRange(dateRange))
       
     case let .didSelectedRoleAndCountItems(items):
+      let items: [RoleAndCountItem] = roleSkillsService.roleSkillsList
+        .map { element in
+          return items
+            .filter { $0.role == element.roleName }
+            .map { return .init(id: $0.id, role: element.roleCode, count: $0.count) }
+        }.flatMap { $0 }
+      
       return .just(.setSelectedRoleAndCountItems(items))
+      
+    case .didTapAlertButton:
+      return .just(.setRoute(.close))
       
     case let .didTapCreateMeeting(parameter):
       
@@ -164,15 +179,15 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
       parameter.updateDateRange(dateRange)
       parameter.updatePlace(region.description)
       
-      print(parameter)
       return repository.requestCreateMeeting(parameter: parameter)
-        .flatMap { _ -> Observable<Mutation> in
-          return .just(.setRoute(.close))
+        .flatMap { (message: String) -> Observable<Mutation> in
+          return .just(.setMessageType(.message(message)))
         }
+        .catch(errorHandler)
     }
   }
   
-  public func reduce(state: State, mutation: Mutation) -> State {
+  func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
     case let .setSelectedInterest(interest):
@@ -185,10 +200,11 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
       newState.selectedRoleAndCountItems = items
     case let .setRoute(route):
       newState.route = route
+    case let .setMessageType(messageType):
+      newState.messageType = messageType
     case let .setError(error):
       newState.error = error
     }
-    
     return newState
   }
 }

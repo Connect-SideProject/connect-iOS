@@ -21,7 +21,7 @@ public class MeetingCreateRepositoryImpl: MeetingCreateRepository {
 }
 
 extension MeetingCreateRepositoryImpl {
-  public func requestCreateMeeting(parameter: CreateMeetingParameter) -> Observable<EmptyResponse> {
+  public func requestCreateMeeting(parameter: CreateMeetingParameter) -> Observable<String> {
     
     return apiService.request(endPoint: .init(path: .createMeeting(parameter)))
   }

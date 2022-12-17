@@ -115,6 +115,14 @@ private extension BottomSheetRoleAndPeopleCell {
   }
   
   @objc func didTapAdditionalButton() {
+    
+    if stepperView.value == 0 {
+      CommonAlert.shared
+        .setMessage(.message("모집 인원수를 정해주세요."))
+        .show()
+      return
+    }
+    
     additionalHandler()
   }
 }

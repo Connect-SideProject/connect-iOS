@@ -19,9 +19,7 @@ import COCommonUI
 import CODomain
 import COExtensions
 
-public final class MeetingCreateViewController: UIViewController, ReactorKit.View {
-  
-  public typealias Reactor = MeetingCreateReactor
+final class MeetingCreateViewController: UIViewController, ReactorKit.View {
   
   enum Height {
     static let titleView: CGFloat = 50
@@ -147,20 +145,20 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
   private let roleAndPeopleRelay = PublishRelay<String>()
   private let locationButtonRelay = PublishRelay<String>()
   
-  public var disposeBag = DisposeBag()
+  var disposeBag = DisposeBag()
   
   deinit {
     removeNotifications()
   }
   
-  public override func viewDidLoad() {
+  override func viewDidLoad() {
     super.viewDidLoad()
     
     configureUI()
     bindEvent()
   }
   
-  public override func viewDidLayoutSubviews() {
+  override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     
     containerScrollView.pin
@@ -183,7 +181,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
     navigationController?.setNavigationBarHidden(false, animated: false)
   }
   
-  public func bind(reactor: Reactor) {
+  func bind(reactor: MeetingCreateReactor) {
     
     interestContainerView.buttonHandlerRelay
       .map { Reactor.Action.didTapInterestButton }
@@ -249,6 +247,18 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
         }
       }.disposed(by: disposeBag)
     
+    reactor.pulse(\.$messageType)
+      .compactMap { $0 }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] in
+        guard let self = self else { return }
+        CommonAlert.shared.setMessage($0)
+          .show(viewController: self)
+          .confirmHandler = {
+            self.reactor?.action.onNext(.didTapAlertButton(.confirm))
+          }
+      }.disposed(by: disposeBag)
+    
     reactor.pulse(\.$error)
       .compactMap { $0 }
       .observe(on: MainScheduler.instance)
@@ -261,7 +271,6 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
         default:
           break
         }
-        
       }.disposed(by: disposeBag)
   }
 }
