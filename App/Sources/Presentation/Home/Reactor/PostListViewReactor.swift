@@ -137,8 +137,16 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             postParameter.updateValue(aligmentItem, forKey: "sort")
             if aligmentItem == "거리순" {
-                _ = UserDefaults.standard.dictionary(forKey: .currentLocation)?.map({ key, value in
-                    postParameter.updateValue(String(describing: value), forKey: key)
+                
+                _ =  UserDefaultsManager.currentLocation?.asDictionary()?.map({ key, value in
+                    switch key {
+                    case "lng":
+                        postParameter.updateValue(String(describing: value), forKey: "x")
+                    case "lat":
+                        postParameter.updateValue(String(describing: value), forKey: "y")
+                    default:
+                        break
+                    }
                 })
                 
                 return .concat(
