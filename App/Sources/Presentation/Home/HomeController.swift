@@ -301,10 +301,11 @@ extension HomeController: ReactorKit.View {
               
               let controller = MeetingCreateViewController()
               controller.reactor = .init(
-                apiService: ApiManager.shared,
+                repository: MeetingCreateRepositoryImpl(),
                 userService: UserManager.shared,
                 interestService: InterestManager.shared,
-                addressService: AddressManager.shared
+                addressService: AddressManager.shared,
+                roleSkillsService: RoleSkillsManager.shared
               )
               controller.modalPresentationStyle = .fullScreen
               self?.present(controller, animated: true)

@@ -15,6 +15,7 @@ import ReactorKit
 import Then
 import KakaoSDKCommon
 import COCommonUI
+import COAuth
 
 public protocol SignInDelegate: AnyObject {
   func routeToSignUp(authType: AuthType, accessToken: String)
@@ -59,7 +60,7 @@ public final class SignInController: UIViewController, ReactorKit.View {
     
     configureUI()
     
-    KakaoSDK.initSDK(appKey: "ee72a7c08c0e36ae98010b8d02f646cf")
+    KakaoSDK.initSDK(appKey: Auth.ThirdParty.kakaoSDK)
   }
   
   public func bind(reactor: SignInReactor) {

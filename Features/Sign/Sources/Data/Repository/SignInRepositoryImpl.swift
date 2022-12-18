@@ -33,6 +33,7 @@ extension SignInRepositoryImpl {
     
     return UserApi.shared.rx.loginWithKakaoTalk()
       .asObservable()
+      .debug()
       .flatMap { oauthToken -> Observable<String> in
         return .just(oauthToken.accessToken)
       }

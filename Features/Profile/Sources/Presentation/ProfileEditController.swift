@@ -228,17 +228,19 @@ public final class ProfileEditController: UIViewController, ReactorKit.View {
           }
           
         case let .bottomSheet(items):
-          BottomSheet(type: .address(items))
-            .show()
-            .handler = { [weak self, weak reactor] state in
-              switch state {
-              case let .confirm(selectedIndex, title):
-                reactor?.action.onNext(.didSelectedLocation(selectedIndex))
-                self?.addressButtonRelay.accept(title)
-              default:
-                break
-              }
+          BottomSheet(
+            type: .address(selectionType: .single, items: items)
+          )
+          .show()
+          .handler = { [weak self, weak reactor] state in
+            switch state {
+            case let .confirm(selectedIndex, title):
+              reactor?.action.onNext(.didSelectedLocation(selectedIndex[0]))
+              self?.addressButtonRelay.accept(title)
+            default:
+              break
             }
+          }
         }
       }.disposed(by: disposeBag)
     
