@@ -24,6 +24,10 @@ public protocol SignInDelegate: AnyObject {
 
 public final class SignInController: UIViewController, ReactorKit.View {
   
+  private let backgroundImageView = UIImageView().then {
+    $0.image = UIImage(named: "img_signIn")
+  }
+  
   private let signInLabel = UILabel().then {
     let attributedText = "IT를 연결하다\n커넥트잇".addAttributes(
       [
@@ -102,11 +106,16 @@ extension SignInController {
     flexContainer.flex
       .direction(.column)
       .define { flex in
-        
+        flex.addItem(backgroundImageView)
+          .grow(1)
+    }
+    
+    backgroundImageView.flex
+      .define { flex in
         flex.addItem()
           .grow(1)
         flex.addItem(signInContainer)
-    }
+      }
     
     signInContainer.flex
       .height(255)
@@ -127,24 +136,14 @@ extension SignInController {
   }
   
   private func makeSignInButtons() -> [UIButton] {
-    
-    let titleColors: [UIColor] = [.black, .white, .white]
-    let backgroundColors: [UIColor] = [.hexFED80B, .hex1AC049, .black]
-    
     return AuthType.allCases.enumerated()
-      .filter { $0.offset < titleColors.count }
       .map { offset, type in
         let button = UIButton()
-        button.setTitle("\(type.description)로 시작하기", for: .normal)
-        button.setTitleColor(titleColors[offset], for: .normal)
-        button.titleLabel?.font = .semiBold(size: 16)
-        
-        button.backgroundColor = backgroundColors[offset]
-        
+        button.setBackgroundImage(.init(named: "img_\(type.description.lowercased())_signIn"), for: .normal)
         button.tag = offset
-        
+        button.layer.cornerRadius = 4
+        button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(didTapSignInButton(sender:)), for: .touchUpInside)
-        
         return button
     }
   }
