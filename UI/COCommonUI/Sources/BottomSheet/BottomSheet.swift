@@ -48,9 +48,13 @@ public enum BottomSheetType: CustomStringConvertible {
   case aligment(SelectionState?)
   case studyType(SelectionState?)
   case date
-  case address([BottomSheetItem])
-  case interest([BottomSheetItem])
+  case address(selectionType: SelectionType, items: [BottomSheetItem])
+  case interest(selectionType: SelectionType, items: [BottomSheetItem])
   case roleAndPeople(BottomSheetRoleItem)
+}
+
+public enum SelectionType {
+  case single, multiple
 }
 
 public enum SelectionState {
@@ -58,7 +62,7 @@ public enum SelectionState {
 }
 
 public enum BottomSheetHandlerState {
-  case confirm(Int, String), date(DateRange), roleAndCount([RoleAndCountItem]), cancel
+  case confirm([Int], String), date(DateRange), roleAndCount([RoleAndCountItem]), cancel
 }
 /**
  BottomSheet 화면.
@@ -195,7 +199,10 @@ public final class BottomSheet: UIViewController {
   
   public var handler: ((BottomSheetHandlerState) -> Void) = { _ in }
   
+  private var selectionType: SelectionType = .single
+  
   private let type: BottomSheetType
+  
   public init(type: BottomSheetType) {
     func updateItems(strings: [String], selectionState: SelectionState?) -> [BottomSheetItem] {
       return strings
@@ -227,7 +234,8 @@ public final class BottomSheet: UIViewController {
     self.titleLabel.text = type.description
     
     switch type {
-    case let .address(items), let .interest(items):
+    case let .address(selectionType, items), let .interest(selectionType, items):
+      self.selectionType = selectionType
       self.items = items
       
     case let .roleAndPeople(item):
@@ -392,26 +400,30 @@ private extension BottomSheet {
       }
       
     default:
-      let selectedIndex = self.items.enumerated()
+      
+      let selectedIndices = self.items.enumerated()
         .map { offset, element in
           return element.isSelected ? offset : -1
         }
         .filter { $0 != -1 }
-        .first
       
-      guard let selectedIndex = selectedIndex else {
+      guard !selectedIndices.isEmpty else {
         CommonAlert.shared
           .setMessage(.message("\(type.description)를(을) 선택해주세요."))
           .show()
         return
       }
       
+      let title = selectedIndices.count == 1 ?
+        items[safe: selectedIndices[0]]?.value ?? "" :
+        selectedIndices.map { items[$0].value }.toStringWithComma
+      
       dimView.backgroundColor = .clear
       
       dismiss(animated: true) { [weak self] in
         guard let self = self else { return }
         self.handler(
-          .confirm(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
+          .confirm(selectedIndices, title)
         )
       }
     }
@@ -444,20 +456,26 @@ extension BottomSheet: UICollectionViewDataSource {
         let titles = roleItem.roles
         cell.setup(titles: titles, item: roleItem.items[index])
         cell.valueHandler = { [weak self] selectedTitle, count in
-          self?.selectedRoleItems[index] = .init(
+          guard let self = self else { return }
+          self.selectedRoleItems[index] = .init(
             id: index,
             role: selectedTitle,
             count: count
           )
+          let items: [RoleAndCountItem] = self.selectedRoleItems.map {
+            .init(id: $0.key, role: $0.value.role, count: $0.value.count)
+          }
+          self.roleItem.updateItems(items)
         }
         cell.additionalHandler = { [weak self] in
           guard let self = self else { return }
           let currentCount = self.roleItem.items.count
           
           if currentCount < self.roleItem.roles.count {
-            let items: [RoleAndCountItem] = (0 ... currentCount).map { index in
-                .init(id: index, role: "", count: 0)
+            var items: [RoleAndCountItem] = self.selectedRoleItems.map {
+              .init(id: $0.key, role: $0.value.role, count: $0.value.count)
             }
+            items.append(.init(id: index + 1, role: "", count: 0))
             self.roleItem.updateItems(items)
             self.collectionView.reloadData()
           }
@@ -480,15 +498,23 @@ extension BottomSheet: UICollectionViewDataSource {
 extension BottomSheet: UICollectionViewDelegateFlowLayout {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     
-    if items[safe: indexPath.item]?.isSelected == true {
-      return
+    guard let item = items[safe: indexPath.item] else { return }
+    
+    if selectionType == .single {
+      if item.isSelected == true {
+        return
+      }
+      
+      let _ = items.indices.map { offset in
+        items[offset].update(isSelected: false)
+      }
+      
+      items[indexPath.item].update(isSelected: true)
+    } else {
+      let isUnSelected = item.isSelected == false
+      items[indexPath.item].update(isSelected: isUnSelected)
     }
     
-    let _ = items.indices.map { offset in
-      items[offset].update(isSelected: false)
-    }
-    
-    items[indexPath.item].update(isSelected: true)
     collectionView.reloadData()
   }
   
