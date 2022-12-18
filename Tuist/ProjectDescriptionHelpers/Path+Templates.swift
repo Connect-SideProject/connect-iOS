@@ -8,6 +8,7 @@
 import ProjectDescription
 
 public extension Path {
+  struct SPM {}
   struct CocoaPods {
     public struct Framework { }
   }

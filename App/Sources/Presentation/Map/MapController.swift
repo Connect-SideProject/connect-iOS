@@ -12,6 +12,8 @@ import ReactorKit
 import RxCocoa
 import SnapKit
 import UIKit
+import COExtensions
+import COManager
 
 protocol ConnectMapDataFuctionality {
     func showFloatingPanel(contentViewController: UIViewController, _ floatingPanelVC: FloatingPanelController)
@@ -26,6 +28,7 @@ class MapController: UIViewController, View {
     
     // MARK: -Properties
     private let locationManager = CLLocationManager()
+    private var currentLocation: MapCoordinate?
 //    var guInfoWindows = [NMFInfoWindow]()
 //    var markers = [NMFMarker]()
     typealias Reactor = MapReactor
@@ -48,9 +51,13 @@ class MapController: UIViewController, View {
         // Define corner radius and background color
         appearance.cornerRadius = 20
         appearance.backgroundColor = .clear
-
+        
         // Set the new appearance
+        fpc.contentMode = .fitToBounds
         fpc.surfaceView.appearance = appearance
+        fpc.surfaceView.grabberHandle.isHidden = true // FloatingPanel Grabber hidden true
+//        fpc.surfaceView.isUserInteractionEnabled = false // 아예 Fpc 안움직이게 함
+        fpc.panGestureRecognizer.isEnabled = false // FloatingPanel Scroll enabled false
         return fpc
     }()
     
@@ -74,8 +81,6 @@ class MapController: UIViewController, View {
         $0.autocorrectionType = .no
         $0.autocapitalizationType = .none
         $0.searchTextField.backgroundColor = .white
-//        $0.barTintColor = .white
-//        $0.searchTextField.layer.shadowColor = UIColor.white.cgColor
         return $0
     }(UISearchBar())
     
@@ -93,7 +98,8 @@ class MapController: UIViewController, View {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
-        exampleGetCurrentLocation()
+        getCurrentLocation()
+       
 //        LocationManager.shared.setLocationManager()
 //        ApiManager.shared.request(endPoint: .init(path: .userProfile)).subscribe(onNext: { (data: KakaoMapAddress) in
 //
@@ -184,7 +190,8 @@ class MapController: UIViewController, View {
             .subscribe(onNext: { [weak self] kakaoAddresses, isEmpty in
                 guard let `self` = self else { return }
                 let contentViewController = MapFloatingPanelViewController(kakaoAddressResults: kakaoAddresses)
-//                contentViewController.checkEmpty(isEmpty: isEmpty)
+                contentViewController.checkEmpty(isEmpty: isEmpty)
+                self.floatingPanelVC.panGestureRecognizer.isEnabled = true
                 self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
             })
             .disposed(by: disposeBag)
@@ -196,7 +203,7 @@ class MapController: UIViewController, View {
         view.addSubview(naverMapView)
         view.addSubview(mapSearchBar)
         view.addSubview(loadingView)
-        mapSearchBar.searchTextField.delegate = self
+        mapSearchBar.delegate = self
 //        moveCameraUpdate(mapView: naverMapView.mapView, mapCoordinate: MapCoordinate(lat: 40.5666102, lng: 126.9783884))
 //        addCustomImageMarker(mapView: mapView, imageName: "", mapCoordinate: MapCoordinate(lat: 37.5666102, lng: 126.9783881))
 //        addCustomImageMarker(mapView: mapView, imageName: "", mapCoordinate: MapCoordinate(lat: 37.5666102, lng: 126.9783882))
@@ -230,6 +237,7 @@ extension MapController: ConnectMapDataFuctionality {
             floatingPanelVC.delegate = self
             floatingPanelVC.addPanel(toParent: self)
             floatingPanelVC.set(contentViewController: contentViewController)
+            floatingPanelVC.track(scrollView: contentViewController.connectCollectionView)
             floatingPanelVC.show()
         }
     }
@@ -256,7 +264,8 @@ extension MapController: ConnectMapDataFuctionality {
                 marker.touchHandler = { [weak self] _ in // 이 부분에 마커, 커스텀뷰에 따라 분기처리해주면 될듯
                     guard let `self` = self else { return false }
                     self.moveCameraUpdate(mapView: mapView, mapCoordinate: mapCoordinate)
-                    let contentViewController = MapFloatingPanelViewController(floatingType: .study)
+                    let contentViewController = MapFloatingPanelViewController(floatingType: .who)
+                    self.floatingPanelVC.panGestureRecognizer.isEnabled = false
                     self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
                     return true
                 }
@@ -296,7 +305,8 @@ extension MapController: ConnectMapDataFuctionality {
                 guInfoWindow.touchHandler = { [weak self] _ in // 이 부분에 마커, 커스텀뷰에 따라 분기처리해주면 될듯
                     guard let `self` = self else { return false }
                     self.moveCameraUpdate(mapView: mapView, mapCoordinate: mapCoordinate)
-                    let contentViewController = MapFloatingPanelViewController(floatingType: .who)
+                    let contentViewController = MapFloatingPanelViewController(floatingType: .study)
+                    self.floatingPanelVC.panGestureRecognizer.isEnabled = false
                     self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
                     return false
                 }
@@ -327,7 +337,7 @@ extension MapController: CLLocationManagerDelegate {
         }
     }
     
-    private func exampleGetCurrentLocation() { // 첫 현재위치를 위한 권한 받아오기위한 함수
+    private func getCurrentLocation() { // 첫 현재위치를 위한 권한 받아오기위한 함수
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
         self.locationManager.requestWhenInUseAuthorization()
@@ -335,6 +345,7 @@ extension MapController: CLLocationManagerDelegate {
         if CLLocationManager.locationServicesEnabled() {
             print("위치 서비스 On 상태")
             locationManager.startUpdatingLocation() // 이 함수를 호출함으로써 didUpdateLocations로 현재위치를 받을 수 있음
+            UserDefaultsManager.currentLocation = currentLocation
         } else {
             print("위치 서비스 Off 상태")
         }
@@ -346,13 +357,12 @@ extension MapController: CLLocationManagerDelegate {
                 오로지 locationManager를 통한 현재위치에만 해당
                 stopUpdatingLocation()을 해주지않으면 쓸데없이 계속 위치정보를 업데이트할 수 있다
              */
-            let location: CLLocation = locations[locations.count - 1]
-            let longtitude: CLLocationDegrees = location.coordinate.longitude
-            let latitude:CLLocationDegrees = location.coordinate.latitude
-            print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
-//            moveCameraUpdate(mapView: naverMapView.mapView, mapCoordinate: MapCoordinate(lat: latitude, lng: longtitude))
-//            manager.stopUpdatingLocation()
-
+        let location: CLLocation = locations[locations.count - 1]
+        let longtitude: CLLocationDegrees = location.coordinate.longitude
+        let latitude:CLLocationDegrees = location.coordinate.latitude
+        print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
+        var currentLocation = MapCoordinate(lat: latitude, lng: longtitude)
+        self.currentLocation = currentLocation
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) { // 현재 위치를 가져올 수 있는 권한상태확인
@@ -436,14 +446,13 @@ class MapFloatingPanelLayout: FloatingPanelLayout {
     }
 }
 
-extension MapController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+extension MapController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let reactor = reactor,
-              let text = textField.text else {
-            return false
-        }
+              let text = searchBar.text else { return }
         reactor.textObserver.onNext(text)
-        textField.resignFirstResponder()
-        return true
+        searchBar.searchTextField.resignFirstResponder()
     }
+    
+//    accesory
 }

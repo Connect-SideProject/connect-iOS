@@ -51,7 +51,7 @@ public class Skill: NSObject, NSCoding, Codable, Identifiable {
   }
   
   enum CodingKeys: String, CodingKey {
-    case id = "code_id"
+    case id = "sort_num"
     case code = "code_cd"
     case name = "code_nm"
     case isAddUser = "add_user"
@@ -59,7 +59,12 @@ public class Skill: NSObject, NSCoding, Codable, Identifiable {
 }
 
 public extension Skill {
-  convenience init(id: Int = 0, code: String = "", name: String = "", isAddUser: String = "") {
+  convenience init(
+    id: Int = 0,
+    code: String = "",
+    name: String = "",
+    isAddUser: String = ""
+  ) {
     self.init()
     
     self.id = id
@@ -83,6 +88,7 @@ public class RoleSkills: NSObject, NSCoding, Codable, Identifiable {
   required public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     
+    self.id       = try container.decodeIfPresent(Int.self, forKey: .id) ?? -1
     self.roleCode = try container.decodeIfPresent(String.self, forKey: .roleCode) ?? ""
     self.roleName = try container.decodeIfPresent(String.self, forKey: .roleName) ?? ""
     self.skills =   try container.decodeIfPresent([Skill].self, forKey: .skills) ?? []
@@ -91,24 +97,28 @@ public class RoleSkills: NSObject, NSCoding, Codable, Identifiable {
   public func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     
+    try container.encode(id, forKey: .id)
     try container.encode(roleCode, forKey: .roleCode)
     try container.encode(roleName, forKey: .roleName)
     try container.encode(skills, forKey: .skills)
   }
   
   public required init?(coder: NSCoder) {
+    self.id = coder.decodeInteger(forKey: CodingKeys.id.rawValue)
     self.roleCode = coder.decodeObject(forKey: CodingKeys.roleCode.rawValue) as? String ?? ""
     self.roleName = coder.decodeObject(forKey: CodingKeys.roleName.rawValue) as? String ?? ""
     self.skills =   coder.decodeObject(forKey: CodingKeys.skills.rawValue) as? [Skill] ?? []
   }
   
   public func encode(with coder: NSCoder) {
+    coder.encode(id, forKey: CodingKeys.id.rawValue)
     coder.encode(roleCode, forKey: CodingKeys.roleCode.rawValue)
     coder.encode(roleName, forKey: CodingKeys.roleName.rawValue)
     coder.encode(skills, forKey: CodingKeys.skills.rawValue)
   }
   
   enum CodingKeys: String, CodingKey {
+    case id = "sort_num"
     case roleCode = "code_cd"
     case roleName = "code_nm"
     case skills = "codes"
@@ -116,7 +126,12 @@ public class RoleSkills: NSObject, NSCoding, Codable, Identifiable {
 }
 
 public extension RoleSkills {
-  convenience init(id: Int = -1, roleCode: String = "", roleName: String = "", skills: [Skill] = []) {
+  convenience init(
+    id: Int = -1,
+    roleCode: String = "",
+    roleName: String = "",
+    skills: [Skill] = []
+  ) {
     self.init()
     
     self.id = id

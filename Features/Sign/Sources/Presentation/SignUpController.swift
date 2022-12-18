@@ -15,55 +15,88 @@ import ReactorKit
 import RxCocoa
 
 public protocol SignUpDelegate: AnyObject {
-  func routeToHome()
+  func routeToMain()
 }
 
 public final class SignUpController: UIViewController, ReactorKit.View {
   
+  enum Height {
+    static let scrollView: CGFloat = 720 + (UIDevice.current.hasNotch ? 0 : 240)
+  }
+  
   private let nicknameContainerView = DescriptionContainerView(
-    type: .textField("닉네임", "닉네임을 입력하세요.")
+    type: .textFieldWithAttributed(
+      .init(
+        attributedTitle: "닉네임 *".setLastWord(color: .red),
+        placeholder: "닉네임을 입력하세요."
+      )
+    )
   )
   
-  private let locationContainerView = DescriptionContainerView(
-    type: .textField("활동지역", "활동지역을 검색해주세요.")
+  private lazy var addressContainerView = DescriptionContainerView(
+    type: .customWithAttributed(
+      .init(
+        attributedTitle: "활동지역 *".setLastWord(color: .red),
+        castableView: CastableButton(type: .downwordArrow("활동 지역을 선택해주세요.")),
+        noticeText: "마이>설정 에서 공개여부를 선택할 수 있어요."
+      )
+    )
   )
   
   private let periodContainerView = DescriptionContainerView(
-    type: .custom("경력기간", CheckBoxContainerView(
-        titles: [Career.aspirant.description, Career.junior.description, Career.senior.description],
-        eventType: .radio
+    type: .customWithAttributed(
+      .init(
+        attributedTitle: "경력기간 *".setLastWord(color: .red),
+        castableView: CheckBoxContainerView(
+          titles: [
+            Career.aspirant.description,
+            Career.junior.description,
+            Career.senior.description
+          ],
+          eventType: .radio
+        )
       )
     )
   )
   
-  private let interestsContainerView = DescriptionContainerView(
-    type: .custom("관심분야", SelectionButtonView(
-      titles: [Interestring.finance.description,
-               Interestring.fashion.description,
-               Interestring.entertainment.description,
-               Interestring.health.description]
+  private var interestTitles: [String] = []
+  private lazy var interestsContainerView = DescriptionContainerView(
+    type: .customWithAttributed(
+      .init(
+        attributedTitle: "관심분야 *".setLastWord(color: .red),
+        castableView: RoundSelectionButtonView(titles: interestTitles),
+        noticeText: "필수 3개를 선택해주세요"
       )
     )
   )
   
-  private lazy var jobContainerView = DescriptionContainerView(
-    type: .custom("원하는 역할", SelectionButtonView(
-      titles: roleSkillsService.roleSkillsList.map { $0.roleName })
+  private var roleTitles: [String] = []
+  private lazy var roleContainerView = DescriptionContainerView(
+    type: .customWithAttributed(
+      .init(
+        attributedTitle: "원하는 역할 *".setLastWord(color: .red),
+        castableView: RoundSelectionButtonView(titles: roleTitles)
+      )
     )
   )
   
+  private var skillsViews: [CastableView] = []
   private lazy var skillContainerView = DescriptionContainerView(
-    type: .custom(
-      "보유 스킬",
-      CastableContainerView(
-        views: roleSkillsService.roleSkillsList
-          .map { SelectionButtonView(titles: $0.skills.map { $0.name }, direction: .vertical) },
-        direction: .column)
+    type: .customWithAttributed(
+      .init(
+        attributedTitle: "보유 스킬 *".setLastWord(color: .red),
+        castableView: CastableContainerView(views: skillsViews)
+      )
     )
   )
   
   private let portfolioContainerView = DescriptionContainerView(
-    type: .textField("포트폴리오", "포트폴리오 URL을 입력 해주세요. (선택)")
+    type: .textField(
+      .init(
+        title: "포트폴리오",
+        placeholder: "포트폴리오 URL을 입력 해주세요. (선택)"
+      )
+    )
   )
   
   private let upper14YearsOldCheckBoxView = CheckBoxSingleView(
@@ -78,16 +111,19 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     titles: [Terms.service.description, Terms.privacy.description, Terms.location.description],
     direction: .vertical
   ).then {
-    $0.backgroundColor = .lightGray
-    $0.layer.cornerRadius = 12
+    $0.backgroundColor = .hexF9F9F9
+    $0.layer.cornerRadius = 5
     $0.layer.masksToBounds = true
   }
   
-  private lazy var startButton = RoundRutton().then {
-    $0.setTitle("시작하기", for: .normal)
+  private lazy var startButton = RoundRutton(
+    cornerRadius: 5,
+    borderColor: .hex028236
+  ).then {
+    $0.setTitle("커넥트잇 시작하기", for: .normal)
     $0.setTitleColor(.white, for: .normal)
-    $0.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-    $0.backgroundColor = .lightGray
+    $0.titleLabel?.font = .medium(size: 16)
+    $0.backgroundColor = .hex028236
     $0.addTarget(self, action: #selector(didTapStartButton), for: .touchUpInside)
   }
   
@@ -99,18 +135,9 @@ public final class SignUpController: UIViewController, ReactorKit.View {
   
   public weak var delegate: SignUpDelegate?
   
+  private let addressButtonRelay = PublishRelay<String>()
+  
   public var disposeBag = DisposeBag()
-  
-  let roleSkillsService: RoleSkillsService
-  
-  init(roleSkillsService: RoleSkillsService) {
-    self.roleSkillsService = roleSkillsService
-    super.init(nibName: nil, bundle: nil)
-  }
-  
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
   
   public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
@@ -121,14 +148,15 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     
     containerScrollView.contentSize = .init(
       width: view.bounds.size.width,
-      height: view.bounds.size.height + 660
+      height: view.bounds.size.height + Height.scrollView
     )
     
     flexContainer.pin
       .width(of: view)
-      .height(containerScrollView.contentSize.height)
-      .top(CGFloat(UIApplication.keyWindow?.safeAreaInsets.top ?? 0))
+      .height(view.bounds.size.height + Height.scrollView)
+      .top()
       .left().right()
+      .bottom(view.pin.safeArea)
       .layout()
     
     flexContainer.flex.layout()
@@ -139,30 +167,76 @@ public final class SignUpController: UIViewController, ReactorKit.View {
     
     configureUI()
     bindEvent()
+    
+    let tapGesture = UITapGestureRecognizer(
+      target: self,
+      action: #selector(dismissKeyboards)
+    )
+    tapGesture.delegate = self
+    view.addGestureRecognizer(tapGesture)
+  }
+  
+  @objc func dismissKeyboards() {
+    nicknameContainerView.textField.resignFirstResponder()
+    portfolioContainerView.textField.resignFirstResponder()
+  }
+  
+  public func prefetch(interestList: [Interest], roleSkillsList: [RoleSkills]) {
+    interestTitles = interestList.map { $0.name }
+    roleTitles = roleSkillsList.map { $0.roleName }
+    skillsViews = roleSkillsList.map {
+      RoundSelectionButtonView(
+        titles: $0.skills.map { $0.name },
+        direction: .vertical
+      )
+    }
   }
   
   public func bind(reactor: SignUpReactor) {
     
-    locationContainerView.textField.rx.value
-      .filter { !($0 ?? "").isEmpty }
-      .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
-      .debug()
-      .flatMap { query -> Observable<Reactor.Action> in
-        return .just(.searchAddress(query ?? ""))
-      }.bind(to: reactor.action)
+    addressContainerView.buttonHandlerRelay
+      .flatMap { () -> Observable<Reactor.Action> in
+        return .just(.didTapAddressButton)
+      }
+      .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
-    reactor.state
-      .compactMap { $0.profile }
+    reactor.pulse(\.$route)
+      .compactMap { $0 }
       .observe(on: MainScheduler.instance)
-      .bind { [weak self] _ in
-        self?.delegate?.routeToHome()
+      .bind { [weak self] route in
+        switch route {
+        case .home:
+          self?.delegate?.routeToMain()
+        case let .bottomSheet(type):
+          BottomSheet(type: type)
+            .show()
+            .handler = { [weak self, weak reactor] in
+              switch $0 {
+              case let .confirm(selectedIndex, title):
+                reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+                self?.addressButtonRelay.accept("서울 \(title)")
+              default:
+                break
+              }
+            }
+        }
       }.disposed(by: disposeBag)
-  }
-  
-  public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    view.endEditing(true)
-    flexContainer.endEditing(true)
+    
+    reactor.pulse(\.$error)
+      .compactMap { $0 }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] error in
+        guard let self = self else { return }
+        switch error {
+        case let .message(_, message):
+          CommonAlert.shared.setMessage(.message(message))
+            .show(viewController: self)
+        default:
+          break
+        }
+        
+      }.disposed(by: disposeBag)
   }
 }
 
@@ -180,16 +254,22 @@ extension SignUpController {
       .marginHorizontal(20)
       .define { flex in
         
-        [nicknameContainerView,
-         locationContainerView,
-         periodContainerView,
+        flex.addItem(nicknameContainerView)
+          .marginBottom(18)
+        
+        flex.addItem(addressContainerView)
+          .marginBottom(18)
+          .markDirty()
+
+        [periodContainerView,
          interestsContainerView,
-         jobContainerView,
+         roleContainerView,
          skillContainerView,
          portfolioContainerView
         ].forEach {
           flex.addItem($0)
             .marginBottom(18)
+            .markDirty()
         }
         
         [upper14YearsOldCheckBoxView,
@@ -201,26 +281,21 @@ extension SignUpController {
         
         flex.addItem(termsCheckBoxContainerView)
           .marginVertical(20)
-          .marginLeft(10)
           .marginBottom(20)
           .height(110)
         
         flex.addItem(startButton)
-          .marginHorizontal(20)
-          .height(50)
+          .height(41)
     }
   }
   
   private func bindEvent() {
-    
-    skillContainerView.customView?
-      .casting(type: CastableContainerView.self).handler = {
-        print($0)
-    }
+
+    addressButtonRelay
+      .bind(to: addressContainerView.castableButtonRelay)
+      .disposed(by: disposeBag)
     
     termsCheckBoxContainerView.handler = { [weak self] checkItems in
-      print(checkItems)
-      
       if checkItems.count == 3 {
         self?.acceptAllCheckBoxView.setChecked(true)
       } else {
@@ -236,34 +311,65 @@ extension SignUpController {
   @objc func didTapStartButton() {
     
     let nickname = nicknameContainerView.textField.text ?? ""
-    let location = locationContainerView.textField.text ?? ""
     
-    guard let period = periodContainerView.customView?.casting(type: CheckBoxContainerView.self),
-          let checkedItems = period.checkedItems else { return }
+    let period = periodContainerView.customView?.casting(
+      type: CheckBoxContainerView.self
+    ).checkedItems?.compactMap { $0 } ?? []
+    
+    let carrer: Career? = .init(
+      description: period[safe: 0]?.title ?? ""
+    )
 
-    let interestings: [Interestring] = interestsContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.compactMap { Interestring(rawValue: $0) } ?? []
+    let interestings: [String] = interestsContainerView.customView?.casting(
+      type: RoundSelectionButtonView.self
+    ).selectedItems.compactMap { $0 } ?? []
     
-    guard let carrer: Career = .init(rawValue: checkedItems[safe: 0]?.title ?? "") else { return }
-    let roles: [Role] = jobContainerView.customView?.casting(type: SelectionButtonView.self).selectedItems.compactMap { Role(rawValue: $0) } ?? []
+    let roles: [RoleType] = roleContainerView.customView?.casting(
+      type: RoundSelectionButtonView.self
+    ).selectedItems.compactMap { RoleType(description: $0) } ?? []
     
-    let portfolioURL = portfolioContainerView.textField.text ?? ""
+    let portfolioURL = portfolioContainerView.textField.text
     
-    let skills: [String] = skillContainerView.customView?.casting(type: CastableContainerView.self).selectedItems.map { $0 } ?? []
+    let skills: [String] = skillContainerView.customView?.casting(
+      type: CastableContainerView.self
+    ).selectedItems.flatMap { $0 } ?? []
     
-    let terms: [Terms] = termsCheckBoxContainerView.checkedItems?.compactMap { Terms(rawValue: $0.title) } ?? []
+    let terms: [Terms] = termsCheckBoxContainerView
+      .checkedItems?
+      .compactMap { Terms(rawValue: $0.title) } ?? []
     
     let parameter: SignUpParameter = .init(
       nickname: nickname,
-      region: .init(),
       interestings: interestings,
       career: carrer,
       roles: roles,
-      profileURL: nil,
       portfolioURL: portfolioURL,
       skills: skills,
       terms: terms
     )
     
     reactor?.action.onNext(.didTapSignUpButton(parameter))
+  }
+}
+
+extension SignUpController: UIGestureRecognizerDelegate {
+  public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+    
+    let gestureDisableViews = [
+      interestsContainerView.customView,
+      roleContainerView.customView,
+      skillContainerView.customView
+    ]
+    
+    let isGestureDisabled = gestureDisableViews
+      .compactMap { $0 }
+      .filter { touch.view?.isDescendant(of: $0) ?? false }
+      .count > 0
+    
+    if isGestureDisabled {
+      return false
+    }
+    
+    return true
   }
 }
