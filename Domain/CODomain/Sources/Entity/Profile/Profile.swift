@@ -392,10 +392,10 @@ public class Interest: NSObject, NSCoding, Codable, Identifiable {
     return name
   }
   
-  public var id: Int = 0
-  public var code: String = ""
-  public var name: String = ""
-  public var imageURL: String = ""
+  public private(set) var id: Int = 0
+  public private(set) var code: String = ""
+  public private(set) var name: String = ""
+  public private(set) var imageURL: String = ""
   
   public override init() {
     super.init()
