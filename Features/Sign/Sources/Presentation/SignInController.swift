@@ -25,17 +25,18 @@ public protocol SignInDelegate: AnyObject {
 public final class SignInController: UIViewController, ReactorKit.View {
   
   private let signInLabel = UILabel().then {
-    $0.text = "로그인"
-    $0.font = .systemFont(ofSize: 22, weight: .bold)
-    $0.textColor = .black
+    let attributedText = "IT를 연결하다\n커넥트잇".addAttributes(
+      [
+        .foregroundColor: UIColor.hex05A647
+      ],
+      range: .init(location: 9, length: 4)
+    )
+    $0.attributedText = attributedText
+    $0.font = .bold(size: 24)
+    $0.numberOfLines = 2
   }
   
-  private let descriptionLabel = UILabel().then {
-    $0.text = "이용약관 및 개인정보 처리방침 동의합니다."
-    $0.font = .systemFont(ofSize: 14, weight: .semibold)
-    $0.textColor = .black
-    $0.textAlignment = .center
-  }
+  private let signInContainer = UIView()
   
   private let flexContainer = UIView()
   
@@ -100,30 +101,35 @@ extension SignInController {
     
     flexContainer.flex
       .direction(.column)
-      .height(280)
-      .marginTop(200 + CGFloat(UIApplication.keyWindow?.safeAreaInsets.top ?? 0))
-      .marginHorizontal(50)
-      .justifyContent(.spaceBetween)
       .define { flex in
         
         flex.addItem()
-        
+          .grow(1)
+        flex.addItem(signInContainer)
+    }
+    
+    signInContainer.flex
+      .height(255)
+      .paddingHorizontal(40)
+      .marginBottom(54 + CGFloat(UIApplication.keyWindow?.safeAreaInsets.bottom ?? 0))
+      .define { flex in
         flex.addItem(signInLabel)
-        
+        flex.addItem()
+          .height(23)
         let buttons = makeSignInButtons()
         buttons.forEach {
           flex.addItem($0)
-            .height(60)
+            .height(45)
+          flex.addItem()
+            .height(16)
         }
-        
-        flex.addItem(descriptionLabel)
-    }
+      }
   }
   
   private func makeSignInButtons() -> [UIButton] {
     
-    let titleColors: [UIColor] = [.black, .black, .white]
-    let backgroundColors: [UIColor] = [.yellow, .green, .black]
+    let titleColors: [UIColor] = [.black, .white, .white]
+    let backgroundColors: [UIColor] = [.hexFED80B, .hex1AC049, .black]
     
     return AuthType.allCases.enumerated()
       .filter { $0.offset < titleColors.count }
@@ -131,12 +137,9 @@ extension SignInController {
         let button = UIButton()
         button.setTitle("\(type.description)로 시작하기", for: .normal)
         button.setTitleColor(titleColors[offset], for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
+        button.titleLabel?.font = .semiBold(size: 16)
         
         button.backgroundColor = backgroundColors[offset]
-        
-        button.layer.cornerRadius = 8
-        button.layer.masksToBounds = true
         
         button.tag = offset
         
