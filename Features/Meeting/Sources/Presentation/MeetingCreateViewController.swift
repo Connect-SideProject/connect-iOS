@@ -199,7 +199,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
       .disposed(by: disposeBag)
     
     locationContainerView.buttonHandlerRelay
-      .map { Reactor.Action.didTapLocationButton }
+      .map { Reactor.Action.didTapRegionButton }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
@@ -220,7 +220,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
                   reactor?.action.onNext(.didSelectedInterests(indices))
                 case .address:
                   self?.locationButtonRelay.accept("서울 \(text)")
-                  reactor?.action.onNext(.didSelectedAddress(text))
+                  reactor?.action.onNext(.didSelectedAddress(indices))
                 default:
                   break
                 }

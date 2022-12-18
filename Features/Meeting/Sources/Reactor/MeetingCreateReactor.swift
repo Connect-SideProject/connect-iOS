@@ -33,11 +33,11 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     case didTapDateButton
     
     /// 모임위치 버튼 터치
-    case didTapLocationButton
+    case didTapRegionButton
     
     /// BottomSheet에서 선택된 요소.
     case didSelectedInterests([Int])
-    case didSelectedAddress(String)
+    case didSelectedAddress([Int])
     case didSelectedDateRange(DateRange)
     case didSelectedRoleAndCountItems([RoleAndCountItem])
     
@@ -144,13 +144,30 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     case .didTapDateButton:
       return .just(.setRoute(.bottomSheet(.date)))
       
-    case .didTapLocationButton:
-      let addressList: [BottomSheetItem] = addressService.addressList.map {
-        .init(value: $0.법정동명)
+    case .didTapRegionButton:
+      
+      guard let region = currentState.selectedRegion else {
+        let items: [BottomSheetItem] = addressService.addressList.map {
+          .init(value: $0.법정동명)
+        }
+        return .just(.setRoute(.bottomSheet(.address(
+          selectionType: .single,
+          items: items
+        ))))
       }
+      
+      let items: [BottomSheetItem] = addressService.addressList
+        .map { element in
+          var item = BottomSheetItem(value: element.법정동명)
+          if element.법정동명 == region.name {
+            item.update(isSelected: true)
+          }
+          return item
+        }
+      
       return .just(.setRoute(.bottomSheet(.address(
         selectionType: .single,
-        items: addressList
+        items: items
       ))))
       
     case let .didSelectedInterests(indices):
@@ -159,10 +176,9 @@ public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
       
       return .just(.setSelectedInterests(interests))
       
-    case let .didSelectedAddress(string):
-      guard let address = addressService.addressList
-        .filter({ $0.법정동명 == string })
-        .first else {
+    case let .didSelectedAddress(indices):
+      guard let address = indices
+        .map({ addressService.addressList[$0] }).first else {
         return .empty()
       }
       let region = Region(code: address.법정코드, name: address.법정동명)

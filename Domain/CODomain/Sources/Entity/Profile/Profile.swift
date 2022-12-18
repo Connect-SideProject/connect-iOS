@@ -340,8 +340,8 @@ public class Region: NSObject, NSCoding, Codable {
     return name
   }
   
-  var code: Int = 0
-  var name: String = ""
+  public private(set) var code: Int = 0
+  public private(set) var name: String = ""
   
   public override init() {
     super.init()
