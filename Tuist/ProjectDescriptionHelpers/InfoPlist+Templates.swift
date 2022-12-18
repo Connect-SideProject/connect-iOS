@@ -11,9 +11,10 @@ import ProjectDescription
 extension InfoPlist {
   
   static func app(name: String, bundleId: String = "") -> [String: InfoPlist.Value] {
+    let appDisplayName: InfoPlist.Value = (name == "App") ? .string("ConnectIT") : .string(name)
     return [
       "CFBundleName": .string(name),
-      "CFBundleDisplayName": .string(name),
+      "CFBundleDisplayName": appDisplayName,
       "CFBundleIdentifier": bundleId.isEmpty ? .string("com.sideproj.\(name)") : .string(bundleId),
       "CFBundleShortVersionString": .string("1.0"),
       "CFBundleVersion": .string("0"),
