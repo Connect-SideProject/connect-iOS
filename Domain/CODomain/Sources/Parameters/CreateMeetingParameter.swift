@@ -91,7 +91,7 @@ public struct CreateMeetingParameter: Parameterable {
   
   let studyType: StudyType?
   let meetingType: MeetingType
-  public var interestings: [Interest] = []
+  public var interests: [Interest] = []
   public var roleAndCounts: [RoleAndCountItem] = []
   public var startDate: String?
   public var endDate: String?
@@ -105,7 +105,7 @@ public struct CreateMeetingParameter: Parameterable {
     
     try container.encode(studyType, forKey: .studyType)
     try container.encode(meetingType, forKey: .meetingType)
-    try container.encode(interestings, forKey: .interestings)
+    try container.encode(interests, forKey: .interests)
     try container.encode(roleAndCounts, forKey: .roleAndCounts)
     try container.encode(startDate, forKey: .startDate)
     try container.encode(endDate, forKey: .endDate)
@@ -118,7 +118,7 @@ public struct CreateMeetingParameter: Parameterable {
   enum CodingKeys: String, CodingKey {
     case studyType
     case meetingType
-    case interestings = "categories"
+    case interests = "categories"
     case roleAndCounts = "parts"
     case startDate
     case endDate
@@ -144,8 +144,8 @@ public extension CreateMeetingParameter {
     self.aspiration = aspiration
   }
   
-  mutating func updateInterestings(_ interestings: [Interest]) {
-    self.interestings = interestings
+  mutating func updateInterests(_ interests: [Interest]) {
+    self.interests = interests
   }
   
   mutating func updatePlace(_ place: String) {

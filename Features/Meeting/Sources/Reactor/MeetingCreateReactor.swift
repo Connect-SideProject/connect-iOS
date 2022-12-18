@@ -15,14 +15,14 @@ import COExtensions
 import COManager
 import CONetwork
 
-final class MeetingCreateReactor: Reactor, ErrorHandlerable {
+public final class MeetingCreateReactor: Reactor, ErrorHandlerable {
   
-  enum Route {
+  public enum Route {
     case close
     case bottomSheet(BottomSheetType)
   }
   
-  enum Action {
+  public enum Action {
     /// 분야선택 버튼 터치
     case didTapInterestButton
     
@@ -36,7 +36,7 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     case didTapLocationButton
     
     /// BottomSheet에서 선택된 요소.
-    case didSelectedInterest(String)
+    case didSelectedInterests([Int])
     case didSelectedAddress(String)
     case didSelectedDateRange(DateRange)
     case didSelectedRoleAndCountItems([RoleAndCountItem])
@@ -48,9 +48,9 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     case didTapCreateMeeting(CreateMeetingParameter)
   }
   
-  enum Mutation {
+  public enum Mutation {
     
-    case setSelectedInterest(Interest)
+    case setSelectedInterests([Interest])
     case setSelectedRegion(Region)
     case setSelectedDateRange(DateRange)
     case setSelectedRoleAndCountItems([RoleAndCountItem])
@@ -60,8 +60,8 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     case setError(COError?)
   }
   
-  struct State {
-    var selectedInterest: Interest?
+  public struct State {
+    var selectedInterests: [Interest] = []
     @Pulse var selectedRoleAndCountItems: [RoleAndCountItem]?
     @Pulse var selectedDateRange: DateRange?
     @Pulse var selectedRegion: Region?
@@ -70,9 +70,9 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     @Pulse var error: COError?
   }
   
-  var initialState: State = .init()
+  public var initialState: State = .init()
   
-  lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
+  public lazy var errorHandler: (_ error: Error) -> Observable<Mutation> = { error in
     return .just(.setError(error.asCOError))
   }
   
@@ -82,7 +82,7 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
   private let addressService: AddressService
   private let roleSkillsService: RoleSkillsService
   
-  init(
+  public init(
     repository: MeetingCreateRepository,
     userService: UserService,
     interestService: InterestService,
@@ -96,13 +96,41 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     self.roleSkillsService = roleSkillsService
   }
   
-  func mutate(action: Action) -> Observable<Mutation> {
+  public func mutate(action: Action) -> Observable<Mutation> {
     switch action {
     case .didTapInterestButton:
-      let interestList: [BottomSheetItem] = interestService.interestList.map {
-        .init(value: $0.name)
+      var items: [BottomSheetItem] = []
+      
+      let interests = currentState.selectedInterests
+      
+      if interests.isEmpty {
+        items = interestService.interestList.map {
+          .init(value: $0.name)
+        }
+      } else {
+        
+        let selectedIndices = interestService.interestList
+          .enumerated()
+          .map { offset, element in
+            return !interests.filter({ $0.name == element.name }).isEmpty ? offset : -1
+          }
+          .filter { $0 != -1 }
+        
+        items = interestService.interestList
+          .enumerated()
+          .map { offset, element in
+            var item = BottomSheetItem(value: element.name)
+            if !selectedIndices.filter({ $0 == offset }).isEmpty {
+              item.update(isSelected: true)
+            }
+            return item
+          }
       }
-      return .just(.setRoute(.bottomSheet(.interest(interestList))))
+      
+      return .just(.setRoute(.bottomSheet(.interest(
+        selectionType: .multiple,
+        items: items
+      ))))
       
     case .didTapRoleAndPeopleButton:
       let roleList = roleSkillsService.roleSkillsList.map { $0.roleName }
@@ -120,16 +148,16 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
       let addressList: [BottomSheetItem] = addressService.addressList.map {
         .init(value: $0.법정동명)
       }
-      return .just(.setRoute(.bottomSheet(.address(addressList))))
+      return .just(.setRoute(.bottomSheet(.address(
+        selectionType: .single,
+        items: addressList
+      ))))
       
-    case let .didSelectedInterest(string):
-      guard let interest = interestService.interestList
-        .filter({ $0.name == string })
-        .first else {
-        return .empty()
-      }
+    case let .didSelectedInterests(indices):
+      let interests = indices
+        .map { interestService.interestList[$0] }
       
-      return .just(.setSelectedInterest(interest))
+      return .just(.setSelectedInterests(interests))
       
     case let .didSelectedAddress(string):
       guard let address = addressService.addressList
@@ -158,7 +186,8 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
       
     case let .didTapCreateMeeting(parameter):
       
-      guard let interesting = currentState.selectedInterest else {
+      let interests = currentState.selectedInterests
+      if interests.isEmpty {
         return .just(.setError(COError.message(nil, "관심분야를 최소 하나이상 선택 해주세요.")))
       }
       
@@ -174,7 +203,7 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
         return .just(.setError(COError.message(nil, "모임위치를 선택 해주세요.")))
       }
       var parameter = parameter
-      parameter.updateInterestings([interesting])
+      parameter.updateInterests(interests)
       parameter.updateRoleAndCounts(roleAndCounts)
       parameter.updateDateRange(
         startDate: dateRange.start?.toFormattedString() ?? "",
@@ -190,11 +219,11 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
     }
   }
   
-  func reduce(state: State, mutation: Mutation) -> State {
+  public func reduce(state: State, mutation: Mutation) -> State {
     var newState = state
     switch mutation {
-    case let .setSelectedInterest(interest):
-      newState.selectedInterest = interest
+    case let .setSelectedInterests(interests):
+      newState.selectedInterests = interests
     case let .setSelectedRegion(region):
       newState.selectedRegion = region
     case let .setSelectedDateRange(dateRange):

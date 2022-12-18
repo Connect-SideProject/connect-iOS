@@ -70,13 +70,15 @@ public final class CheckBoxContainerView: UIView, CastableView {
     self.eventType = eventType
     super.init(frame: .zero)
     
-    self.checkBoxViews = dictionary.keys.enumerated().map { [weak self] offset, element in
-      let checkBox = CheckBoxView(title: element)
-      checkBox.checkBoxButton.tag = offset
-      checkBox.handler = { [weak self] sender in
-        self?.didTapCheckBox(sender: sender)
-      }
-      return checkBox
+    self.checkBoxViews = dictionary.keys
+      .enumerated()
+      .map { [weak self] offset, element in
+        let checkBox = CheckBoxView(title: element)
+        checkBox.checkBoxButton.tag = offset
+        checkBox.handler = { [weak self] sender in
+          self?.didTapCheckBox(sender: sender)
+        }
+        return checkBox
     }
     
     configureUI()

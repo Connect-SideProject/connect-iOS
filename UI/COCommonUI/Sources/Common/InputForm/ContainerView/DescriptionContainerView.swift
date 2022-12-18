@@ -82,7 +82,7 @@ public class DescriptionContainerView: UIView {
   
   /// TextView 사용시 외부 text접근 코드.
   public var textViewText: String {
-    var text = textView.text ?? ""
+    let text = textView.text ?? ""
     if case let .textView(item) = type {
       return textView.text == item.placeholder ? "" : text
     }

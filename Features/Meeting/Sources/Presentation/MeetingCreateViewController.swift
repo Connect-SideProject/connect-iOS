@@ -19,7 +19,7 @@ import COCommonUI
 import CODomain
 import COExtensions
 
-final class MeetingCreateViewController: UIViewController, ReactorKit.View {
+public final class MeetingCreateViewController: UIViewController, ReactorKit.View {
   
   enum Height {
     static let titleView: CGFloat = 50
@@ -50,7 +50,7 @@ final class MeetingCreateViewController: UIViewController, ReactorKit.View {
       .init(
         title: "진행방식",
         castableView: CheckBoxContainerView(
-          dictionary: ["오프라인" : "OFFLINE", "온라인" : "ONLINE", "미정": "NONE"],
+          dictionary: ["오프라인" : "OFFLINE", "온라인" : "ONLINE", "미정": "TBD"],
           eventType: .radio
         )
       )
@@ -145,20 +145,20 @@ final class MeetingCreateViewController: UIViewController, ReactorKit.View {
   private let roleAndPeopleRelay = PublishRelay<String>()
   private let locationButtonRelay = PublishRelay<String>()
   
-  var disposeBag = DisposeBag()
+  public var disposeBag = DisposeBag()
   
   deinit {
     removeNotifications()
   }
   
-  override func viewDidLoad() {
+  public override func viewDidLoad() {
     super.viewDidLoad()
     
     configureUI()
     bindEvent()
   }
   
-  override func viewDidLayoutSubviews() {
+  public override func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     
     containerScrollView.pin
@@ -181,7 +181,7 @@ final class MeetingCreateViewController: UIViewController, ReactorKit.View {
     navigationController?.setNavigationBarHidden(false, animated: false)
   }
   
-  func bind(reactor: MeetingCreateReactor) {
+  public func bind(reactor: MeetingCreateReactor) {
     
     interestContainerView.buttonHandlerRelay
       .map { Reactor.Action.didTapInterestButton }
@@ -213,11 +213,11 @@ final class MeetingCreateViewController: UIViewController, ReactorKit.View {
             .show()
             .handler = { [weak self, weak reactor] state in
               switch state {
-              case let .confirm(_, text):
+              case let .confirm(indices, text):
                 switch type {
                 case .interest:
                   self?.interestButtonRelay.accept(text)
-                  reactor?.action.onNext(.didSelectedInterest(text))
+                  reactor?.action.onNext(.didSelectedInterests(indices))
                 case .address:
                   self?.locationButtonRelay.accept("서울 \(text)")
                   reactor?.action.onNext(.didSelectedAddress(text))
