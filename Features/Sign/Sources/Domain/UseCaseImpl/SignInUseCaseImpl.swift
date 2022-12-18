@@ -43,7 +43,8 @@ extension SignInUseCaseImpl {
       }
       
       if UserApi.isKakaoTalkLoginAvailable() {
-        return repository.requestAccessTokenWithKakaoTalk()
+        return repository
+          .requestAccessTokenWithKakaoTalk()
           .map { $0 }
       } else {
         return repository.requestAccessTokenWithKakaoAccount()

@@ -16,10 +16,12 @@ public enum Path {
   case signIn(AuthType, String)
   case signUp(SignUpParameter, String)
   case serchPlace(String)
+  case createMeeting(CreateMeetingParameter)
+  case search([String:String]?)
   case uploadProfileImage(Data)
   case userProfile
-  case homeMenu
-  case homeNews
+  case homeNews([String:String?])
+  case homeBookMark(String)
   case updateProfile(ProfileEditParameter)
   case homeRelease
   case refreshToken
@@ -38,12 +40,16 @@ public enum Path {
       return "/api/member/auth/signup"
     case .serchPlace:
       return "/v2/local/search/address.json"
-    case .homeMenu:
-        return "/api/study/home/menu"
+    case .createMeeting:
+      return "/api/study"
     case .homeNews:
-        return "/api/study/news"
+      return "/api/study/news"
     case .homeRelease:
       return "/api/study/hots"
+    case let .homeBookMark(id):
+        return "/api/study/\(id)/bookmark"
+    case .search:
+        return "/api/study/search"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:
@@ -53,7 +59,7 @@ public enum Path {
     case .logout:
       return "/api/member/auth/logout"
     case .signOut:
-      return "/api/member/signOut"
+      return "/api/member/auth/signout"
     }
   }
   
@@ -62,6 +68,8 @@ public enum Path {
     case let .signUp(parameter, _):
       return parameter.asDictionary()
     case let .updateProfile(parameter):
+      return parameter.asDictionary()
+    case let .createMeeting(parameter):
       return parameter.asDictionary()
     default:
       return nil
