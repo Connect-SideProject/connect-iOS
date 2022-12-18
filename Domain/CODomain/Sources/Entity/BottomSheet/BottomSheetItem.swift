@@ -7,8 +7,6 @@
 
 import Foundation
 
-import COExtensions
-
 public struct BottomSheetItem {
   public let value: String
   public var isSelected: Bool = false

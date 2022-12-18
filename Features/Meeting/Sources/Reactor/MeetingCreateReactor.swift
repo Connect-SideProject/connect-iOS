@@ -176,7 +176,10 @@ final class MeetingCreateReactor: Reactor, ErrorHandlerable {
       var parameter = parameter
       parameter.updateInterestings([interesting])
       parameter.updateRoleAndCounts(roleAndCounts)
-      parameter.updateDateRange(dateRange)
+      parameter.updateDateRange(
+        startDate: dateRange.start?.toFormattedString() ?? "",
+        endDate: dateRange.end?.toFormattedString() ?? ""
+      )
       parameter.updatePlace(region.description)
       
       return repository.requestCreateMeeting(parameter: parameter)

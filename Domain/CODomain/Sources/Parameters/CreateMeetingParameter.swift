@@ -156,8 +156,11 @@ public extension CreateMeetingParameter {
     self.roleAndCounts = roleAndCounts
   }
   
-  mutating func updateDateRange(_ dateRange: DateRange) {
-    self.startDate = dateRange.start?.toFormattedString() ?? ""
-    self.endDate = dateRange.end?.toFormattedString() ?? ""
+  mutating func updateDateRange(
+    startDate: String,
+    endDate: String
+  ) {
+    self.startDate = startDate
+    self.endDate = endDate
   }
 }
