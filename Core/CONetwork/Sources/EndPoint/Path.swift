@@ -18,8 +18,8 @@ public enum Path {
   case serchPlace(String)
   case uploadProfileImage(Data)
   case userProfile
-  case homeMenu
-  case homeNews
+  case homeNews([String:String?])
+  case homeBookMark(String)
   case updateProfile(ProfileEditParameter)
   case homeRelease
   case refreshToken
@@ -40,8 +40,8 @@ public enum Path {
       return "/api/member/auth/signup"
     case .serchPlace:
       return "/v2/local/search/address.json"
-    case .homeMenu:
-        return "/api/study/home/menu"
+    case .createMeeting:
+      return "/api/study"
     case .homeNews:
         return "/api/study/news"
     case .homeRelease:
