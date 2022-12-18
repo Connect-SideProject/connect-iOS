@@ -69,6 +69,7 @@ extension HomeDependencyContainer {
 public protocol HomeRepository {
     func responseInterestMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
+    func responseHomeMenuImage(image: Interest) async throws -> UIImage
     func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
     func responseHomeMenuSectionItem(item: [Interest]) -> HomeViewSection
@@ -97,6 +98,16 @@ final class HomeViewRepo: HomeRepository {
         return .just(.setHomeInterestMenuItem(interestService.interestList))
     }
     
+    func responseHomeMenuImage(image: Interest) async throws -> UIImage {
+        let imageTask: Task<UIImage, Error> = Task {
+            guard let imageUrl = URL(string: image.imageURL),
+                  let (imageData, _) = try? await URLSession.shared.data(from: imageUrl)
+            else { return UIImage() }
+            return UIImage(data: imageData) ?? UIImage()
+        }
+        return try await imageTask.value
+    }
+    
     func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation> {
         let createNewsResponse = homeApiService.request(endPoint: .init(path: .homeNews(paramenter))).flatMap { (data: [HomeStudyList]) -> Observable<HomeViewReactor.Mutation> in
             
@@ -119,7 +130,7 @@ final class HomeViewRepo: HomeRepository {
     func responseHomeMenuSectionItem(item: [Interest]) -> HomeViewSection {
         var homeMenuSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
-            homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuModel: item[i])))
+            homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuModel: item[i], menuRepo: self)))
         }
         
         return HomeViewSection.field(homeMenuSectionItem)

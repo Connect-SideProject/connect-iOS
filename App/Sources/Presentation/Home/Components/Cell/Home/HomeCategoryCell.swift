@@ -101,12 +101,18 @@ extension HomeCategoryCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         reactor.state
-            .compactMap { URL(string: $0.menuModel.imageURL) }
-            .map { try Data(contentsOf: $0)}
-            .map { UIImage(data: $0) }
-            .bind(to: self.menuImageView.rx.image)
-            .disposed(by: disposeBag)
+            .map { state -> Task<UIImage, _> in
+                Task {
+                    let originImage = try await state.menuRepo.responseHomeMenuImage(image: state.menuModel)
+                    return originImage
+                }
+            }.asObservable()
+            .bind(onNext: { [weak self] originImage in
+                Task {
+                    self?.menuImageView.image = try await originImage.value
+                }
+            }).disposed(by: disposeBag)
+        
         
     }
-    
 }

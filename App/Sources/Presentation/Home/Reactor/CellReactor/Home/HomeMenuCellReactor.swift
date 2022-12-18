@@ -20,14 +20,14 @@ public final class HomeMenuCellReactor: Reactor {
     
     public struct State {
         var menuModel: Interest
+        var menuRepo: HomeRepository
     }
     
     public let initialState: State
     
-    init(menuModel: Interest
+    init(menuModel: Interest, menuRepo: HomeRepository
     ) {
-        self.initialState = State(menuModel: menuModel)
-        print("Home Menu Data: \(menuModel.imageURL)")
+        self.initialState = State(menuModel: menuModel, menuRepo: menuRepo)
     }
     
     
