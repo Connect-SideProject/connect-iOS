@@ -21,17 +21,52 @@ final class PostFilterReactor: Reactor {
     
     struct State {
         var isSelected: Bool
+        var bottomSheetItem: [BottomSheetItem]
+    }
+    
+    enum Mutation {
+        case setSheetItems([BottomSheetItem])
     }
     
     var initialState: State
     
-    init() {
+    init(bottomSheetItem: [BottomSheetItem]) {
         defer { _ = self.state }
-        self.initialState = State(isSelected: false)
+        self.initialState = State(isSelected: false, bottomSheetItem: bottomSheetItem)
     }
     
+    func transform(mutation: Observable<Mutation>) -> Observable<Mutation> {
+        let fromSheetItemMutation = PostFilterTransform.event.flatMap { [weak self] event in
+            self?.responseSheetItemTransform(from: event) ?? .empty()
+        }
+        
+        return Observable.of(mutation, fromSheetItemMutation).merge()
+    }
     
-    
+
+    func reduce(state: State, mutation: Mutation) -> State {
+        switch mutation {
+        case let .setSheetItems(items):
+            var newState = state
+            newState.bottomSheetItem = items
+            
+            return newState
+        }
+    }
+}
+
+private extension PostFilterReactor {
+    func responseSheetItemTransform(from event: PostFilterTransform.Event) -> Observable<Mutation> {
+        switch event {
+        case let .responseSheetItem(item):
+            
+            return .just(.setSheetItems(item))
+            
+        default:
+            return .empty()
+        }
+        
+    }
 }
 
 
@@ -75,13 +110,13 @@ final class PostFilterHeaderView: BaseView {
         $0.backgroundColor = .hexEDEDED
     }
     
-    private let onOffLineFilterComponentView: FilterComponentView = FilterComponentView()
+    private let onOffLineFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .onOffLine(.default)))
     
-    private let studyTypeFilterComponentView: FilterComponentView = FilterComponentView()
+    private let studyTypeFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .studyType(.default)))
     
-    private let interestFieldFilterComponentView: FilterComponentView = FilterComponentView()
+    private let interestFieldFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .interest([])))
     
-    private let alignmentFilterComponentView: FilterComponentView = FilterComponentView()
+    private let alignmentFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .aligment(.default)))
     
     
     init(reactor: Reactor) {
@@ -120,34 +155,19 @@ final class PostFilterHeaderView: BaseView {
             $0.left.equalToSuperview().offset(20)
             $0.centerY.equalToSuperview()
         }
-        
-        onOffLineFilterView.snp.makeConstraints {
-            $0.width.equalTo(73)
-        }
+
         
         onOffLineFilterComponentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        
-        studyTypeFilterView.snp.makeConstraints {
-            $0.width.equalTo(62)
-        }
+
         
         studyTypeFilterComponentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
         
-        
-        interestFieldFilterView.snp.makeConstraints {
-            $0.width.equalTo(62)
-        }
-        
         interestFieldFilterComponentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
-        }
-        
-        alignmentFilterView.snp.makeConstraints {
-            $0.width.equalTo(73)
         }
         
         alignmentFilterComponentView.snp.makeConstraints {
@@ -188,8 +208,16 @@ extension PostFilterHeaderView: ReactorKit.View {
             .when(.recognized)
             .throttle(.seconds(2), scheduler: MainScheduler.instance)
             .bind { _ in
+                self.delegate?.didFilterSheetCreate(.interest(self.reactor?.currentState.bottomSheetItem ?? []))
+            }.disposed(by: disposeBag)
+        
+        alignmentFilterView
+            .rx.tapGesture()
+            .when(.recognized)
+            .throttle(.seconds(2), scheduler: MainScheduler.instance)
+            .bind { _ in
                 self.delegate?.didFilterSheetCreate(.aligment(.default))
-            }
+            }.disposed(by: disposeBag)
         
     }
     

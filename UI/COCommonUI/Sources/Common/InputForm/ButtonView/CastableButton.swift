@@ -11,6 +11,7 @@ import FlexLayout
 import PinLayout
 
 public enum CastableButtonType {
+  case normal(String)
   case downwordArrow(String)
 }
 
@@ -18,7 +19,9 @@ public final class CastableButton: UIButton, CastableView {
   
   public var handler: () -> Void = { }
   
-  public init(type: CastableButtonType) {
+  private let titleColor: UIColor?
+  public init(type: CastableButtonType, titleColor: UIColor? = nil) {
+    self.titleColor = titleColor
     super.init(frame: .zero)
     
     configureUI(type: type)
@@ -37,23 +40,26 @@ public final class CastableButton: UIButton, CastableView {
 private extension CastableButton {
   func configureUI(type: CastableButtonType) {
     
+    var configuration = UIButton.Configuration.bordered()
+    
     switch type {
+    case let .normal(title):
+      setTitle(title, for: .normal)
+      
     case let .downwordArrow(title):
       setTitle(title, for: .normal)
       setImage(UIImage(named: "ic_downward_arrow"), for: .normal)
       
       contentHorizontalAlignment = .left
+      semanticContentAttribute = UIApplication.shared.userInterfaceLayoutDirection == .rightToLeft ? .forceLeftToRight : .forceRightToLeft
       
-      semanticContentAttribute = UIApplication.shared
-          .userInterfaceLayoutDirection == .rightToLeft ? .forceLeftToRight : .forceRightToLeft
+      configuration.imagePadding = 8
+      configuration.baseBackgroundColor = .clear
     }
     
-    var configuration = UIButton.Configuration.bordered()
-    configuration.imagePadding = 8
-    configuration.baseBackgroundColor = .clear
     self.configuration = configuration
     
-    setTitleColor(.hex3A3A3A, for: .normal)
+    setTitleColor(titleColor == nil ? .hex3A3A3A : titleColor, for: .normal)
     titleLabel?.font = .regular(size: 16)
   }
   

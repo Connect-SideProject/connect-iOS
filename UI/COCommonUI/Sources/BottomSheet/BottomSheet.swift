@@ -14,7 +14,11 @@ import COExtensions
 import COManager
 import JTAppleCalendar
 
-public enum BottomSheetType: CustomStringConvertible {
+public enum BottomSheetType: CustomStringConvertible, Equatable {
+    public static func == (lhs: BottomSheetType, rhs: BottomSheetType) -> Bool {
+        return lhs.description == rhs.description
+    }
+    
   public var description: String {
     switch self {
     case .onOffLine:
@@ -29,6 +33,8 @@ public enum BottomSheetType: CustomStringConvertible {
       return "활동지역"
     case .interest:
       return "관심분야"
+    case .roleAndPeople:
+      return "역할 및 인원"
     }
   }
   
@@ -46,8 +52,13 @@ public enum BottomSheetType: CustomStringConvertible {
   case aligment(SelectionState?)
   case studyType(SelectionState?)
   case date
-  case address([BottomSheetItem])
-  case interest([BottomSheetItem])
+  case address(selectionType: SelectionType, items: [BottomSheetItem])
+  case interest(selectionType: SelectionType, items: [BottomSheetItem])
+  case roleAndPeople(BottomSheetRoleItem)
+}
+
+public enum SelectionType {
+  case single, multiple
 }
 
 public enum SelectionState {
@@ -55,7 +66,7 @@ public enum SelectionState {
 }
 
 public enum BottomSheetHandlerState {
-  case confirm(Int, String), date(DateRange), cancel
+  case confirm([Int], String), date(DateRange), roleAndCount([RoleAndCountItem]), cancel
 }
 /**
  BottomSheet 화면.
@@ -84,6 +95,7 @@ public final class BottomSheet: UIViewController {
   private enum Height {
     static let containerView: CGFloat = 490
     static let defaultItem: CGFloat = 38
+    static let largeItem: CGFloat = 100
     static let collectionItem: CGFloat = 42
     static let calendarHeader: CGFloat = 50
   }
@@ -155,6 +167,11 @@ public final class BottomSheet: UIViewController {
         width: view.bounds.width - 40,
         height: Height.defaultItem
       )
+    case .roleAndPeople:
+      $0.itemSize = .init(
+        width: view.bounds.width - 40,
+        height: Height.largeItem
+      )
     default:
       $0.itemSize = .init(
         width: view.bounds.width,
@@ -169,6 +186,7 @@ public final class BottomSheet: UIViewController {
   ).then {
     $0.register(BottomSheetItemCell.self, forCellWithReuseIdentifier: "BottomSheetItemCell")
     $0.register(BottomSheetListCell.self, forCellWithReuseIdentifier: "BottomSheetListCell")
+    $0.register(BottomSheetRoleAndPeopleCell.self, forCellWithReuseIdentifier: "BottomSheetRoleAndPeopleCell")
     $0.delegate = self
     $0.dataSource = self
     if type.isButtonSelection {
@@ -177,12 +195,18 @@ public final class BottomSheet: UIViewController {
   }
   
   private var items: [BottomSheetItem] = []
+  private var roleItem: BottomSheetRoleItem = .init(roles: [], items: [])
+  
+  private var selectedRoleItems: [Int: RoleAndCountItem] = [:]
   
   private var dateRange: DateRange = .init()
   
   public var handler: ((BottomSheetHandlerState) -> Void) = { _ in }
   
+  private var selectionType: SelectionType = .single
+  
   private let type: BottomSheetType
+  
   public init(type: BottomSheetType) {
     func updateItems(strings: [String], selectionState: SelectionState?) -> [BottomSheetItem] {
       return strings
@@ -214,8 +238,12 @@ public final class BottomSheet: UIViewController {
     self.titleLabel.text = type.description
     
     switch type {
-    case let .address(items), let .interest(items):
+    case let .address(selectionType, items), let .interest(selectionType, items):
+      self.selectionType = selectionType
       self.items = items
+      
+    case let .roleAndPeople(item):
+      self.roleItem = item
       
     case let .onOffLine(selectionState):
       self.items = updateItems(strings: ["전체", "온라인", "오프라인"], selectionState: selectionState)
@@ -359,15 +387,8 @@ private extension BottomSheet {
         self.handler(.date(self.dateRange))
       }
       
-    default:
-      let selectedIndex = self.items.enumerated()
-        .map { offset, element in
-          return element.isSelected ? offset : -1
-        }
-        .filter { $0 != -1 }
-        .first
-      
-      guard let selectedIndex = selectedIndex else {
+    case .roleAndPeople:
+      guard selectedRoleItems.count > 0 else {
         CommonAlert.shared
           .setMessage(.message("\(type.description)를(을) 선택해주세요."))
           .show()
@@ -378,8 +399,35 @@ private extension BottomSheet {
       
       dismiss(animated: true) { [weak self] in
         guard let self = self else { return }
+        let items = self.selectedRoleItems.values.map { $0 }
+        self.handler(.roleAndCount(items))
+      }
+      
+    default:
+      
+      let selectedIndices = self.items.enumerated()
+        .map { offset, element in
+          return element.isSelected ? offset : -1
+        }
+        .filter { $0 != -1 }
+      
+      guard !selectedIndices.isEmpty else {
+        CommonAlert.shared
+          .setMessage(.message("\(type.description)를(을) 선택해주세요."))
+          .show()
+        return
+      }
+      
+      let title = selectedIndices.count == 1 ?
+        items[safe: selectedIndices[0]]?.value ?? "" :
+        selectedIndices.map { items[$0].value }.toStringWithComma
+      
+      dimView.backgroundColor = .clear
+      
+      dismiss(animated: true) { [weak self] in
+        guard let self = self else { return }
         self.handler(
-          .confirm(selectedIndex, self.items[safe: selectedIndex]?.value ?? "")
+          .confirm(selectedIndices, title)
         )
       }
     }
@@ -388,7 +436,12 @@ private extension BottomSheet {
 
 extension BottomSheet: UICollectionViewDataSource {
   public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return items.count
+    switch type {
+    case .roleAndPeople:
+      return roleItem.items.count
+    default:
+      return items.count
+    }
   }
   
   public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -400,6 +453,40 @@ extension BottomSheet: UICollectionViewDataSource {
         cell.setup(title: item.value, isSelected: item.isSelected)
         return cell
       }
+    
+    case .roleAndPeople:
+      if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BottomSheetRoleAndPeopleCell", for: indexPath) as? BottomSheetRoleAndPeopleCell {
+        let index = indexPath.item
+        let titles = roleItem.roles
+        cell.setup(titles: titles, item: roleItem.items[index])
+        cell.valueHandler = { [weak self] selectedTitle, count in
+          guard let self = self else { return }
+          self.selectedRoleItems[index] = .init(
+            id: index,
+            role: selectedTitle,
+            count: count
+          )
+          let items: [RoleAndCountItem] = self.selectedRoleItems.map {
+            .init(id: $0.key, role: $0.value.role, count: $0.value.count)
+          }
+          self.roleItem.updateItems(items)
+        }
+        cell.additionalHandler = { [weak self] in
+          guard let self = self else { return }
+          let currentCount = self.roleItem.items.count
+          
+          if currentCount < self.roleItem.roles.count {
+            var items: [RoleAndCountItem] = self.selectedRoleItems.map {
+              .init(id: $0.key, role: $0.value.role, count: $0.value.count)
+            }
+            items.append(.init(id: index + 1, role: "", count: 0))
+            self.roleItem.updateItems(items)
+            self.collectionView.reloadData()
+          }
+        }
+        return cell
+      }
+      
     default:
       if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "BottomSheetListCell", for: indexPath) as? BottomSheetListCell {
         let item = items[indexPath.item]
@@ -415,15 +502,23 @@ extension BottomSheet: UICollectionViewDataSource {
 extension BottomSheet: UICollectionViewDelegateFlowLayout {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     
-    if items[indexPath.item].isSelected == true {
-      return
+    guard let item = items[safe: indexPath.item] else { return }
+    
+    if selectionType == .single {
+      if item.isSelected == true {
+        return
+      }
+      
+      let _ = items.indices.map { offset in
+        items[offset].update(isSelected: false)
+      }
+      
+      items[indexPath.item].update(isSelected: true)
+    } else {
+      let isUnSelected = item.isSelected == false
+      items[indexPath.item].update(isSelected: isUnSelected)
     }
     
-    let _ = items.indices.map { offset in
-      items[offset].update(isSelected: false)
-    }
-    
-    items[indexPath.item].update(isSelected: true)
     collectionView.reloadData()
   }
   

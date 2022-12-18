@@ -90,8 +90,10 @@ public final class SignUpReactor: Reactor, ErrorHandlerable {
         .init(value: $0.법정동명)
       }
       let setAddressList: Observable<Mutation> = .just(.setAddressList(addressList))
-      return .just(.setRoute(.bottomSheet(.address(addressList))))
-        .concat(setAddressList)
+      return .just(.setRoute(.bottomSheet(.address(
+        selectionType: .single, items: addressList
+      ))))
+      .concat(setAddressList)
       
     case let .didSelectedLocation(index):
       

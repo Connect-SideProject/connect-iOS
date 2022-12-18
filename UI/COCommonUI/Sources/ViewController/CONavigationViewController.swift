@@ -19,3 +19,21 @@ public final class CONavigationViewController: UINavigationController {
   }
   
 }
+
+
+extension UINavigationController {
+    public func pushViewController(viewController: UIViewController, animated: Bool, completion: @escaping () -> Void) {
+            CATransaction.setCompletionBlock(completion)
+            CATransaction.begin()
+            self.pushViewController(viewController, animated: animated)
+            CATransaction.commit()
+    }
+    
+    
+    public func popViewController(animated: Bool = true, completion: @escaping () -> Void) {
+        CATransaction.setCompletionBlock(completion)
+        CATransaction.begin()
+        self.popViewController(animated: animated)
+        CATransaction.commit()
+    }
+}
