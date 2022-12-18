@@ -81,20 +81,36 @@ public extension EndPoint {
 
   var url: URL? {
 
-    var components = URLComponents()
-    components.scheme = baseURL.scheme
-    components.host = baseURL.host
-    components.path = path.string
+    var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: true)
+    components?.scheme = baseURL.scheme
+    components?.host = baseURL.host
+    components?.path = path.string
     
     switch path {
     case .serchPlace(let query):
-      components.host = "dapi.kakao.com"
-      components.queryItems = [URLQueryItem(name: "query", value: query)]
+      components?.host = "dapi.kakao.com"
+      components?.queryItems = [URLQueryItem(name: "query", value: query)]
+    case let .search(query):
+        if let queryItems = query {
+            var queryItem: [URLQueryItem] = []
+            _ = queryItems.map {
+                queryItem.append(URLQueryItem(name: $0.key, value: $0.value))
+            }
+            debugPrint("query Item Search: \(queryItem)")
+            components?.queryItems = queryItem
+        }
+    case let .homeNews(query):
+        var queryItem: [URLQueryItem] = []
+        _ = query.map {
+            queryItem.append(URLQueryItem(name: $0.key, value: $0.value))
+        }
+        debugPrint("query Item HomeNews: \(queryItem)")
+        components?.queryItems = queryItem
     default:
       break
     }
     
-    return components.url
+    return components?.url
   }
 
   var parameter: [String: Any]? {
@@ -103,7 +119,7 @@ public extension EndPoint {
 
   var method: HTTPMethod {
     switch path {
-    case .signUp, .uploadProfileImage, .userProfile, .updateProfile:
+    case .signUp, .uploadProfileImage, .userProfile, .updateProfile, .homeBookMark:
       return .put
     case .refreshToken, .signIn, .logout, .createMeeting:
       return .post

@@ -5,7 +5,7 @@
 //  Created by Kim dohyun on 2022/11/21.
 //
 
-import Differentiator
+import RxDataSources
 
 public enum SearchKeywordType: String, Equatable {
     case searchKeyword

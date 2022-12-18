@@ -8,6 +8,6 @@
 import Foundation
 
 public protocol HomeCoordinatorDelegate: AnyObject {
-    func didTapToPostListCreate()
+    func didTapToPostListCreate(completion: (() -> Void)?)
     func didTapToSearchCreate()
 }

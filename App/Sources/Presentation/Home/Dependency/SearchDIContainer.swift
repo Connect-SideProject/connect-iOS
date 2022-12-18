@@ -6,8 +6,13 @@
 //
 
 import Foundation
+import ReactorKit
+
+
 import COCommon
+import CODomain
 import CONetwork
+
 
 
 
@@ -44,7 +49,7 @@ public final class SearchDependencyContainer: HomeDIContainer {
 
 //MARK: Repository
 public protocol SearchRepository {
-    func responseSearchKeywordsSectionItem(item: [String]) -> SearchSection
+    func responseSearchKeywordsSectionItem() -> SearchSection
 }
 
 
@@ -59,14 +64,15 @@ final class SearchViewRepo: SearchRepository {
     }
     
     
-    func responseSearchKeywordsSectionItem(item: [String]) -> SearchSection {
-        var searchRecentlyKeywrodItem: [SearchSectionItem] = []
+    func responseSearchKeywordsSectionItem() -> SearchSection {
+        var searchRecentlyKeywordItem: [SearchSectionItem] = []
+        var recentlyKeyWordItems = UserDefaults.standard.stringArray(forKey: .recentlyKeywords)
         
-        for i in 0 ..< item.count {
-            searchRecentlyKeywrodItem.append(.searchList(SearchKeywordCellReactor(keywordItems: item[i])))
+        for i in 0 ..< recentlyKeyWordItems.count {
+            searchRecentlyKeywordItem.append(.searchList(SearchKeywordCellReactor(keywordItems: recentlyKeyWordItems[i], indexPath: i)))
         }
         
-        return SearchSection.search(searchRecentlyKeywrodItem)
+        return SearchSection.search(searchRecentlyKeywordItem)
     }
     
 

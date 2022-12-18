@@ -10,6 +10,7 @@ import UIKit
 import ReactorKit
 import SnapKit
 import RxCocoa
+import COCommonUI
 
 
 /// 홈 카테고리 셀
@@ -38,7 +39,7 @@ final class HomeCategoryCell: UICollectionViewCell {
         return $0
     }(UIView())
     
-    private let menuImageView: UIImageView = {
+    private var menuImageView: UIImageView = {
         $0.contentMode = .scaleAspectFit
         
         return $0
@@ -94,19 +95,24 @@ extension HomeCategoryCell: ReactorKit.View {
     func bind(reactor: Reactor) {
         
         reactor.state
-            .map{ $0.menuType.menuTitle }
+            .map{ $0.menuModel.name }
             .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
             .bind(to: self.menuTitleLabel.rx.text)
             .disposed(by: disposeBag)
-
+        
         reactor.state
-            .map { try $0.homeCellRepo.responseMenuImage(image: $0.menuType) }
-            .map { UIImage(data: $0)}
-            .distinctUntilChanged()
-            .observe(on: MainScheduler.instance)
-            .bind(to: self.menuImageView.rx.image)
-            .disposed(by: disposeBag)
+            .map { state -> Task<UIImage, _> in
+                Task {
+                    let originImage = try await state.menuRepo.responseHomeMenuImage(image: state.menuModel)
+                    return originImage
+                }
+            }.asObservable()
+            .bind(onNext: { [weak self] originImage in
+                Task {
+                    self?.menuImageView.image = try await originImage.value
+                }
+            }).disposed(by: disposeBag)
+        
+        
     }
-    
 }

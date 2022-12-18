@@ -14,7 +14,11 @@ import COExtensions
 import COManager
 import JTAppleCalendar
 
-public enum BottomSheetType: CustomStringConvertible {
+public enum BottomSheetType: CustomStringConvertible, Equatable {
+    public static func == (lhs: BottomSheetType, rhs: BottomSheetType) -> Bool {
+        return lhs.description == rhs.description
+    }
+    
   public var description: String {
     switch self {
     case .onOffLine:
