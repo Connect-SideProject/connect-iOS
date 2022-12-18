@@ -10,6 +10,7 @@ import SnapKit
 import Then
 import ReactorKit
 import RxCocoa
+import RxGesture
 
 
 /// 홈 Hot 게시글 셀
@@ -124,6 +125,7 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         
         releaseStateContainerView.addSubview(releaseStateLabel)
         releaseMangerConfirmView.addSubview(releaseMangerConfirmTitleLabel)
+        releaseMangerConfirmView.isHidden = true
         
         _ = [releaseBookMarkCountLabel, releaseBookMarkImageView].map {
             self.releaseBookMarkContainerView.addSubview($0)
@@ -149,9 +151,10 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         }
         
         releaseBookMarkContainerView.snp.makeConstraints {
-            $0.right.equalToSuperview().offset(-20)
-            $0.top.equalTo(15)
+            $0.right.equalToSuperview().offset(-16)
+            $0.top.equalToSuperview().offset(15)
             $0.height.equalTo(20)
+            $0.width.equalTo(50)
         }
         
         releaseBookMarkImageView.snp.makeConstraints {
@@ -178,7 +181,7 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         }
         
         releaseMemberStateImageView.snp.makeConstraints {
-            $0.bottom.equalTo(releaseMangerConfirmView.snp.top).offset(-18)
+            $0.bottom.equalToSuperview().offset(-14)
             $0.left.equalTo(releaseSubTitleLabel)
             $0.width.height.equalTo(16)
         }
@@ -186,7 +189,7 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         releaseMemberStateLabel.snp.makeConstraints {
             $0.left.equalTo(releaseMemberStateImageView.snp.right).offset(5)
             $0.height.equalTo(14)
-            $0.centerY.equalToSuperview()
+            $0.centerY.equalTo(releaseMemberStateImageView)
         }
         
         releaseMangerConfirmView.snp.makeConstraints {
@@ -211,6 +214,16 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
     
     func bind(reactor: Reactor) {
         
+        releaseBookMarkContainerView
+            .rx.tapGesture()
+            .when(.recognized)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { _ in Reactor.Action.didTapBookMarkButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        
+        
         reactor.state
             .map { $0.releaseModel.releaseTitle }
             .observe(on: MainScheduler.instance)
@@ -219,33 +232,101 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd }
-            .do(onNext:{ _ in
-                self.releaseStateLabel.text = "모집중"
-            }).map { _ in UIColor.hex05A647 }
+            .map { _ in UIColor.hex05A647 }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseStateContainerView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd == false }
-            .do(onNext:{ _ in
-                self.releaseStateLabel.text = "모집완료"
-            }).map { _ in UIColor.hex8E8E8E }
+            .map { _ in UIColor.hex8E8E8E }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseStateContainerView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
+        reactor.state
+            .filter { $0.releaseModel.releaseisEnd == false }
+            .map { _ in "모집완료"}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseStateLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.releaseModel.releaseisEnd }
+            .map { _ in "모집중" }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseStateLabel.rx.text)
+            .disposed(by: disposeBag)
         
         reactor.state
             .map { String($0.releaseModel.releaseBookMark) }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseBookMarkCountLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .map { $0.releaseModel.releaseStudyInfo }
+            .observe(on: MainScheduler.instance)
             .bind(to: self.releaseSubTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         
+        reactor.state
+            .map { $0.releaseModel.releaseRecruitPart.map { parts -> String in
+                switch parts.role {
+                case "DEV":
+                    return "개발자"
+                case "DESIGN":
+                    return "디자이너"
+                case "PM":
+                    return "기획자"
+                case "MAK":
+                    return "마케터"
+                default:
+                    return ""
+                }
+            }.toStringWithVeticalBar}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseMemberStateLabel.rx.text)
+            .disposed(by: disposeBag)
         
+        reactor.state
+            .filter { $0.releaseModel.releaseMyBookMark }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.releaseModel.releaseMyBookMark == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .filter { $0.bookMarkModel != nil}
+            .filter { $0.bookMarkModel!.bookMarkId == $0.releaseModel.id && $0.bookMarkModel!.bookMarkisCheck }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.bookMarkModel?.bookMarkId == $0.releaseModel.id && $0.bookMarkModel?.bookMarkisCheck == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark")}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.bookMarkModel?.bookMarkId == $0.releaseModel.id  }
+            .map { String($0.bookMarkModel?.bookMarkCount ?? 0)}
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseBookMarkCountLabel.rx.text)
+            .disposed(by: disposeBag)
+            
     }
     
 }

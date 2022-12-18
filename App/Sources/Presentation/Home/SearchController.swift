@@ -8,9 +8,11 @@
 import UIKit
 import Then
 import ReactorKit
-import COCommonUI
-
+import RxCocoa
 import RxDataSources
+
+import COCommonUI
+import COExtensions
 
 
 
@@ -22,10 +24,12 @@ public final class SearchController: UIViewController {
     
     public typealias Reactor = SearchViewReactor
     
+    public weak var delegate: HomeCoordinatorDelegate?
+    
     public var disposeBag: DisposeBag = DisposeBag()
     
     private lazy var collectionViewLayout = LeftAlignedCollectionViewFlowLayout().then {
-        $0.scrollDirection = .horizontal
+        $0.scrollDirection = .vertical
         $0.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
     }
     
@@ -43,8 +47,9 @@ public final class SearchController: UIViewController {
     case let .searchList(cellReactor):
         guard let searchKeywordCell = collectionView.dequeueReusableCell(withReuseIdentifier: "SearchKeywordListCell", for: indexPath) as? SearchKeywordListCell else { return UICollectionViewCell() }
         searchKeywordCell.reactor = cellReactor
+            
+        return searchKeywordCell
     }
-        return UICollectionViewCell()
 })
     
     
@@ -82,6 +87,7 @@ public final class SearchController: UIViewController {
     //MARK: LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.setNavigationBarHidden(false, animated: false)
         configure()
     }
     
@@ -92,10 +98,19 @@ public final class SearchController: UIViewController {
             self.view.addSubview($0)
         }
         
+        if let searchTextFiled = keywordSearchBar.value(forKey: "searchField") as? UITextField {
+            searchTextFiled.snp.makeConstraints {
+                $0.left.equalToSuperview()
+                $0.right.equalToSuperview()
+                $0.height.equalTo(44)
+            }
+        }
+        
         
         keywordCollectionView.snp.makeConstraints {
             $0.top.equalTo(keywordSearchBar.snp.bottom)
-            $0.left.right.bottom.equalToSuperview()
+            $0.left.right.equalToSuperview().inset(20)
+            $0.bottom.equalToSuperview()
         }
         
         
@@ -136,6 +151,13 @@ extension SearchController: ReactorKit.View {
             .bind(to: reactor.action)
             .disposed(by: disposeBag)
         
+        self.keywordSearchBar.searchTextField.rx.value
+            .distinctUntilChanged()
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { Reactor.Action.updateKeyword($0) }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         
         reactor.state
             .map { $0.isLoading }
@@ -144,13 +166,30 @@ extension SearchController: ReactorKit.View {
             .disposed(by: disposeBag)
         
         
-        reactor.state
-            .map { $0.section }
+        reactor.pulse(\.$section)
             .debug("Search Keywrod Section")
-            .observe(on: MainScheduler.instance)
+            .observe(on: MainScheduler.asyncInstance)
             .bind(to: keywordCollectionView.rx.items(dataSource: self.searchDataSource))
             .disposed(by: disposeBag)
         
+        keywordSearchBar.rx.searchButtonTap
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .withUnretained(self)
+            .subscribe(onNext: { vc, keyword in
+                UserDefaults.standard.setRecentlyKeyWord(keyword: keyword)
+                SearchViewTransform.event.onNext(.refreshKeywordSection)
+                vc.navigationController?.dismiss(animated: true) {
+                    vc.delegate?.didTapToPostListCreate(completion: {
+                        NotificationCenter.default.post(name: .searchToPost, object: keyword)
+                    })
+                }
+            }).disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .map { $0.keyword }
+            .bind(to: keywordSearchBar.searchTextField.rx.text)
+            .disposed(by: disposeBag)
         
         
     }
@@ -162,6 +201,12 @@ extension SearchController: ReactorKit.View {
 
 extension SearchController: UICollectionViewDelegateFlowLayout {
     
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 9
+    }
     
+    public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+    }
     
 }

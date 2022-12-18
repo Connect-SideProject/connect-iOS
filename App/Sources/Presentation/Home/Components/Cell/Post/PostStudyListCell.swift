@@ -8,13 +8,20 @@
 import UIKit
 import Then
 import SnapKit
+import ReactorKit
+import RxCocoa
+import RxGesture
 
 
-
-final class PostStduyListCell: UITableViewCell {
+final class PostStduyListCell: UICollectionViewCell {
     
     
     //MARK: Property
+    
+    typealias Reactor = PostListCellReactor
+    
+    var disposeBag: DisposeBag = DisposeBag()
+    
     
     private let postContainerView: UIView = UIView().then {
         $0.backgroundColor = .white
@@ -80,8 +87,8 @@ final class PostStduyListCell: UITableViewCell {
     
     
     //MARK: initalization
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    override init(frame: CGRect) {
+        super.init(frame: .zero)
         configure()
     }
     
@@ -108,23 +115,18 @@ final class PostStduyListCell: UITableViewCell {
         }
         
         postStateView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(14)
-            $0.left.equalToSuperview().offset(20)
+            $0.top.equalToSuperview().offset(15)
+            $0.left.equalToSuperview().offset(15)
             $0.height.equalTo(18)
-            $0.centerY.equalToSuperview()
         }
         
         postStateTitleLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(3)
-            $0.width.equalTo(30)
-            $0.height.equalTo(12)
-            $0.center.equalToSuperview()
+            $0.edges.equalToSuperview().inset(3)
         }
         
         postTitleLabel.snp.makeConstraints {
             $0.top.equalTo(postStateView)
             $0.left.equalTo(postStateView.snp.right).offset(10)
-            $0.centerY.equalToSuperview()
             $0.height.equalTo(19)
         }
         
@@ -141,8 +143,7 @@ final class PostStduyListCell: UITableViewCell {
         postExplanationLabel.snp.makeConstraints {
             $0.top.equalTo(postStateView.snp.bottom).offset(8)
             $0.left.equalTo(postStateView)
-            $0.height.equalTo(17)
-            $0.centerY.equalToSuperview()
+            $0.right.equalToSuperview().offset(-16)
         }
         
         postMemberImageView.snp.makeConstraints {
@@ -152,9 +153,9 @@ final class PostStduyListCell: UITableViewCell {
         }
         
         postMemberLabel.snp.makeConstraints {
-            $0.left.equalTo(postMemberLabel.snp.right).offset(5)
+            $0.left.equalTo(postMemberImageView.snp.right).offset(5)
             $0.height.equalTo(14)
-            $0.centerY.equalToSuperview()
+            $0.centerY.equalTo(postMemberImageView)
         }
         
         
@@ -162,4 +163,110 @@ final class PostStduyListCell: UITableViewCell {
     }
     
     
+}
+
+
+
+extension PostStduyListCell: ReactorKit.View {
+    
+    
+    func bind(reactor: Reactor) {
+        
+        reactor.state
+            .map { $0.postModel.contentStudyTitle }
+            .bind(to: postTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd }
+            .map { _ in UIColor.hex05A647 }
+            .observe(on: MainScheduler.asyncInstance)
+            .bind(to: postStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd }
+            .map { _ in "모집중" }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postStateTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd == false }
+            .observe(on: MainScheduler.asyncInstance)
+            .map { _ in UIColor.hex8E8E8E }
+            .bind(to: postStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd == false }
+            .map { _ in "모집완료" }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postStateTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.postModel.contentStudyInfo}
+            .bind(to: postExplanationLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .map { $0.postModel.contentStudyParts.map { parts -> String in
+                switch parts.contentStudyRole {
+                case "DEV":
+                    return "개발자"
+                case "DESIGN":
+                    return "디자이너"
+                case "PM":
+                    return "기획자"
+                case "MAK":
+                    return "마케터"
+                default:
+                    return ""
+                }
+            }.toStringWithVeticalBar}
+            .observe(on: MainScheduler.instance)
+            .bind(to: postMemberLabel.rx.text)
+            .disposed(by: disposeBag)
+            
+        reactor.state
+            .filter { $0.postModel.contentisBookMark  }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisBookMark == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: postBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+            
+        
+        postBookMarkContainerView.rx
+            .tapGesture()
+            .when(.recognized)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { _ in Reactor.Action.didTapPostBookMark}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .compactMap { $0.postBookMarkItems }
+            .filter { $0.bookMarkId == self.reactor?.currentState.postModel.id && $0.bookMarkisCheck }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select") }
+            .bind(to: postBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .compactMap { $0.postBookMarkItems }
+            .filter { $0.bookMarkId == self.reactor?.currentState.postModel.id && $0.bookMarkisCheck == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark")}
+            .bind(to: postBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        
+    }
 }
