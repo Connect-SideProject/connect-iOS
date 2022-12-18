@@ -13,6 +13,7 @@ import RxGesture
 import RxSwift
 import RxCocoa
 import COCommonUI
+import CODomain
 
 final class PostFilterReactor: Reactor {
     
@@ -114,7 +115,7 @@ final class PostFilterHeaderView: BaseView {
     
     private let studyTypeFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .studyType(.default)))
     
-    private let interestFieldFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .interest([])))
+    private let interestFieldFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .interest(selectionType: .single, items: [])))
     
     private let alignmentFilterComponentView: FilterComponentView = FilterComponentView(reactor: FilterComponentViewReactor(filterType: .aligment(.default)))
     
@@ -208,7 +209,7 @@ extension PostFilterHeaderView: ReactorKit.View {
             .when(.recognized)
             .throttle(.seconds(2), scheduler: MainScheduler.instance)
             .bind { _ in
-                self.delegate?.didFilterSheetCreate(.interest(self.reactor?.currentState.bottomSheetItem ?? []))
+                self.delegate?.didFilterSheetCreate(.interest(selectionType: .single, items: self.reactor?.currentState.bottomSheetItem ?? []))
             }.disposed(by: disposeBag)
         
         alignmentFilterView

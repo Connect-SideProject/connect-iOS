@@ -102,7 +102,7 @@ private extension FilterComponentViewReactor {
             return .just(.setStudyTypeFilter(text))
             
         case let .didTapInterestSheet(text):
-            guard currentState == .interest([]) else { return .empty() }
+            guard currentState == .interest(selectionType: .single, items: []) else { return .empty() }
             debugPrint("Transform InterestType: \(currentState)")
             return .just(.setInterestFilter(text))
         default:
