@@ -15,6 +15,7 @@ extension Project {
     isExcludedFramework: Bool = false,
     infoExtension: [String: InfoPlist.Value] = [:],
     settings: Settings? = .default,
+    packages: [ProjectDescription.Package] = [],
     dependencies: [TargetDependency] = [],
     testDependencies: [TargetDependency] = [],
     externalDependencies: [TargetDependency] = []
@@ -141,6 +142,7 @@ extension Project {
     
     return Project(
       name: name,
+      packages: packages,
       targets: targets,
       schemes: schemes
     )

@@ -41,7 +41,7 @@ class SearchAddressCollectionViewCell: UICollectionViewCell {
     private func configureUI() {
         contentView.addSubview(addressLabel)
     }
-    
+      
     public func configureUI(with model: KakaoMapAddress?) {
         guard let model = model else { return }
         addressLabel.text = model.addressName

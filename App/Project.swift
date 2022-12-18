@@ -31,12 +31,12 @@ let app = Project.feature(
     "NSPhotoLibraryUsageDescription": .string("사용자 프로필 사진에 활용하기 위해서 접근권한이 필요합니다.")
   ],
   dependencies: [
-    .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
-    .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
-    .project(target: "COThirdParty", path: .relativeToRoot("Core/COThirdParty")),
+    .Project.Core.foundation,
+    .Project.UI.common,
+    .Project.Core.thirdParty
   ],
   externalDependencies: [
-    .project(target: "COFeatures", path: .relativeToRoot("Features/COFeatures")),
+    .Project.Features.features,
     .xcframework(path: .CocoaPods.Framework.naverLogin),
     .xcframework(path: .CocoaPods.Framework.naverMaps)
   ]

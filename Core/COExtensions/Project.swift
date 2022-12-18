@@ -5,6 +5,6 @@ let extensions = Project.feature(
   name: "COExtensions",
   products: [.framework(.static)],
   dependencies: [
-    .project(target: "COThirdParty", path: .relativeToRoot("Core/COThirdParty"))
+    .Project.Core.thirdParty
   ]
 )

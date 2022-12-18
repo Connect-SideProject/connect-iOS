@@ -15,12 +15,12 @@ let sign = Project.feature(
     )
   ],
   dependencies: [
-    .project(target: "COAuth", path: .relativeToRoot("Auth/COAuth")),
-    .project(target: "COCommonUI", path: .relativeToRoot("UI/COCommonUI")),
-    .project(target: "COFoundation", path: .relativeToRoot("Core/COFoundation")),
-    .project(target: "CONetwork", path: .relativeToRoot("Core/CONetwork")),
-    .project(target: "COThirdParty", path: .relativeToRoot("Core/COThirdParty")),
-    .project(target: "CODomain", path: .relativeToRoot("Domain/CODomain"))
+    .Project.Auth.auth,
+    .Project.UI.common,
+    .Project.Core.foundation,
+    .Project.Core.network,
+    .Project.Core.thirdParty,
+    .Project.Domain.domain
   ],
   externalDependencies: [
     .xcframework(path: .CocoaPods.Framework.naverLogin)

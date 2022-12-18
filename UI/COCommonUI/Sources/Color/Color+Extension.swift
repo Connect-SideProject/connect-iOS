@@ -23,6 +23,12 @@ public extension UIColor {
   static let hex5B5B5B: UIColor = .init(hex: "#5B5B5B")
   static let hex3A3A3A: UIColor = .init(hex: "#3A3A3A")
   static let hex141616: UIColor = .init(hex: "#141616")
+  static let hex818181: UIColor = .init(hex: "#818181")
+  
+  /// 카카오 색상
+  static let hexFED80B: UIColor = .init(hex: "#FED80B")
+  /// 네이버 색상
+  static let hex1AC049: UIColor = .init(hex: "#1AC049")
 }
 
 public extension UIColor {

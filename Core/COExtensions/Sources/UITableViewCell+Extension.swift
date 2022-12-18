@@ -7,7 +7,7 @@
 
 import UIKit
 
-extension UITableViewCell {
+public extension UITableViewCell {
     static var reuseableIdentifier: String {
         get {
             return NSStringFromClass(self.classForCoder()).components(separatedBy: ".").last!

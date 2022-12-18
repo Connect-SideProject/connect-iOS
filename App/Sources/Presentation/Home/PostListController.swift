@@ -7,16 +7,51 @@
 //
 
 import UIKit
+import Then
+import SnapKit
+import RxDataSources
+import ReactorKit
+import COCommonUI
+
+
 
 /// 프로젝트 리스트 화면 컨트롤러
-class PostListController: UIViewController {
-    
-    private let latestListController: UIViewController
+public final class PostListController: UIViewController {
     
     //MARK: Property
     
-    init(latestListController: UIViewController) {
-        self.latestListController = latestListController
+    public typealias Reactor = PostListReactor
+    
+    public var disposeBag: DisposeBag = DisposeBag()
+    
+    private let postListIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView().then {
+        $0.backgroundColor = .clear
+    }
+    
+    private let postFilterHeaderView: PostFilterHeaderView = PostFilterHeaderView(reactor: PostFilterReactor())
+    
+    
+    private let postTableView: UITableView = UITableView().then {
+        $0.showsHorizontalScrollIndicator = false
+        $0.showsVerticalScrollIndicator = true
+        $0.backgroundColor = .hexEDEDED
+        $0.register(PostStduyListCell.self, forCellReuseIdentifier: "PostStduyListCell")
+    }
+    
+    private let postDataSource: RxTableViewSectionedReloadDataSource<PostSection>
+    
+    private static func postSourceFactory() -> RxTableViewSectionedReloadDataSource<PostSection> {
+        return .init(configureCell: { dataSource, tableView, indexPath, sectionItem in
+            guard let postListCell = tableView.dequeueReusableCell(withIdentifier: "PostStduyListCell", for: indexPath) as? PostStduyListCell else { return UITableViewCell() }
+            return postListCell
+        })
+    }
+    
+    
+    
+    init(reactor: Reactor) {
+        defer { self.reactor = reactor }
+        self.postDataSource = type(of: self).postSourceFactory()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -24,16 +59,47 @@ class PostListController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    
     deinit {
-        print(#function)
+        debugPrint(#function)
     }
     
-    override func viewDidLoad() {
+    
+    //MARK: LifeCycle
+    public override func viewDidLoad() {
         super.viewDidLoad()
+        configure()
     }
     
-    private func configure() {
-        addChild(latestListController)
+    
+    //MARK: Configure
+    private func configure(){
+        
+        postFilterHeaderView.delegate = self
+        
+        self.view.backgroundColor = .white
+        
+        _ = [postListIndicatorView, postFilterHeaderView ,postTableView].map {
+            self.view.addSubview($0)
+        }
+        
+        postFilterHeaderView.snp.makeConstraints {
+            $0.top.equalTo(self.view.safeAreaLayoutGuide.snp.top)
+            $0.left.right.equalToSuperview()
+            $0.height.equalTo(55)
+        }
+        
+        postListIndicatorView.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.height.equalTo(24)
+        }
+        
+        postTableView.snp.makeConstraints {
+            $0.top.equalTo(postFilterHeaderView.snp.bottom)
+            $0.left.right.bottom.equalToSuperview()
+        }
+        
+        
     }
     
     
@@ -41,30 +107,24 @@ class PostListController: UIViewController {
 
 
 
-// 프로젝트 리스트 화면 DI
-extension PostListController {
-    fileprivate func add(child childrenViewController: UIViewController) {
-        beginUpdate(child: childrenViewController)
-        view.addSubview(childrenViewController.view)
-        endAddChild(child: childrenViewController)
-    }
+extension PostListController: ReactorKit.View {
     
-    fileprivate func remove(child childrenViewController: UIViewController) {
-        guard parent != nil else { return }
-        childrenViewController.beginAppearanceTransition(false, animated: false)
-        childrenViewController.willMove(toParent: nil)
-        childrenViewController.removeFromParent()
-        childrenViewController.endAppearanceTransition()
+    
+    public func bind(reactor: Reactor) {
+        
+        
+        
         
     }
     
-    fileprivate func beginUpdate(child childrenViewController: UIViewController) {
-        childrenViewController.beginAppearanceTransition(true, animated: false)
-        self.addChild(childrenViewController)
+}
+
+    //MARK: Delegate
+extension PostListController: PostCoordinatorDelegate {
+    
+    public func didFilterSheetCreate(_ type: BottomSheetType) {
+      BottomSheet(type: type)
+        .show()
     }
     
-    fileprivate func endAddChild(child childrenViewController: UIViewController) {
-        childrenViewController.didMove(toParent: self)
-        childrenViewController.endAppearanceTransition()
-    }
 }
