@@ -19,17 +19,15 @@ public final class HomeMenuCellReactor: Reactor {
     
     
     public struct State {
-        var menuType: HomeMenuList
-        var homeCellRepo: HomeViewRepo
+        var menuModel: Interest
     }
     
     public let initialState: State
     
-    init(menuType: HomeMenuList,
-         homeCellRepo: HomeViewRepo
+    init(menuModel: Interest
     ) {
-        self.initialState = State(menuType: menuType, homeCellRepo: homeCellRepo)
-        
+        self.initialState = State(menuModel: menuModel)
+        print("Home Menu Data: \(menuModel.imageURL)")
     }
     
     

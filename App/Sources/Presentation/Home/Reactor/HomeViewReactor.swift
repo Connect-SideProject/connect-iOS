@@ -42,7 +42,6 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
     
     public enum Mutation {
         case setLoading(Bool)
-        case setHomeMenuItem([HomeMenuList])
         case setHomeInterestMenuItem([Interest])
         case setHomeNewsItem([HomeStudyList])
         case setHomeEmptySection(HomeViewSection)
@@ -98,8 +97,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                         
             return .concat(
                 startLoading,
-//                homeRepository.responseInterestMenuItem(), //TODO: API 수정 후 주석 제거
-                homeRepository.responseHomeMenuItem(),
+                homeRepository.responseInterestMenuItem(),
                 setMenuItems,
                 homeRepository.responseHomeNewsItem(paramenter: homeParameter).catch(errorHandler),
                 homeRepository.responseHomeReleaseItem(),
@@ -118,7 +116,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
                         
             return .concat(
                 startLoading,
-                homeRepository.responseHomeMenuItem(),
+                homeRepository.responseInterestMenuItem(),
                 setMenuItems,
                 homeRepository.responseHomeNewsItem(paramenter: homeParameter).catch(errorHandler),
                 homeRepository.responseHomeReleaseItem(),
@@ -161,12 +159,11 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
         switch mutation {
         case let .setLoading(isLoading):
             newState.isLoading = isLoading
-                        
-        case let .setHomeMenuItem(items):
-            let fieldSectionIndex = self.getIndex(section: .field([]))
-            newState.section[fieldSectionIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
             
-
+        case let .setHomeInterestMenuItem(items):
+            let interestIndex = self.getIndex(section: .field([]))
+            newState.section[interestIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
+                        
         case let .setHomeNewsItem(items):
             let studyListIndex = self.getIndex(section: .homeStudyList([]))
             newState.section[studyListIndex] = homeRepository.responseHomeNewsSectionItem(item: items)
@@ -188,11 +185,7 @@ public final class HomeViewReactor: Reactor, ErrorHandlerable {
         case let .setHomeEmptySection(section):
             let emptyIndex = self.getIndex(section: .homeStudyList([]))
             newState.section[emptyIndex] = section
-            
-        case let .setHomeInterestMenuItem(items):
-            let interestIndex = self.getIndex(section: .field([]))
-            //TODO: API 수정 후 주석 제거
-//            newState.section[interestIndex] = homeRepository.responseHomeMenuSectionItem(item: items)
+
         }
         return newState
     }

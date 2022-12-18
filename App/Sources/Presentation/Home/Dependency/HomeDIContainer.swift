@@ -24,7 +24,9 @@ public final class HomeDependencyContainer: HomeDIContainer {
     private let homeApiService: ApiService
     
     
-    public init(homeApiService: ApiService) {
+    public init(
+        homeApiService: ApiService
+    ) {
         self.homeApiService = homeApiService
     }
     
@@ -65,13 +67,11 @@ extension HomeDependencyContainer {
 
 
 public protocol HomeRepository {
-    func responseMenuImage(image: HomeMenuList) async throws -> Data
     func responseInterestMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
-    func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
-    func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection
+    func responseHomeMenuSectionItem(item: [Interest]) -> HomeViewSection
     func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection
     func requestHomeBookMarkItem(id: String) -> Observable<HomeReleaseCellReactor.Mutation>
     func requestHomeNewsBookMarkItem(id: String) -> Observable<HomeStudyListReactor.Mutation>
@@ -79,33 +79,22 @@ public protocol HomeRepository {
 
 
 final class HomeViewRepo: HomeRepository {
-    
+
+    //MARK: Property
     private let homeApiService: ApiService
+    private let interestService: InterestService
     
-    public init(homeApiService: ApiService = ApiManager.shared) {
+    public init(
+        homeApiService: ApiService = ApiManager.shared,
+        interestService: InterestService = InterestManager.shared
+    ) {
         self.homeApiService = homeApiService
-    }
-    
-    
-    func responseMenuImage(image item: HomeMenuList) async throws -> Data {
-        guard let imageurl = URL(string: item.menuImage),
-              let (imageData, _) = try? await URLSession.shared.data(from: imageurl) else { return Data() }
-        return UIImage(data: imageData)?.pngData() ?? Data()
-    }
-    
-    
-    func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation> {
-        let creteMenuResponse = homeApiService.request(endPoint: .init(path: .homeMenu)).flatMap { (data: [HomeMenuList]) -> Observable<HomeViewReactor.Mutation> in
-            
-            return .just(.setHomeMenuItem(data))
-        }
-        
-        return creteMenuResponse
+        self.interestService = interestService
     }
     
     func responseInterestMenuItem() -> Observable<HomeViewReactor.Mutation> {
         
-        return .just(.setHomeInterestMenuItem(InterestManager.shared.interestList))
+        return .just(.setHomeInterestMenuItem(interestService.interestList))
     }
     
     func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation> {
@@ -127,10 +116,10 @@ final class HomeViewRepo: HomeRepository {
         return createReleaseResponse
     }
     
-    func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection {
+    func responseHomeMenuSectionItem(item: [Interest]) -> HomeViewSection {
         var homeMenuSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
-            homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuType: item[i], homeCellRepo: self)))
+            homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuModel: item[i])))
         }
         
         return HomeViewSection.field(homeMenuSectionItem)

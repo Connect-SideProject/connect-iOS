@@ -10,6 +10,7 @@ import UIKit
 import ReactorKit
 import SnapKit
 import RxCocoa
+import COCommonUI
 
 
 /// 홈 카테고리 셀
@@ -94,25 +95,17 @@ extension HomeCategoryCell: ReactorKit.View {
     func bind(reactor: Reactor) {
         
         reactor.state
-            .map{ $0.menuType.menuTitle }
+            .map{ $0.menuModel.name }
             .distinctUntilChanged()
-            .delay(.milliseconds(180), scheduler: MainScheduler.instance)
             .bind(to: self.menuTitleLabel.rx.text)
             .disposed(by: disposeBag)
-
+        
         reactor.state
-            .map { state -> Task<Data, _> in
-                Task {
-                    let originImage = try await state.homeCellRepo.responseMenuImage(image: state.menuType)
-                    return originImage
-                }
-            }.asObservable()
-            .delay(.milliseconds(180), scheduler: MainScheduler.instance)
-            .bind(onNext: { [weak self] originImage in
-                Task {
-                    self?.menuImageView.image = try await UIImage(data: originImage.value)
-                }
-            }).disposed(by: disposeBag)
+            .compactMap { URL(string: $0.menuModel.imageURL) }
+            .map { try Data(contentsOf: $0)}
+            .map { UIImage(data: $0) }
+            .bind(to: self.menuImageView.rx.image)
+            .disposed(by: disposeBag)
         
     }
     

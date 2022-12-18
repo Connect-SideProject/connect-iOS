@@ -37,7 +37,6 @@ public final class HomeController: UIViewController {
         $0.setImage(UIImage(named: "home_search_floating"), for: .normal)
     }
     
-    private let childrenDependency: HomeDependencyContainer = HomeDependencyContainer(homeApiService: ApiManager.shared)
     
     private lazy var homeIndicatorView:UIActivityIndicatorView = UIActivityIndicatorView().then {
         $0.style = .medium
@@ -343,7 +342,7 @@ extension HomeController {
                 switch self.dataSource[indexPath] {
                 case let .homeMenu(reactor):
                     self.delegate?.didTapToPostListCreate(completion: {
-                        PostFilterTransform.event.onNext(.didTapInterestSheet(text: reactor.currentState.menuType.menuTitle))
+                        PostFilterTransform.event.onNext(.didTapInterestSheet(text: reactor.currentState.menuModel.name))
                     })
                 case let .homeStudyMenu(reactor):
                     HomeViewTransform.event.onNext(.didSelectHomeMenu(type: reactor))
