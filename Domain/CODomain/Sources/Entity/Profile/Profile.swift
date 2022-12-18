@@ -387,6 +387,9 @@ public extension Region {
 }
 
 public class Interest: NSObject, NSCoding, Codable, Identifiable {
+  private enum ServerBaseURL {
+    static let image: String = "https://s3.ap-northeast-2.amazonaws.com/connect-profile/menu/"
+  }
   
   public override var description: String {
     return name
@@ -421,6 +424,9 @@ public class Interest: NSObject, NSCoding, Codable, Identifiable {
     self.id =   coder.decodeInteger(forKey: CodingKeys.id.rawValue)
     self.code = coder.decodeObject(forKey: CodingKeys.code.rawValue) as? String ?? ""
     self.name = coder.decodeObject(forKey: CodingKeys.name.rawValue) as? String ?? ""
+    // 이미지 URL활용을 위해 '_' 제거 및 소문자 처리 진행 후 저장
+    let imageURL = ServerBaseURL.image + code.replacingOccurrences(of: "_", with: "").lowercased() + ".jpg"
+    self.imageURL = imageURL
   }
   
   public func encode(with coder: NSCoder) {
@@ -441,10 +447,6 @@ public extension Interest {
     self.init()
     self.code = code
     self.name = name
-  }
-  
-  func updateImageURL(_ imageURL: String) {
-    self.imageURL = imageURL
   }
   
   override func isEqual(_ object: Any?) -> Bool {
