@@ -8,6 +8,8 @@
 import UIKit
 import SnapKit
 import ReactorKit
+import RxCocoa
+import RxGesture
 
 import COManager
 
@@ -165,40 +167,58 @@ extension MyProfileBookMarkListCell: ReactorKit.View {
     
     func bind(reactor: Reactor) {
         
+        profileBookMarkView
+            .rx.tapGesture()
+            .when(.recognized)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { _ in Reactor.Action.didTapMyProfileBookMarkButton }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         reactor.state
-            .map { $0.myBookMarkModel.myBookMarkTitle}
+            .map { $0.myBookMarkListModel.myBookMarkTitle}
             .observe(on: MainScheduler.instance)
             .bind(to: profileBookMarkTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
-            .map { $0.myBookMarkModel.myBookMarkInfo}
+            .map { $0.myBookMarkListModel.myBookMarkInfo}
             .observe(on: MainScheduler.instance)
             .bind(to: profileBookMarkSubTitleLable.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.myBookMarkModel.myBookMarkisEnd }
+            .filter { $0.myBookMarkListModel.myBookMarkisEnd }
             .observe(on: MainScheduler.instance)
-            .do(onNext: { _ in
-                self.profileBookMarkStateLabel.text = "모집중"
-            }).map { _ in UIColor.hex05A647}
+            .map { _ in UIColor.hex05A647}
             .bind(to: profileBookMarkStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         
         reactor.state
-            .filter { $0.myBookMarkModel.myBookMarkisEnd == false }
-            .do(onNext: { _ in
-                self.profileBookMarkStateLabel.text = "모집완료"
-            }).map { _ in UIColor.hex8E8E8E }
+            .filter { $0.myBookMarkListModel.myBookMarkisEnd == false }
+            .map { _ in UIColor.hex8E8E8E }
             .observe(on: MainScheduler.instance)
             .bind(to: profileBookMarkStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
+        reactor.state
+            .filter { $0.myBookMarkListModel.myBookMarkisEnd == false }
+            .map { _ in "모집완료"}
+            .observe(on: MainScheduler.instance)
+            .bind(to: profileBookMarkStateLabel.rx.text)
+            .disposed(by: disposeBag)
         
         reactor.state
-            .map { $0.myBookMarkModel.myBookMarkParts
+            .filter { $0.myBookMarkListModel.myBookMarkisEnd }
+            .map { _ in "모집중"}
+            .observe(on: MainScheduler.instance)
+            .bind(to: profileBookMarkStateLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        
+        reactor.state
+            .map { $0.myBookMarkListModel.myBookMarkParts
                     .map { parts -> String in
                         switch parts.myStudyMemberRole {
                         case "DEV":
@@ -220,11 +240,22 @@ extension MyProfileBookMarkListCell: ReactorKit.View {
         
         
         reactor.state
-            .filter { !$0.myBookMarkModel.myBookMarkisCheck }
+            .filter { $0.myBookMarkModel != nil}
+            .filter { $0.myBookMarkModel!.bookMarkId == $0.myBookMarkListModel.myBookMarkid && $0.myBookMarkModel!.bookMarkisCheck }
             .map { _ in UIImage(named: "home_studylist_bookmark_select")}
             .observe(on: MainScheduler.instance)
             .bind(to: profileBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.myBookMarkModel != nil}
+            .filter { $0.myBookMarkModel!.bookMarkId == $0.myBookMarkListModel.myBookMarkid && $0.myBookMarkModel!.bookMarkisCheck  == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: profileBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+
+        
         
     }
 }

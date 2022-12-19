@@ -182,9 +182,7 @@ extension MyProfilePostListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.myStudyModel.myStudyisEnd }
-            .do(onNext: { _ in
-                self.profilePostStateLabel.text = "모집중"
-            }).map { _ in UIColor.hex05A647}
+            .map { _ in UIColor.hex05A647}
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
@@ -197,6 +195,21 @@ extension MyProfilePostListCell: ReactorKit.View {
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.myStudyModel.myStudyisEnd }
+            .map { _ in "모집중"}
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostStateLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.myStudyModel.myStudyisEnd == false }
+            .map { _ in "모집완료"}
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostStateLabel.rx.text)
+            .disposed(by: disposeBag)
+        
         
         reactor.state
             .map { $0.myStudyModel.myStudyParts

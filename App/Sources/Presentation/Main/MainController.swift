@@ -142,10 +142,11 @@ extension MainController: ProfileDelegate {
     
   func routeToMyPost(_ type: ProfilePostType) {
     let container = ProfileMyPostDIContainer(
-        apiService: ApiManager.shared
+        apiService: ApiManager.shared,
+        profilePostType: type
      )
         
-    let controller = container.makeController(type)
+    let controller = container.makeController()
     self.navigationController?.pushViewController(controller, animated: true)
   }
 }

@@ -16,4 +16,5 @@ protocol ProfileMyPostRepository {
     func responseMyPostBookMarkItem() -> Observable<ProfileMyPostReactor.Mutation>
     func responseMyPostSectionItem(item: [ProfileStudy]) -> ProfileMyPostSection
     func responseMyBookMarkSectionItem(item: [ProfileBookMark]) -> ProfileMyPostSection
+    func requestMyBookMarkItem(id: String) -> Observable<MyProfileBookMarkListCellReactor.Mutation>
 }

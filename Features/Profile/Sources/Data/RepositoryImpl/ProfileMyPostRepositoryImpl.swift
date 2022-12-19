@@ -13,8 +13,8 @@ import CONetwork
 
 
 final class ProfileMyPostRepositoryImpl: ProfileMyPostRepository {
-        
-    let apiService: ApiService
+            
+    private let apiService: ApiService
     
     init(apiService: ApiService) {
         self.apiService = apiService
@@ -57,10 +57,21 @@ extension ProfileMyPostRepositoryImpl {
         var myBookMarkSectionItem: [ProfileMyPostSectionItem] = []
         
         for i in 0 ..< item.count {
-            myBookMarkSectionItem.append(.myProfileBookMarkItem(MyProfileBookMarkListCellReactor(myBookMarkModel: item[i])))
+            myBookMarkSectionItem.append(.myProfileBookMarkItem(MyProfileBookMarkListCellReactor(myBookMarkListModel: item[i], profileRepo: self)))
         }
         
         return ProfileMyPostSection.myProfileBookMark(myBookMarkSectionItem)
     }
+    
+    
+    func requestMyBookMarkItem(id: String) -> Observable<MyProfileBookMarkListCellReactor.Mutation> {
+        let createMyBookMarkResponse = apiService.request(endPoint: .init(path: .homeBookMark(id))).flatMap { (data: HomeBookMarkList) -> Observable<MyProfileBookMarkListCellReactor.Mutation> in
+            
+            return .just(.updateMyPostBookMark(data))
+        }
+
+        return createMyBookMarkResponse
+    }
+
     
 }

@@ -16,10 +16,12 @@ public final class ProfileMyPostDIContainer {
     typealias Repository = ProfileMyPostRepositoryImpl
     
     private let apiService: ApiService
+    private let profilePostType: ProfilePostType
     
     
-    public init(apiService: ApiService) {
+    public init(apiService: ApiService, profilePostType: ProfilePostType) {
         self.apiService = apiService
+        self.profilePostType = profilePostType
     }
     
     func makeRepository() -> Repository {
@@ -28,14 +30,14 @@ public final class ProfileMyPostDIContainer {
         )
     }
     
-    public func makeReactor(_ type: ProfilePostType) -> ProfileMyPostReactor {
-        return ProfileMyPostReactor(profilePostType: type, profileMyPostRepository: makeRepository())
+    public func makeReactor() -> ProfileMyPostReactor {
+        return ProfileMyPostReactor(profilePostType: profilePostType, profileMyPostRepository: makeRepository())
     }
     
     
-    public func makeController(_ type: ProfilePostType) -> ProfileMyPostController {
+    public func makeController() -> ProfileMyPostController {
         
-        return ProfileMyPostController(reactor: makeReactor(type))
+        return ProfileMyPostController(reactor: makeReactor())
     }
     
 }
