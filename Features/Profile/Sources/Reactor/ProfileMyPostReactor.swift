@@ -75,7 +75,6 @@ public final class ProfileMyPostReactor: Reactor {
             let endLoading = Observable<Mutation>.just(.setLoading(false))
             
             if profilePostType == .bookMark {
-                let bookMarkTypeMutation = Observable<Mutation>.just(.setLoadType(self.profilePostType))
                 return .concat(
                     startLoading,
                     Observable<Mutation>.just(.setLoadType(self.profilePostType)),
@@ -83,7 +82,6 @@ public final class ProfileMyPostReactor: Reactor {
                     endLoading
                 )
             } else {
-                let studyTypeMutation = Observable<Mutation>.just(.setLoadType(self.profilePostType))
                 return .concat(
                     startLoading,
                     Observable<Mutation>.just(.setLoadType(self.profilePostType)),

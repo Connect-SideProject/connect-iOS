@@ -16,7 +16,7 @@ import Foundation
 
 
 public enum PostFilterTransform: TransformType, Equatable {
-    enum Event {
+    public enum Event {
         case didTapOnOffLineSheet(text: String)
         case didTapAligmentSheet(text: String)
         case didTapStudyTypeSheet(text: String)

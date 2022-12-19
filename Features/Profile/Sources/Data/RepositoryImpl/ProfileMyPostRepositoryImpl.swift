@@ -46,7 +46,7 @@ extension ProfileMyPostRepositoryImpl {
         var myPostSectionItem: [ProfileMyPostSectionItem] = []
         
         for i in 0 ..< item.count {
-            myPostSectionItem.append(.myProfilePostItem(MyProfilePostListCellReactor(myStudyModel: item[i])))
+            myPostSectionItem.append(.myProfilePostItem(MyProfilePostListCellReactor(myStudyModel: item[i], profileStudyRepo: self)))
         }
         
         return ProfileMyPostSection.myProfilePost(myPostSectionItem)
@@ -73,5 +73,14 @@ extension ProfileMyPostRepositoryImpl {
         return createMyBookMarkResponse
     }
 
+    
+    func requestMyStudyBookMarkItem(id: String) -> Observable<MyProfilePostListCellReactor.Mutation> {
+        let createMyStudyBookMarkResponse = apiService.request(endPoint: .init(path: .homeBookMark(id))).flatMap { (data: HomeBookMarkList) -> Observable<MyProfilePostListCellReactor.Mutation> in
+            
+            return .just(.updateMyStudyBookMark(data))
+        }
+        
+        return createMyStudyBookMarkResponse
+    }
     
 }

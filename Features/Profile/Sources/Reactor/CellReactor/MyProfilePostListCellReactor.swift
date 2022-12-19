@@ -13,17 +13,46 @@ import CODomain
 
 final class MyProfilePostListCellReactor: Reactor {
     
-    typealias Action = NoAction
+    enum Action {
+        case didTapStudyBookMarkButton
+    }
+    
+    enum Mutation {
+        case updateMyStudyBookMark(HomeBookMarkList)
+    }
     
     struct State {
         var myStudyModel: ProfileStudy
+        var myStudyBookMarkList: HomeBookMarkList?
     }
     
     let initialState: State
+    private let profileStudyRepo: ProfileMyPostRepositoryImpl
     
-    init(myStudyModel: ProfileStudy) {
-        self.initialState = State(myStudyModel: myStudyModel)
+    init(myStudyModel: ProfileStudy, profileStudyRepo: ProfileMyPostRepositoryImpl) {
+        self.initialState = State(myStudyModel: myStudyModel, myStudyBookMarkList: nil)
+        self.profileStudyRepo = profileStudyRepo
     }
     
     
+    func mutate(action: Action) -> Observable<Mutation> {
+        switch action {
+        case .didTapStudyBookMarkButton:
+            let myProfileStudyBookMarkMutation = profileStudyRepo.requestMyStudyBookMarkItem(id: String(self.currentState.myStudyModel.myStudyid))
+            
+            return .empty()
+        }
+    }
+    
+    func reduce(state: State, mutation: Mutation) -> State {
+        var newState = state
+        
+        switch mutation {
+        case let .updateMyStudyBookMark(items):
+            newState.myStudyBookMarkList = items
+            
+        }
+    
+        return newState
+    }
 }
