@@ -29,9 +29,9 @@ final class MyProfileBookMarkListCellReactor: Reactor {
     }
     
     let initialState: State
-    private let profileRepo: ProfileMyPostRepositoryImpl
+    private let profileRepo: ProfileMyPostRepository
     
-    init(myBookMarkListModel: ProfileBookMark, profileRepo: ProfileMyPostRepositoryImpl) {
+    init(myBookMarkListModel: ProfileBookMark, profileRepo: ProfileMyPostRepository) {
         self.initialState = State(myBookMarkListModel: myBookMarkListModel, myBookMarkModel: nil)
         self.profileRepo = profileRepo
     }

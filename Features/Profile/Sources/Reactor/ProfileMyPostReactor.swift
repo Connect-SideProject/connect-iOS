@@ -48,7 +48,6 @@ public final class ProfileMyPostReactor: Reactor {
         
         self.profilePostType = profilePostType
         self.profileMyPostRepository = profileMyPostRepository
-        print("debug postType init: \(self.profilePostType)")
         self.initialState = State(
             isLoading: false,
             isPostType: .study,

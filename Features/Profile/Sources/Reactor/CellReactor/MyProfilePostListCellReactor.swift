@@ -27,9 +27,9 @@ final class MyProfilePostListCellReactor: Reactor {
     }
     
     let initialState: State
-    private let profileStudyRepo: ProfileMyPostRepositoryImpl
+    private let profileStudyRepo: ProfileMyPostRepository
     
-    init(myStudyModel: ProfileStudy, profileStudyRepo: ProfileMyPostRepositoryImpl) {
+    init(myStudyModel: ProfileStudy, profileStudyRepo: ProfileMyPostRepository) {
         self.initialState = State(myStudyModel: myStudyModel, myStudyBookMarkList: nil)
         self.profileStudyRepo = profileStudyRepo
     }
@@ -40,7 +40,7 @@ final class MyProfilePostListCellReactor: Reactor {
         case .didTapStudyBookMarkButton:
             let myProfileStudyBookMarkMutation = profileStudyRepo.requestMyStudyBookMarkItem(id: String(self.currentState.myStudyModel.myStudyid))
             
-            return .empty()
+            return myProfileStudyBookMarkMutation
         }
     }
     

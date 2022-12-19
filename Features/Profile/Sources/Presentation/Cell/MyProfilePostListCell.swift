@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import RxGesture
 import ReactorKit
 
 import COManager
@@ -168,6 +169,14 @@ final class MyProfilePostListCell: UICollectionViewCell {
 extension MyProfilePostListCell: ReactorKit.View {
     func bind(reactor: Reactor) {
         
+        profilePostBookMarkView
+            .rx.tapGesture()
+            .when(.recognized)
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .map { _ in Reactor.Action.didTapStudyBookMarkButton}
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
         reactor.state
             .map { $0.myStudyModel.myStudyTitle}
             .observe(on: MainScheduler.instance)
@@ -189,9 +198,7 @@ extension MyProfilePostListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.myStudyModel.myStudyisEnd == false }
-            .do(onNext: { _ in
-                self.profilePostStateLabel.text = "모집완료"
-            }).map { _ in UIColor.hex8E8E8E }
+            .map { _ in UIColor.hex8E8E8E }
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
@@ -240,6 +247,22 @@ extension MyProfilePostListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.myStudyModel.myStudyisBookMark == false }
+            .map { _ in UIImage(named: "home_studylist_bookmark") }
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.myStudyBookMarkList != nil }
+            .filter { $0.myStudyModel.myStudyid == $0.myStudyBookMarkList!.bookMarkId && $0.myStudyBookMarkList!.bookMarkisCheck }
+            .map { _ in UIImage(named: "home_studylist_bookmark_select")}
+            .observe(on: MainScheduler.instance)
+            .bind(to: profilePostBookMarkImageView.rx.image)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.myStudyBookMarkList != nil }
+            .filter { $0.myStudyModel.myStudyid == $0.myStudyBookMarkList!.bookMarkId && $0.myStudyBookMarkList!.bookMarkisCheck == false}
             .map { _ in UIImage(named: "home_studylist_bookmark") }
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostBookMarkImageView.rx.image)

@@ -13,7 +13,8 @@ import CONetwork
 
 
 final class ProfileMyPostRepositoryImpl: ProfileMyPostRepository {
-            
+    
+    //MARK: Property
     private let apiService: ApiService
     
     init(apiService: ApiService) {

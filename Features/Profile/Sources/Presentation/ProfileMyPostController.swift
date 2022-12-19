@@ -79,10 +79,14 @@ public final class ProfileMyPostController: UIViewController {
     //MARK: LifeCycle
     public override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationItem.leftBarButtonItem = profilePostBarButtonItem
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         
         configure()
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationItem.leftBarButtonItem = profilePostBarButtonItem
     }
     
     

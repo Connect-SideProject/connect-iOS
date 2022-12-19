@@ -15,6 +15,7 @@ public final class ProfileMyPostDIContainer {
     
     typealias Repository = ProfileMyPostRepositoryImpl
     
+    //MARK: Property
     private let apiService: ApiService
     private let profilePostType: ProfilePostType
     
