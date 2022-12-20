@@ -66,7 +66,7 @@ public enum SelectionState {
 }
 
 public enum BottomSheetHandlerState {
-  case confirm([Int], String), date(DateRange), roleAndCount([RoleAndCountItem]), cancel
+  case confirm([Int], String), date(DateRange), roleAndCount([Int : RoleAndCountItem]), cancel
 }
 /**
  BottomSheet 화면.
@@ -97,7 +97,7 @@ public final class BottomSheet: UIViewController {
     static let defaultItem: CGFloat = 38
     static let largeItem: CGFloat = 100
     static let collectionItem: CGFloat = 42
-    static let calendarHeader: CGFloat = 50
+    static let calendarHeader: CGFloat = 70
   }
   
   private let dimView: UIView = UIView().then {
@@ -123,6 +123,7 @@ public final class BottomSheet: UIViewController {
     $0.setImage(UIImage(named: "ic_close"), for: .normal)
     $0.contentMode = .scaleToFill
     $0.addTarget(self, action: #selector(didTapCloseButton), for: .touchUpInside)
+    $0.layer.zPosition = -1
   }
   
   private lazy var confirmButton: UIButton = UIButton().then {
@@ -297,36 +298,30 @@ private extension BottomSheet {
     
     dimView.addSubview(containerView)
     
-    let _ = [titleLabel, closeButton, confirmButton].map {
-      containerView.addSubview($0)
-    }
+    containerView.addSubview(confirmButton)
     
     dimView.snp.makeConstraints {
       $0.top.left.right.bottom.equalToSuperview()
     }
     
-    titleLabel.snp.makeConstraints {
-      $0.top.equalToSuperview().offset(20)
-      $0.height.equalTo(19)
-      $0.centerX.equalToSuperview()
-    }
-    
-    closeButton.snp.makeConstraints {
-      $0.top.equalToSuperview().offset(21)
-      $0.right.equalToSuperview().inset(20)
-      $0.width.height.equalTo(18)
-    }
-    
     if case .date = type {
       containerView.addSubview(calendar)
       calendar.snp.makeConstraints {
-        $0.top.equalTo(titleLabel.snp.bottom).offset(24)
+        $0.top.equalToSuperview().offset(20)
         $0.leading.equalToSuperview().offset(20)
         $0.trailing.equalToSuperview().inset(20)
         $0.bottom.equalTo(confirmButton.snp.top).offset(-13)
       }
     } else {
+      containerView.addSubview(titleLabel)
       containerView.addSubview(collectionView)
+      
+      titleLabel.snp.makeConstraints {
+        $0.top.equalToSuperview().offset(20)
+        $0.height.equalTo(19)
+        $0.centerX.equalToSuperview()
+      }
+      
       collectionView.snp.makeConstraints {
         $0.top.equalTo(titleLabel.snp.bottom).offset(24)
         $0.leading.equalToSuperview().offset(type.isButtonSelection ? 20 : 0)
@@ -345,6 +340,14 @@ private extension BottomSheet {
     containerView.snp.makeConstraints {
       $0.bottom.left.right.equalToSuperview()
       $0.height.equalTo(Height.containerView)
+    }
+    
+    containerView.addSubview(closeButton)
+    
+    closeButton.snp.makeConstraints {
+      $0.top.equalToSuperview().offset(21)
+      $0.right.equalToSuperview().inset(20)
+      $0.width.height.equalTo(18)
     }
   }
   
@@ -399,8 +402,7 @@ private extension BottomSheet {
       
       dismiss(animated: true) { [weak self] in
         guard let self = self else { return }
-        let items = self.selectedRoleItems.values.map { $0 }
-        self.handler(.roleAndCount(items))
+        self.handler(.roleAndCount(self.selectedRoleItems))
       }
       
     default:
@@ -537,6 +539,14 @@ extension BottomSheet: UIGestureRecognizerDelegate {
   }
 }
 
+// MARK: CalendarTitleViewDelegate {
+extension BottomSheet: CalendarHeaderViewDelegate {
+  func didTapDirectionButton(direction: CalendarHeaderDirection) {
+    let destination: SegmentDestination = direction == .prev ? .previous : .next
+    calendar.scrollToSegment(destination)
+  }
+}
+
 // MARK: JTAppleCalendar
 private extension BottomSheet {
   func configureCell(view: JTACDayCell?, cellState: CellState) {
@@ -635,6 +645,7 @@ extension BottomSheet: JTACMonthViewDelegate {
       for: indexPath
     ) as? CalendarHeaderView {
       header.setup(title: range.start.toFormattedString(dateFormat: "yyyy년 MM월"))
+      header.delegate = self
       return header
     }
     
