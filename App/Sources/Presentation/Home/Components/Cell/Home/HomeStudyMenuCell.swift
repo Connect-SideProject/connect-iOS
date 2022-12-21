@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Then
 import ReactorKit
+import RxCocoa
 
 enum HomeSubMenuType: String {
     case all
@@ -41,7 +42,6 @@ public final class HomeStudyMenuReactor: Reactor {
     }
     
     init(menuType: HomeSubMenuType, isSelected: Bool) {
-        defer { _ = self.state }
         self.initialState = State(menuType: menuType, isSelected: isSelected)
     }
     
@@ -155,7 +155,6 @@ extension HomeStudyMenuCell: ReactorKit.View {
         
         
         reactor.state.map { $0.menuType.getTitle()}
-            .observe(on: MainScheduler.instance)
             .bind(to: studyMenuTitleLabel.rx.text)
             .disposed(by: disposeBag)
         
@@ -167,7 +166,6 @@ extension HomeStudyMenuCell: ReactorKit.View {
         
         reactor.state.filter { $0.isSelected == false }
             .map { _ in UIColor.hex8E8E8E }
-            .observe(on: MainScheduler.instance)
             .bind(to: self.studyMenuTitleLabel.rx.textColor)
             .disposed(by: disposeBag)
         
@@ -175,7 +173,6 @@ extension HomeStudyMenuCell: ReactorKit.View {
         reactor.state.map { $0.isSelected }
             .map { !$0 }
             .distinctUntilChanged()
-            .observe(on: MainScheduler.asyncInstance)
             .bind(to: self.selectedLineView.rx.isHidden)
             .disposed(by: self.disposeBag)
             

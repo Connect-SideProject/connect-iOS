@@ -16,23 +16,29 @@ import Then
 
 import COCommon
 import COCommonUI
+import CODomain
 import COExtensions
 
 public final class MeetingCreateViewController: UIViewController, ReactorKit.View {
   
-  public typealias Reactor = MeetingCreateReactor
-  
   enum Height {
     static let titleView: CGFloat = 50
-    static let scrollView: CGFloat = 160 + (UIDevice.current.hasNotch ? 0 : 150)
+    static let scrollView: CGFloat = 400 + (UIDevice.current.hasNotch ? 0 : 150)
+    static let createButton: CGFloat = 41
   }
+  
+  private lazy var titleView = TitleView()
+    .set(title: "모임 만들기")
+    .setLeftBtn(type: .close) { [weak self] in
+      self?.dismiss(animated: true)
+    }
   
   private let typeContainerView = DescriptionContainerView(
     type: .custom(
       .init(
         title: "모임유형",
         castableView: CheckBoxContainerView(
-          titles: ["사이드 프로젝트", "스터디"],
+          dictionary: ["사이드 프로젝트" : "PROJECT", "스터디" : "STUDY"],
           eventType: .radio
         )
       )
@@ -44,7 +50,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
       .init(
         title: "진행방식",
         castableView: CheckBoxContainerView(
-          titles: ["오프라인", "온라인", "미정"],
+          dictionary: ["오프라인" : "OFFLINE", "온라인" : "ONLINE", "미정": "TBD"],
           eventType: .radio
         )
       )
@@ -64,7 +70,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
     type: .custom(
       .init(
         title: "모집인원",
-        castableView: CastableButton(type: .downwordArrow("역할"))
+        castableView: CastableButton(type: .downwordArrow("역할 및 인원"))
       )
     )
   )
@@ -107,7 +113,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
     )
   )
   
-  private let commentContainerView = DescriptionContainerView(
+  private let aspirationContainerView = DescriptionContainerView(
     type: .textField(
       .init(
         title: "포부 한마디",
@@ -136,6 +142,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
   
   private let interestButtonRelay = PublishRelay<String>()
   private let dateButtonRelay = PublishRelay<String>()
+  private let roleAndPeopleRelay = PublishRelay<String>()
   private let locationButtonRelay = PublishRelay<String>()
   
   public var disposeBag = DisposeBag()
@@ -156,29 +163,33 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
     
     containerScrollView.pin
       .all()
-      .layout()
-    
-    containerScrollView.contentSize = .init(
-      width: view.bounds.size.width,
-      height: view.bounds.size.height + Height.scrollView
-    )
     
     flexContainer.pin
       .width(of: view)
-      .height(containerScrollView.contentSize.height)
-      .top()
+      .height(of: view)
+      .top(UIApplication.keyWindow?.safeAreaInsets.top ?? 0)
       .left().right()
       .layout()
     
-    flexContainer.flex.layout()
+    flexContainer.flex.layout(mode: .adjustHeight)
+    
+    containerScrollView.contentSize = .init(
+      width: flexContainer.bounds.size.width,
+      height: flexContainer.bounds.size.height + Height.scrollView
+    )
     
     navigationController?.setNavigationBarHidden(false, animated: false)
   }
   
-  public func bind(reactor: Reactor) {
+  public func bind(reactor: MeetingCreateReactor) {
     
     interestContainerView.buttonHandlerRelay
       .map { Reactor.Action.didTapInterestButton }
+      .bind(to: reactor.action)
+      .disposed(by: disposeBag)
+    
+    peopleContainerView.buttonHandlerRelay
+      .map { Reactor.Action.didTapRoleAndPeopleButton }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
@@ -188,7 +199,7 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
       .disposed(by: disposeBag)
     
     locationContainerView.buttonHandlerRelay
-      .map { Reactor.Action.didTapLocationButton }
+      .map { Reactor.Action.didTapRegionButton }
       .bind(to: reactor.action)
       .disposed(by: disposeBag)
     
@@ -200,25 +211,65 @@ public final class MeetingCreateViewController: UIViewController, ReactorKit.Vie
         case let .bottomSheet(type):
           BottomSheet(type: type)
             .show()
-            .handler = { [weak self] state in
+            .handler = { [weak self, weak reactor] state in
               switch state {
-              case let .confirm(_, text):
+              case let .confirm(indices, text):
                 switch type {
                 case .interest:
                   self?.interestButtonRelay.accept(text)
+                  reactor?.action.onNext(.didSelectedInterests(indices))
                 case .address:
                   self?.locationButtonRelay.accept("서울 \(text)")
+                  reactor?.action.onNext(.didSelectedAddress(indices))
                 default:
                   break
                 }
               case let .date(dateRange):
-                self?.dateButtonRelay.accept(dateRange.description)
+                let startDateString = dateRange.start?.toFormattedString() ?? ""
+                let endDateString = dateRange.end?.toFormattedString() ?? ""
+                let description = "\(startDateString) ~ \(endDateString)"
+                self?.dateButtonRelay.accept(description)
+                reactor?.action.onNext(.didSelectedDateRange(dateRange))
+              case let .roleAndCount(items):
+                let string = items
+                  .sorted { $0.id < $1.id }
+                  .map { "\($0.role): \($0.count) /" }
+                  .reduce("", +)
+                
+                self?.roleAndPeopleRelay.accept(string)
+                self?.reactor?.action.onNext(.didSelectedRoleAndCountItems(items))
               default:
                 break
               }
             }
         case .close:
           self?.dismiss(animated: true)
+        }
+      }.disposed(by: disposeBag)
+    
+    reactor.pulse(\.$messageType)
+      .compactMap { $0 }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] in
+        guard let self = self else { return }
+        CommonAlert.shared.setMessage($0)
+          .show(viewController: self)
+          .confirmHandler = {
+            self.reactor?.action.onNext(.didTapAlertButton(.confirm))
+          }
+      }.disposed(by: disposeBag)
+    
+    reactor.pulse(\.$error)
+      .compactMap { $0 }
+      .observe(on: MainScheduler.instance)
+      .bind { [weak self] error in
+        guard let self = self else { return }
+        switch error {
+        case let .message(_, message):
+          CommonAlert.shared.setMessage(.message(message))
+            .show(viewController: self)
+        default:
+          break
         }
       }.disposed(by: disposeBag)
   }
@@ -228,35 +279,51 @@ private extension MeetingCreateViewController {
   func configureUI() {
     view.backgroundColor = .white
     
-    containerScrollView.addSubview(flexContainer)
-    
-    view.addSubview(containerScrollView)
+    view.addSubview(flexContainer)
     
     flexContainer.flex
+      .define { flex in
+        flex.addItem(titleView)
+          .height(Height.titleView)
+        
+        flex.addItem(containerScrollView)
+      }
+    
+    containerScrollView.flex
       .paddingHorizontal(20)
       .define { flex in
-        
         [typeContainerView,
          wayContainerView,
          interestContainerView,
+         peopleContainerView,
          dateContainerView,
          locationContainerView,
          titleContainerView,
          contentContainerView,
-         commentContainerView
+         aspirationContainerView
         ].forEach {
           flex.addItem($0)
-            .marginBottom(18)
+            .marginVertical(18)
+          flex.separator(
+            direction: .vertical,
+            value: 1,
+            backgroundColor: .hexF9F9F9
+          )
         }
         
         flex.addItem(createButton)
-          .height(41)
+          .height(Height.createButton)
       }
   }
   
   func bindEvent() {
+     
     interestButtonRelay
       .bind(to: interestContainerView.castableButtonRelay)
+      .disposed(by: disposeBag)
+    
+    roleAndPeopleRelay
+      .bind(to: peopleContainerView.castableButtonRelay)
       .disposed(by: disposeBag)
     
     dateButtonRelay
@@ -282,7 +349,28 @@ private extension MeetingCreateViewController {
   }
   
   @objc func didTapCreateButton() {
-    dismiss(animated: true)
+    
+    let studyType = typeContainerView.customView?.casting(
+      type: CheckBoxContainerView.self
+    ).checkedItems?.compactMap { $0 } ?? []
+    
+    let meetingType = wayContainerView.customView?.casting(
+      type: CheckBoxContainerView.self
+    ).checkedItems?.compactMap { $0 } ?? []
+    
+    let title = titleContainerView.textField.text ?? ""
+    let content = contentContainerView.textViewText
+    let aspiration = aspirationContainerView.textField.text ?? ""
+    
+    let parameter: CreateMeetingParameter = .init(
+      studyType: .init(rawValue: studyType[safe: 0]?.title ?? ""),
+      meetingType: .init(rawValue: meetingType[safe: 0]?.title ?? "") ?? .none,
+      title: title,
+      content: content,
+      aspiration: aspiration
+    )
+    
+    reactor?.action.onNext(.didTapCreateMeeting(parameter))
   }
 }
 
@@ -294,6 +382,6 @@ extension MeetingCreateViewController: UIGestureRecognizerDelegate {
 
 extension MeetingCreateViewController: KeyboardResponder {
   public var targetView: UIView {
-    commentContainerView.textField
+    aspirationContainerView.textField
   }
 }

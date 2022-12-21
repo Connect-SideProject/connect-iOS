@@ -6,11 +6,13 @@
 //
 
 import Foundation
-import CODomain
-import COCommon
 import ReactorKit
 import UIKit
+
+import CODomain
 import CONetwork
+import COCommon
+import COManager
 
 //MARK: Dependency
 public final class HomeDependencyContainer: HomeDIContainer {
@@ -22,7 +24,9 @@ public final class HomeDependencyContainer: HomeDIContainer {
     private let homeApiService: ApiService
     
     
-    public init(homeApiService: ApiService) {
+    public init(
+        homeApiService: ApiService
+    ) {
         self.homeApiService = homeApiService
     }
     
@@ -63,43 +67,49 @@ extension HomeDependencyContainer {
 
 
 public protocol HomeRepository {
-    func responseMenuImage(image: HomeMenuList) throws -> Data
+    func responseInterestMenuItem() -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseItem() -> Observable<HomeViewReactor.Mutation>
-    func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation>
-    func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation>
+    func responseHomeMenuImage(image: Interest) async throws -> UIImage
+    func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation>
     func responseHomeReleaseSectionItem(item: [HomeHotList]) -> HomeReleaseSection
-    func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection
-    func responseHomeNewsSectionItem(item: [HomeStudyNodeList]) -> HomeViewSection
+    func responseHomeMenuSectionItem(item: [Interest]) -> HomeViewSection
+    func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection
+    func requestHomeBookMarkItem(id: String) -> Observable<HomeReleaseCellReactor.Mutation>
+    func requestHomeNewsBookMarkItem(id: String) -> Observable<HomeStudyListReactor.Mutation>
 }
 
 
 final class HomeViewRepo: HomeRepository {
-    
+
+    //MARK: Property
     private let homeApiService: ApiService
+    private let interestService: InterestService
     
-    public init(homeApiService: ApiService = ApiManager.shared) {
+    public init(
+        homeApiService: ApiService = ApiManager.shared,
+        interestService: InterestService = InterestManager.shared
+    ) {
         self.homeApiService = homeApiService
+        self.interestService = interestService
     }
     
-    
-    func responseMenuImage(image item: HomeMenuList) throws -> Data {
-        guard let imageurl = URL(string: item.menuImage),
-              let imageData = try? Data(contentsOf: imageurl) else { return Data() }
-        return UIImage(data: imageData)?.pngData() ?? Data()
-    }
-    
-    
-    func responseHomeMenuItem() -> Observable<HomeViewReactor.Mutation> {
-        let creteMenuResponse = homeApiService.request(endPoint: .init(path: .homeMenu)).flatMap { (data: [HomeMenuList]) -> Observable<HomeViewReactor.Mutation> in
-            
-            return .just(.setHomeMenuItem(data))
-        }
+    func responseInterestMenuItem() -> Observable<HomeViewReactor.Mutation> {
         
-        return creteMenuResponse
+        return .just(.setHomeInterestMenuItem(interestService.interestList))
     }
     
-    func responseHomeNewsImte() -> Observable<HomeViewReactor.Mutation> {
-        let createNewsResponse = homeApiService.request(endPoint: .init(path: .homeNews)).flatMap { (data: HomeStudyList) -> Observable<HomeViewReactor.Mutation> in
+    func responseHomeMenuImage(image: Interest) async throws -> UIImage {
+        let imageTask: Task<UIImage, Error> = Task {
+            guard let imageUrl = URL(string: image.imageURL),
+                  let (imageData, _) = try? await URLSession.shared.data(from: imageUrl)
+            else { return UIImage() }
+            return UIImage(data: imageData) ?? UIImage()
+        }
+        return try await imageTask.value
+    }
+    
+    func responseHomeNewsItem(paramenter: [String: String?]) -> Observable<HomeViewReactor.Mutation> {
+        let createNewsResponse = homeApiService.request(endPoint: .init(path: .homeNews(paramenter))).flatMap { (data: [HomeStudyList]) -> Observable<HomeViewReactor.Mutation> in
             
             return .just(.setHomeNewsItem(data))
         }
@@ -117,20 +127,20 @@ final class HomeViewRepo: HomeRepository {
         return createReleaseResponse
     }
     
-    func responseHomeMenuSectionItem(item: [HomeMenuList]) -> HomeViewSection {
+    func responseHomeMenuSectionItem(item: [Interest]) -> HomeViewSection {
         var homeMenuSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
-            homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuType: item[i], homeCellRepo: self)))
+            homeMenuSectionItem.append(.homeMenu(HomeMenuCellReactor(menuModel: item[i], menuRepo: self)))
         }
         
         return HomeViewSection.field(homeMenuSectionItem)
     }
     
     
-    func responseHomeNewsSectionItem(item: [HomeStudyNodeList]) -> HomeViewSection {
+    func responseHomeNewsSectionItem(item: [HomeStudyList]) -> HomeViewSection {
         var homeNewsSectionItem: [HomeViewSectionItem] = []
         for i in 0 ..< item.count {
-            homeNewsSectionItem.append(.homeStudyList(HomeStudyListReactor(studyNewsModel: item[i])))
+            homeNewsSectionItem.append(.homeStudyList(HomeStudyListReactor(studyNewsModel: item[i], homeNewsRepo: self)))
         }
         
         return HomeViewSection.homeStudyList(homeNewsSectionItem)
@@ -142,11 +152,28 @@ final class HomeViewRepo: HomeRepository {
         var homeReleaseSectionItem: [HomeRelaseSectionItem] = []
         
         for i in 0 ..< item.count {
-            homeReleaseSectionItem.append(.hotList(HomeReleaseCellReactor(releaseModel: item[i])))
+            homeReleaseSectionItem.append(.hotList(HomeReleaseCellReactor(releaseModel: item[i], homeReleaseRepo: self)))
         }
         
         return HomeReleaseSection.hotMenu(homeReleaseSectionItem)
     }
     
     
+    func requestHomeBookMarkItem(id: String) -> Observable<HomeReleaseCellReactor.Mutation> {
+        
+        let createBookMarkResponse = homeApiService.request(endPoint: .init(path: .homeBookMark(id))).flatMap { (data: HomeBookMarkList) -> Observable<HomeReleaseCellReactor.Mutation> in
+            
+            return .just(.updateSelected(data))
+        }
+        return createBookMarkResponse
+    }
+    
+    func requestHomeNewsBookMarkItem(id: String) -> Observable<HomeStudyListReactor.Mutation> {
+        
+        let createNewsBookMarkResponse = homeApiService.request(endPoint: .init(path: .homeBookMark(id))).flatMap { (data: HomeBookMarkList) -> Observable<HomeStudyListReactor.Mutation> in
+            
+            return .just(.updateNewsBookMark(data))
+        }
+        return createNewsBookMarkResponse
+    }
 }

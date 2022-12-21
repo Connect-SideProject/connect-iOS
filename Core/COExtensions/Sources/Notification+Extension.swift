@@ -12,6 +12,11 @@ public enum NotificationType: String {
   case routeToSignIn
 }
 
+public extension Notification.Name {
+    static let searchToPost = NSNotification.Name("searchToPost")
+    
+}
+
 public extension NotificationCenter {
 
   func post(type: NotificationType, params: Any? = nil, userInfo: [AnyHashable : Any]? = nil) {

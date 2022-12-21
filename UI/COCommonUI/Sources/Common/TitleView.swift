@@ -52,12 +52,11 @@ public final class TitleView: FlexLayoutView {
                             .marginEnd(20)
                     }
                 }
-            
-            flex.addItem(self.separatorView)
-                .height(1)
-        }
+            }
+      
+        leftBtn.addTarget(self, action: #selector(didTapLeftButton), for: .touchUpInside)
     }
-    
+  
     public override func layout() {
         self.rootContainer.pin.all()
         self.rootContainer.flex.layout()
@@ -75,12 +74,13 @@ public extension TitleView {
     typealias ButtonAction = (() -> Void)
     
     enum BtnType {
-        case back, pin, star, alert, search, menu
+        case back, close, pin, star, alert, search, menu
         
         var image: UIImage? {
             var img: UIImage?
             switch self {
             case .back: img = COCommonUIAsset.icTitleBack.image
+            case .close: img = COCommonUIAsset.icClose.image
             case .pin: img = COCommonUIAsset.icTitlePin.image
             case .star: img = COCommonUIAsset.icTitleStar.image
             case .alert: img = COCommonUIAsset.icTitleAlert.image
@@ -118,4 +118,24 @@ public extension TitleView {
         self.rightOuterBtnAction = action
         return self
     }
+}
+
+private extension TitleView {
+  @objc func didTapLeftButton() {
+    
+    if let handler = leftBtnAction {
+      handler()
+      return
+    }
+    
+    if let handler = rightInnerBtnAction {
+      handler()
+      return
+    }
+    
+    if let handler = rightOuterBtnAction {
+      handler()
+      return
+    }
+  }
 }
