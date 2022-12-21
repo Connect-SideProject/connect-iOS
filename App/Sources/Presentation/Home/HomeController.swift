@@ -142,6 +142,7 @@ public final class HomeController: UIViewController {
         $0.numberOfLines = 1
         $0.text = "실시간 HOT 게시글"
         $0.font = .boldSystemFont(ofSize: 20)
+        $0.sizeToFit()
     }
     
     private lazy var releaseCollectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: releaseFlowLayout).then {
