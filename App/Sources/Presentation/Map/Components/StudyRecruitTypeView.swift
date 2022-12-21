@@ -57,8 +57,8 @@ class StudyRecruitTypeView: UIView {
         }
     }
     
-    public func configureUI(recruitTypes: [RecruitType]) {
-        let recruitTypesToString = recruitTypes.map{ $0.recruitName }
+    public func configureUI(with  model: [Part]) {
+        let recruitTypesToString = model.map{ $0.role }
         let text = recruitTypesToString.joined(separator: "|")
         studyRecruitTypeLabel.text = text
     }

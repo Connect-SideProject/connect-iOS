@@ -25,7 +25,8 @@ class MapFloatingPanelViewController: UIViewController {
     // MARK: -Properities
     let floatingType: FloatingType
     
-    private var kakaoAddressResults: [KakaoMapAddress] = [] 
+    private var kakaoAddressResults: [KakaoMapAddress] = []
+    private var placeStudyInfos: [PlaceStudyInfo] = []
     
     lazy var connectCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewCompositionalLayout(sectionProvider: { [weak self] _, _ -> NSCollectionLayoutSection? in
         guard let `self` = self else { return nil }
@@ -56,6 +57,12 @@ class MapFloatingPanelViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    convenience init(placeStudyInfos: [PlaceStudyInfo]) {
+        self.init(floatingType: .study)
+        print("prprpr = \(placeStudyInfos)")
+        self.placeStudyInfos = placeStudyInfos
+    }
+    
     convenience init(kakaoAddressResults: [KakaoMapAddress]) {
         self.init(floatingType: .searchResult)
         self.kakaoAddressResults = kakaoAddressResults
@@ -69,21 +76,6 @@ class MapFloatingPanelViewController: UIViewController {
         super.viewDidLoad()
         configureUI()
         setCollectionView(with: connectCollectionView)
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        connectCollectionView.snp.makeConstraints { make in
-//            make.edges.equalToSuperview()
-            make.top.left.right.equalToSuperview()
-            make.height.equalToSuperview().multipliedBy(0.48)
-//            make.edges.equalTo(view.safeAreaLayoutGuide)
-        }
-        
-        emptyView.snp.makeConstraints { make in
-            make.top.left.right.equalToSuperview()
-            make.height.equalTo(view.frame.height / 3)
-        }
     }
     
     //MARK: -Configure
@@ -132,6 +124,15 @@ class MapFloatingPanelViewController: UIViewController {
     private func configureUI() {
         view.backgroundColor = .systemBackground
         _ = [connectCollectionView, emptyView].map{ view.addSubview($0) }
+        connectCollectionView.snp.makeConstraints { make in
+            make.top.left.right.equalToSuperview()
+            make.height.equalToSuperview().multipliedBy(0.9) // panGesture를 제한하면서 FVC의 높이를 계산하는게 달라짐
+        }
+        
+        emptyView.snp.makeConstraints { make in
+            make.top.left.right.equalToSuperview()
+            make.height.equalTo(view.frame.height / 3)
+        }
     }
     
     private func setCollectionView(with collectionView: UICollectionView) {
@@ -158,6 +159,8 @@ extension MapFloatingPanelViewController: UICollectionViewDataSource {
         switch floatingType {
             case .searchResult:
                 return kakaoAddressResults.count
+            case .study:
+                return placeStudyInfos.count
             default:
                 return 10
         }
@@ -174,7 +177,7 @@ extension MapFloatingPanelViewController: UICollectionViewDataSource {
                 return cell
             case .study:
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: StudyCollectionViewCell.identifier, for: indexPath) as? StudyCollectionViewCell ?? StudyCollectionViewCell()
-                cell.configureUI(with: "")
+                cell.configureUI(with: placeStudyInfos[indexPath.row])
                 return cell
             case .searchResult:
                 let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchAddressCollectionViewCell.identifier, for: indexPath) as? SearchAddressCollectionViewCell ?? SearchAddressCollectionViewCell()
@@ -195,19 +198,15 @@ extension MapFloatingPanelViewController: UICollectionViewDelegateFlowLayout {
         return 20
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 20
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        switch floatingType {
-        case .study, .who:
-            return CGSize(width: collectionView.frame.width / 4 * 3, height: collectionView.frame.height / 5 * 2)
-//            return CGSize(width: (view.frame.width - 20 - 15 - 15) / 2, height: 292 - 30)
-        case .searchResult:
-            return CGSize(width: collectionView.frame.width, height: 60)
-        }
-    }
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        switch floatingType {
+//        case .study, .who:
+//            return CGSize(width: collectionView.frame.width / 4 * 3, height: collectionView.frame.height)
+////            return CGSize(width: (view.frame.width - 20 - 15 - 15) / 2, height: 292 - 30)
+//        case .searchResult:
+//            return CGSize(width: collectionView.frame.width, height: 60)
+//        }
+//    }
 }
 
 extension MapFloatingPanelViewController:  WhoCollectionViewCellDelegate {

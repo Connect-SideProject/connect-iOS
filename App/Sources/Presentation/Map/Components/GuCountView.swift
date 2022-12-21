@@ -49,8 +49,7 @@ class GuCountView: UIButton {
 //        numberOfLines = 2
     }
     
-    public func configureUI(with model: GuCountViewModel) {
-        print("model = \(model)")
+    public func configureUI(with model: WhoMarkerModel) {
         setTitle("\(model.title)\n\(model.count)명", for: .normal)
     }
 }

@@ -20,7 +20,7 @@ protocol ConnectMapDataFuctionality {
     func moveCameraUpdate(mapView: NMFMapView, mapCoordinate: MapCoordinate)
     func addCustomImageMarkers(mapView: NMFMapView, imageName: String, mapCoordinates: [MapCoordinate])
     func addTextInfoWindows(title: String, marker: NMFMarker)
-    func addCustomViewInfoWindows(mapView: NMFMapView, mapCoordinates: [MapCoordinate])
+    func addWhoMarkers(mapView: NMFMapView, whoMarkerModels: [WhoMarkerModel])
 }
 
 /// 지도 화면 컨트롤러.
@@ -108,25 +108,15 @@ class MapController: UIViewController, View {
         /*
             현재 위치를 가져오는 부분 코드추가해야함
          */
-        
-        addCustomViewInfoWindows(mapView: naverMapView.mapView, mapCoordinates: [
-            MapCoordinate(lat: 37.5666102, lng: 126.9783882),
-            MapCoordinate(lat: 35.5666102, lng: 126.9783883),
-            MapCoordinate(lat: 34.5666102, lng: 126.9783884),
-            MapCoordinate(lat: 33.5666103, lng: 126.9783882),
-            MapCoordinate(lat: 32.5666104, lng: 126.9783882),
-            MapCoordinate(lat: 39.5666106, lng: 126.9783882),
-            MapCoordinate(lat: 38.5666105, lng: 126.9783882)
-        ])
 
         addCustomImageMarkers(mapView: naverMapView.mapView, imageName: "송파구 스터디카페", mapCoordinates: [
-            MapCoordinate(lat: 37.5666102, lng: 125.9783882),
-            MapCoordinate(lat: 35.5666102, lng: 124.9783883),
-            MapCoordinate(lat: 34.5666102, lng: 123.9783884),
-            MapCoordinate(lat: 33.5666103, lng: 122.9783882),
-            MapCoordinate(lat: 32.5666104, lng: 121.9783882),
-            MapCoordinate(lat: 39.5666106, lng: 120.9783882),
-            MapCoordinate(lat: 38.5666105, lng: 128.9783882)
+            MapCoordinate(x: 37.5666102, y: 125.9783882),
+            MapCoordinate(x: 35.5666102, y: 124.9783883),
+            MapCoordinate(x: 34.5666102, y: 123.9783884),
+            MapCoordinate(x: 33.5666103, y: 122.9783882),
+            MapCoordinate(x: 32.5666104, y: 121.9783882),
+            MapCoordinate(x: 39.5666106, y: 120.9783882),
+            MapCoordinate(x: 38.5666105, y: 128.9783882)
         ])
     }
     
@@ -177,6 +167,35 @@ class MapController: UIViewController, View {
 //        })
 //        .bind(to: reactor.action)
 //        .disposed(by: disposeBag)
+        self.rx.viewDidLoad
+            .map{ MapReactor.Action.viewDidLoad }
+            .bind(to: reactor.action)
+            .disposed(by: disposeBag)
+        
+        reactor.state.map{ $0.whoMarkerModels }
+            .subscribe(onNext: { [weak self] whoMarkerModels in
+                guard let `self` = self,
+                      let whoMarkerModels = whoMarkerModels else { return }
+                self.addWhoMarkers(mapView: self.naverMapView.mapView, whoMarkerModels: whoMarkerModels)
+            })
+            .disposed(by: disposeBag)
+        
+//        Observable.combineLatest(
+//            reactor.state.map{ $0.placeStudyInfos },
+//            reactor.state.map{ $0.selectedStudyMarkerLocation }
+//        )
+//        .subscribe(onNext: { [weak self] (placeStudyInfos, selectedStudyMarkerLocation) in
+//            print("info = \(placeStudyInfos)")
+//            print("selected = \(selectedStudyMarkerLocation)")
+//            guard let `self` = self,
+//                  let placeStudyInfos = placeStudyInfos,
+//                  let selectedStudyMarkerLocation = selectedStudyMarkerLocation else { return }
+//            self.moveCameraUpdate(mapView: self.naverMapView.mapView, mapCoordinate: selectedStudyMarkerLocation)
+//            let contentViewController = MapFloatingPanelViewController(placeStudyInfos: placeStudyInfos)
+//            self.floatingPanelVC.panGestureRecognizer.isEnabled = false
+//            self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
+//        })
+//        .disposed(by: disposeBag)
         
         reactor.state.map{ !$0.isLoading }
             .observe(on: MainScheduler.instance)
@@ -188,7 +207,8 @@ class MapController: UIViewController, View {
             reactor.state.map{ $0.isEmpty })
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] kakaoAddresses, isEmpty in
-                guard let `self` = self else { return }
+                guard let `self` = self,
+                      let kakaoAddresses = kakaoAddresses else { return }
                 let contentViewController = MapFloatingPanelViewController(kakaoAddressResults: kakaoAddresses)
                 contentViewController.checkEmpty(isEmpty: isEmpty)
                 self.floatingPanelVC.panGestureRecognizer.isEnabled = true
@@ -204,11 +224,6 @@ class MapController: UIViewController, View {
         view.addSubview(mapSearchBar)
         view.addSubview(loadingView)
         mapSearchBar.delegate = self
-//        moveCameraUpdate(mapView: naverMapView.mapView, mapCoordinate: MapCoordinate(lat: 40.5666102, lng: 126.9783884))
-//        addCustomImageMarker(mapView: mapView, imageName: "", mapCoordinate: MapCoordinate(lat: 37.5666102, lng: 126.9783881))
-//        addCustomImageMarker(mapView: mapView, imageName: "", mapCoordinate: MapCoordinate(lat: 37.5666102, lng: 126.9783882))
-//        addCustomImageMarker(mapView: mapView, imageName: "", mapCoordinate: MapCoordinate(lat: 37.5666102, lng: 126.9783883))
-//        addCustomImageMarker(mapView: naverMapView.mapView, imageName: "토스 선릉점", mapCoordinate: MapCoordinate(lat: 40.5666102, lng: 126.9783884))
     }
     
     private func presentSettingAlert() {
@@ -243,7 +258,7 @@ extension MapController: ConnectMapDataFuctionality {
     }
     
     func moveCameraUpdate(mapView: NMFMapView, mapCoordinate: MapCoordinate) { // 지도카메라 위치이동
-        let cameraUpdate = NMFCameraUpdate(scrollTo: NMGLatLng(lat: mapCoordinate.lat, lng: mapCoordinate.lng))
+        let cameraUpdate = NMFCameraUpdate(scrollTo: NMGLatLng(lat: mapCoordinate.x, lng: mapCoordinate.y))
         cameraUpdate.reason = 3
         cameraUpdate.animation = .fly
         cameraUpdate.animationDuration = 2
@@ -257,7 +272,7 @@ extension MapController: ConnectMapDataFuctionality {
             guard let `self` = self else { return }
             for mapCoordinate in mapCoordinates {
                 let marker = NMFMarker()
-                let position = NMGLatLng(lat: mapCoordinate.lat, lng: mapCoordinate.lng)
+                let position = NMGLatLng(lat: mapCoordinate.x, lng: mapCoordinate.y)
                 marker.position = position
                 marker.iconImage = NMFOverlayImage(image: UIImage(systemName: "person.fill")!)
 //                marker.userInfo = ["info": GuCountViewModel(title: "송파구청", count: 3)]
@@ -291,31 +306,37 @@ extension MapController: ConnectMapDataFuctionality {
         infoWindow.open(with: marker)
     }
     
-    func addCustomViewInfoWindows(mapView: NMFMapView, mapCoordinates: [MapCoordinate]) {
+    func addWhoMarkers(mapView: NMFMapView, whoMarkerModels: [WhoMarkerModel]) { // Who전용 원형커스텀뷰
         DispatchQueue.global(qos: .default).async { [weak self] in
             guard let `self` = self else { return }
             var guInfoWindows = [NMFInfoWindow]()
-            for mapCoordinate in mapCoordinates {
+            for whoMarkerModel in whoMarkerModels {
+                guard let location = whoMarkerModel.location else { return }
                 let guInfoWindow = NMFInfoWindow()
-                let position = NMGLatLng(lat: mapCoordinate.lat, lng: mapCoordinate.lng)
+                let position = NMGLatLng(lat: location.x, lng: location.y)
                 guInfoWindow.position = position
                 guInfoWindow.dataSource = self
-//                guInfoWindow.
-                guInfoWindow.userInfo = ["info": GuCountViewModel(title: "송파구청", count: 3)]
-                guInfoWindow.touchHandler = { [weak self] _ in // 이 부분에 마커, 커스텀뷰에 따라 분기처리해주면 될듯
-                    guard let `self` = self else { return false }
-                    self.moveCameraUpdate(mapView: mapView, mapCoordinate: mapCoordinate)
-                    let contentViewController = MapFloatingPanelViewController(floatingType: .study)
-                    self.floatingPanelVC.panGestureRecognizer.isEnabled = false
-                    self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
-                    return false
+                guInfoWindow.userInfo = ["info": whoMarkerModel]
+                guInfoWindow.touchHandler = { [weak self] whoMarker in // 이 부분에 마커, 커스텀뷰에 따라 분기처리해주면 될듯
+                    guard let `self` = self,
+                          let reactor = self.reactor,
+                          let whoMarkerInfo = whoMarker.userInfo["info"] as? WhoMarkerModel,
+                          let location = whoMarkerInfo.location else { return false }
+                    
+                        self.moveCameraUpdate(mapView: self.naverMapView.mapView, mapCoordinate: location)
+                    let contentViewController = MapFloatingPanelViewController(floatingType: .who)
+                        self.floatingPanelVC.panGestureRecognizer.isEnabled = false
+                        self.showFloatingPanel(contentViewController: contentViewController, self.floatingPanelVC)
+//                    Observable.just(Reactor.Action.tapWhoMarker)
+//                        .bind(to: reactor.action)
+//                        .disposed(by: self.disposeBag)
+                    return true
                 }
                 guInfoWindows.append(guInfoWindow)
             }
             
             DispatchQueue.main.async {
                 for guInfoWindow in guInfoWindows {
-//                    guInfoWindow.mapView = mapView
                     guInfoWindow.open(with: mapView)
                 }
             }
@@ -361,7 +382,7 @@ extension MapController: CLLocationManagerDelegate {
         let longtitude: CLLocationDegrees = location.coordinate.longitude
         let latitude:CLLocationDegrees = location.coordinate.latitude
         print("location = \(location), longtitude = \(longtitude), latitude = \(latitude)")
-        var currentLocation = MapCoordinate(lat: latitude, lng: longtitude)
+        var currentLocation = MapCoordinate(x: latitude, y: longtitude)
         self.currentLocation = currentLocation
     }
     
@@ -392,16 +413,12 @@ extension MapController: NMFOverlayImageDataSource, NMFMapViewTouchDelegate {
     }
     
     func view(with overlay: NMFOverlay) -> UIView {
-        guard let guInfo = overlay.userInfo["info"] as? GuCountViewModel,
-              let reactor = reactor else {
+        guard let studyMarkerInfo = overlay.userInfo["info"] as? WhoMarkerModel else {
             return UIView(frame: .zero)
         }
         
         let vw = GuCountView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
-        vw.configureUI(with: guInfo)
-//        vw.rx.tap.subscribe(onNext: { _ in
-//            print("앙 기모찌")
-//        }).disposed(by: disposeBag)
+        vw.configureUI(with: studyMarkerInfo)
         return vw
     }
 }
