@@ -9,6 +9,6 @@
 import Foundation
 
 struct MapCoordinate: Codable {
-    let lat: Double // 위도
-    let lng: Double // 경도
+    let x: Double // 위도
+    let y: Double // 경도
 }
