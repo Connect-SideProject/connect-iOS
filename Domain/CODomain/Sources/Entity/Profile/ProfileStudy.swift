@@ -27,6 +27,11 @@ public struct ProfileStudy: Codable {
         case myStudyInfo = "studyInfo"
         case myStudyParts = "parts"
     }
+    
+    public func setProfileStudyResultsParts() -> String {
+        return self.myStudyParts.map { $0.setProfileStudyParts() }
+            .joined(separator: " | ")
+    }
 
 }
 
@@ -38,5 +43,21 @@ public struct ProfileStudyPart: Codable {
     enum CodingKeys: String, CodingKey {
         case myStudyMemberRole = "role"
         case myStudyMemberCount = "count"
+    }
+    
+    public func setProfileStudyParts() -> String {
+        switch self.myStudyMemberRole {
+        case "DEV":
+            return ProfilePartsType.develop.rawValue
+        case "DESIGN":
+            return ProfilePartsType.designer.rawValue
+        case "PM":
+            return ProfilePartsType.planner.rawValue
+        case "MAK":
+            return ProfilePartsType.marketer.rawValue
+        default:
+            return ""
+        }
+        
     }
 }
