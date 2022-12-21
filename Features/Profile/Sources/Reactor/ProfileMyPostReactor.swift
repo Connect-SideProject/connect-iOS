@@ -121,10 +121,8 @@ private extension ProfileMyPostReactor {
     func getIndex(section: ProfileMyPostSection) -> Int {
         var index: Int = 0
         
-        for i in 0 ..< self.currentState.section.count {
-            if self.currentState.section[i].getSectionType() == section.getSectionType() {
-                index = i
-            }
+        for i in 0 ..< self.currentState.section.count where self.currentState.section[i].getSectionType() == section.getSectionType() {
+            index = i
         }
         return index
     }

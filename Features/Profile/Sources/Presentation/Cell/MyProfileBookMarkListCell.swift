@@ -218,22 +218,7 @@ extension MyProfileBookMarkListCell: ReactorKit.View {
         
         
         reactor.state
-            .map { $0.myBookMarkListModel.myBookMarkParts
-                    .map { parts -> String in
-                        switch parts.myStudyMemberRole {
-                        case "DEV":
-                            return "개발자"
-                        case "DESIGN":
-                            return "디자이너"
-                        case "PM":
-                            return "기획자"
-                        case "MAK":
-                            return "마케터"
-                        default:
-                            return ""
-                        }
-                    }.toStringWithVeticalBar
-            }
+            .map { $0.myBookMarkListModel.setProfileResultsParts() }
             .observe(on: MainScheduler.instance)
             .bind(to: profileBookMarkMemberStateLabel.rx.text)
             .disposed(by: disposeBag)

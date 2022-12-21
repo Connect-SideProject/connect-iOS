@@ -7,6 +7,12 @@
 
 import Foundation
 
+public enum ProfilePartsType: String {
+    case develop = "개발자"
+    case designer = "디자이너"
+    case planner = "기획자"
+    case marketer = "마케터"
+}
 
 public struct ProfileBookMark: Codable {
     
@@ -16,7 +22,7 @@ public struct ProfileBookMark: Codable {
     public var myBookMarkDescription: Int
     public var myBookMarkisCheck: Bool
     public var myBookMarkInfo: String
-    public var myBookMarkParts: [ProfileStudyPart]
+    public var myBookMarkParts: [ProfileBookMarkPart]
     
     enum CodingKeys: String, CodingKey {
         case myBookMarkid = "id"
@@ -27,6 +33,10 @@ public struct ProfileBookMark: Codable {
         case myBookMarkInfo = "studyInfo"
         case myBookMarkParts = "parts"
         
+    }
+    
+    public func setProfileResultsParts() -> String {
+        return self.myBookMarkParts.map { $0.setProfileParts() }.joined(separator: " | ")
     }
     
 }
@@ -40,5 +50,21 @@ public struct ProfileBookMarkPart: Codable {
     enum CodingKeys: String, CodingKey {
         case myBookMarkRole = "role"
         case myBookMarkCount = "count"
+    }
+    
+    public func setProfileParts() -> String {
+        switch self.myBookMarkRole {
+        case "DEV":
+            return ProfilePartsType.develop.rawValue
+        case "DESIGN":
+            return ProfilePartsType.designer.rawValue
+        case "PM":
+            return ProfilePartsType.planner.rawValue
+        case "MAK":
+            return ProfilePartsType.marketer.rawValue
+        default:
+            return ""
+        }
+        
     }
 }
