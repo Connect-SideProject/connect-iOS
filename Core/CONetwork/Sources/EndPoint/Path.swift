@@ -55,7 +55,7 @@ public enum Path {
     case .logout:
       return "/api/member/auth/logout"
     case .signOut:
-      return "/api/member/signOut"
+      return "/api/member/signout"
     case .getWhoMarker:
         return "/api/study/map"
     case .getStudyInfo(let regionID):
