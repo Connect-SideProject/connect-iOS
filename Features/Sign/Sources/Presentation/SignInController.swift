@@ -54,7 +54,13 @@ public final class SignInController: UIViewController, ReactorKit.View {
     flexContainer.pin
       .width(of: view)
       .height(of: view)
+      .all()
       .layout()
+    
+    backgroundImageView.pin
+      .all()
+      .width(100%)
+      .height(100%)
     
     flexContainer.flex.layout()
   }
@@ -101,21 +107,16 @@ extension SignInController {
     
     navigationController?.setNavigationBarHidden(true, animated: false)
     
+    view.addSubview(backgroundImageView)
     view.addSubview(flexContainer)
     
     flexContainer.flex
       .direction(.column)
       .define { flex in
-        flex.addItem(backgroundImageView)
-          .grow(1)
-    }
-    
-    backgroundImageView.flex
-      .define { flex in
         flex.addItem()
           .grow(1)
         flex.addItem(signInContainer)
-      }
+    }
     
     signInContainer.flex
       .height(255)
@@ -138,8 +139,8 @@ extension SignInController {
   private func makeSignInButtons() -> [UIButton] {
     return AuthType.allCases.enumerated()
       .map { offset, type in
-        let button = UIButton()
-        button.setBackgroundImage(.init(named: "img_\(type.description.lowercased())_signIn"), for: .normal)
+        let button = UIButton(type: .custom)
+        button.setImage(.init(named: "img_\(type.description.lowercased())_signIn"), for: .normal)
         button.tag = offset
         button.layer.cornerRadius = 4
         button.layer.masksToBounds = true
