@@ -58,6 +58,10 @@ extension SceneDelegate: ProfileDelegate {
   func routeToSingIn() {
     
   }
+    
+  func routeToMyPost(_ type: ProfilePostType) {
+    
+  }
 }
 
 extension SceneDelegate: ProfileEditDelegate {

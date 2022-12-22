@@ -139,6 +139,16 @@ extension MainController: ProfileDelegate {
   func routeToSingIn() {
     NotificationCenter.default.post(type: .routeToSignIn)
   }
+    
+  func routeToMyPost(_ type: ProfilePostType) {
+    let container = ProfileMyPostDIContainer(
+        apiService: ApiManager.shared,
+        profilePostType: type
+     )
+        
+    let controller = container.makeController()
+    self.navigationController?.pushViewController(controller, animated: true)
+  }
 }
 
 extension MainController: ProfileEditDelegate {

@@ -6,9 +6,10 @@
 //
 
 import ReactorKit
+import COExtensions
 
 enum SearchViewTransform: TransformType {
-    enum Event {
+    public enum Event {
         case refreshKeywordSection
         case didTapRecentlyKeyword(keyword: String)
     }
