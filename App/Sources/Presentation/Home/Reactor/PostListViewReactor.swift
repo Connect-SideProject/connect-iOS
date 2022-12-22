@@ -16,7 +16,7 @@ import Foundation
 
 
 public enum PostFilterTransform: TransformType, Equatable {
-    enum Event {
+    public enum Event {
         case didTapOnOffLineSheet(text: String)
         case didTapAligmentSheet(text: String)
         case didTapStudyTypeSheet(text: String)
@@ -139,14 +139,7 @@ public final class PostListViewReactor: Reactor, ErrorHandlerable {
             if aligmentItem == "거리순" {
                 
                 _ =  UserDefaultsManager.currentLocation?.asDictionary()?.map({ key, value in
-                    switch key {
-                    case "lng":
-                        postParameter.updateValue(String(describing: value), forKey: "x")
-                    case "lat":
-                        postParameter.updateValue(String(describing: value), forKey: "y")
-                    default:
-                        break
-                    }
+                    postParameter.updateValue(String(describing: value), forKey: key)
                 })
                 
                 return .concat(
