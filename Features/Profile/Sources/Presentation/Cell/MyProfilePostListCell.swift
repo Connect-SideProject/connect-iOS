@@ -10,6 +10,7 @@ import SnapKit
 import RxGesture
 import ReactorKit
 
+import CODomain
 import COManager
 
 
@@ -162,6 +163,18 @@ final class MyProfilePostListCell: UICollectionViewCell {
         
     }
     
+    fileprivate func isBookMarkCheck(listEntity: ProfileStudy, bookMarkEntity: HomeBookMarkList?) -> Bool {
+        guard let bookMarkEntity = bookMarkEntity else { return false }
+        
+        return listEntity.isBookMarkId(bookMarkEntity.bookMarkId) && bookMarkEntity.bookMarkisCheck
+    }
+    
+    fileprivate func isNotBookMarkCheck(listEntity: ProfileStudy, bookMarkEntity: HomeBookMarkList?) -> Bool {
+        guard let bookMarkEntity = bookMarkEntity else { return false }
+        
+        return listEntity.isBookMarkId(bookMarkEntity.bookMarkId) && bookMarkEntity.bookMarkisCheck == false
+    }
+    
 }
 
 
@@ -238,16 +251,14 @@ extension MyProfilePostListCell: ReactorKit.View {
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.myStudyBookMarkList != nil }
-            .filter { $0.myStudyModel.isBookMarkId($0.myStudyBookMarkList!.bookMarkId) && $0.myStudyBookMarkList!.bookMarkisCheck }
+            .filter { self.isBookMarkCheck(listEntity: $0.myStudyModel, bookMarkEntity: $0.myStudyBookMarkList)}
             .map { _ in UIImage(named: "home_studylist_bookmark_select")}
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostBookMarkImageView.rx.image)
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.myStudyBookMarkList != nil }
-            .filter { $0.myStudyModel.isBookMarkId($0.myStudyBookMarkList!.bookMarkId) && $0.myStudyBookMarkList!.bookMarkisCheck == false}
+            .filter { self.isNotBookMarkCheck(listEntity: $0.myStudyModel, bookMarkEntity: $0.myStudyBookMarkList)}
             .map { _ in UIImage(named: "home_studylist_bookmark") }
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostBookMarkImageView.rx.image)
