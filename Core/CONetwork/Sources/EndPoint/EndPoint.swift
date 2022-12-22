@@ -61,7 +61,7 @@ public extension EndPoint {
     case .serchPlace:
       return ["Authorization": Auth.ThirdParty.kakao]
       
-    case .interests, .skills:
+    case .interests, .skills, .getWhoMarker:
       break
     
     case .uploadProfileImage:

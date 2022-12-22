@@ -20,7 +20,6 @@ public enum Path {
   case search([String:String]?)
   case uploadProfileImage(Data)
   case userProfile
-  case homeMenu
   case homeNews([String:String?])
   case homeBookMark(String)
   case updateProfile(ProfileEditParameter)
@@ -28,6 +27,8 @@ public enum Path {
   case refreshToken
   case logout
   case signOut
+  case getWhoMarker
+  case getStudyInfo(Int)
   
   public var string: String {
     switch self {
@@ -43,8 +44,6 @@ public enum Path {
       return "/v2/local/search/address.json"
     case .createMeeting:
       return "/api/study"
-    case .homeMenu:
-      return "/api/study/home/menu"
     case .homeNews:
       return "/api/study/news"
     case .homeRelease:
@@ -63,6 +62,10 @@ public enum Path {
       return "/api/member/auth/logout"
     case .signOut:
       return "/api/member/auth/signout"
+    case .getWhoMarker:
+        return "/api/study/map"
+    case .getStudyInfo(let regionID):
+        return "/api/study/map/\(regionID)"
     }
   }
   

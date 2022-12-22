@@ -138,20 +138,21 @@ class StudyCollectionViewCell: UICollectionViewCell {
         contentView.layer.borderWidth = 1
         contentView.layer.borderColor = UIColor.lightGray.cgColor
         contentView.clipsToBounds = true
-        contentView.backgroundColor = .systemBackground
+        contentView.backgroundColor = .red
         [studyStatusView, studyLikeView, studyTitleLabel, studyDescriptionLabel, studyRecruitTypeView,  chattingButton].forEach{contentView.addSubview($0)}
         
         chattingButton.addTarget(self, action: #selector(didTappdChattingButton), for: .touchUpInside)
-        studyRecruitTypeView.configureUI(recruitTypes: [RecruitType.developer, RecruitType.planner, RecruitType.designer])
     }
     
-    public func configureUI(with model: String) {
+    public func configureUI(with model: PlaceStudyInfo) {
+        print("model = \(model)")
         let config = UIImage.SymbolConfiguration(pointSize: 30, weight: .bold)
         chattingButton.setTitle("담당자와 채팅하기", for: .normal)
         chattingButton.backgroundColor = .green
         // MOCK DATA
         studyStatusView.text = "모집중"
-        studyTitleLabel.text = "여성 아티스트 육성 NFT"
-        studyDescriptionLabel.text = "SPACE OF WOMEN은 .NET 시장에서 여성 크리에이터들을 늘리기 위한 움직임...ㅇㄹㄴㅇㄹㅁㄴㄹㄴㅁㄹㄴㅁㄹㄴㅁㄹㄴㅁㄹㅁㄴㄹ"
+        studyTitleLabel.text = model.studyTitle
+        studyDescriptionLabel.text = model.studyInfo
+        studyRecruitTypeView.configureUI(with: model.parts)
     }
 }
