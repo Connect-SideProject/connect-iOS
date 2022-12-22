@@ -32,6 +32,10 @@ public struct ProfileStudy: Codable {
         return self.myStudyParts.map { $0.setProfileStudyParts() }
             .joined(separator: " | ")
     }
+    
+    public func isBookMarkId(_ id: Int) -> Bool {
+        return self.myStudyid == id
+    }
 
 }
 

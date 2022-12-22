@@ -239,7 +239,7 @@ extension MyProfilePostListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.myStudyBookMarkList != nil }
-            .filter { $0.myStudyModel.myStudyid == $0.myStudyBookMarkList!.bookMarkId && $0.myStudyBookMarkList!.bookMarkisCheck }
+            .filter { $0.myStudyModel.isBookMarkId($0.myStudyBookMarkList!.bookMarkId) && $0.myStudyBookMarkList!.bookMarkisCheck }
             .map { _ in UIImage(named: "home_studylist_bookmark_select")}
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostBookMarkImageView.rx.image)
@@ -247,7 +247,7 @@ extension MyProfilePostListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.myStudyBookMarkList != nil }
-            .filter { $0.myStudyModel.myStudyid == $0.myStudyBookMarkList!.bookMarkId && $0.myStudyBookMarkList!.bookMarkisCheck == false}
+            .filter { $0.myStudyModel.isBookMarkId($0.myStudyBookMarkList!.bookMarkId) && $0.myStudyBookMarkList!.bookMarkisCheck == false}
             .map { _ in UIImage(named: "home_studylist_bookmark") }
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostBookMarkImageView.rx.image)

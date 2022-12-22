@@ -39,6 +39,10 @@ public struct ProfileBookMark: Codable {
         return self.myBookMarkParts.map { $0.setProfileParts() }.joined(separator: " | ")
     }
     
+    public func isBookMarkId(_ id: Int) -> Bool {
+        return self.myBookMarkid == id
+    }
+    
 }
 
 
