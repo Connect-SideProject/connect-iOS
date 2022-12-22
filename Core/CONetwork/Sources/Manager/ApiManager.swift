@@ -14,9 +14,20 @@ import RxSwift
 
 public final class ApiManager: ApiService {
   
+  enum Header {
+    static let accessToken = "access-token"
+    static let refreshToken = "refresh-token"
+  }
+  
   public static let shared: ApiManager = ApiManager()
   
-  private init() {}
+  private let userManager: UserService
+  
+  private init(
+    userManager: UserService = UserManager.shared
+  ) {
+    self.userManager = userManager
+  }
   
   public func request<T>(endPoint: EndPoint) -> Observable<T> where T: Decodable {
     guard let url = endPoint.url else {
@@ -47,7 +58,7 @@ public final class ApiManager: ApiService {
     print("Parameter: \(String(describing: endPoint.parameter?.format(options: [.prettyPrinted])))")
     print("===============================================")
     
-    return Observable<T>.create { observer in
+    return Observable<T>.create { [weak self] observer in
       
       let configuration = URLSessionConfiguration.default
       configuration.requestCachePolicy = URLRequest.CachePolicy.reloadIgnoringLocalCacheData
@@ -65,12 +76,16 @@ public final class ApiManager: ApiService {
         print("StatusCode: \(response.statusCode)")
         
         let headers = response.allHeaderFields.filter {
-          $0.key.description == "access-token" || $0.key.description == "refresh-token"
+          $0.key.description == Header.accessToken || $0.key.description == Header.refreshToken
         }
         
         if headers.count != 0 {
           print("Header: \(headers)")
-          SessionManager.shared.update(headers: headers)
+          let tokens: Tokens = .init(
+            access: Header.accessToken,
+            refresh: Header.refreshToken
+          )
+          self?.userManager.update(tokens: tokens, profile: nil)
         }
         
         // 회원가입이 필요한 경우.
@@ -93,13 +108,11 @@ public final class ApiManager: ApiService {
         print("Data: \(String(describing: base))")
         print("================================================")
         // 토큰 유효시간 만료.
-        if let errorCode = base?.errorCode, response.statusCode == 401 {
-          SessionManager.shared.process(errorCode: errorCode) {
-            NotificationCenter.default.post(
-              type: .expiredToken,
-              userInfo: ["message": base?.message ?? ""]
-            )
-          }
+        if let _ = base?.errorCode, response.statusCode == 401 {
+          NotificationCenter.default.post(
+            type: .expiredToken,
+            userInfo: ["message": base?.message ?? ""]
+          )
           return
         }
         

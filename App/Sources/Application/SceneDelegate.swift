@@ -20,6 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   
   var controller: CONavigationViewController!
   
+  let userManager = UserManager.shared
+  
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     
     guard let scene = (scene as? UIWindowScene) else { return }
@@ -59,6 +61,7 @@ extension SceneDelegate {
       )
       .show()
       .confirmHandler = { [weak self] in
+        self?.userManager.remove()
         self?.routeToSplash()
       }
     }
