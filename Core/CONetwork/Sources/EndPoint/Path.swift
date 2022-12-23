@@ -27,6 +27,8 @@ public enum Path {
   case refreshToken
   case logout
   case signOut
+  case myStudy
+  case myBookMark
   case getWhoMarker
   case getStudyInfo(Int)
   
@@ -45,13 +47,17 @@ public enum Path {
     case .createMeeting:
       return "/api/study"
     case .homeNews:
-      return "/api/study/news"
+        return "/api/study/news"
     case .homeRelease:
       return "/api/study/hots"
-    case let .homeBookMark(id):
-        return "/api/study/\(id)/bookmark"
+    case .myStudy:
+        return "/api/study/myStudies"
+    case .myBookMark:
+        return "/api/study/myBookmark"
     case .search:
         return "/api/study/search"
+    case let .homeBookMark(id):
+        return "/api/study/\(id)/bookmark"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:
@@ -74,8 +80,6 @@ public enum Path {
     case let .signUp(parameter, _):
       return parameter.asDictionary()
     case let .updateProfile(parameter):
-      return parameter.asDictionary()
-    case let .createMeeting(parameter):
       return parameter.asDictionary()
     default:
       return nil

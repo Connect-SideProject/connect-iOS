@@ -25,5 +25,5 @@ public extension Array where Element == String {
             return acc + ((item.offset != self.count - 1) ? "\(item.element) | " : "\(item.element)")
         }
     }
-    
+
 }
