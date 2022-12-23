@@ -20,6 +20,7 @@ extension MeetingDetailController {
         private let cardValueArea = UIView()
         private let cardTitleLabels = [UILabel(), UILabel(), UILabel(), UILabel(), UILabel()]
         private let cardValueLabels = [UILabel(), UILabel(), UILabel(), UILabel(), UILabel()]
+        private let dDayLabel = UILabel()
         
         override func setupContainer() {
             self.contentView.flex.define {
@@ -48,9 +49,19 @@ extension MeetingDetailController {
                             .marginLeft(25)
                             .marginVertical(20)
                             .define { flex in
-                                self.cardValueLabels.enumerated().forEach {
-                                    flex.addItem($1)
-                                        .marginTop($0 > 0 ? 12 : 0)
+                                self.cardValueLabels.enumerated().forEach { offset, label in
+                                    if offset > 0 {
+                                        flex.addItem(label)
+                                            .marginTop(12)
+                                    } else {
+                                        flex.addItem()
+                                            .direction(.row)
+                                            .define { flex in
+                                                flex.addItem(label)
+                                                flex.addItem(self.dDayLabel)
+                                                    .marginLeft(10)
+                                            }
+                                    }
                                 }
                             }
                     }
@@ -74,7 +85,7 @@ extension MeetingDetailController {
         }
         
         override func configure(with item: MeetingInfo) {
-            let values = [item.endDate.toDate(format: "yyyy-mm-dd")?.toFormattedString(dateFormat: "yy.mm.dd") ?? "",
+            let values = [item.endDate.toDate(format: "yyyy-MM-dd")?.toFormattedString(dateFormat: "yy.MM.dd") ?? "",
                           item.studyType,
                           item.meetingType,
                           item.categories.map(\.category).joined(separator: " ,"),
@@ -82,6 +93,7 @@ extension MeetingDetailController {
             self.cardValueLabels.enumerated().forEach { offset, label in
                 label.text = values[offset]
             }
+            self.dDayLabel.text = item.endDate.toDate(format: "yyyy-MM-dd")?.toDdayFormattedStr()
         }
         
         private func setLabels() {
@@ -97,6 +109,8 @@ extension MeetingDetailController {
                 $0.font = .medium(size: 14)
                 $0.textColor = .black
             }
+            self.dDayLabel.font = .medium(size: 14)
+            self.dDayLabel.textColor = .hex06C755
         }
         
         private func setCardContainer() {
