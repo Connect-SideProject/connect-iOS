@@ -28,6 +28,10 @@ final class SplashController: UIViewController, ReactorKit.View {
     $0.startAnimating()
   }
   
+  let imageView = UIImageView().then {
+    $0.image = UIImage(named: "img_splash")
+  }
+  
   private let flexContainer = UIView()
   
   weak var delegate: SplashDelegate?
@@ -81,7 +85,12 @@ extension SplashController {
     view.addSubview(flexContainer)
     
     flexContainer.flex
-      .alignItems(.center)
+      .define { flex in
+        flex.addItem(imageView)
+          .grow(1)
+      }
+    
+    imageView.flex
       .define { flex in
         flex.addItem(indicatorView)
           .marginTop(view.bounds.height / 2 - 17.5)

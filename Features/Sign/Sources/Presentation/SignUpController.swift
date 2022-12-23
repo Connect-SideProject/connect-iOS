@@ -214,7 +214,7 @@ public final class SignUpController: UIViewController, ReactorKit.View {
             .handler = { [weak self, weak reactor] in
               switch $0 {
               case let .confirm(selectedIndex, title):
-                reactor?.action.onNext(.didSelectedLocation(selectedIndex))
+                reactor?.action.onNext(.didSelectedLocation(selectedIndex[0]))
                 self?.addressButtonRelay.accept("서울 \(title)")
               default:
                 break

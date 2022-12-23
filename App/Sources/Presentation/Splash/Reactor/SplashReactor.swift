@@ -52,31 +52,34 @@ public final class SplashReactor: Reactor, ErrorHandlerable {
     switch action {
     case .requestNeedsData:
       
-      if roleSkillsService.isExists && interestService.isExists {
-        return .just(.setIsFinishRequests(true))
-      }
-      
-      let updateRoleSkills = apiService.request(
-        endPoint: .init(path: .skills)
-      )
-      .flatMap { [weak self] (roleSkills: [RoleSkills]) -> Observable<Void> in
-          self?.roleSkillsService.update(roleSkills)
-          return .just(())
-      }
-      
       let updateInterests = apiService.request(
         endPoint: .init(path: .interests)
       )
       .flatMap { [weak self] (interests: [Interest]) -> Observable<Void> in
         self?.interestService.update(interests)
         return .just(())
-    }
+      }
       
-      return Observable.combineLatest(
-        updateRoleSkills, updateInterests
-      ).flatMap { _ -> Observable<Mutation> in
-        return .just(.setIsFinishRequests(true))
-      }.catch(errorHandler)
+      let updateRoleSkills = apiService.request(
+        endPoint: .init(path: .skills)
+      )
+      .flatMap { [weak self] (roleSkills: [RoleSkills]) -> Observable<Void> in
+        self?.roleSkillsService.update(roleSkills)
+        return .just(())
+      }
+      
+      if roleSkillsService.isExists {
+        return updateInterests
+          .flatMap { _ -> Observable<Mutation> in
+            return .just(.setIsFinishRequests(true))
+          }.catch(errorHandler)
+      } else {
+        return Observable.combineLatest(
+          updateRoleSkills, updateInterests
+        ).flatMap { _ -> Observable<Mutation> in
+          return .just(.setIsFinishRequests(true))
+        }.catch(errorHandler)
+      }
     }
   }
   

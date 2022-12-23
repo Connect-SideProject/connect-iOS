@@ -139,6 +139,16 @@ extension MainController: ProfileDelegate {
   func routeToSingIn() {
     NotificationCenter.default.post(type: .routeToSignIn)
   }
+    
+  func routeToMyPost(_ type: ProfilePostType) {
+    let container = ProfileMyPostDIContainer(
+        apiService: ApiManager.shared,
+        profilePostType: type
+     )
+        
+    let controller = container.makeController()
+    self.navigationController?.pushViewController(controller, animated: true)
+  }
 }
 
 extension MainController: ProfileEditDelegate {
@@ -149,14 +159,18 @@ extension MainController: ProfileEditDelegate {
 
 
 extension MainController: HomeCoordinatorDelegate {
-    func didTapToPostListCreate() {
+    func didTapToPostListCreate(completion: (() -> Void)?) {
         let homeDependency = HomeDependencyContainer(homeApiService: ApiManager.shared)
         let childrenCoordinator = homeDependency.makeChildrenController()
-        self.navigationController?.pushViewController(childrenCoordinator, animated: true)
+        self.navigationController?.pushViewController(viewController: childrenCoordinator, animated: true, completion: {
+            completion?()
+        })
     }
     
     func didTapToSearchCreate() {
         let searchDependency = SearchDependencyContainer(searchApiService: ApiManager.shared)
-        self.navigationController?.pushViewController(searchDependency.makeController(), animated: true)
+        let childrenCoordinator = searchDependency.makeController()
+        childrenCoordinator.delegate = self
+        self.navigationController?.pushViewController(childrenCoordinator, animated: true)
     }
 }

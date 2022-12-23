@@ -23,10 +23,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     let controller = MeetingCreateViewController()
     controller.reactor = .init(
-      apiService: ApiManaerStub(),
+      repository: MeetingCreateRepositoryImpl(),
       userService: UserManagerStub(),
       interestService: InterestManagerStub(isExists: true),
-      addressService: AddressManager.shared
+      addressService: AddressManager.shared,
+      roleSkillsService: RoleSkillsManager.shared
     )
     window?.rootViewController = controller
     window?.makeKeyAndVisible()

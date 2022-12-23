@@ -19,19 +19,15 @@ public final class HomeMenuCellReactor: Reactor {
     
     
     public struct State {
-        var menuType: HomeMenuList
-        var homeCellRepo: HomeViewRepo
+        var menuModel: Interest
+        var menuRepo: HomeRepository
     }
     
     public let initialState: State
     
-    init(menuType: HomeMenuList,
-         homeCellRepo: HomeViewRepo
+    init(menuModel: Interest, menuRepo: HomeRepository
     ) {
-        defer { _ = self.state }
-        self.initialState = State(menuType: menuType, homeCellRepo: homeCellRepo)
-        print("Menu Type : \(menuType)")
-        
+        self.initialState = State(menuModel: menuModel, menuRepo: menuRepo)
     }
     
     

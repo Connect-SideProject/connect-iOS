@@ -16,16 +16,22 @@ public enum Path {
   case signIn(AuthType, String)
   case signUp(SignUpParameter, String)
   case serchPlace(String)
+  case createMeeting(CreateMeetingParameter)
+  case search([String:String]?)
   case uploadProfileImage(Data)
   case userProfile
-  case homeMenu
-  case homeNews
+  case homeNews([String:String?])
+  case homeBookMark(String)
   case updateProfile(ProfileEditParameter)
   case homeRelease
   case refreshToken
   case logout
   case signOut
   case meetingDetail(id: Int)
+  case myStudy
+  case myBookMark
+  case getWhoMarker
+  case getStudyInfo(Int)
   
   public var string: String {
     switch self {
@@ -39,12 +45,20 @@ public enum Path {
       return "/api/member/auth/signup"
     case .serchPlace:
       return "/v2/local/search/address.json"
-    case .homeMenu:
-        return "/api/study/home/menu"
+    case .createMeeting:
+      return "/api/study"
     case .homeNews:
         return "/api/study/news"
     case .homeRelease:
       return "/api/study/hots"
+    case .myStudy:
+        return "/api/study/myStudies"
+    case .myBookMark:
+        return "/api/study/myBookmark"
+    case .search:
+        return "/api/study/search"
+    case let .homeBookMark(id):
+        return "/api/study/\(id)/bookmark"
     case .uploadProfileImage:
       return "/api/member/myPage/profile"
     case .userProfile, .updateProfile:
@@ -54,9 +68,13 @@ public enum Path {
     case .logout:
       return "/api/member/auth/logout"
     case .signOut:
-      return "/api/member/signOut"
+        return "/api/member/auth/signout"
     case .meetingDetail(let id):
       return "/api/study/\(id)/info"
+    case .getWhoMarker:
+        return "/api/study/map"
+    case .getStudyInfo(let regionID):
+        return "/api/study/map/\(regionID)"
     }
   }
   
