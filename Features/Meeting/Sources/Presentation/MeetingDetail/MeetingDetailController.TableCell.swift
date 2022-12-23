@@ -46,6 +46,7 @@ extension MeetingDetailController {
                         
                         $0.addItem(self.cardValueArea)
                             .marginLeft(25)
+                            .marginVertical(20)
                             .define { flex in
                                 self.cardValueLabels.enumerated().forEach {
                                     flex.addItem($1)
@@ -91,6 +92,10 @@ extension MeetingDetailController {
                 label.text = cardTitles[offset]
                 label.font = .medium(size: 14)
                 label.textColor = .hex8E8E8E
+            }
+            self.cardValueLabels.forEach {
+                $0.font = .medium(size: 14)
+                $0.textColor = .black
             }
         }
         
