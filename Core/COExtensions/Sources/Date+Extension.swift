@@ -39,4 +39,9 @@ public extension Date {
     components.timeZone = timeZone
     return calendar.date(from: components)!
   }
+  
+  func toDdayFormattedStr() -> String? {
+    guard let daysLeft = Calendar.current.dateComponents([.day], from: self, to: Date()).day else { return nil }
+    return daysLeft >= 0 ? "D+\(daysLeft)" : "D\(daysLeft)"
+  }
 }
