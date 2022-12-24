@@ -124,6 +124,7 @@ final class MyProfileBookMarkListCell: UICollectionViewCell {
         profileBookMarkView.snp.makeConstraints {
             $0.top.equalTo(profileBookMarkStateView)
             $0.right.equalToSuperview().offset(-20)
+            $0.left.greaterThanOrEqualTo(profileBookMarkTitleLabel.snp.right).offset(5)
             $0.width.height.equalTo(20)
         }
         
@@ -135,6 +136,7 @@ final class MyProfileBookMarkListCell: UICollectionViewCell {
         profileBookMarkSubTitleLable.snp.makeConstraints {
             $0.top.equalTo(profileBookMarkStateView.snp.bottom).offset(8)
             $0.left.equalTo(profileBookMarkStateView)
+            $0.bottom.equalTo(profileBookMarkMemberImageView.snp.top).offset(-10)
             $0.right.equalToSuperview().offset(-16)
         }
         
@@ -203,28 +205,28 @@ extension MyProfileBookMarkListCell: ReactorKit.View {
         reactor.state
             .filter { $0.myBookMarkListModel.myBookMarkisEnd }
             .observe(on: MainScheduler.instance)
-            .map { _ in UIColor.hex05A647}
+            .map { _ in UIColor.hex8E8E8E}
             .bind(to: profileBookMarkStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         
         reactor.state
             .filter { $0.myBookMarkListModel.myBookMarkisEnd == false }
-            .map { _ in UIColor.hex8E8E8E }
+            .map { _ in UIColor.hex05A647 }
             .observe(on: MainScheduler.instance)
             .bind(to: profileBookMarkStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.myBookMarkListModel.myBookMarkisEnd == false }
-            .map { _ in "모집완료"}
+            .map { _ in "모집중"}
             .observe(on: MainScheduler.instance)
             .bind(to: profileBookMarkStateLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.myBookMarkListModel.myBookMarkisEnd }
-            .map { _ in "모집중"}
+            .map { _ in "모집완료"}
             .observe(on: MainScheduler.instance)
             .bind(to: profileBookMarkStateLabel.rx.text)
             .disposed(by: disposeBag)

@@ -232,13 +232,6 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd }
-            .map { _ in UIColor.hex05A647 }
-            .observe(on: MainScheduler.instance)
-            .bind(to: self.releaseStateContainerView.rx.backgroundColor)
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .filter { $0.releaseModel.releaseisEnd == false }
             .map { _ in UIColor.hex8E8E8E }
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseStateContainerView.rx.backgroundColor)
@@ -246,14 +239,21 @@ extension HomeReleaseStudyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd == false }
-            .map { _ in "모집완료"}
+            .map { _ in UIColor.hex05A647 }
+            .observe(on: MainScheduler.instance)
+            .bind(to: self.releaseStateContainerView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.releaseModel.releaseisEnd == false }
+            .map { _ in "모집중"}
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseStateLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.releaseModel.releaseisEnd }
-            .map { _ in "모집중" }
+            .map { _ in "모집완료" }
             .observe(on: MainScheduler.instance)
             .bind(to: self.releaseStateLabel.rx.text)
             .disposed(by: disposeBag)
