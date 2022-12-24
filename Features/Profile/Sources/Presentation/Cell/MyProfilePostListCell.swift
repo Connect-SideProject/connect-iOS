@@ -129,6 +129,7 @@ final class MyProfilePostListCell: UICollectionViewCell {
         profilePostBookMarkView.snp.makeConstraints {
             $0.top.equalTo(profilePostStateView)
             $0.right.equalToSuperview().offset(-20)
+            $0.left.greaterThanOrEqualTo(profilePostTitleLabel.snp.right).offset(5)
             $0.width.height.equalTo(20)
         }
         
@@ -139,6 +140,7 @@ final class MyProfilePostListCell: UICollectionViewCell {
         profilePostSubTitleLabel.snp.makeConstraints {
             $0.top.equalTo(profilePostStateView.snp.bottom).offset(8)
             $0.left.equalTo(profilePostStateView)
+            $0.bottom.equalTo(profilePostMemberImageView.snp.top).offset(-10)
             $0.right.equalToSuperview().offset(-16)
         }
         
@@ -204,28 +206,28 @@ extension MyProfilePostListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.myStudyModel.myStudyisEnd }
-            .map { _ in UIColor.hex05A647}
+            .map { _ in UIColor.hex8E8E8E}
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.myStudyModel.myStudyisEnd == false }
-            .map { _ in UIColor.hex8E8E8E }
+            .map { _ in UIColor.hex05A647 }
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.myStudyModel.myStudyisEnd }
-            .map { _ in "모집중"}
+            .map { _ in "모집완료"}
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostStateLabel.rx.text)
             .disposed(by: disposeBag)
         
         reactor.state
             .filter { $0.myStudyModel.myStudyisEnd == false }
-            .map { _ in "모집완료"}
+            .map { _ in "모집중"}
             .observe(on: MainScheduler.instance)
             .bind(to: profilePostStateLabel.rx.text)
             .disposed(by: disposeBag)

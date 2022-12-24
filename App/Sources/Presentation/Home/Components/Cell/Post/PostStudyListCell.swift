@@ -133,6 +133,7 @@ final class PostStduyListCell: UICollectionViewCell {
         postBookMarkContainerView.snp.makeConstraints {
             $0.top.equalTo(postStateView)
             $0.right.equalToSuperview().offset(-20)
+            $0.left.greaterThanOrEqualTo(postTitleLabel.snp.right).offset(5)
             $0.width.height.equalTo(20)
         }
         
@@ -143,6 +144,7 @@ final class PostStduyListCell: UICollectionViewCell {
         postExplanationLabel.snp.makeConstraints {
             $0.top.equalTo(postStateView.snp.bottom).offset(8)
             $0.left.equalTo(postStateView)
+            $0.bottom.equalTo(postMemberImageView.snp.top).offset(-10)
             $0.right.equalToSuperview().offset(-16)
         }
         
@@ -179,29 +181,25 @@ extension PostStduyListCell: ReactorKit.View {
         
         reactor.state
             .filter { $0.postModel.contentisEnd }
-            .map { _ in UIColor.hex05A647 }
-            .observe(on: MainScheduler.asyncInstance)
-            .bind(to: postStateView.rx.backgroundColor)
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .filter { $0.postModel.contentisEnd }
-            .map { _ in "모집중" }
-            .observe(on: MainScheduler.instance)
-            .bind(to: postStateTitleLabel.rx.text)
-            .disposed(by: disposeBag)
-        
-        reactor.state
-            .filter { $0.postModel.contentisEnd == false }
-            .observe(on: MainScheduler.asyncInstance)
             .map { _ in UIColor.hex8E8E8E }
             .bind(to: postStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
         
         reactor.state
-            .filter { $0.postModel.contentisEnd == false }
+            .filter { $0.postModel.contentisEnd }
             .map { _ in "모집완료" }
-            .observe(on: MainScheduler.instance)
+            .bind(to: postStateTitleLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd == false }
+            .map { _ in UIColor.hex05A647 }
+            .bind(to: postStateView.rx.backgroundColor)
+            .disposed(by: disposeBag)
+        
+        reactor.state
+            .filter { $0.postModel.contentisEnd == false }
+            .map { _ in "모집중" }
             .bind(to: postStateTitleLabel.rx.text)
             .disposed(by: disposeBag)
         

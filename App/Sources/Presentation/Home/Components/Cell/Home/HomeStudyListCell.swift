@@ -187,6 +187,7 @@ final class HomeStudyListCell: UICollectionViewCell {
         studyBookMarkView.snp.makeConstraints {
             $0.top.equalTo(studyListStateView)
             $0.right.equalToSuperview().offset(-20)
+            $0.left.greaterThanOrEqualTo(studyListTitleLabel.snp.right).offset(5)
             $0.width.height.equalTo(20)
         }
         
@@ -197,6 +198,7 @@ final class HomeStudyListCell: UICollectionViewCell {
         studyListSubTitleLabel.snp.makeConstraints {
             $0.top.equalTo(studyListStateView.snp.bottom).offset(8)
             $0.left.equalTo(studyListStateView)
+            $0.bottom.equalTo(studyMemberImageView.snp.top).offset(-10)
             $0.right.equalToSuperview().offset(-16)
         }
         
@@ -242,7 +244,7 @@ extension HomeStudyListCell: ReactorKit.View {
         reactor.state
             .compactMap { $0.studyNewsModel}
             .filter { $0.studyNewsIsEnd }
-            .map { _ in UIColor.hex05A647 }
+            .map { _ in UIColor.hex8E8E8E }
             .observe(on: MainScheduler.instance)
             .bind(to: studyListStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
@@ -250,7 +252,7 @@ extension HomeStudyListCell: ReactorKit.View {
         reactor.state
             .compactMap { $0.studyNewsModel }
             .filter { $0.studyNewsIsEnd }
-            .map { _ in "모집중" }
+            .map { _ in "모집완료" }
             .observe(on: MainScheduler.instance)
             .bind(to: studyListStateLabel.rx.text)
             .disposed(by: disposeBag)
@@ -258,7 +260,7 @@ extension HomeStudyListCell: ReactorKit.View {
         reactor.state
             .compactMap { $0.studyNewsModel }
             .filter { $0.studyNewsIsEnd == false }
-            .map { _ in UIColor.hex8E8E8E}
+            .map { _ in UIColor.hex05A647}
             .observe(on: MainScheduler.instance)
             .bind(to: studyListStateView.rx.backgroundColor)
             .disposed(by: disposeBag)
@@ -267,7 +269,7 @@ extension HomeStudyListCell: ReactorKit.View {
         reactor.state
             .compactMap { $0.studyNewsModel }
             .filter { $0.studyNewsIsEnd == false }
-            .map { _ in "모집완료"}
+            .map { _ in "모집중"}
             .observe(on: MainScheduler.instance)
             .bind(to: studyListStateLabel.rx.text)
             .disposed(by: disposeBag)
