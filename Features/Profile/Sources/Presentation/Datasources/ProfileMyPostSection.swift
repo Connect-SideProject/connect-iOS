@@ -14,7 +14,7 @@ enum ProfileMyPostType: String, Equatable {
 }
 
 
-enum ProfileMyPostSection {
+public enum ProfileMyPostSection {
     case myProfilePost([ProfileMyPostSectionItem])
     case myProfileBookMark([ProfileMyPostSectionItem])
     
@@ -26,7 +26,7 @@ enum ProfileMyPostSection {
     }
 }
 
-enum ProfileMyPostSectionItem {
+public enum ProfileMyPostSectionItem {
     case myProfilePostItem(MyProfilePostListCellReactor)
     case myProfileBookMarkItem(MyProfileBookMarkListCellReactor)
 }
@@ -34,14 +34,14 @@ enum ProfileMyPostSectionItem {
 
 extension ProfileMyPostSection: SectionModelType {
     
-    var items: [ProfileMyPostSectionItem] {
+    public var items: [ProfileMyPostSectionItem] {
         switch self {
         case let .myProfilePost(items): return items
         case let .myProfileBookMark(items): return items
         }
     }
     
-    init(original: ProfileMyPostSection, items: [ProfileMyPostSectionItem]) {
+    public init(original: ProfileMyPostSection, items: [ProfileMyPostSectionItem]) {
         switch original {
         case .myProfilePost: self = .myProfilePost(items)
         case .myProfileBookMark: self = .myProfileBookMark(items)
