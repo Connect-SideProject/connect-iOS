@@ -171,6 +171,7 @@ final class HomeReleaseStudyListCell: UICollectionViewCell {
         releaseTitleLabel.snp.makeConstraints {
             $0.top.equalTo(releaseStateContainerView.snp.bottom).offset(10)
             $0.left.equalTo(releaseStateContainerView)
+            $0.right.equalTo(releaseBookMarkImageView.snp.left)
             $0.height.equalTo(19)
         }
         
