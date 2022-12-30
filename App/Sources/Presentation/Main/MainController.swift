@@ -46,12 +46,14 @@ extension MainController {
   private func setViewContaollers() {
     
     /// 지도 화면.
-    let mapController = MapController()
-    mapController.tabBarItem = .init(
-      title: "main.tabItem.map".localized(),
-      image: .init(named: "ic_map_inactive")?.withRenderingMode(.alwaysOriginal),
-      selectedImage: .init(named: "ic_map_active")?.withRenderingMode(.alwaysOriginal)
-    )
+      let mapDIContainer = MapDependencyContainer(mapApiService: ApiManager.shared)
+      
+      let mapController = mapDIContainer.makeController()
+      mapController.tabBarItem = .init(
+        title: "main.tabItem.map".localized(),
+        image: .init(named: "ic_map_inactive")?.withRenderingMode(.alwaysOriginal),
+        selectedImage: .init(named: "ic_map_active")?.withRenderingMode(.alwaysOriginal)
+      )
     
     let homeDIContainer = HomeDependencyContainer(
       homeApiService: ApiManager.shared
