@@ -108,12 +108,16 @@ public final class CommonAlert: UIAlertController {
     }
     
     DispatchQueue.main.async {
+      var controller: UIViewController?
       if let viewController = viewController {
-        viewController.present(self, animated: true)
+        controller = viewController
       } else {
-        let viewController = UIApplication.getTopViewController()
-        viewController?.present(self, animated: true)
+        controller = UIApplication.getTopViewController()
       }
+      // alert이 띄워질 컨트롤러가 최상위가 아니라면 리턴.
+      guard controller?.presentedViewController == nil else { return }
+      
+      controller?.present(self, animated: true)
     }
     
     return self
