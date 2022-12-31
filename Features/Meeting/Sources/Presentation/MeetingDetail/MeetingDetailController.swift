@@ -87,6 +87,7 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
     
     private func setTable() {
         self.tableView.register(CardTableCell.self, forCellReuseIdentifier: CardTableCell.reuseableIdentifier)
+        self.tableView.register(TextTableCell.self, forCellReuseIdentifier: TextTableCell.reuseableIdentifier)
         self.tableView.rowHeight = UITableView.automaticDimension
     }
 }
