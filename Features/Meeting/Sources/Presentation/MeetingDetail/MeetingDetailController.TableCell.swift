@@ -119,9 +119,39 @@ extension MeetingDetailController {
         }
     }
     
-    final class TextTableCell: RxBaseTableCell<Any> {
+    final class TextTableCell: RxBaseTableCell<MeetingInfo> {
         private let titleLabel = UILabel()
         private let descLabel = UILabel()
+        
+        override func setupContainer() {
+            self.contentView.flex.define {
+                $0.addItem(self.titleLabel)
+                    .marginTop(16)
+                    .marginLeft(20)
+                
+                $0.addItem(self.descLabel)
+                    .marginTop(12)
+                    .marginHorizontal(20)
+                    .marginBottom(14)
+            }
+        }
+        
+        public override func layout() {
+            self.contentView.flex.layout(mode: .adjustHeight)
+        }
+        
+        override func sizeThatFits(_ size: CGSize) -> CGSize {
+            self.contentView.pin.width(size.width)
+            self.layout()
+            return self.contentView.frame.size
+        }
+        
+        override func setAttrs() {
+            super.setAttrs()
+            self.titleLabel.font = .semiBold(size: 16)
+            self.descLabel.font = .medium(size: 14)
+            self.descLabel.numberOfLines = 0
+        }
     }
 }
 
