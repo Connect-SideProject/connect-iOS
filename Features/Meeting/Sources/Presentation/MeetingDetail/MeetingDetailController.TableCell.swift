@@ -13,6 +13,9 @@ import COCommonUI
 import CODomain
 
 extension MeetingDetailController {
+    
+    typealias TextKeyValuePair = (title: String, description: String)
+    
     final class CardTableCell: RxBaseTableCell<MeetingInfo> {
         private let titleLabel = UILabel()
         private let cardContainer = UIView()
@@ -119,7 +122,7 @@ extension MeetingDetailController {
         }
     }
     
-    final class TextTableCell: RxBaseTableCell<MeetingInfo> {
+    final class TextTableCell: RxBaseTableCell<TextKeyValuePair> {
         private let titleLabel = UILabel()
         private let descLabel = UILabel()
         
@@ -146,6 +149,11 @@ extension MeetingDetailController {
             return self.contentView.frame.size
         }
         
+        override func configure(with item: TextKeyValuePair) {
+            self.titleLabel.text = item.title
+            self.descLabel.text = item.description
+        }
+        
         override func setAttrs() {
             super.setAttrs()
             self.titleLabel.font = .semiBold(size: 16)
@@ -158,7 +166,7 @@ extension MeetingDetailController {
 extension MeetingDetailController {
     enum SectionModel: SectionModelType {
         enum Item {
-            case card(MeetingInfo), `default`(MeetingInfo)
+            case card(MeetingInfo), `default`(TextKeyValuePair)
         }
         
         var items: [Item] {

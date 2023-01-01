@@ -25,9 +25,9 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
             let cell = tableView.dequeueReusableCell(withIdentifier: CardTableCell.reuseableIdentifier, for: indexPath) as! CardTableCell
             cell.configure(with: info)
             return cell
-        case .default(let info):
+        case .default(let pair):
             let cell = tableView.dequeueReusableCell(withIdentifier: TextTableCell.reuseableIdentifier, for: indexPath) as! TextTableCell
-            cell.configure(with: info)
+            cell.configure(with: pair)
             return cell
         }
     }
