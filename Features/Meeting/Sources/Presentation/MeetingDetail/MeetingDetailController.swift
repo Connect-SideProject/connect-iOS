@@ -128,9 +128,18 @@ extension MeetingDetailController {
             switch mutation {
             case .setMeetingInfo(let info):
                 new.meetingInfo = info
-                new.sectionModels = [.basic(items: [.card(info)])]
+                let items = self.makeSectionItems(for: info)
+                new.sectionModels = [.basic(items: items)]
             }
             return new
+        }
+        
+        private func makeSectionItems(for info: MeetingInfo) -> [SectionModel.Item] {
+            var items = [SectionModel.Item]()
+            items.append(.card(info))
+            items.append(.default((title: "모임상세", description: info.studyInfo)))
+            items.append(.default((title: "모임위치", description: info.place.name)))
+            return items
         }
     }
 }
