@@ -7,9 +7,12 @@
 
 import UIKit
 
+import FlexLayout
+
 import RxSwift
 import ReactorKit
 import RxDataSources
+
 import COCommonUI
 import COExtensions
 import CONetwork
@@ -206,7 +209,7 @@ extension MeetingDetailController {
                 $0.addItem().direction(.row)
                     .marginTop(30)
                     .alignItems(.baseline)
-                    .justifyContent(.spaceEvenly)
+                    .justifyContent(.spaceAround)
                     .define { flex in
                         self.tabItems.enumerated().forEach { index, item in
                             flex.addItem(item)
@@ -216,19 +219,54 @@ extension MeetingDetailController {
                 
                 $0.addItem(self.tabUnderLineView)
                     .marginTop(8)
-                    .width(41).height(1)
+                    .width(40).height(1)
+                    .position(.relative)
+                    .horizontally((100 / 6)%)
             }
+        }
+        
+        override func bind() {
+            self.tabItems.enumerated().forEach { offset, btn in
+                btn.rx.tap.map { _ in TitleCases.allCases[offset] }
+                    .bind(to: self.selectedCase)
+                    .disposed(by: self.disposeBag)
+            }
+            
+            self.selectedCase.share()
+                .distinctUntilChanged()
+                .bind(onNext: self.updateUnderbarLocation(for:))
+                .disposed(by: self.disposeBag)
+        }
+        
+        private func updateUnderbarLocation(for case: TitleCases) {
+            var percent: Double
+            switch `case` {
+            case .info:
+                percent = 100 / 6
+            case .detail:
+                percent = 100 / 2
+            case .location:
+                percent = 100 * 5 / 6
+            }
+            percent = percent - 100/12
+            self.tabUnderLineView.flex
+                .position(.relative)
+                .horizontally(percent%)
+                .markDirty()
+            self.flex.layout()
         }
         
         override func setAttrs() {
             super.setAttrs()
             self.setTabItems()
+            self.tabUnderLineView.backgroundColor = .hex06C755
         }
         
         private func setTabItems() {
             let titles = TitleCases.allCases.map(\.rawValue)
             self.tabItems.enumerated().forEach { idx, btn in
                 btn.setTitle(titles[idx], for: .normal)
+                btn.setTitleColor(.black, for: .normal)
             }
         }
     }
