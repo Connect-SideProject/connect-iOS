@@ -23,6 +23,14 @@ public extension FlexLayoutType {
     }
 }
 
+public extension FlexLayoutType where Self: RxBindable {
+    func setup() {
+        self.setupContainer()
+        self.setAttrs()
+        self.bind()
+    }
+}
+
 public protocol RxBaseType {
     var disposeBag: DisposeBag { get set }
     func clearBag()

@@ -9,7 +9,7 @@ import UIKit
 
 import RxSwift
 
-open class FlexLayoutView: UIView, FlexLayoutType, RxBaseType {
+open class FlexLayoutView: UIView, FlexLayoutType, RxBindable {
     public let rootContainer = UIView()
     public var disposeBag: DisposeBag = .init()
     
@@ -31,6 +31,7 @@ open class FlexLayoutView: UIView, FlexLayoutType, RxBaseType {
         self.addSubview(self.rootContainer)
     }
     
+    open func bind() { }
     open func setAttrs() { }
     open func layout() { }
     open func clearBag() {
