@@ -152,6 +152,14 @@ extension MeetingDetailController {
         private let tabItems = [UIButton(), UIButton(), UIButton()]
         private let tabUnderLineView = UIView()
         
+        let selectedCase = BehaviorSubject<TitleCases>(value: .info)
+        
+        enum TitleCases: String, CaseIterable {
+            case info = "모집정보"
+            case detail = "모임상세"
+            case location = "모임위치"
+        }
+        
         override func setupContainer() {
             self.flex.define {
                 $0.addItem(self.titleLabel)
@@ -194,7 +202,7 @@ extension MeetingDetailController {
         }
         
         private func setTabItems() {
-            let titles = ["모집정보", "모임상세", "모임위치"]
+            let titles = TitleCases.allCases.map(\.rawValue)
             self.tabItems.enumerated().forEach { idx, btn in
                 btn.setTitle(titles[idx], for: .normal)
             }
