@@ -53,6 +53,8 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
     }
     
     public override func bind(reactor: Reactor) {
+        self.bindTopArea()
+        
         self.reload.share()
             .map { Reactor.Action.reload }
             .bind(to: reactor.action)
@@ -67,6 +69,28 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
         reactor.pulse(\.$sectionModels).share()
             .asDriver(onErrorJustReturn: [])
             .drive(self.tableView.rx.items(dataSource: self.dataSource))
+            .disposed(by: self.disposeBag)
+    }
+    
+    private func bindTopArea() {
+        func indexPath(for case: TopArea.TitleCases) -> IndexPath {
+            switch `case` {
+            case .info:
+                return .init(row: 0, section: 0)
+            case .detail:
+                return .init(row: 1, section: 0)
+            case .location:
+                return .init(row: 2, section: 0)
+            }
+        }
+        
+        self.topArea.selectedCase.share()
+            .distinctUntilChanged()
+            .map(indexPath(for:))
+            .observe(on: MainScheduler.instance)
+            .bind(onNext: { [weak self] in
+                self?.tableView.scrollToRow(at: $0, at: .top, animated: true)
+            })
             .disposed(by: self.disposeBag)
     }
     
