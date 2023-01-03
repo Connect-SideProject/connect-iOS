@@ -82,6 +82,7 @@ extension MeetingDetailController {
         }
         
         override func setAttrs() {
+            self.selectionStyle = .none
             self.contentView.backgroundColor = .hexF9F9F9
             self.setCardContainer()
             self.setLabels()
@@ -156,6 +157,7 @@ extension MeetingDetailController {
         
         override func setAttrs() {
             super.setAttrs()
+            self.selectionStyle = .none
             self.titleLabel.font = .semiBold(size: 16)
             self.descLabel.font = .medium(size: 14)
             self.descLabel.numberOfLines = 0
