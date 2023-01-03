@@ -239,21 +239,27 @@ extension MeetingDetailController {
         }
         
         private func updateUnderbarLocation(for case: TitleCases) {
-            var percent: Double
+            let screenWidth = UIScreen.main.bounds.size.width
+            var offset: Double
+            
             switch `case` {
             case .info:
-                percent = 100 / 6
+                offset = screenWidth / 6
             case .detail:
-                percent = 100 / 2
+                offset = screenWidth / 2
             case .location:
-                percent = 100 * 5 / 6
+                offset = screenWidth * 5/6
             }
-            percent = percent - 100/12
+            offset = offset - 20
+            
             self.tabUnderLineView.flex
                 .position(.relative)
-                .horizontally(percent%)
+                .horizontally(offset)
                 .markDirty()
-            self.flex.layout()
+            
+            UIView.animate(withDuration: 0.3, delay: 0) {
+                self.flex.layout()
+            }
         }
         
         override func setAttrs() {
