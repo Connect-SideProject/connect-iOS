@@ -110,9 +110,12 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
             .setRightOuterBtn(type: .share)
     }
     
-    private func configure(with info: MeetingInfo) { }
+    private func configure(with info: MeetingInfo) {
+        self.topArea.configure(with: info)
+    }
     
     private func setTable() {
+        self.tableView.separatorStyle = .none
         self.tableView.register(CardTableCell.self, forCellReuseIdentifier: CardTableCell.reuseableIdentifier)
         self.tableView.register(TextTableCell.self, forCellReuseIdentifier: TextTableCell.reuseableIdentifier)
         self.tableView.rowHeight = UITableView.automaticDimension
@@ -204,6 +207,7 @@ extension MeetingDetailController {
                         
                         $0.addItem(self.profileLabel)
                             .marginLeft(8)
+                            .grow(1)
                     }
                 
                 $0.addItem().direction(.row)
@@ -264,6 +268,9 @@ extension MeetingDetailController {
         
         override func setAttrs() {
             super.setAttrs()
+            self.titleLabel.font = .semiBold(size: 18)
+            self.profileLabel.font = .regular(size: 14)
+            self.profileLabel.textColor = .hex8E8E8E
             self.setTabItems()
             self.tabUnderLineView.backgroundColor = .hex06C755
         }
@@ -274,6 +281,14 @@ extension MeetingDetailController {
                 btn.setTitle(titles[idx], for: .normal)
                 btn.setTitleColor(.black, for: .normal)
             }
+        }
+        
+        func configure(with info: MeetingInfo) {
+            self.titleLabel.text = info.studyInfo
+            Task {
+                await self.avatarView.setImage(url: .init(string: info.profileURL)!)
+            }
+            self.profileLabel.text = info.nickName
         }
     }
 }
