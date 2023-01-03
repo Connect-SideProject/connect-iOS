@@ -84,6 +84,10 @@ public final class MeetingDetailController: ReactorBaseController<MeetingDetailC
     }
     
     private func tableScrollToRow(for case: TopArea.TitleCases) {
+        guard let items = self.reactor?.currentState.sectionModels.first?.items,
+              items.count == TopArea.TitleCases.allCases.count else {
+            return
+        }
         func indexPath(for case: TopArea.TitleCases) -> IndexPath {
             switch `case` {
             case .info:
