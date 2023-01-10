@@ -139,12 +139,17 @@ extension SignInController {
   private func makeSignInButtons() -> [UIButton] {
     return AuthType.allCases.enumerated()
       .map { offset, type in
-        let button = UIButton(type: .custom)
-        button.setImage(.init(named: "img_\(type.description.lowercased())_signIn"), for: .normal)
-        button.tag = offset
-        button.layer.cornerRadius = 4
-        button.layer.masksToBounds = true
-        button.addTarget(self, action: #selector(didTapSignInButton(sender:)), for: .touchUpInside)
+          let button = UIButton(type: .custom)
+          print("type Check : \(type.description)")
+          if type.description == "NAVER" || type.description == "KAKAO" {
+              button.isHidden = true
+          } else {
+              button.setImage(.init(named: "img_\(type.description.lowercased())_signIn"), for: .normal)
+              button.tag = offset
+              button.layer.cornerRadius = 4
+              button.layer.masksToBounds = true
+              button.addTarget(self, action: #selector(didTapSignInButton(sender:)), for: .touchUpInside)
+          }
         return button
     }
   }
