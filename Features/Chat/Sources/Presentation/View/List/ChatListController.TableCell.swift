@@ -25,8 +25,7 @@ extension ChatListController {
             
             self.rootContainer.flex.direction(.row)
                 .alignItems(.center)
-                .define { [weak self] in
-                    guard let self = self else { return }
+                .define {
                     $0.addItem(self.avatarView)
                         .width(64).height(64)
                         .marginLeft(25)

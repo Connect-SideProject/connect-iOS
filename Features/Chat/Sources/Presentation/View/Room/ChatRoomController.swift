@@ -13,7 +13,7 @@ import RxDataSources
 import COExtensions
 import COCommonUI
 
-public final class ChatRoomController: ChatBaseController<ChatRoomController.Reactor> {
+public final class ChatRoomController: ReactorBaseController<ChatRoomController.Reactor> {
     private let tableView = UITableView()
     private let titleView = TitleView().setLeftBtn(type: .back)
     private lazy var inputArea = InputArea()
@@ -38,8 +38,7 @@ public final class ChatRoomController: ChatBaseController<ChatRoomController.Rea
     public override func setupContainer() {
         super.setupContainer()
         
-        self.rootContainer.flex.define { [weak self] in
-            guard let self = self else { return }
+        self.rootContainer.flex.define {
             $0.addItem(self.titleView)
                 .height(50)
             $0.addItem(self.tableView)

@@ -27,6 +27,7 @@ public enum Path {
   case refreshToken
   case logout
   case signOut
+  case meetingDetail(id: Int)
   case myStudy
   case myBookMark
   case getWhoMarker
@@ -67,7 +68,9 @@ public enum Path {
     case .logout:
       return "/api/member/auth/logout"
     case .signOut:
-      return "/api/member/auth/signout"
+        return "/api/member/auth/signout"
+    case .meetingDetail(let id):
+      return "/api/study/\(id)/info"
     case .getWhoMarker:
         return "/api/study/map"
     case .getStudyInfo(let regionID):

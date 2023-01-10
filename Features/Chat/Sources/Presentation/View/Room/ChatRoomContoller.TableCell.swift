@@ -49,8 +49,7 @@ extension ChatRoomController {
         public override func setupContainer() {
             self.contentView.flex.direction(.row)
                 .alignItems(.end)
-                .define { [weak self] in
-                    guard let self = self else { return }
+                .define {
                     $0.addItem(self.msgLabel)
                         .marginTop(10)
                         .marginLeft(23)
@@ -77,8 +76,7 @@ extension ChatRoomController {
         public override func setupContainer() {
             self.contentView.flex.direction(.rowReverse)
                 .alignItems(.end)
-                .define { [weak self] in
-                    guard let self = self else { return }
+                .define {
                     $0.addItem(self.msgLabel)
                         .marginTop(10)
                         .marginEnd(23)
